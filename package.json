@@ -1,7 +1,17 @@
 {
   "name": "starter-project",
   "version": "0.1.0",
+  "description": "A Next.js starter project with TypeScript, Tailwind CSS, Drizzle ORM, and Vitest",
   "private": true,
+  "keywords": [
+    "nextjs",
+    "typescript",
+    "tailwindcss",
+    "drizzle-orm",
+    "vitest",
+    "starter",
+    "template"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },
@@ -19,13 +29,16 @@
     "database:migrate": "drizzle-kit migrate",
     "database:push": "drizzle-kit push",
     "database:studio": "drizzle-kit studio",
-    "quality": "npm run typecheck && npm run lint && npm run format",
+    "quality": "npm run typecheck && npm run lint && npm run format && npm run test:run",
+    "quality:quick": "npm run typecheck && npm run lint && npm run format",
     "start": "next start",
     "test": "vitest",
+    "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -53,6 +66,7 @@
     "drizzle-kit": "^0.31.7",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.3",
+    "husky": "^9.1.7",
     "jsdom": "^27.2.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.17",
