@@ -1,4 +1,4 @@
-# TimeTraveler
+# StarterProject
 
 A [Next.js](https://nextjs.org) project built with TypeScript and Tailwind CSS.
 
