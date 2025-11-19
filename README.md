@@ -35,10 +35,10 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
 - `npm run quality` - Run typecheck, lint, and format
-- `npm run db:generate` - Generate database migrations
-- `npm run db:migrate` - Run database migrations
-- `npm run db:push` - Push schema changes to database
-- `npm run db:studio` - Open Drizzle Studio (database GUI)
+- `npm run database:generate` - Generate database migrations
+- `npm run database:migrate` - Run database migrations
+- `npm run database:push` - Push schema changes to database
+- `npm run database:studio` - Open Drizzle Studio (database GUI)
 - `npm run test` - Run tests with Vitest
 - `npm run test:ui` - Run tests with Vitest UI
 - `npm run test:coverage` - Run tests with coverage report
@@ -78,26 +78,26 @@ npm run test:coverage
 
 ## Database
 
-This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite. The database schema is defined in `db/schema.ts`.
+This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite. The database schema is defined in `data/database/schema.ts`.
 
 ### Database Commands
 
-- `npm run db:generate` - Generate migration files from schema changes
-- `npm run db:migrate` - Apply migrations to the database
-- `npm run db:push` - Push schema changes directly (useful for development)
-- `npm run db:studio` - Open Drizzle Studio to browse and edit data
+- `npm run database:generate` - Generate migration files from schema changes
+- `npm run database:migrate` - Apply migrations to the database
+- `npm run database:push` - Push schema changes directly (useful for development)
+- `npm run database:studio` - Open Drizzle Studio to browse and edit data
 
 ### Usage Example
 
 ```typescript
-import { db } from "@/db";
-import { users } from "@/db/schema";
+import { database } from "@/data/database";
+import { users } from "@/data/database/schema";
 
 // Query
-const allUsers = await db.select().from(users);
+const allUsers = await database.select().from(users);
 
 // Insert
-await db.insert(users).values({
+await database.insert(users).values({
   name: "John Doe",
   email: "john@example.com",
   createdAt: new Date(),
