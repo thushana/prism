@@ -4,7 +4,7 @@ A [Next.js](https://nextjs.org) project built with TypeScript and Tailwind CSS.
 
 ## Prerequisites
 
-- Node.js >= 24.0.0
+- Node.js >= 22.0.0
 
 ## Getting Started
 
@@ -131,7 +131,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 ### Configuration
 
 This project includes a `vercel.json` configuration file with:
-- Node.js 24.x runtime
+- Node.js 22.x runtime
 - Build and install commands
 - Function timeout settings (10 seconds)
 

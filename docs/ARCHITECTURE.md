@@ -9,7 +9,7 @@
 - **Testing**: Vitest 4.0.10 with React Testing Library
 - **Linting**: ESLint 9.39.1
 - **Formatting**: Prettier 3.6.2
-- **Runtime**: Node.js >= 24.0.0 (LTS)
+- **Runtime**: Node.js 22.x (LTS)
 
 ## Project Structure
 
