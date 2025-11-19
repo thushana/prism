@@ -14,9 +14,10 @@
 ## Project Structure
 
 - `app/` - Next.js App Router pages and layouts
-- `app/components/` – React components
+- `components/` - Shared React components (shadcn/ui components in `components/ui/`)
 - `data/database/` - Database schema, migrations, and connection
 - `docs/` - Project documentation
+- `utilities/` - Shared utilities, helpers, and reusable code
 
 ## Key Decisions
 
@@ -25,6 +26,6 @@
 - **Database**: SQLite for simplicity, Drizzle ORM for type safety
 - **Testing**: Vitest for fast unit/integration tests
 - **No `src/` directory**: Following user preference for flat structure
-- **No Acronyms**: Avoid acronyms whenever possible (e.g., use "database" instead of "db")
+- **No Acronyms**: Avoid acronyms whenever possible (use "database" instead of "db", "library" > "lib", "utlities" > "utils")
 - **File Moves**: Use `git mv` for moving files to preserve history
 
