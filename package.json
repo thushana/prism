@@ -17,6 +17,9 @@
     "precommit": "npm run build",
     "quality": "npm run typecheck && npm run lint && npm run format",
     "start": "next start",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
     "watch": "tsc --watch"
   },
@@ -31,9 +34,16 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.0.10",
+    "@vitest/ui": "^4.0.10",
     "eslint-config-next": "16.0.3",
+    "jsdom": "^27.2.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10"
   }
 }
