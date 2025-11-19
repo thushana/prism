@@ -120,4 +120,33 @@ To learn more about Next.js, take a look at the following resources:
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
+### Quick Deploy
+
+1. Push your code to GitHub
+2. Import your repository on [Vercel](https://vercel.com/new)
+3. Vercel will automatically detect Next.js and configure the build settings
+4. Add any required environment variables in the Vercel dashboard
+5. Deploy!
+
+### Configuration
+
+This project includes a `vercel.json` configuration file with:
+- Node.js 24.x runtime
+- Build and install commands
+- Function timeout settings (10 seconds)
+
+### Database Considerations
+
+**Important**: SQLite with `better-sqlite3` has limitations on Vercel's serverless platform:
+- Serverless functions are stateless and ephemeral
+- No persistent file system for database files
+- Native bindings may not work in Vercel's environment
+
+**For production deployments**, consider:
+- Using a managed database service (PostgreSQL, MySQL, etc.)
+- Using Vercel Postgres or other serverless-compatible databases
+- Migrating to Drizzle ORM with a PostgreSQL adapter
+
+For development, SQLite works perfectly fine locally.
+
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
