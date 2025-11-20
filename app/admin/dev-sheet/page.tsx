@@ -192,7 +192,9 @@ function getGitCommitUrl(commitSha?: string): string | undefined {
   const repoUrl = getGitRepositoryUrl();
   if (!repoUrl) return undefined;
 
-  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+  const sha =
+    commitSha ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
     (() => {
       try {
         return execSync("git rev-parse HEAD", {
@@ -247,7 +249,9 @@ function getBuildTime(): string {
 }
 
 function getCommitDate(commitSha?: string): string | undefined {
-  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+  const sha =
+    commitSha ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
     (() => {
       try {
         return execSync("git rev-parse HEAD", {
@@ -278,7 +282,9 @@ function getCommitMessage(commitSha?: string): string | undefined {
     return process.env.VERCEL_GIT_COMMIT_MESSAGE;
   }
 
-  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+  const sha =
+    commitSha ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
     (() => {
       try {
         return execSync("git rev-parse HEAD", {
@@ -309,7 +315,9 @@ function getCommitAuthor(commitSha?: string): string | undefined {
     return process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME;
   }
 
-  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+  const sha =
+    commitSha ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
     (() => {
       try {
         return execSync("git rev-parse HEAD", {
