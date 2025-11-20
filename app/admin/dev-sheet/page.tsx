@@ -26,7 +26,8 @@ interface DevSheetData {
     testing: string;
     nodeVersion: string;
     gitHash: string;
-    gitHashUrl?: string;
+    gitRepositoryUrl?: string;
+    gitRepositoryName?: string;
     gitStatus: string;
     environment: string;
     buildTime: string;
@@ -114,7 +115,8 @@ function getTechStack() {
       testing: deps.vitest ? `Vitest ${deps.vitest}` : "None",
       nodeVersion: process.version,
       gitHash: getGitHash(),
-      gitHashUrl: getGitCommitUrl(),
+      gitRepositoryUrl: getGitRepositoryUrl(),
+      gitRepositoryName: getGitRepositoryName(),
       gitStatus: getGitStatus(),
       environment: process.env.NODE_ENV || "development",
       buildTime: getBuildTime(),
@@ -128,7 +130,8 @@ function getTechStack() {
       testing: "Unknown",
       nodeVersion: process.version,
       gitHash: "unknown",
-      gitHashUrl: undefined,
+      gitRepositoryUrl: undefined,
+      gitRepositoryName: undefined,
       gitStatus: "unknown",
       environment: process.env.NODE_ENV || "development",
       buildTime: "Unknown",
@@ -161,6 +164,24 @@ function getGitRepositoryUrl(): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function getGitRepositoryName(): string | undefined {
+  const repoUrl = getGitRepositoryUrl();
+  if (!repoUrl) return undefined;
+
+  // Extract repository name from URL
+  // e.g., https://github.com/user/repo -> "GitHub"
+  // or we could extract the repo name: "user/repo"
+  if (repoUrl.includes("github.com")) {
+    return "GitHub";
+  } else if (repoUrl.includes("gitlab.com")) {
+    return "GitLab";
+  } else if (repoUrl.includes("bitbucket.org")) {
+    return "Bitbucket";
+  }
+
+  return undefined;
 }
 
 function getGitCommitUrl(): string | undefined {
@@ -402,8 +423,9 @@ export default function DevSheetPage() {
                 if (key === "buildTime" && typeof value === "string") {
                   displayValue = new Date(value).toLocaleString();
                 } else if (key === "gitHash" && typeof value === "string") {
-                  displayValue = value;
-                  clickUrl = data.techStack.gitHashUrl;
+                  // Show repository name (e.g., "GitHub") instead of hash, link to repo
+                  displayValue = data.techStack.gitRepositoryName || value;
+                  clickUrl = data.techStack.gitRepositoryUrl;
                   isClickable = !!clickUrl;
                 } else if (key === "gitStatus" && typeof value === "string") {
                   displayValue = value === "clean" ? "clean" : "dirty";
@@ -501,7 +523,7 @@ export default function DevSheetPage() {
                     href={data.vercel.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:underline font-mono"
                   >
                     {data.vercel.url}
                     <svg
@@ -527,7 +549,7 @@ export default function DevSheetPage() {
                     href={data.vercel.branchUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:underline font-mono"
                   >
                     {data.vercel.branchUrl}
                     <svg
@@ -553,7 +575,7 @@ export default function DevSheetPage() {
                     href={data.vercel.productionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:underline font-mono"
                   >
                     {data.vercel.productionUrl}
                     <svg
