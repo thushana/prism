@@ -26,12 +26,24 @@ interface DevSheetData {
     testing: string;
     nodeVersion: string;
     gitHash: string;
+    gitHashUrl?: string;
     gitStatus: string;
     environment: string;
     buildTime: string;
   };
   dependencies: {
     key: string[];
+  };
+  vercel?: {
+    env: string;
+    url?: string;
+    branchUrl?: string;
+    productionUrl?: string;
+    region?: string;
+    commitSha?: string;
+    commitUrl?: string;
+    commitMessage?: string;
+    commitAuthor?: string;
   };
   lastUpdated: string;
 }
@@ -102,6 +114,7 @@ function getTechStack() {
       testing: deps.vitest ? `Vitest ${deps.vitest}` : "None",
       nodeVersion: process.version,
       gitHash: getGitHash(),
+      gitHashUrl: getGitCommitUrl(),
       gitStatus: getGitStatus(),
       environment: process.env.NODE_ENV || "development",
       buildTime: getBuildTime(),
@@ -115,6 +128,7 @@ function getTechStack() {
       testing: "Unknown",
       nodeVersion: process.version,
       gitHash: "unknown",
+      gitHashUrl: undefined,
       gitStatus: "unknown",
       environment: process.env.NODE_ENV || "development",
       buildTime: "Unknown",
@@ -122,7 +136,72 @@ function getTechStack() {
   }
 }
 
+function getGitRepositoryUrl(): string | undefined {
+  try {
+    const remoteUrl = execSync("git config --get remote.origin.url", {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    }).trim();
+
+    // Convert SSH to HTTPS URL (git@github.com:user/repo.git -> https://github.com/user/repo)
+    if (remoteUrl.startsWith("git@")) {
+      const match = remoteUrl.match(/git@([^:]+):(.+)\.git$/);
+      if (match) {
+        const [, host, repo] = match;
+        return `https://${host}/${repo}`;
+      }
+    }
+
+    // Convert HTTPS URL (remove .git if present)
+    if (remoteUrl.startsWith("http")) {
+      return remoteUrl.replace(/\.git$/, "");
+    }
+
+    return remoteUrl;
+  } catch {
+    return undefined;
+  }
+}
+
+function getGitCommitUrl(): string | undefined {
+  const repoUrl = getGitRepositoryUrl();
+  if (!repoUrl) return undefined;
+
+  // Use Vercel's environment variable in production
+  const commitSha =
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    (() => {
+      try {
+        return execSync("git rev-parse HEAD", {
+          encoding: "utf-8",
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        return undefined;
+      }
+    })();
+
+  if (!commitSha) return undefined;
+
+  // Generate commit URL for GitHub, GitLab, etc.
+  if (repoUrl.includes("github.com")) {
+    return `${repoUrl}/commit/${commitSha}`;
+  } else if (repoUrl.includes("gitlab.com")) {
+    return `${repoUrl}/-/commit/${commitSha}`;
+  } else if (repoUrl.includes("bitbucket.org")) {
+    return `${repoUrl}/commits/${commitSha}`;
+  }
+
+  return undefined;
+}
+
 function getGitHash(): string {
+  // Use Vercel's environment variable in production
+  if (process.env.VERCEL_GIT_COMMIT_SHA) {
+    return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
+  }
+
+  // Fallback to git command in development
   try {
     return execSync("git rev-parse HEAD", {
       encoding: "utf-8",
@@ -136,6 +215,12 @@ function getGitHash(): string {
 }
 
 function getGitStatus(): string {
+  // In production (Vercel), assume clean since it's from a committed state
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return "clean";
+  }
+
+  // Only check git status in development
   try {
     const status = execSync("git status --porcelain", {
       encoding: "utf-8",
@@ -186,11 +271,37 @@ function getKeyDependencies(): string[] {
   }
 }
 
+function getVercelInfo() {
+  // Only return Vercel info if running on Vercel
+  if (!process.env.VERCEL) {
+    return undefined;
+  }
+
+  return {
+    env: process.env.VERCEL_ENV || "unknown",
+    url: process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : undefined,
+    branchUrl: process.env.VERCEL_BRANCH_URL
+      ? `https://${process.env.VERCEL_BRANCH_URL}`
+      : undefined,
+    productionUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined,
+    region: process.env.VERCEL_REGION || undefined,
+    commitSha: process.env.VERCEL_GIT_COMMIT_SHA || undefined,
+    commitUrl: getGitCommitUrl(),
+    commitMessage: process.env.VERCEL_GIT_COMMIT_MESSAGE || undefined,
+    commitAuthor: process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME || undefined,
+  };
+}
+
 function getDevSheetData(): DevSheetData {
   const shadcnConfig = getShadcnConfig();
   const allComponents = getAllComponents();
   const techStack = getTechStack();
   const dependencies = getKeyDependencies();
+  const vercel = getVercelInfo();
 
   return {
     shadcn: {
@@ -202,6 +313,7 @@ function getDevSheetData(): DevSheetData {
     dependencies: {
       key: dependencies,
     },
+    vercel,
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -284,17 +396,39 @@ export default function DevSheetPage() {
             <div className="grid grid-cols-3 gap-4">
               {Object.entries(data.techStack).map(([key, value]) => {
                 let displayValue = value;
+                let isClickable = false;
+                let clickUrl: string | undefined;
+
                 if (key === "buildTime" && typeof value === "string") {
                   displayValue = new Date(value).toLocaleString();
                 } else if (key === "gitHash" && typeof value === "string") {
                   displayValue = value;
+                  clickUrl = data.techStack.gitHashUrl;
+                  isClickable = !!clickUrl;
                 } else if (key === "gitStatus" && typeof value === "string") {
                   displayValue = value === "clean" ? "clean" : "dirty";
                 }
+
                 return (
                   <div key={key} className="space-y-1">
                     <p className="text-sm font-medium capitalize">{key}</p>
-                    <Badge variant="outline">{displayValue}</Badge>
+                    {isClickable && clickUrl ? (
+                      <a
+                        href={clickUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block"
+                      >
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-accent transition-colors"
+                        >
+                          {displayValue}
+                        </Badge>
+                      </a>
+                    ) : (
+                      <Badge variant="outline">{displayValue}</Badge>
+                    )}
                   </div>
                 );
               })}
@@ -312,6 +446,143 @@ export default function DevSheetPage() {
             </div>
           </div>
         </div>
+
+        {/* Vercel Deployment Info */}
+        {data.vercel && (
+          <div className="border-t pt-8">
+            <h2 className="text-2xl font-semibold mb-4">Vercel Deployment</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Environment</p>
+                <Badge variant="outline">{data.vercel.env}</Badge>
+              </div>
+              {data.vercel.region && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Region</p>
+                  <Badge variant="outline">{data.vercel.region}</Badge>
+                </div>
+              )}
+              {data.vercel.commitSha && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Commit SHA</p>
+                  {data.vercel.commitUrl ? (
+                    <a
+                      href={data.vercel.commitUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block"
+                    >
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer hover:bg-accent transition-colors"
+                      >
+                        {data.vercel.commitSha.slice(0, 7)}
+                      </Badge>
+                    </a>
+                  ) : (
+                    <Badge variant="outline">
+                      {data.vercel.commitSha.slice(0, 7)}
+                    </Badge>
+                  )}
+                </div>
+              )}
+              {data.vercel.commitAuthor && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Commit Author</p>
+                  <Badge variant="outline">{data.vercel.commitAuthor}</Badge>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 space-y-3">
+              {data.vercel.url && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Deployment URL</p>
+                  <a
+                    href={data.vercel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                  >
+                    {data.vercel.url}
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              )}
+              {data.vercel.branchUrl && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Branch URL</p>
+                  <a
+                    href={data.vercel.branchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                  >
+                    {data.vercel.branchUrl}
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              )}
+              {data.vercel.productionUrl && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Production URL</p>
+                  <a
+                    href={data.vercel.productionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono"
+                  >
+                    {data.vercel.productionUrl}
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              )}
+              {data.vercel.commitMessage && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Commit Message</p>
+                  <p className="text-sm text-muted-foreground">
+                    {data.vercel.commitMessage}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="border-t pt-8">
           {/* Row 2: UI Configuration - six columns */}
