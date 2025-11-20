@@ -25,12 +25,18 @@ interface DevSheetData {
     database: string;
     testing: string;
     nodeVersion: string;
-    gitHash: string;
-    gitRepositoryUrl?: string;
-    gitRepositoryName?: string;
-    gitStatus: string;
     environment: string;
-    buildTime: string;
+  };
+  git: {
+    repositoryUrl?: string;
+    repositoryName?: string;
+    status: string;
+    branch?: string;
+    commitSha?: string;
+    commitUrl?: string;
+    commitAuthor?: string;
+    commitDate?: string;
+    commitMessage?: string;
   };
   dependencies: {
     key: string[];
@@ -41,10 +47,7 @@ interface DevSheetData {
     branchUrl?: string;
     productionUrl?: string;
     region?: string;
-    commitSha?: string;
-    commitUrl?: string;
-    commitMessage?: string;
-    commitAuthor?: string;
+    buildTime: string;
   };
   lastUpdated: string;
 }
@@ -114,12 +117,7 @@ function getTechStack() {
         : "None",
       testing: deps.vitest ? `Vitest ${deps.vitest}` : "None",
       nodeVersion: process.version,
-      gitHash: getGitHash(),
-      gitRepositoryUrl: getGitRepositoryUrl(),
-      gitRepositoryName: getGitRepositoryName(),
-      gitStatus: getGitStatus(),
       environment: process.env.NODE_ENV || "development",
-      buildTime: getBuildTime(),
     };
   } catch {
     return {
@@ -129,17 +127,23 @@ function getTechStack() {
       database: "Unknown",
       testing: "Unknown",
       nodeVersion: process.version,
-      gitHash: "unknown",
-      gitRepositoryUrl: undefined,
-      gitRepositoryName: undefined,
-      gitStatus: "unknown",
       environment: process.env.NODE_ENV || "development",
-      buildTime: "Unknown",
     };
   }
 }
 
 function getGitRepositoryUrl(): string | undefined {
+  // Use Vercel environment variables in production
+  if (process.env.VERCEL) {
+    const repoOwner = process.env.VERCEL_GIT_REPO_OWNER;
+    const repoSlug = process.env.VERCEL_GIT_REPO_SLUG;
+    if (repoOwner && repoSlug) {
+      // Assume GitHub for Vercel deployments
+      return `https://github.com/${repoOwner}/${repoSlug}`;
+    }
+  }
+
+  // Fallback to git command in development
   try {
     const remoteUrl = execSync("git config --get remote.origin.url", {
       encoding: "utf-8",
@@ -184,13 +188,11 @@ function getGitRepositoryName(): string | undefined {
   return undefined;
 }
 
-function getGitCommitUrl(): string | undefined {
+function getGitCommitUrl(commitSha?: string): string | undefined {
   const repoUrl = getGitRepositoryUrl();
   if (!repoUrl) return undefined;
 
-  // Use Vercel's environment variable in production
-  const commitSha =
-    process.env.VERCEL_GIT_COMMIT_SHA ||
+  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
     (() => {
       try {
         return execSync("git rev-parse HEAD", {
@@ -202,37 +204,18 @@ function getGitCommitUrl(): string | undefined {
       }
     })();
 
-  if (!commitSha) return undefined;
+  if (!sha) return undefined;
 
   // Generate commit URL for GitHub, GitLab, etc.
   if (repoUrl.includes("github.com")) {
-    return `${repoUrl}/commit/${commitSha}`;
+    return `${repoUrl}/commit/${sha}`;
   } else if (repoUrl.includes("gitlab.com")) {
-    return `${repoUrl}/-/commit/${commitSha}`;
+    return `${repoUrl}/-/commit/${sha}`;
   } else if (repoUrl.includes("bitbucket.org")) {
-    return `${repoUrl}/commits/${commitSha}`;
+    return `${repoUrl}/commits/${sha}`;
   }
 
   return undefined;
-}
-
-function getGitHash(): string {
-  // Use Vercel's environment variable in production
-  if (process.env.VERCEL_GIT_COMMIT_SHA) {
-    return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
-  }
-
-  // Fallback to git command in development
-  try {
-    return execSync("git rev-parse HEAD", {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    })
-      .trim()
-      .slice(0, 7);
-  } catch {
-    return "unknown";
-  }
 }
 
 function getGitStatus(): string {
@@ -261,6 +244,139 @@ function getBuildTime(): string {
   } catch {
     return new Date().toISOString();
   }
+}
+
+function getCommitDate(commitSha?: string): string | undefined {
+  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+    (() => {
+      try {
+        return execSync("git rev-parse HEAD", {
+          encoding: "utf-8",
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        return undefined;
+      }
+    })();
+
+  if (!sha) return undefined;
+
+  try {
+    const dateStr = execSync(`git log -1 --format=%ci ${sha}`, {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    }).trim();
+    return dateStr ? new Date(dateStr).toISOString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getCommitMessage(commitSha?: string): string | undefined {
+  // Use Vercel's environment variable in production
+  if (process.env.VERCEL_GIT_COMMIT_MESSAGE) {
+    return process.env.VERCEL_GIT_COMMIT_MESSAGE;
+  }
+
+  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+    (() => {
+      try {
+        return execSync("git rev-parse HEAD", {
+          encoding: "utf-8",
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        return undefined;
+      }
+    })();
+
+  if (!sha) return undefined;
+
+  try {
+    const message = execSync(`git log -1 --format=%s ${sha}`, {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    }).trim();
+    return message || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getCommitAuthor(commitSha?: string): string | undefined {
+  // Use Vercel's environment variable in production
+  if (process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME) {
+    return process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME;
+  }
+
+  const sha = commitSha || process.env.VERCEL_GIT_COMMIT_SHA ||
+    (() => {
+      try {
+        return execSync("git rev-parse HEAD", {
+          encoding: "utf-8",
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        return undefined;
+      }
+    })();
+
+  if (!sha) return undefined;
+
+  try {
+    const author = execSync(`git log -1 --format=%an ${sha}`, {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    }).trim();
+    return author || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getGitBranch(): string | undefined {
+  // Use Vercel's environment variable in production
+  if (process.env.VERCEL_GIT_COMMIT_REF) {
+    return process.env.VERCEL_GIT_COMMIT_REF;
+  }
+
+  // Fallback to git command in development
+  try {
+    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    }).trim();
+    return branch || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getGitInfo() {
+  const commitSha =
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    (() => {
+      try {
+        return execSync("git rev-parse HEAD", {
+          encoding: "utf-8",
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        return undefined;
+      }
+    })();
+
+  return {
+    repositoryUrl: getGitRepositoryUrl(),
+    repositoryName: getGitRepositoryName(),
+    status: getGitStatus(),
+    branch: getGitBranch(),
+    commitSha: commitSha || undefined,
+    commitUrl: getGitCommitUrl(commitSha),
+    commitAuthor: getCommitAuthor(commitSha),
+    commitDate: getCommitDate(commitSha),
+    commitMessage: getCommitMessage(commitSha),
+  };
 }
 
 function getKeyDependencies(): string[] {
@@ -310,10 +426,7 @@ function getVercelInfo() {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : undefined,
     region: process.env.VERCEL_REGION || undefined,
-    commitSha: process.env.VERCEL_GIT_COMMIT_SHA || undefined,
-    commitUrl: getGitCommitUrl(),
-    commitMessage: process.env.VERCEL_GIT_COMMIT_MESSAGE || undefined,
-    commitAuthor: process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME || undefined,
+    buildTime: getBuildTime(),
   };
 }
 
@@ -321,6 +434,7 @@ function getDevSheetData(): DevSheetData {
   const shadcnConfig = getShadcnConfig();
   const allComponents = getAllComponents();
   const techStack = getTechStack();
+  const git = getGitInfo();
   const dependencies = getKeyDependencies();
   const vercel = getVercelInfo();
 
@@ -331,6 +445,7 @@ function getDevSheetData(): DevSheetData {
     },
     components: allComponents,
     techStack,
+    git,
     dependencies: {
       key: dependencies,
     },
@@ -416,41 +531,10 @@ export default function DevSheetPage() {
             <h2 className="text-2xl font-semibold mb-4">Tech Stack</h2>
             <div className="grid grid-cols-3 gap-4">
               {Object.entries(data.techStack).map(([key, value]) => {
-                let displayValue = value;
-                let isClickable = false;
-                let clickUrl: string | undefined;
-
-                if (key === "buildTime" && typeof value === "string") {
-                  displayValue = new Date(value).toLocaleString();
-                } else if (key === "gitHash" && typeof value === "string") {
-                  // Show repository name (e.g., "GitHub") instead of hash, link to repo
-                  displayValue = data.techStack.gitRepositoryName || value;
-                  clickUrl = data.techStack.gitRepositoryUrl;
-                  isClickable = !!clickUrl;
-                } else if (key === "gitStatus" && typeof value === "string") {
-                  displayValue = value === "clean" ? "clean" : "dirty";
-                }
-
                 return (
                   <div key={key} className="space-y-1">
                     <p className="text-sm font-medium capitalize">{key}</p>
-                    {isClickable && clickUrl ? (
-                      <a
-                        href={clickUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block"
-                      >
-                        <Badge
-                          variant="outline"
-                          className="cursor-pointer hover:bg-accent transition-colors"
-                        >
-                          {displayValue}
-                        </Badge>
-                      </a>
-                    ) : (
-                      <Badge variant="outline">{displayValue}</Badge>
-                    )}
+                    <Badge variant="outline">{value}</Badge>
                   </div>
                 );
               })}
@@ -469,6 +553,89 @@ export default function DevSheetPage() {
           </div>
         </div>
 
+        {/* Git Section */}
+        <div className="border-t pt-8">
+          <h2 className="text-2xl font-semibold mb-4">Git</h2>
+          {data.git.commitMessage && (
+            <div className="mb-4 space-y-1">
+              <p className="text-sm font-medium">Commit Message</p>
+              <p className="text-sm text-muted-foreground">
+                {data.git.commitMessage}
+              </p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {data.git.commitSha && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Commit SHA</p>
+                {data.git.commitUrl ? (
+                  <a
+                    href={data.git.commitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <Badge
+                      variant="outline"
+                      className="cursor-pointer hover:bg-accent transition-colors"
+                    >
+                      {data.git.commitSha.slice(0, 7)}
+                    </Badge>
+                  </a>
+                ) : (
+                  <Badge variant="outline">
+                    {data.git.commitSha.slice(0, 7)}
+                  </Badge>
+                )}
+              </div>
+            )}
+            {data.git.repositoryUrl && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Repository</p>
+                <a
+                  href={data.git.repositoryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                  >
+                    {data.git.repositoryName || "Repository"}
+                  </Badge>
+                </a>
+              </div>
+            )}
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Status</p>
+              <Badge variant="outline">
+                {data.git.status === "clean" ? "clean" : "dirty"}
+              </Badge>
+            </div>
+            {data.git.branch && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Branch</p>
+                <Badge variant="outline">{data.git.branch}</Badge>
+              </div>
+            )}
+            {data.git.commitDate && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Commit Date</p>
+                <Badge variant="outline">
+                  {new Date(data.git.commitDate).toLocaleString()}
+                </Badge>
+              </div>
+            )}
+            {data.git.commitAuthor && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Commit Author</p>
+                <Badge variant="outline">{data.git.commitAuthor}</Badge>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Vercel Deployment Info */}
         {data.vercel && (
           <div className="border-t pt-8">
@@ -484,36 +651,12 @@ export default function DevSheetPage() {
                   <Badge variant="outline">{data.vercel.region}</Badge>
                 </div>
               )}
-              {data.vercel.commitSha && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Commit SHA</p>
-                  {data.vercel.commitUrl ? (
-                    <a
-                      href={data.vercel.commitUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block"
-                    >
-                      <Badge
-                        variant="outline"
-                        className="cursor-pointer hover:bg-accent transition-colors"
-                      >
-                        {data.vercel.commitSha.slice(0, 7)}
-                      </Badge>
-                    </a>
-                  ) : (
-                    <Badge variant="outline">
-                      {data.vercel.commitSha.slice(0, 7)}
-                    </Badge>
-                  )}
-                </div>
-              )}
-              {data.vercel.commitAuthor && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Commit Author</p>
-                  <Badge variant="outline">{data.vercel.commitAuthor}</Badge>
-                </div>
-              )}
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Build Time</p>
+                <Badge variant="outline">
+                  {new Date(data.vercel.buildTime).toLocaleString()}
+                </Badge>
+              </div>
             </div>
             <div className="mt-4 space-y-3">
               {data.vercel.url && (
@@ -592,14 +735,6 @@ export default function DevSheetPage() {
                       />
                     </svg>
                   </a>
-                </div>
-              )}
-              {data.vercel.commitMessage && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Commit Message</p>
-                  <p className="text-sm text-muted-foreground">
-                    {data.vercel.commitMessage}
-                  </p>
                 </div>
               )}
             </div>
