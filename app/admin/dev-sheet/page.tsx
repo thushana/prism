@@ -6,6 +6,38 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds} ${diffSeconds === 1 ? "second" : "seconds"} ago`;
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? "minute" : "minutes"} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  } else if (diffDays < 30) {
+    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  } else if (diffMonths < 12) {
+    return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
+  } else {
+    return `${diffYears} ${diffYears === 1 ? "year" : "years"} ago`;
+  }
+}
+
+function formatDateTimeWithRelative(dateString: string): string {
+  const date = new Date(dateString);
+  const formatted = date.toLocaleString();
+  const relative = getRelativeTime(date);
+  return `${formatted} – ${relative}`;
+}
+
 interface DevSheetData {
   shadcn: {
     style: string;
@@ -564,14 +596,24 @@ export default function DevSheetPage() {
         {/* Git Section */}
         <div className="border-t pt-8">
           <h2 className="text-2xl font-semibold mb-4">Git</h2>
-          {data.git.commitMessage && (
-            <div className="mb-4 space-y-1">
-              <p className="text-sm font-medium">Commit Message</p>
-              <p className="text-sm text-muted-foreground">
-                {data.git.commitMessage}
-              </p>
-            </div>
-          )}
+          {/* First row: Commit Message (4 cols) and Commit Author (2 cols) */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+            {data.git.commitMessage && (
+              <div className="space-y-1 md:col-span-4">
+                <p className="text-sm font-medium">Commit Message</p>
+                <p className="text-sm text-muted-foreground">
+                  {data.git.commitMessage}
+                </p>
+              </div>
+            )}
+            {data.git.commitAuthor && (
+              <div className="space-y-1 md:col-span-2">
+                <p className="text-sm font-medium">Commit Author</p>
+                <Badge variant="outline">{data.git.commitAuthor}</Badge>
+              </div>
+            )}
+          </div>
+          {/* Second row: Commit Date (2 cols) and other fields */}
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             {data.git.commitSha && (
               <div className="space-y-1">
@@ -628,17 +670,11 @@ export default function DevSheetPage() {
               </div>
             )}
             {data.git.commitDate && (
-              <div className="space-y-1">
+              <div className="space-y-1 md:col-span-2">
                 <p className="text-sm font-medium">Commit Date</p>
                 <Badge variant="outline">
-                  {new Date(data.git.commitDate).toLocaleString()}
+                  {formatDateTimeWithRelative(data.git.commitDate)}
                 </Badge>
-              </div>
-            )}
-            {data.git.commitAuthor && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Commit Author</p>
-                <Badge variant="outline">{data.git.commitAuthor}</Badge>
               </div>
             )}
           </div>
@@ -648,7 +684,7 @@ export default function DevSheetPage() {
         {data.vercel && (
           <div className="border-t pt-8">
             <h2 className="text-2xl font-semibold mb-4">Vercel Deployment</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium">Environment</p>
                 <Badge variant="outline">{data.vercel.env}</Badge>
@@ -662,7 +698,7 @@ export default function DevSheetPage() {
               <div className="space-y-1">
                 <p className="text-sm font-medium">Build Time</p>
                 <Badge variant="outline">
-                  {new Date(data.vercel.buildTime).toLocaleString()}
+                  {formatDateTimeWithRelative(data.vercel.buildTime)}
                 </Badge>
               </div>
             </div>
