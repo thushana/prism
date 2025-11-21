@@ -1,120 +1,119 @@
-# Monorepo Migration Summary
+# Monorepo Structure
 
-This document summarizes the migration from a single Next.js app to a monorepo structure.
+This project uses a monorepo architecture to organize multiple applications and shared packages.
 
-## What Changed
-
-### Structure
-
-**Before:**
-
-```
-starter-project/
-├── app/                  # Next.js app
-├── components/ui/        # UI components
-├── data/database/        # Database
-├── utilities/            # Utilities
-└── package.json
-```
-
-**After:**
+## Current Structure
 
 ```
 starter-project/
 ├── apps/
-│   ├── web/              # Main app (was root app/)
-│   └── admin/            # Admin app (was app/admin/)
+│   ├── web/              # Main customer-facing application
+│   └── admin/            # Admin dashboard
 ├── packages/
-│   ├── ui/               # Shared UI (was components/ui/)
-│   ├── database/         # Shared database (was data/database/)
-│   └── utilities/        # Shared utilities (was utilities/)
-└── package.json          # Root workspace config
+│   ├── ui/               # Shared UI components
+│   ├── database/         # Shared database layer
+│   └── utilities/        # Shared utility functions
+└── package.json          # Root workspace configuration
 ```
 
-## Migration Details
+## Workspace Configuration
 
-### 1. Workspace Configuration
+The root `package.json` uses npm workspaces:
 
-- Added npm workspaces to root `package.json`
-- Configured workspaces: `["apps/*", "packages/*"]`
-- Created individual `package.json` files for each workspace
+- Workspaces: `["apps/*", "packages/*"]`
+- Each workspace has its own `package.json`
+- Dependencies are managed at the workspace level
 
-### 2. Apps Created
+## Apps
 
-#### apps/web
+### apps/web
 
-- Main customer-facing application
+Main customer-facing Next.js application:
+
 - Runs on http://localhost:3000
-- Includes all original app pages (except admin)
+- Also accessible via http://www.localhost:3000 and http://web.localhost:3000 (after setup)
 - Independent Next.js configuration
 - Independent deployment to Vercel
 
-#### apps/admin
+### apps/admin
 
-- Admin dashboard application
+Admin dashboard Next.js application:
+
 - Runs on http://localhost:3001
-- Includes dev-sheet page (moved from /admin/dev-sheet)
-- New admin homepage with navigation
+- Also accessible via http://admin.localhost:3001 (after setup)
+- Includes dev-sheet page for development information
 - Independent deployment to Vercel
 
-### 3. Packages Created
+## Packages
 
-#### packages/ui
+### packages/ui
 
-- Contains all UI components (Button, Card, Badge, Icon)
-- Depends on: utilities, class-variance-authority, lucide-react
+Shared UI component library:
+
+- Contains UI components (Button, Card, Badge, Icon)
+- Depends on: utilities, class-variance-authority
 - Exports all components from `source/index.ts`
 - Used by both web and admin apps
+- Uses Material Symbols Rounded icons (Google Fonts)
 
-#### packages/database
+### packages/database
+
+Shared database layer:
 
 - Contains database schema and Drizzle configuration
 - SQLite with better-sqlite3 for development
-- Can be shared across multiple apps
-- Includes drizzle.config.ts
+- Shared across multiple apps
+- Includes `drizzle.config.ts`
 
-#### packages/utilities
+### packages/utilities
 
-- Contains utility functions (cn for classnames)
+Shared utility functions:
+
+- Contains utility functions (`cn` for classnames)
 - Includes tests
-- No external dependencies beyond tailwind-merge and clsx
+- Dependencies: tailwind-merge and clsx
 - Used by ui package and both apps
 
-### 4. Import Changes
+## Import Style
 
-**Before:**
-
-```typescript
-import { Button } from "@/components/ui/button";
-import { db } from "@/data/database";
-import { cn } from "@/utilities/classnames";
-```
-
-**After:**
+Apps import from shared packages using workspace package names:
 
 ```typescript
-import { Button } from "ui";
+// Import UI components
+import { Button, Card } from "ui";
+
+// Import database
 import { db } from "database";
+
+// Import utilities
 import { cn } from "utilities";
 ```
 
-### 5. Scripts Updated
+## Scripts
 
-**Root package.json** now includes workspace-aware scripts:
+The root `package.json` includes workspace-aware scripts:
+
+### Development
 
 - `npm run dev` - Run all apps concurrently (uses `concurrently` for colored output)
 - `npm run dev:web` - Run web app only (port 3000)
 - `npm run dev:admin` - Run admin app only (port 3001)
 - `npm run dev:kill` - Kill all dev servers on ports 3000 and 3001
 - `npm run dev:setup` - Set up subdomain routing (adds to `/etc/hosts`)
+
+### Building
+
 - `npm run build` - Build all apps
 - `npm run build:web` - Build web app only
 - `npm run build:admin` - Build admin app only
+
+### Code Quality
+
 - `npm run typecheck` - Type check all workspaces
 - `npm run lint` - Lint all workspaces
 - `npm run test:run` - Test all workspaces
 
-### 6. TypeScript Configuration
+## TypeScript Configuration
 
 Each workspace has its own `tsconfig.json` with paths configured to resolve workspace packages:
 
@@ -131,16 +130,16 @@ Each workspace has its own `tsconfig.json` with paths configured to resolve work
 }
 ```
 
-### 7. Deployment Strategy
+## Deployment Strategy
 
-**Before:** Single Vercel project
-
-**After:** Two Vercel projects (same repo, different root directories)
+The monorepo deploys each app independently on Vercel:
 
 - **Web**: Root directory `apps/web` → `yourdomain.com`
 - **Admin**: Root directory `apps/admin` → `admin.yourdomain.com`
 
-See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for setup instructions.
+Both projects point to the same GitHub repository but use different root directories.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
 
 ## Benefits
 
@@ -151,24 +150,19 @@ See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for setup instructions.
 5. **Type Safety**: Workspace packages maintain full TypeScript support
 6. **Atomic Changes**: Update shared code and all apps in one commit
 
-## Testing
+## Getting Started
 
-All apps and packages have been tested:
+### Installation
 
-- ✅ `npm run typecheck` - All TypeScript checks pass
-- ✅ `npm run build:web` - Web app builds successfully
-- ✅ `npm run build:admin` - Admin app builds successfully
-- ✅ Dependencies installed and linked correctly
-- ✅ Workspace packages resolve properly
+```bash
+npm install
+```
 
-## Next Steps
+This installs dependencies for all workspaces (apps and packages).
 
 ### Development
 
 ```bash
-# Install dependencies
-npm install
-
 # Set up subdomain routing (one-time, optional)
 npm run dev:setup
 
@@ -197,7 +191,7 @@ npm run dev:admin  # http://localhost:3001 (also admin.localhost:3001)
    - Set per-project in Vercel dashboard
    - Can be different for each app
 
-### Future Enhancements
+## Future Enhancements
 
 Consider:
 
@@ -207,13 +201,8 @@ Consider:
 - Adding Turborepo for faster builds with caching
 - Setting up Changesets for package versioning
 
-## Documentation
+## Related Documentation
 
-- [README.md](./README.md) - Updated with monorepo commands and structure
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Updated with monorepo architecture decisions
-- [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) - Vercel deployment guide for both apps
-
-## Migration Completed
-
-Date: November 20, 2025
-All todos completed successfully! ✨
+- [README.md](../README.md) - Project overview and quick start
+- [docs/ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture decisions and patterns
+- [docs/DEPLOYMENT.md](./DEPLOYMENT.md) - Vercel deployment guide

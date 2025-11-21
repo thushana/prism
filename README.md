@@ -66,7 +66,7 @@ For subdomain routing (`www.localhost`, `web.localhost`, `admin.localhost`), run
 npm run dev:setup
 ```
 
-This adds the subdomains to your `/etc/hosts` file. After setup, you can access:
+This adds the subdomains to your `/etc/hosts` file. Once set up, you can access:
 
 - Web: `http://www.localhost:3000` or `http://web.localhost:3000`
 - Admin: `http://admin.localhost:3001`
@@ -231,7 +231,7 @@ packages/[package-name]/
 
 ## Deployment
 
-This monorepo is designed to deploy each app independently on Vercel. See [VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md) for detailed instructions.
+This monorepo is designed to deploy each app independently on Vercel. See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed instructions.
 
 ### Quick Summary
 
