@@ -12,10 +12,10 @@ This monorepo contains two separate Next.js applications that can be deployed in
 4. Configure:
    - **Project Name**: `starter-project-web` (or your preferred name)
    - **Framework Preset**: Next.js
-   - **Root Directory**: `apps/web`
-   - **Build Command**: `npm run build -w apps/web`
-   - **Output Directory**: `apps/web/.next`
-   - **Install Command**: `npm install`
+   - **Root Directory**: `apps/web` ⚠️ **IMPORTANT**: This must be set!
+   - **Build Command**: `npm run build` (or leave default - Vercel will run from apps/web)
+   - **Output Directory**: `.next` (leave default - relative to root directory)
+   - **Install Command**: `cd ../.. && npm install` (install from monorepo root for workspace dependencies)
 
 5. Add custom domain (optional):
    - Go to Project Settings → Domains
@@ -28,10 +28,10 @@ This monorepo contains two separate Next.js applications that can be deployed in
 3. Configure:
    - **Project Name**: `starter-project-admin` (or your preferred name)
    - **Framework Preset**: Next.js
-   - **Root Directory**: `apps/admin`
-   - **Build Command**: `npm run build -w apps/admin`
-   - **Output Directory**: `apps/admin/.next`
-   - **Install Command**: `npm install`
+   - **Root Directory**: `apps/admin` ⚠️ **IMPORTANT**: This must be set!
+   - **Build Command**: `npm run build` (or leave default - Vercel will run from apps/admin)
+   - **Output Directory**: `.next` (leave default - relative to root directory)
+   - **Install Command**: `cd ../.. && npm install` (install from monorepo root for workspace dependencies)
 
 4. Add custom domain (optional):
    - Go to Project Settings → Domains
@@ -163,10 +163,21 @@ vercel
 
 ## Troubleshooting
 
+### Build fails with "Couldn't find any `pages` or `app` directory"
+
+**This error means the Root Directory is not set correctly in Vercel project settings.**
+
+1. Go to your Vercel project → Settings → General
+2. Scroll to "Root Directory"
+3. Set it to:
+   - `apps/web` for the web app
+   - `apps/admin` for the admin app
+4. Save and redeploy
+
 ### Build fails with "Cannot find module"
 
 - Ensure root `package.json` has `"workspaces": ["apps/*", "packages/*"]`
-- Verify install command includes workspace dependencies
+- Verify install command is `cd ../.. && npm install` to install from monorepo root
 - Run `npm install` to ensure all workspace dependencies are linked
 
 ### Workspace Dependencies Not Found
