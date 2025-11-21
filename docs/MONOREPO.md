@@ -102,9 +102,11 @@ import { cn } from "utilities";
 
 **Root package.json** now includes workspace-aware scripts:
 
-- `npm run dev` - Run all apps
-- `npm run dev:web` - Run web app only
-- `npm run dev:admin` - Run admin app only
+- `npm run dev` - Run all apps concurrently (uses `concurrently` for colored output)
+- `npm run dev:web` - Run web app only (port 3000)
+- `npm run dev:admin` - Run admin app only (port 3001)
+- `npm run dev:kill` - Kill all dev servers on ports 3000 and 3001
+- `npm run dev:setup` - Set up subdomain routing (adds to `/etc/hosts`)
 - `npm run build` - Build all apps
 - `npm run build:web` - Build web app only
 - `npm run build:admin` - Build admin app only
@@ -167,13 +169,18 @@ All apps and packages have been tested:
 # Install dependencies
 npm install
 
-# Run both apps
+# Set up subdomain routing (one-time, optional)
+npm run dev:setup
+
+# Run both apps concurrently
 npm run dev
 
 # Or run individually
-npm run dev:web    # http://localhost:3000
-npm run dev:admin  # http://localhost:3001
+npm run dev:web    # http://localhost:3000 (also www.localhost:3000, web.localhost:3000)
+npm run dev:admin  # http://localhost:3001 (also admin.localhost:3001)
 ```
+
+**Note**: `npm run dev` automatically kills any existing dev servers before starting, preventing port conflicts.
 
 ### Deployment
 

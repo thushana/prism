@@ -35,11 +35,18 @@ This will install dependencies for all workspaces (apps and packages).
 
 ### Development
 
-Run both apps in development mode:
+Run both apps concurrently in development mode:
 
 ```bash
 npm run dev
 ```
+
+This will:
+
+- Kill any existing dev servers on ports 3000 and 3001
+- Start both web and admin apps with colored output (blue for web, green for admin)
+- Web app: http://localhost:3000 (also http://www.localhost:3000 and http://web.localhost:3000)
+- Admin app: http://localhost:3001 (also http://admin.localhost:3001)
 
 Or run individual apps:
 
@@ -51,14 +58,28 @@ npm run dev:web
 npm run dev:admin
 ```
 
+#### Subdomain Setup (Optional)
+
+For subdomain routing (`www.localhost`, `web.localhost`, `admin.localhost`), run the setup script once:
+
+```bash
+npm run dev:setup
+```
+
+This adds the subdomains to your `/etc/hosts` file. After setup, you can access:
+
+- Web: `http://www.localhost:3000` or `http://web.localhost:3000`
+- Admin: `http://admin.localhost:3001`
+
 ## Available Scripts
 
 ### Development
 
-- `npm run dev` - Run all apps in development mode
+- `npm run dev` - Run all apps concurrently in development mode (kills existing servers first)
 - `npm run dev:web` - Run web app only (port 3000)
 - `npm run dev:admin` - Run admin app only (port 3001)
-- `npm run dev:kill` - Kill all development servers
+- `npm run dev:kill` - Kill all development servers on ports 3000 and 3001
+- `npm run dev:setup` - Set up subdomain routing (adds entries to `/etc/hosts`)
 
 ### Building
 
@@ -120,7 +141,7 @@ npm run dev:admin
 - **packages/ui**: Shared UI components (Button, Card, Badge, Icon)
   - Radix UI primitives
   - Class Variance Authority for variants
-  - Lucide React icons
+  - Material Symbols Rounded icons (via Google Fonts)
 - **packages/database**: Database layer
   - Drizzle ORM 0.44.7
   - SQLite with better-sqlite3 (development)

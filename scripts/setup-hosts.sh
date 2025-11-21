@@ -1,20 +1,31 @@
 #!/bin/bash
 
-# Setup script to add admin.localhost to /etc/hosts
+# Setup script to add subdomain entries to /etc/hosts
 
 HOSTS_FILE="/etc/hosts"
-ENTRY="127.0.0.1 admin.localhost"
+ENTRIES=(
+  "127.0.0.1 www.localhost"
+  "127.0.0.1 web.localhost"
+  "127.0.0.1 admin.localhost"
+)
 
-if grep -q "admin.localhost" "$HOSTS_FILE" 2>/dev/null; then
-  echo "✓ admin.localhost already configured in /etc/hosts"
-else
-  echo "Adding admin.localhost to /etc/hosts..."
-  echo "$ENTRY" | sudo tee -a "$HOSTS_FILE" > /dev/null
-  echo "✓ Added admin.localhost to /etc/hosts"
-fi
+echo "Setting up subdomain routing in /etc/hosts..."
+
+for ENTRY in "${ENTRIES[@]}"; do
+  SUBDOMAIN=$(echo "$ENTRY" | awk '{print $2}')
+  if grep -q "$SUBDOMAIN" "$HOSTS_FILE" 2>/dev/null; then
+    echo "✓ $SUBDOMAIN already configured"
+  else
+    echo "Adding $SUBDOMAIN to /etc/hosts..."
+    echo "$ENTRY" | sudo tee -a "$HOSTS_FILE" > /dev/null
+    echo "✓ Added $SUBDOMAIN to /etc/hosts"
+  fi
+done
 
 echo ""
 echo "You can now access:"
 echo "  - Web app: http://localhost:3000"
+echo "  - Web app: http://www.localhost:3000"
+echo "  - Web app: http://web.localhost:3000"
 echo "  - Admin app: http://admin.localhost:3001"
 

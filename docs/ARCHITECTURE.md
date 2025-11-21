@@ -114,6 +114,13 @@ Shared utility functions:
 - **Schema Location**: `packages/database/source/schema.ts`
 - **Migrations**: Managed by Drizzle Kit
 
+### Styling
+
+- **Framework**: Tailwind CSS 4.1.17 (CSS-first configuration)
+- **Configuration**: Each app's `globals.css` includes `@source` directives to scan workspace packages
+- **Icons**: Material Symbols Rounded (Google Fonts) with preconnect for fast loading
+- **Theme**: CSS variables defined in `globals.css` with dark mode support
+
 ### Testing
 
 - **Framework**: Vitest for fast unit/integration tests
@@ -226,10 +233,15 @@ For larger monorepos, consider:
 1. **Local Development**:
 
    ```bash
-   npm run dev        # Run all apps
-   npm run dev:web    # Run web only
-   npm run dev:admin  # Run admin only
+   npm run dev        # Run all apps concurrently (kills existing servers first)
+   npm run dev:web    # Run web only (port 3000)
+   npm run dev:admin  # Run admin only (port 3001)
+   npm run dev:setup  # Set up subdomain routing (one-time setup)
    ```
+
+   **Subdomain Routing**: After running `npm run dev:setup`, you can access:
+   - Web: `http://www.localhost:3000` or `http://web.localhost:3000`
+   - Admin: `http://admin.localhost:3001`
 
 2. **Making Changes**:
    - Edit files in any workspace

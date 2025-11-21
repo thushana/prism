@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "(sleep 4 && open http://localhost:3001) & next dev -p 3001",
+    "dev": "(sleep 4 && open http://admin.localhost:3001) & next dev -p 3001",
     "start": "next start -p 3001",
     "typecheck": "tsc --noEmit",
     "lint": "eslint app --ext .ts,.tsx",
