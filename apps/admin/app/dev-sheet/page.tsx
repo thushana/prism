@@ -5,6 +5,89 @@ import { Card, CardContent, CardHeader, CardTitle } from "ui";
 import { Badge } from "ui";
 import { Button } from "ui";
 import { Icon } from "ui";
+import { headers } from "next/headers";
+
+async function checkPortAccessible(
+  host: string,
+  port: number
+): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+    const response = await fetch(`http://${host}:${port}`, {
+      method: "GET",
+      signal: controller.signal,
+      cache: "no-store",
+      headers: {
+        "User-Agent": "dev-sheet-status-check",
+      },
+    });
+
+    clearTimeout(timeoutId);
+    return response.status < 500; // Any response < 500 means server is running
+  } catch {
+    // Timeout, connection refused, or other network error
+    return false;
+  }
+}
+
+async function getBaseHost(): Promise<string> {
+  // Try to get from request headers (if available in server component)
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    if (host) {
+      // Extract just the hostname without port
+      return host.split(":")[0];
+    }
+  } catch {
+    // Not in server component context, use localhost
+  }
+
+  // Default to localhost
+  return "localhost";
+}
+
+async function getAppStatuses(): Promise<AppStatus[]> {
+  // Define apps with preferred hosts (subdomains first, then localhost)
+  const apps: AppStatus[] = [
+    {
+      name: "Web",
+      port: 3000,
+      hosts: ["www.localhost", "web.localhost", "localhost"],
+      url: `http://localhost:3000`,
+      isRunning: false,
+    },
+    {
+      name: "Admin",
+      port: 3001,
+      hosts: ["admin.localhost", "localhost"],
+      url: `http://localhost:3001`,
+      isRunning: false,
+    },
+  ];
+
+  // Check each app's status
+  for (const app of apps) {
+    // Try each host in order of preference
+    for (const host of app.hosts) {
+      try {
+        const isRunning = await checkPortAccessible(host, app.port);
+        if (isRunning) {
+          app.isRunning = true;
+          app.url = `http://${host}:${app.port}`;
+          break; // Use the first working host
+        }
+      } catch {
+        // Continue to next host
+        continue;
+      }
+    }
+  }
+
+  return apps;
+}
 
 function getRelativeTime(date: Date): string {
   const now = new Date();
@@ -38,7 +121,16 @@ function formatDateTimeWithRelative(dateString: string): string {
   return `${formatted} – ${relative}`;
 }
 
+interface AppStatus {
+  name: string;
+  port: number;
+  hosts: string[];
+  url: string;
+  isRunning: boolean;
+}
+
 interface DevSheetData {
+  apps: AppStatus[];
   shadcn: {
     style: string;
     iconLibrary: string;
@@ -494,7 +586,8 @@ function getVercelInfo() {
   };
 }
 
-function getDevSheetData(): DevSheetData {
+async function getDevSheetData(): Promise<DevSheetData> {
+  const apps = await getAppStatuses();
   const shadcnConfig = getShadcnConfig();
   const allComponents = getAllComponents();
   const techStack = getTechStack();
@@ -503,6 +596,7 @@ function getDevSheetData(): DevSheetData {
   const vercel = getVercelInfo();
 
   return {
+    apps,
     shadcn: {
       ...shadcnConfig,
       components: allComponents.shadcn,
@@ -576,8 +670,8 @@ function renderComponentExample(componentName: string) {
   }
 }
 
-export default function DevSheetPage() {
-  const data = getDevSheetData();
+export default async function DevSheetPage() {
+  const data = await getDevSheetData();
 
   return (
     <div className="container mx-auto p-8 space-y-8">
@@ -589,6 +683,46 @@ export default function DevSheetPage() {
       </div>
 
       <div className="space-y-8">
+        {/* Apps Status Row - Top Row */}
+        <div className="border-b pb-8">
+          <div className="flex flex-wrap gap-4 items-center">
+            {data.apps.map((app) => (
+              <div
+                key={app.name}
+                className="flex items-center gap-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <div
+                  className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                    app.isRunning ? "bg-green-500" : "bg-red-500"
+                  }`}
+                  title={app.isRunning ? "Running" : "Not running"}
+                />
+                <span className="font-medium">{app.name}</span>
+                <a
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline font-mono flex items-center gap-1"
+                >
+                  {app.url}
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
         {/* Row 1: Tech Stack | Key Dependencies */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
