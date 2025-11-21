@@ -10,22 +10,248 @@
 - **Linting**: ESLint 9.39.1
 - **Formatting**: Prettier 3.6.2
 - **Runtime**: Node.js 22.x (LTS)
+- **Monorepo**: npm workspaces
+
+## Monorepo Structure
+
+This project uses a monorepo architecture to organize multiple applications and shared packages:
+
+```
+starter-project/
+├── apps/
+│   ├── web/              # Main customer-facing application
+│   └── admin/            # Admin dashboard
+├── packages/
+│   ├── ui/               # Shared UI components
+│   ├── database/         # Database layer
+│   └── utilities/        # Shared utilities
+└── package.json          # Root workspace configuration
+```
+
+### Benefits of Monorepo
+
+1. **Code Sharing**: Easily share UI components, utilities, and database logic between apps
+2. **Atomic Commits**: Changes across multiple apps/packages in a single commit
+3. **Consistent Versioning**: All packages and apps use the same dependency versions
+4. **Simplified Development**: Run all apps with a single command
+5. **Independent Deployment**: Each app can be deployed separately
 
 ## Project Structure
 
+### Apps
+
+#### apps/web
+
+Main customer-facing Next.js application:
+
 - `app/` - Next.js App Router pages and layouts
-- `components/` - Shared React components (shadcn/ui components in `components/ui/`)
-- `data/database/` - Database schema, migrations, and connection
-- `docs/` - Project documentation
-- `utilities/` - Shared utilities, helpers, and reusable code
+- `public/` - Static assets
+- `package.json` - App-specific dependencies
+- `next.config.ts` - Next.js configuration
+- `tsconfig.json` - TypeScript configuration with workspace paths
+- `vercel.json` - Vercel deployment configuration
+
+#### apps/admin
+
+Admin dashboard Next.js application:
+
+- `app/` - Admin pages (includes dev-sheet)
+- `app/dev-sheet/` - Development information page
+- Similar structure to web app
+- Runs on port 3001 in development
+
+### Packages
+
+#### packages/ui
+
+Shared UI component library:
+
+- `source/` - Component source files
+- `source/index.ts` - Main export file
+- Built with Radix UI primitives
+- Uses Class Variance Authority for variants
+- Includes: Button, Card, Badge, Icon
+
+#### packages/database
+
+Shared database layer:
+
+- `source/` - Database schema and queries
+- `drizzle.config.ts` - Drizzle ORM configuration
+- SQLite for development (consider PostgreSQL for production)
+- Type-safe queries with Drizzle ORM
+
+#### packages/utilities
+
+Shared utility functions:
+
+- `source/` - Utility functions
+- `source/classnames.ts` - Tailwind class name merger (`cn`)
+- Includes tests for utilities
 
 ## Key Decisions
 
-- **App Router**: Using Next.js App Router (not Pages Router)
-- **TypeScript Path Alias**: `@/*` points to project root
-- **Database**: SQLite for simplicity, Drizzle ORM for type safety
-- **Testing**: Vitest for fast unit/integration tests
-- **No `src/` directory**: Following user preference for flat structure
-- **No Acronyms**: Avoid acronyms whenever possible (use "database" instead of "db", "library" > "lib", "utlities" > "utils")
-- **File Moves**: Use `git mv` for moving files to preserve history
+### Monorepo Architecture
 
+- **Workspace Management**: Using npm workspaces (native npm feature)
+- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`)
+- **Directory Convention**: `source/` instead of `src/` for packages
+- **Versioning**: All packages use `*` for workspace dependencies
+- **Import Style**: Direct imports from package names (`import { Button } from "ui"`)
+
+### Application Architecture
+
+- **App Router**: Using Next.js App Router (not Pages Router) for both apps
+- **TypeScript Path Alias**: `@/*` points to app root, workspace packages by name
+- **Feature Organization**: Feature-based organization in `source/features/` within each app
+- **Shared Code**: Common components, utilities, and database logic in packages
+
+### Database
+
+- **ORM**: Drizzle ORM for type safety and excellent TypeScript support
+- **Development**: SQLite with better-sqlite3 for local development
+- **Production**: Consider managed PostgreSQL or other serverless-compatible databases
+- **Schema Location**: `packages/database/source/schema.ts`
+- **Migrations**: Managed by Drizzle Kit
+
+### Testing
+
+- **Framework**: Vitest for fast unit/integration tests
+- **React Testing**: React Testing Library for component tests
+- **Location**: Tests colocated with source files (`*.test.ts`, `*.test.tsx`)
+- **Coverage**: V8 coverage provider
+- **CI**: Tests run in GitHub Actions on pull requests
+
+### Code Quality
+
+- **Type Checking**: TypeScript strict mode enabled across all workspaces
+- **Linting**: ESLint with Next.js config
+- **Formatting**: Prettier with automatic formatting on save
+- **Pre-commit Hooks**: Husky + lint-staged for automated formatting and linting
+- **Quality Scripts**: `npm run quality` runs full quality checks
+
+### Naming Conventions
+
+- **No Acronyms**: Use full words (e.g., "database" not "db", "utilities" not "utils")
+- **Kebab-case**: For file and directory names
+- **PascalCase**: For React components and TypeScript types
+- **camelCase**: For functions and variables
+
+### Deployment
+
+- **Platform**: Vercel
+- **Strategy**: Independent deployment for each app
+- **Web App**: Deploy from `apps/web` root
+- **Admin App**: Deploy from `apps/admin` root
+- **Domains**:
+  - Web: `yourdomain.com`
+  - Admin: `admin.yourdomain.com`
+- **Build**: Vercel automatically detects and builds changed apps
+
+### Git Workflow
+
+- **Commits**: Use descriptive commit messages (see `.cursor/commands/commitmessage.md`)
+- **File Moves**: Use `git mv` to preserve file history
+- **Hooks**: Pre-commit hooks run format, lint, and typecheck
+- **CI**: GitHub Actions runs quality checks on every push
+
+## Workspace Dependencies
+
+Each app declares dependencies on shared packages:
+
+```json
+{
+  "dependencies": {
+    "ui": "*",
+    "database": "*",
+    "utilities": "*"
+  }
+}
+```
+
+The `*` version means "use the local workspace version" during development.
+
+## TypeScript Configuration
+
+Each workspace has its own `tsconfig.json`:
+
+- **Root**: Minimal config for IDE
+- **Apps**: Full Next.js config with workspace paths
+- **Packages**: Minimal config for type checking
+
+TypeScript path mapping allows imports like:
+
+```typescript
+import { Button } from "ui"; // Resolves to packages/ui/source
+import { db } from "database"; // Resolves to packages/database/source
+import { cn } from "utilities"; // Resolves to packages/utilities/source
+```
+
+## Build Process
+
+1. **Install**: `npm install` installs all workspace dependencies
+2. **Development**: Each app runs independently with hot reload
+3. **Build**: Each app builds independently, including workspace packages
+4. **Deploy**: Each app deploys to separate Vercel projects
+
+## Future Considerations
+
+### When to Extract More Packages
+
+Consider creating new packages when:
+
+- Code is shared by multiple apps
+- Logic is domain-specific and reusable
+- You want to publish to npm (open source)
+
+### When to Create New Apps
+
+Consider creating new apps when:
+
+- Functionality is distinct from existing apps
+- You need different deployment/scaling characteristics
+- You want separate authentication or access control
+
+### Scaling the Monorepo
+
+For larger monorepos, consider:
+
+- **Turborepo**: For faster builds with caching
+- **Build Dependencies**: Explicit dependency graphs
+- **Package Versioning**: Independent versioning instead of `*`
+- **Changesets**: For managing package versions and changelogs
+
+## Development Workflow
+
+1. **Local Development**:
+
+   ```bash
+   npm run dev        # Run all apps
+   npm run dev:web    # Run web only
+   npm run dev:admin  # Run admin only
+   ```
+
+2. **Making Changes**:
+   - Edit files in any workspace
+   - Hot reload works automatically
+   - Shared packages update all dependent apps
+
+3. **Testing**:
+
+   ```bash
+   npm run test       # Test all workspaces
+   npm run quality    # Full quality check
+   ```
+
+4. **Deployment**:
+   - Push to GitHub
+   - Vercel deploys changed apps automatically
+   - Review deploy previews before merging
+
+## References
+
+- [Next.js App Router](https://nextjs.org/docs/app)
+- [npm Workspaces](https://docs.npmjs.com/cli/v10/using-npm/workspaces)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [Vitest](https://vitest.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)

@@ -1,0 +1,23 @@
+{
+  "name": "utilities",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run"
+  }
+}

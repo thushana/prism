@@ -1,4 +1,4 @@
-import { cn } from "@/utilities/classnames";
+import { cn } from "utilities";
 
 interface IconProps {
   name: string;
@@ -29,4 +29,3 @@ export function Icon({
     </span>
   );
 }
-

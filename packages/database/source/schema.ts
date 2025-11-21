@@ -9,4 +9,3 @@ export const users = sqliteTable("users", {
     .notNull()
     .$defaultFn(() => new Date()),
 });
-

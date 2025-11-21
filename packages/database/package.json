@@ -1,0 +1,19 @@
+{
+  "name": "database",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "drizzle-orm": "^0.44.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "drizzle-kit": "^0.31.7",
+    "typescript": "^5.9.3"
+  }
+}

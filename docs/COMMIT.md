@@ -25,4 +25,3 @@ ALL CAPS SLUG - Brief description of the feature succinctly
 - Commit should include all related unstaged changes
 - Slug should be a single word or short phrase (e.g., `SETUP`, `DATABASE`, `UI`)
 - Description should be concise but descriptive enough to understand the change
-

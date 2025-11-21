@@ -1,10 +1,10 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
+import { Card, CardContent, CardHeader, CardTitle } from "ui";
+import { Badge } from "ui";
+import { Button } from "ui";
+import { Icon } from "ui";
 
 function getRelativeTime(date: Date): string {
   const now = new Date();
@@ -96,14 +96,30 @@ function getComponentsInDirectory(dirPath: string): string[] {
 }
 
 function getAllComponents() {
+  // Get root directory (monorepo root)
+  // process.cwd() in Next.js will be the app directory (apps/admin) when running from there
+  // or the root when running from root. Try both.
+  let rootDir = process.cwd();
+
+  // If we're in apps/admin, go up to root
+  if (rootDir.endsWith("apps/admin") || rootDir.endsWith("apps\\admin")) {
+    rootDir = join(rootDir, "../..");
+  }
+  // If we're already at root, stay there
+
+  // UI components are in packages/ui/source
   const shadcnComponents = getComponentsInDirectory(
-    join(process.cwd(), "components", "ui")
+    join(rootDir, "packages", "ui", "source")
   );
+
+  // Custom components would be in apps/web/components (if any)
   const customComponents = getComponentsInDirectory(
-    join(process.cwd(), "components")
+    join(rootDir, "apps", "web", "components")
   ).filter((name) => name !== "ui");
+
+  // App-specific components
   const appComponents = getComponentsInDirectory(
-    join(process.cwd(), "app", "components")
+    join(rootDir, "apps", "web", "app", "components")
   );
 
   return {
@@ -115,7 +131,15 @@ function getAllComponents() {
 
 function getShadcnConfig() {
   try {
-    const configPath = join(process.cwd(), "components.json");
+    // components.json is in apps/web
+    let rootDir = process.cwd();
+
+    // If we're in apps/admin, go up to root
+    if (rootDir.endsWith("apps/admin") || rootDir.endsWith("apps\\admin")) {
+      rootDir = join(rootDir, "../..");
+    }
+
+    const configPath = join(rootDir, "apps", "web", "components.json");
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
     return {
       style: config.style || "default",

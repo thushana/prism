@@ -1,152 +1,268 @@
-# StarterProject
+# Starter Project (Monorepo)
 
-A [Next.js](https://nextjs.org) project built with TypeScript and Tailwind CSS.
+A [Next.js](https://nextjs.org) monorepo built with TypeScript and Tailwind CSS. This project uses npm workspaces to manage multiple applications and shared packages.
+
+## Project Structure
+
+```
+starter-project/
+├── apps/
+│   ├── web/              # Main customer-facing application
+│   └── admin/            # Admin dashboard
+├── packages/
+│   ├── ui/               # Shared UI components
+│   ├── database/         # Database layer (Drizzle ORM + SQLite)
+│   └── utilities/        # Shared utility functions
+└── package.json          # Root workspace configuration
+```
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.0.0 (as specified in `package.json`)
+- npm (comes with Node.js)
 
 ## Getting Started
 
-First, install dependencies:
+### Installation
+
+Install all dependencies for the monorepo:
 
 ```bash
 npm install
 ```
 
-Then, run the development server:
+This will install dependencies for all workspaces (apps and packages).
+
+### Development
+
+Run both apps in development mode:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or run individual apps:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Web app (http://localhost:3000)
+npm run dev:web
+
+# Admin app (http://localhost:3001)
+npm run dev:admin
+```
 
 ## Available Scripts
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the production application
-- `npm run start` - Start the production server
-- `npm run lint` - Run ESLint
+### Development
+
+- `npm run dev` - Run all apps in development mode
+- `npm run dev:web` - Run web app only (port 3000)
+- `npm run dev:admin` - Run admin app only (port 3001)
+- `npm run dev:kill` - Kill all development servers
+
+### Building
+
+- `npm run build` - Build all apps
+- `npm run build:web` - Build web app only
+- `npm run build:admin` - Build admin app only
+
+### Production
+
+- `npm run start` - Start all production servers
+- `npm run start:web` - Start web app (port 3000)
+- `npm run start:admin` - Start admin app (port 3001)
+
+### Code Quality
+
+- `npm run typecheck` - Run TypeScript type checking across all workspaces
+- `npm run lint` - Run ESLint across all workspaces
 - `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run typecheck` - Run TypeScript type checking
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
-- `npm run quality` - Run typecheck, lint, and format
+- `npm run quality` - Run typecheck, lint, format, and tests
+- `npm run quality:quick` - Run typecheck, lint, and format (no tests)
+
+### Testing
+
+- `npm run test` - Run all tests
+- `npm run test:run` - Run all tests once
+- `npm run test:ui` - Run tests with Vitest UI (web app)
+- `npm run test:coverage` - Generate coverage report (web app)
+
+### Database
+
 - `npm run database:generate` - Generate database migrations
 - `npm run database:migrate` - Run database migrations
 - `npm run database:push` - Push schema changes to database
 - `npm run database:studio` - Open Drizzle Studio (database GUI)
-- `npm run test` - Run tests with Vitest
-- `npm run test:ui` - Run tests with Vitest UI
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run watch` - Watch TypeScript files and compile
+
+### Utilities
+
 - `npm run clean` - Clean build artifacts
-- `npm run dev:kill` - Kill all development servers
+- `npm run watch` - Watch TypeScript files
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.0.3
+### Core
+
+- **Framework**: Next.js 16.0.3 (App Router)
 - **Language**: TypeScript 5.9.3 (target: ES2022)
 - **Styling**: Tailwind CSS 4.1.17
-- **Database**: Drizzle ORM 0.44.7 with SQLite (better-sqlite3)
+- **Monorepo**: npm workspaces
+
+### Apps
+
+- **apps/web**: Main customer-facing Next.js application
+- **apps/admin**: Admin dashboard with dev-sheet for development info
+
+### Packages
+
+- **packages/ui**: Shared UI components (Button, Card, Badge, Icon)
+  - Radix UI primitives
+  - Class Variance Authority for variants
+  - Lucide React icons
+- **packages/database**: Database layer
+  - Drizzle ORM 0.44.7
+  - SQLite with better-sqlite3 (development)
+- **packages/utilities**: Shared utility functions
+  - `cn()` - Tailwind class name merger
+
+### Development
+
 - **Testing**: Vitest 4.0.10 with React Testing Library
-- **Linting**: ESLint 9.39.1
+- **Linting**: ESLint 9.39.1 with Next.js config
 - **Formatting**: Prettier 3.6.2
-- **Fonts**: [Geist](https://vercel.com/font) and Geist Mono via `next/font`
+- **Git Hooks**: Husky 9.1.7 with lint-staged
+- **Fonts**: Geist and Geist Mono via `next/font`
 
 ## Testing
 
-This project uses [Vitest](https://vitest.dev/) for testing with React Testing Library. Tests should be placed in files ending with `.test.ts` or `.test.tsx`.
+This project uses [Vitest](https://vitest.dev/) for testing. Tests should be placed in files ending with `.test.ts` or `.test.tsx`.
 
-Run tests with:
 ```bash
+# Run tests
 npm run test
-```
 
-For an interactive UI:
-```bash
+# Run tests with UI
 npm run test:ui
-```
 
-For coverage reports:
-```bash
+# Run tests with coverage
 npm run test:coverage
 ```
 
 ## Database
 
-This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite. The database schema is defined in `data/database/schema.ts`.
-
-### Database Commands
-
-- `npm run database:generate` - Generate migration files from schema changes
-- `npm run database:migrate` - Apply migrations to the database
-- `npm run database:push` - Push schema changes directly (useful for development)
-- `npm run database:studio` - Open Drizzle Studio to browse and edit data
+This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite for development. The database schema is defined in `packages/database/source/schema.ts`.
 
 ### Usage Example
 
 ```typescript
-import { database } from "@/data/database";
-import { users } from "@/data/database/schema";
+import { db } from "database";
 
-// Query
-const allUsers = await database.select().from(users);
-
-// Insert
-await database.insert(users).values({
-  name: "John Doe",
-  email: "john@example.com",
-  createdAt: new Date(),
-});
+// Both apps can import from the shared database package
+const data = await db.query.users.findMany();
 ```
+
+### Database Commands
+
+```bash
+# Generate migrations from schema changes
+npm run database:generate
+
+# Apply migrations
+npm run database:migrate
+
+# Push schema changes directly (development)
+npm run database:push
+
+# Open Drizzle Studio GUI
+npm run database:studio
+```
+
+## Shared Packages
+
+### Using Shared Packages
+
+All apps can import from shared packages:
+
+```typescript
+// Import UI components
+import { Button, Card } from "ui";
+
+// Import database
+import { db } from "database";
+
+// Import utilities
+import { cn } from "utilities";
+```
+
+### Package Structure
+
+Each package follows the same structure:
+
+```
+packages/[package-name]/
+├── source/           # Source files
+│   └── index.ts      # Main export file
+├── package.json      # Package configuration
+└── tsconfig.json     # TypeScript configuration
+```
+
+## Deployment
+
+This monorepo is designed to deploy each app independently on Vercel. See [VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md) for detailed instructions.
+
+### Quick Summary
+
+1. **Web App**: Deploy from `apps/web` root directory
+2. **Admin App**: Deploy from `apps/admin` root directory
+
+Both projects can point to the same GitHub repository but with different root directories.
+
+### Custom Domains
+
+- Web: `yourdomain.com` or `www.yourdomain.com`
+- Admin: `admin.yourdomain.com`
+
+### Database for Production
+
+**Important**: SQLite with `better-sqlite3` is for local development only. For production:
+
+- Use a managed database service (PostgreSQL, MySQL, etc.)
+- Consider Vercel Postgres or other serverless-compatible databases
+- Update the database package to use the appropriate Drizzle adapter
 
 ## Environment Variables
 
 Copy `.env.example` to `.env.local` and fill in your environment variables. Never commit `.env.local` or any files containing secrets.
 
+Environment variables can be set per-app in Vercel or at the root level for all apps.
+
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+### Next.js
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Learn Next.js](https://nextjs.org/learn)
 - [Next.js GitHub repository](https://github.com/vercel/next.js)
 
-## Deploy on Vercel
+### Monorepos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [npm workspaces](https://docs.npmjs.com/cli/v10/using-npm/workspaces)
+- [Turborepo](https://turbo.build/) - Consider for larger monorepos
 
-### Quick Deploy
+### Drizzle ORM
 
-1. Push your code to GitHub
-2. Import your repository on [Vercel](https://vercel.com/new)
-3. Vercel will automatically detect Next.js and configure the build settings
-4. Add any required environment variables in the Vercel dashboard
-5. Deploy!
+- [Drizzle Documentation](https://orm.drizzle.team/)
+- [Drizzle with Next.js](https://orm.drizzle.team/docs/tutorials/drizzle-with-nextjs)
 
-### Configuration
+## Contributing
 
-This project includes a `vercel.json` configuration file with:
-- Node.js 22.x runtime
-- Build and install commands
-- Function timeout settings (10 seconds)
+1. Make changes in the appropriate workspace
+2. Run `npm run quality` to ensure code quality
+3. Commit with descriptive messages (see `.cursor/commands/commitmessage.md`)
+4. Pre-commit hooks will automatically format and lint your code
 
-### Database Considerations
+## License
 
-**Important**: SQLite with `better-sqlite3` has limitations on Vercel's serverless platform:
-- Serverless functions are stateless and ephemeral
-- No persistent file system for database files
-- Native bindings may not work in Vercel's environment
-
-**For production deployments**, consider:
-- Using a managed database service (PostgreSQL, MySQL, etc.)
-- Using Vercel Postgres or other serverless-compatible databases
-- Migrating to Drizzle ORM with a PostgreSQL adapter
-
-For development, SQLite works perfectly fine locally.
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is private and not licensed for public use.

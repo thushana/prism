@@ -4,4 +4,3 @@ import * as schema from "./schema";
 
 const sqlite = new Database("./data/database/sqlite.db");
 export const database = drizzle(sqlite, { schema });
-
