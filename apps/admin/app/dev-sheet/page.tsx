@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "ui";
 import { Badge } from "ui";
 import { Button } from "ui";
 import { Icon } from "ui";
-import { headers } from "next/headers";
 
 async function checkPortAccessible(
   host: string,
@@ -30,23 +29,6 @@ async function checkPortAccessible(
     // Timeout, connection refused, or other network error
     return false;
   }
-}
-
-async function getBaseHost(): Promise<string> {
-  // Try to get from request headers (if available in server component)
-  try {
-    const headersList = await headers();
-    const host = headersList.get("host");
-    if (host) {
-      // Extract just the hostname without port
-      return host.split(":")[0];
-    }
-  } catch {
-    // Not in server component context, use localhost
-  }
-
-  // Default to localhost
-  return "localhost";
 }
 
 async function getAppStatuses(): Promise<AppStatus[]> {

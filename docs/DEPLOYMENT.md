@@ -174,6 +174,18 @@ vercel
    - `apps/admin` for the admin app
 4. Save and redeploy
 
+### Build fails with "husky: command not found"
+
+**This error occurs when the `prepare` script tries to run husky during `npm install`.**
+
+The `prepare` script is configured to skip husky in CI/Vercel environments. If you still see this error:
+
+1. Ensure your `package.json` has the conditional prepare script:
+   ```json
+   "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\""
+   ```
+2. This script only runs husky in local development, not in Vercel builds
+
 ### Build fails with "Cannot find module"
 
 - Ensure root `package.json` has `"workspaces": ["apps/*", "packages/*"]`
