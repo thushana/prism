@@ -1,0 +1,24 @@
+{
+  "name": "cli-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx app/tools.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app --ext .ts"
+  },
+  "dependencies": {
+    "cli": "*",
+    "logger": "*",
+    "database": "*",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

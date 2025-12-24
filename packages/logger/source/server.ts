@@ -3,8 +3,17 @@
  * Use in API routes, server components, and CLI scripts
  */
 
-import "server-only";
 import winston from "winston";
+
+// Runtime check to prevent accidental use in browser
+if (
+  typeof globalThis !== "undefined" &&
+  typeof (globalThis as any).window !== "undefined"
+) {
+  throw new Error(
+    "Server logger cannot be used in browser. Use logger/client instead."
+  );
+}
 
 // Log levels in order of severity (Winston default)
 const LOG_LEVELS = {

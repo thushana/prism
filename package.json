@@ -54,6 +54,7 @@
     "test:run": "npm run test:run --workspaces --if-present",
     "test:ui": "npm run test:ui -w apps/web",
     "test:coverage": "npm run test:coverage -w apps/web",
+    "tools": "npm run start -w apps/cli --",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "watch": "tsc --watch",
     "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\""

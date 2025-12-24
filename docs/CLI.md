@@ -1,18 +1,33 @@
 # CLI Tool Documentation
 
-> **Status**: This CLI infrastructure is planned but not yet implemented. This document describes the intended design for when CLI functionality is added.
+> **Status**: ✅ Implemented - The CLI infrastructure is now fully functional with seed, migrate, and export commands.
 
 ## Overview
 
-The CLI tool (`npm run tools`) will provide a unified command-line interface for common development and maintenance tasks. It will use **Commander.js** for argument parsing and command registration.
+The CLI tool (`npm run tools`) provides a unified command-line interface for common development and maintenance tasks. It uses **Commander.js** for argument parsing and command registration, with a clean separation between generic CLI utilities (`packages/cli`) and specific commands (`apps/cli`).
+
+## Architecture
+
+The CLI is split into two parts following monorepo best practices:
+
+- **`packages/cli`** - Generic CLI utilities and patterns (reusable across projects)
+  - Command patterns and interfaces
+  - Command registry utilities
+  - Common CLI utilities (path resolution, validation, etc.)
+
+- **`apps/cli`** - Specific CLI application for this project
+  - Actual command implementations (seed, migrate, export)
+  - Integration with database and logger packages
+  - Main tools.ts entry point
 
 ## Design Philosophy
 
 1. **Unified Entry Point**: Single `tools` command with subcommands
 2. **Modular Commands**: Each command is in its own file for maintainability
-3. **Consistent Logging**: All commands use the centralized logger
+3. **Consistent Logging**: All commands use the centralized logger with emoji prefixes
 4. **Type-Safe**: Full TypeScript support with proper types
 5. **Extensible**: Easy to add new commands following established patterns
+6. **Reusable**: Generic CLI infrastructure can be used by other apps in the monorepo
 
 ## Usage
 
@@ -29,9 +44,7 @@ npm run tools --version
 npm run tools <command> [options]
 ```
 
-### Planned Commands
-
-When implemented, the CLI will support commands like:
+### Available Commands
 
 #### `seed`
 
@@ -69,22 +82,29 @@ npm run tools export users --format csv
 npm run tools export users --format json
 ```
 
-## Architecture
-
-### Planned File Structure
-
-When implemented, the CLI will follow this structure:
+## Actual File Structure
 
 ```
-source/cli/
-├── tools.ts              # Main entry point
-└── commands/
-    ├── seed.ts           # Seed command implementation
-    ├── migrate.ts        # Migrate command implementation
-    └── export.ts         # Export command implementation
-```
+packages/cli/
+├── package.json
+├── tsconfig.json
+└── source/
+    ├── index.ts           # Package exports
+    ├── command.ts         # Base command patterns/interfaces
+    ├── registry.ts        # Command registration helpers
+    └── utils.ts           # CLI utilities
 
-**Note**: The `source/cli/` directory doesn't exist yet. This will be created when CLI functionality is added.
+apps/cli/
+├── package.json
+├── tsconfig.json
+├── README.md
+└── app/
+    ├── tools.ts           # Main CLI entry point
+    └── commands/
+        ├── seed.ts        # Database seeding command
+        ├── migrate.ts     # Migration runner
+        └── export.ts      # Data export command
+```
 
 ### Command Registration Pattern (Planned)
 

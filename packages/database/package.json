@@ -5,7 +5,8 @@
   "main": "./source/index.ts",
   "types": "./source/index.ts",
   "exports": {
-    ".": "./source/index.ts"
+    ".": "./source/index.ts",
+    "./schema": "./source/schema.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",
