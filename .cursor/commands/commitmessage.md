@@ -1,14 +1,15 @@
 Write a commit message for the changes on disk
 
+## Rules
+
+- One line only
+- Cover all unstaged changes in the commit
+- Craft a holistic and descriptive message
+- It must be in this format: **Emoji** + **ALL CAPS** slug + dash + brief description
+
 ```
 🎯 EMOJI ALL CAPS SLUG - Brief description of the feature succinctly
 ```
-
-## Rules
-
-- **Emoji** + **ALL CAPS** slug + dash + brief description
-- One line only
-- Cover all unstaged changes in the commit
 
 ## Examples
 
@@ -25,17 +26,4 @@ Write a commit message for the changes on disk
 
 `🎨` UI `🐛` Fix `✨` Feature `🗄️` Database `⚙️` Config `📝` Docs `🔧` Tooling `🎯` Dev tools `🚀` Deploy `♻️` Refactor `⚡` Performance `🔒` Security
 
-## Staging for GitHub Desktop
-
-To prefill the message in GitHub Desktop:
-
-```bash
-echo "YOUR_COMMIT_MESSAGE" > .git/COMMIT_EDITMSG
-```
-
-**Important**:
-
-- Close and reopen GitHub Desktop after writing the file
-- Then stage files → click "Commit" → message will be prefilled
-
-**Alternative** (if above doesn't work): Copy the message and paste it manually in GitHub Desktop's commit text area.
+Return it as a copyable Markdown block
