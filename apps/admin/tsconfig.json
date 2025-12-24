@@ -22,7 +22,8 @@
       "@/*": ["./*"],
       "ui": ["../../packages/ui/source"],
       "database": ["../../packages/database/source"],
-      "utilities": ["../../packages/utilities/source"]
+      "utilities": ["../../packages/utilities/source"],
+      "styles": ["../../packages/styles/source"]
     }
   },
   "include": [

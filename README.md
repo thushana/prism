@@ -154,7 +154,7 @@ This adds the subdomains to your `/etc/hosts` file. Once set up, you can access:
 - **Linting**: ESLint 9.39.1 with Next.js config
 - **Formatting**: Prettier 3.6.2
 - **Git Hooks**: Husky 9.1.7 with lint-staged
-- **Fonts**: Geist and Geist Mono via `next/font`
+- **Fonts**: Satoshi (variable font) via `next/font/local`
 
 ## Testing
 
