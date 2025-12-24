@@ -1,12 +1,10 @@
 # AI Task System
 
-> **Status**: AI task infrastructure is planned but not yet implemented. This document describes the intended design for when AI functionality is added to the project.
-
 Comprehensive guide to the AI-powered task system built on Vercel AI SDK.
 
 ## Overview
 
-When implemented, the AI task system will provide a standardized, scalable architecture for integrating LLM-powered features into the application. It's designed around self-contained tasks with automatic validation, cost tracking, caching, error handling, and retry logic.
+The AI task system provides a standardized, scalable architecture for integrating LLM-powered features into applications. It's designed around self-contained tasks with automatic validation, cost tracking, error handling, and retry logic.
 
 **Powered by Vercel AI Gateway**: All AI requests route through [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), providing:
 
@@ -19,7 +17,7 @@ When implemented, the AI task system will provide a standardized, scalable archi
 ## Philosophy
 
 - **Self-Contained Tasks**: Each task is a module with its own types, prompts, and logic
-- **Automatic Infrastructure**: Validation, caching, cost tracking, and retry logic are handled by base classes
+- **Automatic Infrastructure**: Validation, cost tracking, and retry logic are handled by base classes
 - **Zero Side Effects**: Tasks are pure functions (input → AI → output); callers handle database/state
 - **Type Safety**: Zod schemas provide runtime validation; TypeScript ensures compile-time safety
 - **Observable**: All operations are logged with costs, durations, and metadata
@@ -27,34 +25,48 @@ When implemented, the AI task system will provide a standardized, scalable archi
 
 ## Architecture
 
-When implemented, the AI system will be structured as a workspace package:
+The AI system is split between generic infrastructure (reusable) and app-specific tasks:
+
+**Generic Infrastructure** (`packages/intelligence/`):
 
 ```
-packages/ai/
+packages/intelligence/
+├── models.config.json           # Model metadata, pricing, capabilities
 ├── source/
-│   ├── models.config.json       # Model metadata, pricing, capabilities
 │   ├── client.ts                # AI client setup (shared)
 │   ├── utilities/               # Shared utilities
-│   │   ├── cache.ts             # Input/output caching
 │   │   ├── cost.ts              # Automatic cost tracking
 │   │   ├── retry.ts             # Retry logic with exponential backoff
 │   │   └── models.ts            # Model config loader and helpers
-│   ├── tasks/
-│   │   ├── index.ts             # Export all tasks
-│   │   ├── base.ts              # BaseTask abstract class (infrastructure)
-│   │   ├── generation-json.ts   # JSON generation base class
-│   │   ├── generation-text.ts   # Plain text generation base class (future)
-│   │   ├── generation-image.ts  # Image generation base class (future)
-│   │   ├── types.ts             # Shared task types
-│   │   ├── registry.ts          # Task registry for discoverability
-│   │   └── {task-name}/         # Self-contained task modules
-│   │       ├── index.ts         # Task implementation
-│   │       ├── prompt.ts        # Versioned prompts
-│   │       └── types.ts         # Task-specific types + Zod schemas
-│   └── index.ts                 # Main package exports
-├── package.json
-└── tsconfig.json
+│   └── tasks/                   # Task infrastructure (base classes)
+│       ├── base.ts              # BaseTask abstract class (infrastructure)
+│       ├── types.ts             # Shared task types
+│       └── registry.ts          # Task registry for discoverability
 ```
+
+**App-Specific Tasks** (`apps/{app}/ai/tasks/`):
+
+```
+apps/web/ai/tasks/               # Web app-specific tasks
+├── index.ts                     # Export all tasks
+└── {task-name}/                 # Self-contained task modules
+    ├── index.ts                 # Task implementation
+    ├── prompt.ts                # Versioned prompts
+    └── types.ts                 # Task-specific types + Zod schemas
+
+apps/admin/ai/tasks/            # Admin app-specific tasks
+├── index.ts                     # Export all tasks
+└── {task-name}/                 # Self-contained task modules
+    ├── index.ts                 # Task implementation
+    ├── prompt.ts                # Versioned prompts
+    └── types.ts                 # Task-specific types + Zod schemas
+```
+
+**Why This Structure?**
+
+- **Generic Infrastructure** (`packages/intelligence/`): Reusable across all apps (client, utilities, base classes)
+- **App-Specific Tasks** (`apps/{app}/ai/tasks/`): Tasks are application-specific and define what each app does with AI
+- **Separation of Concerns**: Infrastructure is shared; tasks are app-specific
 
 ## Core Components
 
@@ -162,11 +174,23 @@ export interface ModelConfig {
     tokensPerMinute: number;
   };
   recommended?: boolean;
+  aliases?: string[];
 }
 
-// Get model configuration
+// Get model configuration (supports provider/model and legacy aliases)
 export function getModelConfig(modelId: string): ModelConfig | null {
-  return modelsConfig.models[modelId] || null;
+  const models = modelsConfig.models as Record<string, ModelConfig>;
+  const direct = models[modelId];
+  if (direct) return direct;
+
+  const aliasMatch = Object.values(models).find(
+    (m) =>
+      m.aliases?.includes(modelId) ||
+      m.apiIdentifier === modelId ||
+      m.name === modelId
+  );
+
+  return aliasMatch || null;
 }
 
 // Get all active models
@@ -181,7 +205,7 @@ export function getRecommendedModel(): ModelConfig {
   const recommended = Object.values(modelsConfig.models).find(
     (m) => m.recommended
   );
-  return recommended || modelsConfig.models["gpt-4o-mini"];
+  return recommended || modelsConfig.models["google/gemini-3-flash"];
 }
 
 // Calculate cost from token usage
@@ -228,21 +252,21 @@ import {
   getModelConfig,
   calculateCost,
   supportsCapability,
-} from "ai/utilities/models";
+} from "@intelligence/utilities/models"; // Import via path alias
 
 // Get model details
-const model = getModelConfig("gpt-4o-mini");
+const model = getModelConfig("openai/gpt-5-nano");
 console.log(model.description); // "Cost-effective model..."
 
 // Calculate cost
-const cost = calculateCost("gpt-4o-mini", {
+const cost = calculateCost("openai/gpt-5-nano", {
   promptTokens: 250,
   completionTokens: 100,
 });
 console.log(`Cost: $${cost.toFixed(6)}`);
 
 // Check capabilities
-if (supportsCapability("gpt-4o-mini", "vision")) {
+if (supportsCapability("openai/gpt-4o-mini", "vision")) {
   // Use vision features
 }
 
@@ -252,38 +276,63 @@ const streamingModels = getModelsByCapability("streaming");
 
 ### 2. AI Client (`client.ts`)
 
-Centralized AI client configuration using Vercel AI Gateway.
+Centralized AI client configuration using Vercel AI Gateway via `@ai-sdk/gateway`.
+
+**Implementation Pattern:**
+
+The client uses `createGateway` from `@ai-sdk/gateway` to route all requests through Vercel AI Gateway. When using string model IDs (e.g., `'openai/gpt-5'`), the AI SDK automatically uses the gateway if `AI_GATEWAY_API_KEY` is set.
 
 ```typescript
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
-import { getModelConfig } from "./utilities/models";
+import { createGateway } from "@ai-sdk/gateway";
 import "server-only";
+import { getModelConfig } from "./utilities/models";
+
+/**
+ * Cached gateway provider instance
+ * Memoized to avoid creating multiple instances per process
+ */
+let cachedGateway: ReturnType<typeof createGateway> | null = null;
+
+function getGatewayProvider() {
+  if (cachedGateway) {
+    return cachedGateway;
+  }
+
+  const gatewayApiKey = process.env.AI_GATEWAY_API_KEY;
+  if (!gatewayApiKey) {
+    throw new Error("AI_GATEWAY_API_KEY environment variable is not set");
+  }
+
+  cachedGateway = createGateway({ apiKey: gatewayApiKey });
+  return cachedGateway;
+}
 
 /**
  * Get AI model instance through Vercel AI Gateway
- * Gateway provides unified API, automatic retries, and observability
- *
- * Supports two formats:
- * - "provider/model" format (e.g., "openai/gpt-5-nano") - recommended
- * - Legacy format: key from models.config.json (e.g., "gpt-5-nano")
+ * Supports "provider/model" format (e.g., "openai/gpt-5-nano") - recommended
+ * Also supports legacy format: key from models.config.json
  */
-export function getAIModel(modelId: string) {
+export function getAIModel(
+  modelId: string,
+  options?: { cacheControl?: boolean }
+) {
+  const gatewayEnabled = process.env.AI_GATEWAY_ENABLED !== "false";
+
   // Gateway format: "provider/model-name"
   if (modelId.includes("/")) {
     const [provider, model] = modelId.split("/");
-    // Route through Vercel AI Gateway
-    switch (provider) {
-      case "openai":
-        return openai(model);
-      case "anthropic":
-        return anthropic(model);
-      case "google":
-        return google(model);
-      default:
-        throw new Error(`Unsupported provider: ${provider}`);
+
+    if (!gatewayEnabled) {
+      // Bypass gateway for direct provider access (local testing)
+      return getDirectProviderModel(provider, model, options);
     }
+
+    // Use gateway provider - automatically routes through Vercel AI Gateway
+    const gateway = getGatewayProvider();
+    return gateway(modelId);
   }
 
   // Legacy format: Look up in models.config.json
@@ -292,38 +341,66 @@ export function getAIModel(modelId: string) {
     throw new Error(`Unknown model: ${modelId}`);
   }
 
-  // Route through Vercel AI Gateway
-  switch (config.provider) {
-    case "openai":
-      return openai(config.apiIdentifier);
-    case "anthropic":
-      return anthropic(config.apiIdentifier);
-    case "google":
-      return google(config.apiIdentifier);
-    default:
-      throw new Error(`Unsupported provider: ${config.provider}`);
+  if (!gatewayEnabled) {
+    return getDirectProviderModel(
+      config.provider,
+      config.apiIdentifier,
+      options
+    );
   }
+
+  // Convert legacy model ID to gateway format
+  const gatewayModelId = `${config.provider}/${config.apiIdentifier}`;
+  const gateway = getGatewayProvider();
+  return gateway(gatewayModelId);
 }
 
 /**
- * Get recommended/default model
+ * Get model directly from provider (bypass gateway)
+ * Used for local testing when AI_GATEWAY_ENABLED=false
  */
+function getDirectProviderModel(
+  provider: string,
+  apiIdentifier: string,
+  options?: { cacheControl?: boolean }
+) {
+  switch (provider) {
+    case "openai":
+      return openai(
+        apiIdentifier,
+        options?.cacheControl ? { cacheControl: true } : undefined
+      );
+    case "anthropic":
+      return anthropic(
+        apiIdentifier,
+        options?.cacheControl ? { cacheControl: true } : undefined
+      );
+    case "google":
+      return google(apiIdentifier);
+    default:
+      throw new Error(`Unsupported provider: ${provider}`);
+  }
+}
+
 export function getDefaultModel() {
-  const defaultModelId = process.env.AI_DEFAULT_MODEL || "openai/gpt-5-nano";
+  const defaultModelId =
+    process.env.AI_DEFAULT_MODEL || "google/gemini-3-flash";
   return getAIModel(defaultModelId);
 }
 ```
 
 **Features:**
 
-- Routes all requests through Vercel AI Gateway
-- Multi-provider support (OpenAI, Anthropic, Google)
-- Supports "provider/model" format (e.g., "openai/gpt-5-nano")
+- Routes all requests through Vercel AI Gateway via `@ai-sdk/gateway`'s `createGateway`
+- Multi-provider support (OpenAI, Anthropic, Google, xAI)
+- Supports "provider/model" format (e.g., "openai/gpt-5-nano") - recommended
 - Legacy support for models.config.json keys
 - Server-side only (enforced by `server-only` package)
 - Validates gateway token and model config
 - Single source of truth for model access
 - Automatic retries and fallbacks via gateway
+- Can bypass gateway for local testing (`AI_GATEWAY_ENABLED=false`)
+- Gateway automatically handles string model IDs when `AI_GATEWAY_API_KEY` is set
 
 **Gateway Benefits:**
 
@@ -337,17 +414,17 @@ export function getDefaultModel() {
 **Usage:**
 
 ```typescript
-import { getAIModel, getDefaultModel } from "ai";
+import { getAIModel, getDefaultModel } from "@intelligence/client"; // Import via path alias
 
 // Get specific model using provider/model format (recommended)
 const model = getAIModel("openai/gpt-5-nano");
 
-// Get default/recommended model (defaults to openai/gpt-5-nano)
+// Get default/recommended model
 const defaultModel = getDefaultModel();
 
 // Use in server actions
-import { generateText } from "ai";
-import { getAIModel } from "@ai/client";
+import { generateText } from "intelligence";
+import { getAIModel } from "@intelligence/client";
 
 // Using provider/model format
 const result = await generateText({
@@ -359,7 +436,7 @@ const result = await generateText({
 const legacyModel = getAIModel("gpt-5-nano");
 ```
 
-### 2. Base Task (`tasks/base.ts`)
+### 3. Base Task (`tasks/base.ts`)
 
 Abstract class that all tasks extend. Provides automatic infrastructure.
 
@@ -371,22 +448,18 @@ export abstract class BaseTask<TInput, TOutput> implements Task<TInput, TOutput>
   abstract outputSchema: z.ZodSchema<TOutput>;
 
   defaultConfig: TaskConfig = {
-    model: 'openai/gpt-5-nano',
+    model: 'google/gemini-3-flash',
     temperature: 0.7,
     maxTokens: 500,
     retries: 3,
-    cacheResults: true,
-    cacheTtlMs: 3600000,
   };
 
   async execute(input: TInput, config?: Partial<TaskConfig>): Promise<TaskResult<TOutput>> {
     // 1. Validate input (Zod)
-    // 2. Check cache
-    // 3. Execute with retry
-    // 4. Validate output (Zod)
-    // 5. Track cost
-    // 6. Cache result
-    // 7. Return with metadata
+    // 2. Execute with retry
+    // 3. Validate output (Zod)
+    // 4. Track cost
+    // 5. Return with metadata
   }
 
   protected abstract executeTask(input: TInput, config: TaskConfig): Promise<...>;
@@ -397,12 +470,11 @@ export abstract class BaseTask<TInput, TOutput> implements Task<TInput, TOutput>
 
 - ✅ Input validation (Zod)
 - ✅ Output validation (Zod)
-- ✅ Caching (configurable)
 - ✅ Cost tracking
 - ✅ Retry logic
 - ✅ Error handling
 - ✅ Logging
-- ✅ Metadata (duration, tokens, cost, cached)
+- ✅ Metadata (duration, tokens, cost)
 
 **Task Implementation Pattern:**
 
@@ -421,7 +493,7 @@ export class MyTask extends BaseTask<MyInput, MyOutput> {
 }
 ```
 
-### 3. Input Validation (`Zod Schemas`)
+### 4. Input Validation (`Zod Schemas`)
 
 Every task defines Zod schemas for input and output validation.
 
@@ -460,7 +532,7 @@ export type MyOutput = z.infer<typeof MyOutputSchema>;
 2. Output validated after AI call → ensures quality
 3. Validation errors logged and returned in TaskResult
 
-### 4. Caching
+### 5. Caching
 
 Two levels of caching work together to optimize performance and costs:
 
@@ -496,93 +568,40 @@ const result2 = await generateText({
 - ✅ Cost savings - system message tokens cached
 - ✅ Works with Vercel AI Gateway
 
-#### B. Result Caching (`utilities/cache.ts`)
-
-In-memory cache to prevent duplicate AI calls for identical inputs.
-
-**Features:**
-
-- Hash-based keys (task name + input)
-- TTL support (expire after N milliseconds)
-- LRU eviction (max 100 entries)
-- Per-task enable/disable via config
-
-**Implementation:**
-
-```typescript
-interface CacheEntry<T> {
-  data: T;
-  expiresAt: number;
-}
-
-const cache = new Map<string, CacheEntry<any>>();
-
-export function getCached<T>(taskName: string, input: any): T | null {
-  const key = createCacheKey(taskName, input);
-  const entry = cache.get(key);
-
-  if (!entry || entry.expiresAt < Date.now()) {
-    cache.delete(key);
-    return null;
-  }
-
-  return entry.data;
-}
-
-export function setCache<T>(
-  taskName: string,
-  input: any,
-  data: T,
-  ttlMs: number
-): void {
-  const key = createCacheKey(taskName, input);
-  cache.set(key, { data, expiresAt: Date.now() + ttlMs });
-
-  // LRU eviction
-  if (cache.size > 100) {
-    const firstKey = cache.keys().next().value;
-    cache.delete(firstKey);
-  }
-}
-
-function createCacheKey(taskName: string, input: any): string {
-  return `${taskName}:${JSON.stringify(input)}`;
-}
-```
-
-**Cache Behavior:**
-
-- Default: Enabled with 1-hour TTL
-- Override: `config.cacheResults = false` disables per call
-- Clear: Call `clearCache()` to reset all cached data
-- Metadata: TaskResult includes `cached: true` when cache hit
-
-**Benefits:**
-
-- Saves money (no duplicate AI calls)
-- Faster responses (instant for cached)
-- Consistent results (same input → same output)
-
-### 5. Cost Tracking (`utilities/cost.ts`)
+### 6. Cost Tracking (`utilities/cost.ts`)
 
 Automatic cost calculation and logging for all AI operations using `models.config.json`.
+
+**Why Local Calculation?**
+
+Vercel AI Gateway does not provide a REST API to retrieve pricing programmatically. Pricing is only available in the dashboard UI. Therefore, we:
+
+1. Maintain pricing data in `models.config.json` (manually updated from provider websites)
+2. Use the `usage` field returned by the AI SDK (contains token counts)
+3. Calculate costs locally using our pricing data
+
+This approach provides immediate cost tracking without additional API calls.
 
 **Implementation:**
 
 ```typescript
 import { calculateCost, getModelConfig } from "./models";
-import { logCost } from "logger";
+// Import from packages/logger
+import { serverLogger as logger, logCost } from "logger";
 
 export function trackCost(
   usage: { promptTokens: number; completionTokens: number },
-  modelId: string
+  modelId: string,
+  taskName?: string
 ): number {
   // Calculate cost from models.config.json
+  // The usage object comes from the AI SDK's response.usage field
   const cost = calculateCost(modelId, usage);
 
   // Get model metadata
   const model = getModelConfig(modelId);
 
+  // Log cost with details (adjust logger interface as needed)
   logCost(`AI generation: $${cost.toFixed(6)}`, {
     model: modelId,
     modelName: model?.name || modelId,
@@ -591,6 +610,7 @@ export function trackCost(
     totalTokens: usage.promptTokens + usage.completionTokens,
     costUsd: cost,
     pricingVerified: model?.pricing.lastVerified,
+    taskName,
   });
 
   return cost;
@@ -613,9 +633,9 @@ export function trackCost(
 - Budget planning
 - Cost attribution
 
-### 6. Logging
+### 7. Logging
 
-All AI operations will be automatically logged using the centralized logger infrastructure (see [LOGGER.md](./LOGGER.md)).
+All AI operations are automatically logged using your logger infrastructure.
 
 **Integration Points:**
 
@@ -628,20 +648,21 @@ All AI operations will be automatically logged using the centralized logger infr
 
 - `info` - Task execution start/success
 - `error` - Task failures, validation errors
-- `debug` - Cache hits, retry attempts
+- `debug` - Retry attempts, detailed execution flow
 - Cost logger - All token usage and costs
 
 **Pattern:**
 
 ```typescript
-import { serverLogger as logger, logCost } from "logger";
+// Adjust import path to match your logger setup
+import { logger, logCost } from "@/your-logger";
 
 logger.info("Task started", { taskName, input });
 logCost("AI generation cost: $0.000123", { model, tokensUsed, costUsd });
 logger.error("Task failed", { taskName, error });
 ```
 
-### 7. Retry Logic (`utilities/retry.ts`)
+### 8. Retry Logic (`utilities/retry.ts`)
 
 Automatic retry with exponential backoff for transient failures.
 
@@ -707,13 +728,15 @@ function isRetryableError(error: any): boolean {
 - 403 Forbidden (permissions)
 - 404 Not Found
 
-### 8. Task Registry (`tasks/registry.ts`)
+### 9. Task Registry (`packages/intelligence/source/tasks/registry.ts`)
 
 Centralized registry for task discovery and runtime execution.
 
+**Important:** The registry is app-specific. Each app maintains its own registry of tasks. Tasks registered in `apps/web/ai/tasks/` are only available to the web app, and tasks registered in `apps/admin/ai/tasks/` are only available to the admin app.
+
 **Purpose:**
 
-- Discover available tasks programmatically
+- Discover available tasks programmatically (within an app)
 - Execute tasks by name (for API/CLI)
 - List tasks with metadata
 - Enable dynamic task selection in UI
@@ -757,13 +780,13 @@ export class TaskRegistry {
 
 ```typescript
 // tasks/index.ts
-import { AwardCategoryTextTask } from "./award-category-generate";
+import { MyTask } from "./my-task";
 import { TaskRegistry } from "./registry";
 
 // Auto-register on import
-TaskRegistry.register(new AwardCategoryTextTask());
+TaskRegistry.register(new MyTask());
 
-export * from "./award-category-generate";
+export * from "./my-task";
 ```
 
 **Usage Examples:**
@@ -771,13 +794,13 @@ export * from "./award-category-generate";
 ```typescript
 // List all tasks
 const tasks = TaskRegistry.list();
-// => [{ name: 'award-category-text', description: '...' }]
+// => [{ name: 'my-task', description: '...' }]
 
 // Get task by name
-const task = TaskRegistry.get("award-category-text");
+const task = TaskRegistry.get("my-task");
 
 // Execute by name (useful for API/CLI)
-const result = await TaskRegistry.execute("award-category-text", input);
+const result = await TaskRegistry.execute("my-task", input);
 ```
 
 **Benefits:**
@@ -791,10 +814,15 @@ const result = await TaskRegistry.execute("award-category-text", input);
 
 ### Self-Contained Task Pattern
 
-Each task will be a directory containing everything it needs:
+Each task is a directory containing everything it needs, located in the app that uses it:
 
 ```
-packages/ai/source/tasks/award-category-generate/
+apps/web/ai/tasks/my-task/       # Web app-specific task
+├── index.ts       # Task implementation (extends BaseTask)
+├── prompt.ts      # Versioned prompt templates
+└── types.ts       # Input/output types with Zod schemas
+
+apps/admin/ai/tasks/admin-task/ # Admin app-specific task
 ├── index.ts       # Task implementation (extends BaseTask)
 ├── prompt.ts      # Versioned prompt templates
 └── types.ts       # Input/output types with Zod schemas
@@ -846,10 +874,11 @@ export function getUserPrompt(input: MyInput, version = PROMPTS.current) {
 
 // index.ts
 import { BaseTask } from "../base";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { generateText } from "intelligence";
+import { getAIModel } from "@intelligence/client";
 import { MyInputSchema, MyOutputSchema, MyInput, MyOutput } from "./types";
 import { getSystemPrompt, getUserPrompt } from "./prompt";
+import type { TaskConfig } from "../types";
 
 export class MyTask extends BaseTask<MyInput, MyOutput> {
   name = "my-task";
@@ -859,7 +888,7 @@ export class MyTask extends BaseTask<MyInput, MyOutput> {
 
   protected async executeTask(input: MyInput, config: TaskConfig) {
     const result = await generateText({
-      model: openai(config.model),
+      model: getAIModel(config.model),
       temperature: config.temperature,
       maxTokens: config.maxTokens,
       system: getSystemPrompt(),
@@ -893,7 +922,7 @@ export const InputSchema = z.object({
     .min(1, "Category name is required")
     .max(100, "Category name too long"),
   groupName: z.string().min(1),
-  contenderType: z.string().optional(),
+  optionalField: z.string().optional(),
 });
 ```
 
@@ -943,76 +972,6 @@ AI Response → Parse JSON → Zod Validation → Pass → Return Data
                               Fail → Return Error + Log Raw Response
 ```
 
-## Caching
-
-### How It Works
-
-1. **Cache Key**: Hash of task name + input JSON
-2. **Check**: Before AI call, check if key exists and not expired
-3. **Hit**: Return cached data immediately (no AI call)
-4. **Miss**: Execute AI call, store result in cache
-5. **Eviction**: LRU when cache size exceeds limit, TTL expiration
-
-### Cache Configuration
-
-**Per Task:**
-
-```typescript
-defaultConfig: TaskConfig = {
-  cacheResults: true, // Enable/disable caching
-  cacheTtlMs: 3600000, // 1 hour TTL
-};
-```
-
-**Per Call:**
-
-```typescript
-const result = await task.execute(input, {
-  cacheResults: false, // Disable for this call
-});
-```
-
-**Global:**
-
-```typescript
-import { clearCache } from "@ai/utilities/cache";
-
-// Clear all cached data
-clearCache();
-```
-
-### Cache Metadata
-
-TaskResult includes cache information:
-
-```typescript
-{
-  success: true,
-  data: { ... },
-  metadata: {
-    cached: true,        // Was this a cache hit?
-    durationMs: 5,       // Fast for cached results
-    tokensUsed: 0,       // No tokens for cached results
-    costUsd: 0,          // No cost for cached results
-  }
-}
-```
-
-### When to Cache
-
-**Good Candidates:**
-
-- Identical inputs (same category → same output)
-- Expensive operations (high token count)
-- High-frequency calls (same data requested often)
-- Idempotent operations (same input always → same output)
-
-**Poor Candidates:**
-
-- Time-sensitive data (news, weather)
-- User-specific data (personalized responses)
-- Randomized outputs (creative writing)
-
 ## Cost Tracking
 
 ### Automatic Tracking
@@ -1038,7 +997,7 @@ All AI calls are automatically tracked and logged.
   "completionTokens": 100,
   "totalTokens": 350,
   "costUsd": 0.000123,
-  "taskName": "award-category-text"
+  "taskName": "my-task"
 }
 ```
 
@@ -1061,18 +1020,18 @@ All AI calls are automatically tracked and logged.
 Server actions aggregate costs for bulk operations:
 
 ```typescript
-export async function generateAllMissingText() {
+export async function generateAllMissing() {
   let totalCost = 0;
 
-  for (const category of categories) {
-    const result = await generateCategoryText(category.id);
+  for (const item of items) {
+    const result = await generateItem(item.id);
     if (result.metadata?.costUsd) {
       totalCost += result.metadata.costUsd;
     }
   }
 
   logger.info('Bulk generation completed', {
-    total: categories.length,
+    total: items.length,
     totalCost: totalCost.toFixed(4),
   });
 
@@ -1144,7 +1103,10 @@ Centralized registry for runtime task discovery and execution.
 **Endpoint Pattern:**
 
 ```typescript
-// app/api/ai/tasks/execute/route.ts
+// apps/web/app/api/ai/tasks/execute/route.ts
+import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias
+import { NextResponse } from "next/server";
+
 export async function POST(request: Request) {
   const { taskName, input, config } = await request.json();
 
@@ -1157,20 +1119,24 @@ export async function POST(request: Request) {
 **Usage:**
 
 ```bash
+# Execute a task from the web app
 curl -X POST http://localhost:3000/api/ai/tasks/execute \
   -H "Content-Type: application/json" \
   -d '{
-    "taskName": "award-category-text",
-    "input": { "categoryName": "Pizza", "groupName": "Food" }
+    "taskName": "my-task",
+    "input": { "field1": "value1", "field2": 123 }
   }'
 ```
 
+**Note:** Tasks are app-specific. The registry only contains tasks registered by the app that imports them. Each app has its own task registry.
+
 ### CLI Integration
 
-When the CLI is implemented:
-
 ```typescript
-// packages/cli/source/commands/ai-generate.ts
+// apps/cli/app/commands/ai-generate.ts
+import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias
+import { serverLogger as logger } from "logger";
+
 export async function runAiGenerate(options: { task: string; input: string }) {
   const input = JSON.parse(options.input);
   const result = await TaskRegistry.execute(options.task, input);
@@ -1186,8 +1152,11 @@ export async function runAiGenerate(options: { task: string; input: string }) {
 **Usage:**
 
 ```bash
-npm run tools ai-generate --task award-category-text --input '{"categoryName":"Pizza"}'
+# Execute a task via CLI (tasks must be registered in the CLI app)
+npm run tools ai-generate --task my-task --input '{"field1":"value1"}'
 ```
+
+**Note:** Tasks are app-specific. The CLI app can only execute tasks that are registered in `apps/cli/ai/tasks/`.
 
 ## Prompt Versioning
 
@@ -1253,12 +1222,12 @@ export interface TaskResult<T> {
   data?: T; // Output data (if success)
   error?: string; // Error message (if failure)
   metadata?: {
-    cached?: boolean; // Was result from cache?
     tokensUsed?: number; // Total tokens consumed
     costUsd?: number; // Cost in USD
     durationMs?: number; // Execution time
     model?: string; // Model used
     retries?: number; // Number of retry attempts
+    costTrackingFailed?: boolean; // Cost tracking failed
   };
 }
 ```
@@ -1273,8 +1242,6 @@ export interface TaskConfig {
   temperature?: number; // 0.0-2.0 (creativity)
   maxTokens?: number; // Max output tokens
   retries?: number; // Max retry attempts
-  cacheResults?: boolean; // Enable/disable caching
-  cacheTtlMs?: number; // Cache TTL in milliseconds
   promptVersion?: string; // Prompt version to use
 }
 ```
@@ -1301,14 +1268,20 @@ export interface Task<TInput, TOutput> {
 
 **1. Create Task Directory**
 
+Choose the appropriate app for your task:
+
 ```bash
-mkdir -p packages/ai/source/tasks/my-new-task
+# For web app tasks
+mkdir -p apps/web/ai/tasks/my-new-task
+
+# For admin app tasks
+mkdir -p apps/admin/ai/tasks/my-new-task
 ```
 
 **2. Define Types with Zod Schemas**
 
 ```typescript
-// packages/ai/source/tasks/my-new-task/types.ts
+// apps/web/ai/tasks/my-new-task/types.ts (or apps/admin/ai/tasks/...)
 import { z } from "zod";
 
 export const MyInputSchema = z.object({
@@ -1328,7 +1301,7 @@ export type MyOutput = z.infer<typeof MyOutputSchema>;
 **3. Create Prompts**
 
 ```typescript
-// packages/ai/source/tasks/my-new-task/prompt.ts
+// apps/web/ai/tasks/my-new-task/prompt.ts (or apps/admin/ai/tasks/...)
 import type { MyInput } from "./types";
 
 export const PROMPTS = {
@@ -1351,11 +1324,11 @@ export function getUserPrompt(input: MyInput, version = PROMPTS.current) {
 **4. Implement Task**
 
 ```typescript
-// packages/ai/source/tasks/my-new-task/index.ts
-import { BaseTask } from "../base";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import type { TaskConfig } from "../types";
+// apps/web/ai/tasks/my-new-task/index.ts (or apps/admin/ai/tasks/...)
+import { BaseTask } from "@intelligence/tasks/base"; // Import via path alias
+import { generateText } from "intelligence";
+import { getAIModel } from "@intelligence/client"; // Import via path alias
+import type { TaskConfig } from "@intelligence/tasks/types"; // Import via path alias
 import { MyInputSchema, MyOutputSchema, MyInput, MyOutput } from "./types";
 import { getSystemPrompt, getUserPrompt } from "./prompt";
 
@@ -1367,7 +1340,7 @@ export class MyTask extends BaseTask<MyInput, MyOutput> {
 
   protected async executeTask(input: MyInput, config: TaskConfig) {
     const result = await generateText({
-      model: openai(config.model),
+      model: getAIModel(config.model),
       temperature: config.temperature,
       maxTokens: config.maxTokens,
       system: getSystemPrompt(),
@@ -1391,9 +1364,12 @@ export const executeMyTask = (input: MyInput, config?: Partial<TaskConfig>) =>
 **5. Export and Register**
 
 ```typescript
-// packages/ai/source/tasks/index.ts
+// apps/web/ai/tasks/index.ts (or apps/admin/ai/tasks/index.ts)
 export * from "./my-new-task";
 import { MyTask } from "./my-new-task";
+import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias
+
+// Auto-register on import
 TaskRegistry.register(new MyTask());
 ```
 
@@ -1410,22 +1386,19 @@ TaskRegistry.register(new MyTask());
 
 ## Usage Examples
 
-When the AI system is implemented:
-
 ### Basic Task Execution
 
 ```typescript
-import { generateAwardCategoryText } from "ai";
+// Import from your app's tasks
+import { executeMyTask } from "@/ai/tasks"; // or from 'app/ai/tasks' depending on your path alias
 
-const result = await generateAwardCategoryText({
-  categoryName: "Pizza Restaurant",
-  groupName: "Food and Drink",
-  contenderType: "Generic",
+const result = await executeMyTask({
+  requiredField: "value1",
+  optionalField: 123,
 });
 
 if (result.success) {
-  console.log(result.data.tagline);
-  console.log(result.data.description);
+  console.log(result.data.result);
   console.log(`Cost: $${result.metadata.costUsd}`);
 } else {
   console.error(result.error);
@@ -1435,16 +1408,14 @@ if (result.success) {
 ### With Custom Configuration
 
 ```typescript
-const result = await generateAwardCategoryText(
+const result = await executeMyTask(
   {
-    categoryName: "Art Gallery",
-    groupName: "Arts and Culture",
+    requiredField: "value1",
   },
   {
     model: "gpt-4o", // Upgrade to better model
     temperature: 0.9, // More creative
     maxTokens: 1000, // Longer output
-    cacheResults: false, // Disable cache
   }
 );
 ```
@@ -1452,76 +1423,66 @@ const result = await generateAwardCategoryText(
 ### Server Action Integration
 
 ```typescript
-// Server action
+// Server action in apps/web/app/actions/generate.ts (or similar)
 "use server";
 
-export async function generateCategoryText(categoryId: number) {
-  const db = createLocalDatabase();
+import { executeMyTask } from "@/ai/tasks"; // Import from app's tasks
+import { getItemById, updateItem } from "database";
 
-  try {
-    const category = await db.awardCategories.getAwardCategoryById(categoryId);
-    if (!category) {
-      return { success: false, error: "Category not found" };
-    }
-
-    const result = await generateAwardCategoryText({
-      categoryName: category.name,
-      groupName: category.groupName,
-    });
-
-    if (result.success) {
-      await db.awardCategories.upsertAwardCategory({
-        ...category,
-        tagline: result.data.tagline,
-        description: result.data.description,
-      });
-    }
-
-    return result;
-  } finally {
-    db.close();
+export async function generateItem(itemId: number) {
+  // Your database access here
+  const item = await getItemById(itemId);
+  if (!item) {
+    return { success: false, error: "Item not found" };
   }
+
+  const result = await executeMyTask({
+    requiredField: item.name,
+  });
+
+  if (result.success) {
+    // Save to database
+    await updateItem(itemId, {
+      generatedText: result.data.result,
+    });
+  }
+
+  return result;
 }
 ```
 
 ### Bulk Operations with Rate Limiting
 
 ```typescript
-export async function generateAllMissingText() {
-  const db = createLocalDatabase();
+export async function generateAllMissing() {
+  const items = await getAllItems();
+  const missing = items.filter((i) => !i.generatedText);
 
-  try {
-    const categories = await db.awardCategories.getAllAwardCategories();
-    const missing = categories.filter((c) => !c.tagline || !c.description);
+  const results = {
+    total: missing.length,
+    successful: 0,
+    failed: 0,
+    totalCost: 0,
+    errors: [] as string[],
+  };
 
-    const results = {
-      total: missing.length,
-      successful: 0,
-      failed: 0,
-      totalCost: 0,
-      errors: [] as string[],
-    };
+  for (const item of missing) {
+    const result = await generateItem(item.id);
 
-    for (const category of missing) {
-      const result = await generateCategoryText(category.id);
-
-      if (result.success) {
-        results.successful++;
-        results.totalCost += result.metadata?.costUsd || 0;
-      } else {
-        results.failed++;
-        results.errors.push(`${category.name}: ${result.error}`);
-      }
-
-      // Rate limiting: 1 second delay between calls
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (result.success) {
+      results.successful++;
+      results.totalCost += result.metadata?.costUsd || 0;
+    } else {
+      results.failed++;
+      results.errors.push(`${item.name}: ${result.error}`);
     }
 
-    logger.info("Bulk generation completed", results);
-    return results;
-  } finally {
-    db.close();
+    // Rate limiting: 1 second delay between calls
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+
+  logger.info("Bulk generation completed", results);
+  return results;
 }
 ```
 
@@ -1529,7 +1490,7 @@ export async function generateAllMissingText() {
 
 ### Environment Variables
 
-When implemented, the following environment variables will be required in `.env`:
+Required in `.env`:
 
 ```bash
 # Vercel AI Gateway API key (get from Vercel dashboard)
@@ -1546,13 +1507,11 @@ Optional:
 
 ```bash
 # Override default model (use provider/model format)
-AI_DEFAULT_MODEL=openai/gpt-5-nano
+# Default is google/gemini-3-flash (recommended model)
+AI_DEFAULT_MODEL=google/gemini-3-flash
 
 # Override default temperature
 AI_DEFAULT_TEMPERATURE=0.7
-
-# Override cache TTL (in ms)
-AI_CACHE_TTL_MS=3600000
 
 # Disable gateway (for local testing)
 AI_GATEWAY_ENABLED=false
@@ -1575,7 +1534,7 @@ AI_GATEWAY_ENABLED=false
 
 ### Model Selection
 
-All available models will be defined in `packages/ai/source/models.config.json`.
+All available models are defined in `packages/intelligence/models.config.json`.
 
 **Model Format:**
 
@@ -1584,14 +1543,16 @@ All available models will be defined in `packages/ai/source/models.config.json`.
 
 **OpenAI Models:**
 
-- `openai/gpt-5-nano` - Cheapest, excellent value (recommended)
+- `openai/gpt-5-nano` - Cheapest, excellent value
   - $0.05/1M input, $0.40/1M output tokens
   - Supports streaming, function calling, vision, JSON mode, web search
-  - 400K context window (largest!)
+  - 400K context window
   - Cache read: $0.01/1M tokens
-- `openai/gpt-4.1-mini` - Cost-effective alternative
-  - $0.40/1M input, $1.60/1M output tokens
-  - 1M context window
+- `openai/gpt-5-chat` - High-quality chat model with excellent reasoning
+  - $1.25/1M input, $10.00/1M output tokens
+  - 128K context window
+  - Supports streaming, function calling, vision, JSON mode, web search
+  - Best for most production use cases
 
 **Anthropic Models (via Gateway):**
 
@@ -1604,27 +1565,50 @@ All available models will be defined in `packages/ai/source/models.config.json`.
 
 **Google Models (via Gateway):**
 
-- `google/gemini-2.5-flash-lite` - Very cost-effective
-  - $0.10/1M input, $0.40/1M output tokens
+- `google/gemini-3-flash` - **Recommended default** - Fast and efficient
+  - $0.50/1M input, $3.00/1M output tokens
   - 1M context window
+  - Supports streaming, function calling, vision, JSON mode
+  - Good balance of speed and cost
+- `google/gemini-2.5-flash-lite` - Very cost-effective, large context
+  - $0.10/1M input, $0.40/1M output tokens
+  - 1.049M context window (largest!)
+  - Best for tasks requiring extensive context
+
+**xAI Models (via Gateway):**
+
+- `xai/grok-code-fast-1` - Optimized for coding workflows
+  - $0.20/1M input, $0.50/1M output tokens
+  - 256K context window
+  - Excellent for code generation and debugging
+- `xai/grok-4.1-fast-non-reasoning` - Fast, high-context for non-reasoning tasks
+  - $0.20/1M input, $0.50/1M output tokens
+  - 2M context window (extremely large!)
+  - Best for large context processing and quick responses
 
 **Choosing a Model:**
 
-- Start with `openai/gpt-5-nano` (cheapest, best value, recommended)
-- Use `anthropic/claude-sonnet-4.5` for highest quality when needed
-- Try `google/gemini-2.5-flash-lite` for cost-effective alternative
+- **Default/Recommended**: `google/gemini-3-flash` (balanced speed and cost)
+- **Cost-optimized**: `openai/gpt-5-nano` (cheapest)
+- **Quality-optimized**: `anthropic/claude-sonnet-4.5` (best quality)
+- **Large context**: `google/gemini-2.5-flash-lite` or `xai/grok-4.1-fast-non-reasoning`
+- **Coding tasks**: `xai/grok-code-fast-1`
 - Check capabilities before use: `supportsCapability(modelId, 'vision')`
 - Override per call for specific needs
 
 **Fallback Chains:**
-The gateway supports automatic fallbacks if a model fails:
+The gateway supports automatic fallbacks if a model fails (configured in `models.config.json`):
 
 ```json
 {
   "fallbackChains": {
-    "cost-optimized": ["gpt-5-nano"],
-    "quality-optimized": ["claude-sonnet-4.5"],
-    "balanced": ["gpt-5-nano", "claude-sonnet-4.5"]
+    "cost-optimized": ["openai/gpt-5-nano"],
+    "quality-optimized": ["openai/gpt-5-chat", "anthropic/claude-sonnet-4.5"],
+    "balanced": [
+      "google/gemini-3-flash",
+      "openai/gpt-5-nano",
+      "anthropic/claude-sonnet-4.5"
+    ]
   }
 }
 ```
@@ -1636,19 +1620,25 @@ import {
   getRecommendedModel,
   getModelsByCapability,
   getModelConfig,
-} from "ai/utilities/models";
+} from "@intelligence/utilities/models"; // Import via path alias
 
-// Get recommended model
+// Get recommended model (currently gemini-3-flash)
 const model = getRecommendedModel();
+console.log(
+  `Recommended: ${model.name} (${model.provider}/${model.apiIdentifier})`
+);
 
 // Get models that support vision
 const visionModels = getModelsByCapability("vision");
+console.log(`Vision models: ${visionModels.map((m) => m.name).join(", ")}`);
 
 // Compare costs across providers
-const gpt4Mini = getModelConfig("gpt-4o-mini");
-const claudeHaiku = getModelConfig("claude-3-haiku");
-console.log(`GPT-4o-mini: $${gpt4Mini.pricing.outputCostPer1MTokens}/1M`);
-console.log(`Claude Haiku: $${claudeHaiku.pricing.outputCostPer1MTokens}/1M`);
+const gpt5Nano = getModelConfig("openai/gpt-5-nano");
+const gemini3Flash = getModelConfig("google/gemini-3-flash");
+console.log(`GPT-5 Nano: $${gpt5Nano.pricing.outputCostPer1MTokens}/1M output`);
+console.log(
+  `Gemini 3 Flash: $${gemini3Flash.pricing.outputCostPer1MTokens}/1M output`
+);
 
 // Get all active models from all providers
 const activeModels = getActiveModels();
@@ -1666,38 +1656,23 @@ console.log(`Available models: ${activeModels.map((m) => m.name).join(", ")}`);
 
 ### Logging
 
-All operations will be logged via the centralized logger (when implemented):
-
-```typescript
-import { serverLogger as logger, logCost } from "logger";
-```
+All AI operations are automatically logged using your logger infrastructure.
 
 **Log Levels:**
 
-- `info` - Task start, success, cache hits
+- `info` - Task start, success
 - `error` - Task failures, validation errors, retry exhaustion
-- `debug` - Retry attempts, cache misses, detailed flow
-- `logCost` - All costs and token usage
+- `debug` - Retry attempts, detailed execution flow
+- Cost logger - All costs and token usage
 
 ### Debugging Tips
 
 **Enable Debug Logging:**
 
 ```typescript
-import { serverLogger } from "logger";
-serverLogger.level = "debug";
-```
-
-**Check Cache:**
-
-```typescript
-import { getCached, clearCache } from "ai/utilities/cache";
-
-// Check if specific input is cached
-const cached = getCached("my-task", input);
-
-// Clear all cache to test fresh
-clearCache();
+// Adjust import path to match your logger
+import { serverLogger as logger } from "logger"; // Import from packages/logger
+logger.level = "debug";
 ```
 
 **Test Without AI:**
@@ -1723,7 +1698,7 @@ class MyTaskTest extends MyTask {
 ```typescript
 {
   success: false,
-  error: "Validation failed: categoryName is required"
+  error: "Validation failed: field1 is required"
 }
 ```
 
@@ -1752,15 +1727,13 @@ Task Start
   ↓
 Input Validation → Fail → Return Error
   ↓ Pass
-Check Cache → Hit → Return Cached
-  ↓ Miss
 Execute AI Call → Fail → Retry → Fail → Return Error
   ↓ Success
 Parse Response → Fail → Return Error
   ↓ Success
 Output Validation → Fail → Return Error
   ↓ Pass
-Track Cost → Cache → Return Success
+Track Cost → Return Success
 ```
 
 ### Graceful Degradation
@@ -1795,13 +1768,13 @@ if (result.success) {
 ### 3. Log Costs
 
 - Track all AI spending
-- Use `logCost` for visibility
+- Use cost logger for visibility
 - Include in TaskResult metadata
 
-### 4. Cache Intelligently
+### 4. Handle Errors Gracefully
 
-- Enable for idempotent operations
-- Disable for time-sensitive data
+- Always check result.success
+- Never throw from tasks
 - Set appropriate TTL
 
 ### 5. Version Prompts
@@ -1833,19 +1806,17 @@ if (result.success) {
 ### Unit Testing Prompts
 
 ```typescript
-describe("Award Category Prompts", () => {
+describe("My Task Prompts", () => {
   it("builds system prompt", () => {
     const prompt = getSystemPrompt("v1");
-    expect(prompt).toContain("Alameda Stars");
+    expect(prompt).toContain("expert");
   });
 
   it("builds user prompt with input", () => {
     const prompt = getUserPrompt({
-      categoryName: "Pizza",
-      groupName: "Food",
+      requiredField: "test",
     });
-    expect(prompt).toContain("Pizza");
-    expect(prompt).toContain("Food");
+    expect(prompt).toContain("test");
   });
 });
 ```
@@ -1853,27 +1824,25 @@ describe("Award Category Prompts", () => {
 ### Integration Testing Tasks
 
 ```typescript
-describe("AwardCategoryTextTask", () => {
+describe("MyTask", () => {
   it("validates input", async () => {
-    const task = new AwardCategoryTextTask();
+    const task = new MyTask();
     const result = await task.execute({
-      categoryName: "", // Invalid
-      groupName: "Food",
+      requiredField: "", // Invalid
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("categoryName");
+    expect(result.error).toContain("requiredField");
   });
 
   it("generates text (integration)", async () => {
-    const task = new AwardCategoryTextTask();
+    const task = new MyTask();
     const result = await task.execute({
-      categoryName: "Pizza Restaurant",
-      groupName: "Food and Drink",
+      requiredField: "test value",
     });
 
     expect(result.success).toBe(true);
-    expect(result.data?.tagline).toBeTruthy();
+    expect(result.data?.result).toBeTruthy();
     expect(result.metadata?.costUsd).toBeGreaterThan(0);
   });
 });
@@ -1883,7 +1852,7 @@ describe("AwardCategoryTextTask", () => {
 
 ### API Key Issues
 
-**Symptom:** `OPENAI_API_KEY environment variable is not set`
+**Symptom:** `AI_GATEWAY_API_KEY environment variable is not set`
 **Solution:** Add key to `.env` file
 
 **Symptom:** `401 Unauthorized`
@@ -1893,14 +1862,6 @@ describe("AwardCategoryTextTask", () => {
 
 **Symptom:** `429 Rate Limit Exceeded`
 **Solution:** Retry logic handles this automatically. For bulk operations, add delay between calls.
-
-### Caching Issues
-
-**Symptom:** Not getting fresh results
-**Solution:** Disable cache for that call: `{ cacheResults: false }`
-
-**Symptom:** Cache using too much memory
-**Solution:** Adjust max size in `utilities/cache.ts` or clear periodically
 
 ### Validation Errors
 
@@ -1919,7 +1880,7 @@ For longer generations, stream results:
 ```typescript
 export async function* executeStream(input: MyInput): AsyncIterable<string> {
   const stream = await streamText({
-    model: openai("gpt-4o-mini"),
+    model: getAIModel("gpt-4o-mini"),
     prompt: getUserPrompt(input),
   });
 
@@ -1929,12 +1890,12 @@ export async function* executeStream(input: MyInput): AsyncIterable<string> {
 }
 ```
 
-### Persistent Caching
+### Persistent Caching (Future)
 
-For production, consider Redis or database caching:
+For production, consider implementing Redis or database caching if needed:
 
 ```typescript
-// Cache to database instead of memory
+// Example: Cache to database instead of memory
 export async function getCached(
   taskName: string,
   input: any
@@ -1962,8 +1923,8 @@ const result = await pipeline.execute(input);
 For long-running bulk operations:
 
 ```typescript
-export async function queueBulkGeneration(categoryIds: number[]) {
-  await queue.add("bulk-generation", { categoryIds });
+export async function queueBulkGeneration(itemIds: number[]) {
+  await queue.add("bulk-generation", { itemIds });
   return { jobId: "..." };
 }
 ```
@@ -1972,13 +1933,16 @@ export async function queueBulkGeneration(categoryIds: number[]) {
 
 ### Updating Pricing
 
-When OpenAI or other providers update pricing:
+**Important:** Since Vercel AI Gateway doesn't provide a pricing API, we manually maintain pricing in `models.config.json`. When OpenAI or other providers update pricing:
 
-1. Open `packages/ai/source/models.config.json`
-2. Update `pricing.inputCostPer1MTokens` and `pricing.outputCostPer1MTokens`
-3. Update `pricing.lastVerified` to today's date
-4. Verify at provider's pricing page (see `providers[].pricingUrl`)
-5. Run cost tracking tests to ensure calculations are correct
+1. Check the provider's pricing page (see `providers[].pricingUrl` in config)
+2. Open `packages/intelligence/models.config.json`
+3. Update `pricing.inputCostPer1MTokens` and `pricing.outputCostPer1MTokens`
+4. Update `pricing.lastVerified` to today's date
+5. Verify calculations are correct (pricing is per 1M tokens, so divide by 1,000,000)
+6. Run cost tracking tests to ensure calculations are correct
+
+**Note:** Provider pricing changes are typically announced in advance, so you can update the config proactively. The `lastVerified` field helps track when pricing was last checked.
 
 **Example:**
 
@@ -1995,7 +1959,7 @@ When OpenAI or other providers update pricing:
 
 ### Adding New Models
 
-1. Add model to `models.config.json`:
+1. Add model to `packages/intelligence/models.config.json`:
 
 ```json
 {
@@ -2025,7 +1989,7 @@ When OpenAI or other providers update pricing:
 
 When adding providers beyond OpenAI (e.g., Anthropic, Cohere):
 
-1. Add provider to `models.config.json`:
+1. Add provider to `packages/intelligence/models.config.json`:
 
 ```json
 {
@@ -2057,11 +2021,12 @@ When adding providers beyond OpenAI (e.g., Anthropic, Cohere):
 }
 ```
 
-3. Update `packages/ai/source/client.ts` to support multiple providers:
+3. Update `packages/intelligence/source/client.ts` to support multiple providers:
 
 ```typescript
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { createGateway } from "@ai-sdk/gateway";
 import { getModelConfig } from "./utilities/models";
 
 export function getAIModel(modelId: string) {
@@ -2070,14 +2035,9 @@ export function getAIModel(modelId: string) {
     throw new Error(`Unknown model: ${modelId}`);
   }
 
-  switch (config.provider) {
-    case "openai":
-      return openai(config.apiIdentifier);
-    case "anthropic":
-      return anthropic(config.apiIdentifier);
-    default:
-      throw new Error(`Unsupported provider: ${config.provider}`);
-  }
+  // Gateway handles all providers automatically
+  const gateway = getGatewayProvider();
+  return gateway(`${config.provider}/${config.apiIdentifier}`);
 }
 ```
 
@@ -2089,8 +2049,9 @@ Access multiple providers through a single endpoint. Switch between OpenAI, Anth
 
 ```typescript
 // Same interface for all providers
-const openaiResult = await generateText({ model: getAIModel('gpt-4o-mini'), ... });
-const claudeResult = await generateText({ model: getAIModel('claude-3.5-sonnet'), ... });
+const openaiResult = await generateText({ model: getAIModel('openai/gpt-5-nano'), ... });
+const claudeResult = await generateText({ model: getAIModel('anthropic/claude-sonnet-4.5'), ... });
+const geminiResult = await generateText({ model: getAIModel('google/gemini-3-flash'), ... });
 ```
 
 ### Automatic Retries & Fallbacks
@@ -2098,23 +2059,42 @@ const claudeResult = await generateText({ model: getAIModel('claude-3.5-sonnet')
 Gateway automatically retries failed requests and can fall back to alternative models:
 
 ```typescript
-// If gpt-4o-mini fails, gateway automatically tries claude-3-haiku
+// Gateway automatically retries failed requests
+// Configure fallback chains in models.config.json for automatic model fallback
 const result = await generateText({
-  model: getAIModel("gpt-4o-mini"),
+  model: getAIModel("openai/gpt-5-nano"),
   prompt: "Hello",
   // Gateway handles retries automatically
 });
 ```
 
-### Observability
+### Observability & Usage Tracking
 
 Monitor all AI requests in Vercel dashboard:
 
 - Request volume and latency
-- Token usage and costs
+- Token usage and costs (real-time tracking)
 - Error rates and types
 - Model performance comparison
 - Provider health status
+- Budget management and alerts
+
+**Important:** Vercel AI Gateway does **not** provide a REST API to retrieve pricing information programmatically. Pricing is only available through the Vercel dashboard UI.
+
+**Our Approach:**
+
+- We maintain pricing data in `models.config.json` (manually updated from provider websites)
+- The AI SDK returns a `usage` field with token counts after each request
+- We calculate costs locally using `calculateCost()` based on the pricing in our config
+- This gives us immediate cost tracking without needing to query an API
+- The Vercel dashboard provides comprehensive analytics and can be used for budget monitoring and historical analysis
+
+**Why This Works:**
+
+- Provider pricing changes infrequently (typically announced in advance)
+- Local calculation is faster and doesn't require additional API calls
+- We can track costs immediately after each request completes
+- The `usage` field from the SDK provides accurate token counts
 
 ### Load Balancing
 
@@ -2128,20 +2108,8 @@ Tokens cost exactly the same as direct from providers (0% markup). You only pay 
 
 Bring Your Own Key for direct billing from providers, or use Vercel's managed keys for simplicity.
 
-## Dependencies
-
-When implementing the AI system, the following packages will be required:
-
-```bash
-npm install ai @ai-sdk/openai @ai-sdk/anthropic @ai-sdk/google zod
-```
-
 ## Related Documentation
 
-- [DATABASE.md](./DATABASE.md) - Database operations
-- [CONVENTIONS.md](./CONVENTIONS.md) - Code conventions
-- [LOGGER.md](./LOGGER.md) - Logging patterns (planned)
-- [CLI.md](./CLI.md) - CLI command patterns (planned)
 - [Vercel AI SDK Docs](https://ai-sdk.dev/docs/introduction) - Official AI SDK documentation
 - [Vercel AI Gateway Docs](https://vercel.com/docs/ai-gateway) - AI Gateway features and setup
 - [OpenAI Pricing](https://openai.com/api/pricing/) - Current OpenAI API pricing

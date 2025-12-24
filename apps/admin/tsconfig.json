@@ -22,6 +22,8 @@
       "@/*": ["./*"],
       "@logger/*": ["../../packages/logger/source/*"],
       "logger": ["../../packages/logger/source"],
+      "@intelligence/*": ["../../packages/intelligence/source/*"],
+      "intelligence": ["../../packages/intelligence/source"],
       "ui": ["../../packages/ui/source"],
       "database": ["../../packages/database/source"],
       "utilities": ["../../packages/utilities/source"]

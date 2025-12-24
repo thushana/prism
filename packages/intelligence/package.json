@@ -1,0 +1,35 @@
+{
+  "name": "intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts",
+    "./client": "./source/client.ts",
+    "./utilities/models": "./source/utilities/models.ts",
+    "./utilities/cost": "./source/utilities/cost.ts",
+    "./utilities/retry": "./source/utilities/retry.ts",
+    "./tasks/types": "./source/tasks/types.ts",
+    "./tasks/base": "./source/tasks/base.ts",
+    "./tasks/registry": "./source/tasks/registry.ts"
+  },
+  "dependencies": {
+    "ai": "^6.0.3",
+    "@ai-sdk/openai": "^3.0.1",
+    "@ai-sdk/anthropic": "^3.0.1",
+    "@ai-sdk/google": "^3.0.1",
+    "@ai-sdk/gateway": "^3.0.2",
+    "zod": "^3.24.1",
+    "server-only": "^0.0.1",
+    "logger": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10"
+  },
+  "peerDependencies": {
+    "zod": "^3.24.1"
+  }
+}

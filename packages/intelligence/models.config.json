@@ -1,0 +1,270 @@
+{
+  "models": {
+    "openai/gpt-5-nano": {
+      "aliases": ["gpt-5-nano"],
+      "name": "GPT-5 Nano",
+      "provider": "openai",
+      "apiIdentifier": "gpt-5-nano",
+      "description": "Cheapest, excellent value",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.05,
+        "outputCostPer1MTokens": 0.4,
+        "cacheReadCostPer1MTokens": 0.01,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": true,
+        "maxContextTokens": 400000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 500,
+        "tokensPerMinute": 2000000
+      },
+      "recommended": false
+    },
+    "openai/gpt-5-chat": {
+      "aliases": ["gpt-5-chat"],
+      "name": "GPT-5 Chat",
+      "provider": "openai",
+      "apiIdentifier": "gpt-5-chat",
+      "description": "High-quality chat model with excellent reasoning",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 1.25,
+        "outputCostPer1MTokens": 10.0,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": true,
+        "maxContextTokens": 128000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 500,
+        "tokensPerMinute": 800000
+      },
+      "recommended": false
+    },
+    "anthropic/claude-sonnet-4.5": {
+      "aliases": ["claude-sonnet-4.5"],
+      "name": "Claude Sonnet 4.5",
+      "provider": "anthropic",
+      "apiIdentifier": "claude-sonnet-4.5",
+      "description": "High-quality reasoning (best quality)",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 3.0,
+        "outputCostPer1MTokens": 15.0,
+        "cacheReadCostPer1MTokens": 0.3,
+        "cacheWriteCostPer1MTokens": 3.75,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": true,
+        "maxContextTokens": 200000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 50,
+        "tokensPerMinute": 40000
+      },
+      "recommended": false
+    },
+    "google/gemini-3-flash": {
+      "aliases": ["gemini-3-flash"],
+      "name": "Gemini 3 Flash",
+      "provider": "google",
+      "apiIdentifier": "gemini-3-flash",
+      "description": "Recommended default - Fast and efficient",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.5,
+        "outputCostPer1MTokens": 3.0,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": false,
+        "maxContextTokens": 1000000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 1000,
+        "tokensPerMinute": 4000000
+      },
+      "recommended": true
+    },
+    "google/gemini-2.5-flash-lite": {
+      "aliases": ["gemini-2.5-flash-lite"],
+      "name": "Gemini 2.5 Flash Lite",
+      "provider": "google",
+      "apiIdentifier": "gemini-2.5-flash-lite",
+      "description": "Very cost-effective, large context",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.1,
+        "outputCostPer1MTokens": 0.4,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": false,
+        "maxContextTokens": 1049000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 1000,
+        "tokensPerMinute": 4000000
+      },
+      "recommended": false
+    },
+    "xai/grok-code-fast-1": {
+      "aliases": ["grok-code-fast-1"],
+      "name": "Grok Code Fast 1",
+      "provider": "xai",
+      "apiIdentifier": "grok-code-fast-1",
+      "description": "Optimized for coding workflows",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.2,
+        "outputCostPer1MTokens": 0.5,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": false,
+        "json": true,
+        "webSearch": false,
+        "maxContextTokens": 256000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 100,
+        "tokensPerMinute": 200000
+      },
+      "recommended": false
+    },
+    "xai/grok-4.1-fast-non-reasoning": {
+      "aliases": ["grok-4.1-fast-non-reasoning"],
+      "name": "Grok 4.1 Fast Non-Reasoning",
+      "provider": "xai",
+      "apiIdentifier": "grok-4.1-fast-non-reasoning",
+      "description": "Fast, high-context for non-reasoning tasks",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.2,
+        "outputCostPer1MTokens": 0.5,
+        "lastVerified": "2025-12-24"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": false,
+        "json": true,
+        "webSearch": false,
+        "maxContextTokens": 2000000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 100,
+        "tokensPerMinute": 200000
+      },
+      "recommended": false
+    }
+  },
+  "providers": {
+    "openai": {
+      "name": "OpenAI",
+      "apiKeyEnvVar": "OPENAI_API_KEY",
+      "sdkPackage": "@ai-sdk/openai",
+      "docsUrl": "https://platform.openai.com/docs",
+      "pricingUrl": "https://openai.com/api/pricing/"
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "apiKeyEnvVar": "ANTHROPIC_API_KEY",
+      "sdkPackage": "@ai-sdk/anthropic",
+      "docsUrl": "https://docs.anthropic.com",
+      "pricingUrl": "https://www.anthropic.com/api"
+    },
+    "google": {
+      "name": "Google",
+      "apiKeyEnvVar": "GOOGLE_API_KEY",
+      "sdkPackage": "@ai-sdk/google",
+      "docsUrl": "https://ai.google.dev/docs",
+      "pricingUrl": "https://ai.google.dev/pricing"
+    },
+    "xai": {
+      "name": "xAI",
+      "apiKeyEnvVar": "XAI_API_KEY",
+      "sdkPackage": "@ai-sdk/xai",
+      "docsUrl": "https://docs.x.ai",
+      "pricingUrl": "https://x.ai/pricing"
+    }
+  },
+  "fallbackChains": {
+    "cost-optimized": ["openai/gpt-5-nano"],
+    "quality-optimized": ["openai/gpt-5-chat", "anthropic/claude-sonnet-4.5"],
+    "balanced": [
+      "google/gemini-3-flash",
+      "openai/gpt-5-nano",
+      "anthropic/claude-sonnet-4.5"
+    ]
+  }
+}
