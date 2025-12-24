@@ -1,19 +1,15 @@
 # Logger Documentation
 
-> **Status**: Centralized logging infrastructure is planned but not yet implemented. This document describes the intended design for when logging is added.
+> **Status**: ✅ **Implemented** - Centralized logging infrastructure is available in `packages/logger`.
 
 ## Overview
 
-When implemented, the application will use separate loggers for client and server code to prevent bundling issues. Both loggers will provide the same API for consistent developer experience:
+The application uses separate loggers for client and server code to prevent bundling issues. Both loggers provide the same API for consistent developer experience:
 
-- **Client-side**: `logger-client.ts` - Uses browser `console.*` methods
-- **Server-side**: `logger-server.ts` - Uses **Winston** for Node.js logging
+- **Client-side**: `packages/logger/source/client.ts` - Uses browser `console.*` methods
+- **Server-side**: `packages/logger/source/server.ts` - Uses **Winston** for Node.js logging
 
-Both loggers will support emoji-prefixed messages for better readability and context. All logging will go through these logger instances to ensure consistency across the codebase.
-
-## Current State
-
-For now, use `console.log`, `console.error`, and `console.warn` appropriately. When the logger is implemented, these can be migrated to use the centralized logger.
+Both loggers support emoji-prefixed messages for better readability and context. All logging should go through these logger instances to ensure consistency across the codebase.
 
 ## Design Philosophy
 
@@ -31,7 +27,7 @@ For now, use `console.log`, `console.error`, and `console.warn` appropriately. W
 For client components (React components, pages):
 
 ```typescript
-import { logger } from "@/library/logger/client";
+import { logger } from "@logger/client";
 
 // Standard log levels
 logger.error("Operation failed", { error });
@@ -45,7 +41,7 @@ logger.debug("Debug information", { data });
 For server code (API routes, server components, CLI scripts):
 
 ```typescript
-import { serverLogger as logger } from "@/library/logger/server";
+import { serverLogger as logger } from "@logger/server";
 
 // Standard log levels
 logger.error("Operation failed", { error });
@@ -57,7 +53,7 @@ logger.debug("Debug information", { data });
 **Note**: You can alias `serverLogger` to `logger` for consistency:
 
 ```typescript
-import { serverLogger as logger } from "@/library/logger/server";
+import { serverLogger as logger } from "@logger/server";
 ```
 
 ### Context-Specific Loggers
@@ -73,7 +69,7 @@ import {
   logStats,
   logCost,
   logStart,
-} from "@/library/logger/client";
+} from "@logger/client";
 
 logSearch("Searching for places..."); // 🔍 Searching for places...
 logSuccess("Operation completed"); // ✅ Operation completed
@@ -91,7 +87,7 @@ import {
   logStats,
   logCost,
   logStart,
-} from "@/library/logger/server";
+} from "@logger/server";
 
 logSearch("Searching for places..."); // 🔍 Searching for places...
 logSuccess("Operation completed"); // ✅ Operation completed
@@ -145,7 +141,7 @@ NEXT_PUBLIC_LOG_LEVEL=debug
 **Server-side only**: You can change the log level at runtime:
 
 ```typescript
-import { setLogLevel } from "@/library/logger/server";
+import { setLogLevel } from "@logger/server";
 
 setLogLevel("debug"); // Enable debug logging
 setLogLevel("error"); // Only show errors
@@ -277,30 +273,30 @@ logger.info(`Place saved: ${placeId}, ${name}, ${category}`); // Hard to parse
 - **Client Components** (React components, pages): Use `logger-client.ts`
 
   ```typescript
-  import { logger } from "@/library/logger/client";
+  import { logger } from "@logger/client";
   ```
 
 - **API Routes**: Use `logger-server.ts`
 
   ```typescript
-  import { serverLogger as logger } from "@/library/logger/server";
+  import { serverLogger as logger } from "@logger/server";
   ```
 
 - **Server Components**: Use `logger-server.ts`
 
   ```typescript
-  import { serverLogger as logger } from "@/library/logger/server";
+  import { serverLogger as logger } from "@logger/server";
   ```
 
-- **CLI Scripts**: Use `logger-server.ts`
+- **CLI Scripts**: Use `@logger/server`
 
   ```typescript
-  import { serverLogger as logger } from "../../library/logger/server";
+  import { serverLogger as logger } from "@logger/server";
   ```
 
-- **Shared Server Code**: Use `logger-server.ts`
+- **Shared Server Code**: Use `@logger/server`
   ```typescript
-  import { serverLogger as logger } from "./logger-server";
+  import { serverLogger as logger } from "@logger/server";
   ```
 
 ### Why Two Separate Loggers?
@@ -316,7 +312,7 @@ Next.js/Turbopack analyzes all `require()` statements at build time, even when t
 
 ### Adding New Context Loggers
 
-To add a new context-specific logger, update both `source/library/logger/client.ts` and `source/library/logger/server.ts`:
+To add a new context-specific logger, update both `packages/logger/source/client.ts` and `packages/logger/source/server.ts`:
 
 **In both files:**
 
@@ -337,7 +333,7 @@ export const logDatabase = contextLogger(contextEmojiMap.database);
 
 ### Adding Custom Transports (Server Only)
 
-To add file logging or other transports to the server logger, update `source/library/logger/server.ts`:
+To add file logging or other transports to the server logger, update `packages/logger/source/server.ts`:
 
 ```typescript
 import winston from "winston";
@@ -367,7 +363,7 @@ console.error("Error:", error);
 console.warn("Warning: deprecated feature");
 
 // After
-import { logger } from "@/library/logger/client";
+import { logger } from "@logger/client";
 logger.info("Processing started");
 logger.error("Processing failed", { error });
 logger.warn("Deprecated feature used");
@@ -382,7 +378,7 @@ console.error("Error:", error);
 console.warn("Warning: deprecated feature");
 
 // After
-import { serverLogger as logger } from "@/library/logger/server";
+import { serverLogger as logger } from "@logger/server";
 logger.info("Processing started");
 logger.error("Processing failed", { error });
 logger.warn("Deprecated feature used");
@@ -413,7 +409,7 @@ logger.warn("Deprecated feature used");
 - `logger.silly(message, meta?)` - Log silly
 - `logger.log(level: string, message, meta?)` - Generic log method
 
-### Server Logger (`logger-server.ts`)
+### Server Logger (`server.ts`)
 
 **Exported Functions:**
 

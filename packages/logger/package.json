@@ -1,0 +1,27 @@
+{
+  "name": "logger",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts",
+    "./client": "./source/client.ts",
+    "./server": "./source/server.ts"
+  },
+  "dependencies": {
+    "winston": "^3.17.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10",
+    "@vitejs/plugin-react": "^4.3.4"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}
