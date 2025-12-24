@@ -66,11 +66,14 @@ Admin dashboard Next.js application:
 
 Shared UI component library:
 
-- `source/` - Component source files
-- `source/index.ts` - Main export file
+- `source/` - Component source files (Button, Card, Badge, Icon)
+- `styles/` - Font configurations and global CSS
+- `fonts/` - Font files (.woff2)
+- `source/index.ts` - Main export file (exports components and styles)
 - Built with Radix UI primitives
 - Uses Class Variance Authority for variants
-- Includes: Button, Card, Badge, Icon
+- Includes fonts: Satoshi, Sentient, Zodiak, Gambarino
+- Exports font configurations for Next.js `localFont`
 
 #### packages/database
 
@@ -118,6 +121,9 @@ Shared utility functions:
 
 - **Framework**: Tailwind CSS 4.1.17 (CSS-first configuration)
 - **Configuration**: Each app's `globals.css` includes `@source` directives to scan workspace packages
+- **Fonts**: Custom fonts (Satoshi, Sentient, Zodiak, Gambarino) in `packages/ui/fonts/`
+- **Font Configuration**: Font exports from `packages/ui/styles/fonts.ts` using Next.js `localFont`
+- **Global Styles**: Base styles and theme variables in `packages/ui/styles/globals.css`
 - **Icons**: Material Symbols Rounded (Google Fonts) with preconnect for fast loading
 - **Theme**: CSS variables defined in `globals.css` with dark mode support
 

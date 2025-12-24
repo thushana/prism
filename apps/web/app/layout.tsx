@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { satoshi } from "styles";
+import { satoshi } from "ui";
 import "./globals.css";
 
 export const metadata: Metadata = {

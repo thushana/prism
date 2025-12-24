@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "ui";
 import { Badge } from "ui";
 import { Button } from "ui";
 import { Icon } from "ui";
-import { satoshi, sentient, zodiak } from "styles";
+import { satoshi, sentient, zodiak } from "ui";
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({

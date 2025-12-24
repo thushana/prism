@@ -215,6 +215,12 @@ import { db } from "database";
 
 // Import utilities
 import { cn } from "utilities";
+
+// Import logger (client-side)
+import { logger, logSuccess } from "logger/client";
+
+// Import logger (server-side)
+import { serverLogger as logger, logStart } from "logger/server";
 ```
 
 ### Package Structure
@@ -258,6 +264,24 @@ Both projects can point to the same GitHub repository but with different root di
 Copy `.env.example` to `.env.local` and fill in your environment variables. Never commit `.env.local` or any files containing secrets.
 
 Environment variables can be set per-app in Vercel or at the root level for all apps.
+
+### Logger Configuration
+
+Configure log levels using environment variables:
+
+- **Server-side**: `LOG_LEVEL` (default: "info" in production, "debug" in development)
+- **Client-side**: `NEXT_PUBLIC_LOG_LEVEL` (default: "info" in production, "debug" in development)
+
+Valid log levels: `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`
+
+Example `.env.local`:
+
+```bash
+LOG_LEVEL=debug
+NEXT_PUBLIC_LOG_LEVEL=debug
+```
+
+See [docs/LOGGER.md](./docs/LOGGER.md) for full logger documentation.
 
 ## Learn More
 

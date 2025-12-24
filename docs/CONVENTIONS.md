@@ -103,15 +103,36 @@ Style and naming conventions for this codebase.
 
 ## Logging
 
-> **Note**: Centralized logging infrastructure is planned but not yet implemented. For now, use `console.log/error/warn` appropriately.
-
-When the logger is implemented:
+The centralized logging infrastructure is implemented and available via the `logger` package.
 
 - **Avoid `console.log/error/warn`** - Use the centralized logger instead
-- Import from the logger package (e.g., `packages/logger/`)
-- Use appropriate log levels: `error`, `warn`, `info`, `debug`
+- **Client components**: Import from `"logger/client"` or `"logger"`
+- **Server code**: Import from `"logger/server"` or `"logger"`
+- Use appropriate log levels: `error`, `warn`, `info`, `debug`, `verbose`, `silly`
 - Include structured metadata for errors and context
 - See [docs/LOGGER.md](./LOGGER.md) for detailed documentation
+
+### Usage Examples
+
+**Client-side (React components):**
+
+```typescript
+import { logger, logSuccess } from "logger/client";
+
+logger.info("Component mounted");
+logger.error("Error occurred", { error });
+logSuccess("Operation completed");
+```
+
+**Server-side (API routes, server components):**
+
+```typescript
+import { serverLogger as logger, logStart } from "logger/server";
+
+logger.info("Request received");
+logger.error("Database error", { error });
+logStart("Processing started");
+```
 
 ## Folder Structure
 
@@ -199,7 +220,7 @@ When implemented:
   - A `run*` function with the implementation
   - A `register*` function that registers the command with Commander
 - Use TypeScript interfaces for command options
-- Use the centralized logger when available
+- Use the centralized logger from `"logger/server"` for all logging
 - Handle errors gracefully and set `process.exitCode` instead of throwing
 
 ### Command Naming (Future)
