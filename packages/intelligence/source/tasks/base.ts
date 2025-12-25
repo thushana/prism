@@ -13,9 +13,10 @@ import type { Task, TaskConfig, TaskResult, ExecutionResult } from "./types";
  * Abstract base class for AI tasks
  * Provides automatic infrastructure for all tasks
  */
-export abstract class BaseTask<TInput, TOutput>
-  implements Task<TInput, TOutput>
-{
+export abstract class BaseTask<TInput, TOutput> implements Task<
+  TInput,
+  TOutput
+> {
   abstract name: string;
   abstract description: string;
   abstract inputSchema: z.ZodSchema<TInput>;

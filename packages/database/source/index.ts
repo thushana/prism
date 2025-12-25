@@ -45,6 +45,7 @@ if (!fs.existsSync(dbDir)) {
 }
 
 const sqlite = new Database(dbPath);
+// @ts-expect-error - Beta version type definitions don't match runtime API yet
 export const database = drizzle(sqlite, { schema });
 
 // Export schema for convenience
