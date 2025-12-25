@@ -83,6 +83,10 @@ function getDirectProviderModel(provider: string, apiIdentifier: string) {
       return anthropic(apiIdentifier);
     case "google":
       return google(apiIdentifier);
+    case "xai":
+      throw new Error(
+        "Direct provider access for xAI is not supported. Enable AI_GATEWAY_ENABLED or choose a supported provider."
+      );
     default:
       throw new Error(`Unsupported provider: ${provider}`);
   }
