@@ -1,4 +1,4 @@
-# Prism Core
+# 💎 Prism Core
 
 **@prism/core** - Foundational infrastructure for Next.js applications built with TypeScript, Tailwind CSS, Drizzle ORM, and AI capabilities.
 
