@@ -2,6 +2,7 @@
 @source "../**/*.{ts,tsx,js,jsx,mdx}";
 @source "../../../packages/ui/source/**/*.{ts,tsx}";
 @source "../../../packages/utilities/source/**/*.{ts,tsx}";
+@source "../../../packages/dev-sheet/source/**/*.{ts,tsx}";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

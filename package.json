@@ -1,7 +1,7 @@
 {
-  "name": "starter-project",
+  "name": "@prism/core",
   "version": "0.1.0",
-  "description": "A Next.js starter project with TypeScript, Tailwind CSS, Drizzle ORM, and Vitest - Monorepo",
+  "description": "Prism Core - Foundational infrastructure for Next.js applications with TypeScript, Tailwind CSS, Drizzle ORM, and AI capabilities",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -83,5 +83,19 @@
   },
   "overrides": {
     "esbuild": "^0.27.2"
+  },
+  "exports": {
+    "./ui": "./packages/ui/source/index.ts",
+    "./database": "./packages/database/source/index.ts",
+    "./intelligence": "./packages/intelligence/source/index.ts",
+    "./logger": "./packages/logger/source/index.ts",
+    "./utilities": "./packages/utilities/source/index.ts",
+    "./dev-sheet": "./packages/dev-sheet/source/index.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "^16.0.0",
+    "zod": "^3.24.0"
   }
 }

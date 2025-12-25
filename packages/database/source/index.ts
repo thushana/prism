@@ -34,7 +34,9 @@ function findProjectRoot(startDir: string): string {
 
 // Resolve database path relative to project root
 // Can be overridden with DB_PATH environment variable
-const projectRoot = findProjectRoot(__dirname);
+// Note: We use process.cwd() as the starting point since Next.js/Turbopack
+// handles module resolution and __dirname may not be available in all contexts
+const projectRoot = findProjectRoot(process.cwd());
 const dbPath =
   process.env.DB_PATH || path.join(projectRoot, "data/database/sqlite.db");
 const dbDir = path.dirname(dbPath);

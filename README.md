@@ -1,19 +1,24 @@
-# Starter Project (Monorepo)
+# Prism Core
 
-A [Next.js](https://nextjs.org) monorepo built with TypeScript and Tailwind CSS. This project uses npm workspaces to manage multiple applications and shared packages.
+**@prism/core** - Foundational infrastructure for Next.js applications built with TypeScript, Tailwind CSS, Drizzle ORM, and AI capabilities.
+
+A [Next.js](https://nextjs.org) monorepo that can be used as a standalone package by apps in separate repositories. Uses npm workspaces to manage multiple applications and shared packages.
 
 ## Project Structure
 
 ```
-starter-project/
-├── apps/
-│   ├── web/              # Main customer-facing application
-│   └── admin/            # Admin dashboard
+prism/
 ├── packages/
 │   ├── ui/               # Shared UI components
 │   ├── database/         # Database layer (Drizzle ORM + SQLite)
-│   └── utilities/        # Shared utility functions
-└── package.json          # Root workspace configuration
+│   ├── intelligence/     # AI tasks and utilities
+│   ├── logger/           # Logging infrastructure
+│   ├── utilities/        # Shared utility functions
+│   └── dev-sheet/        # Development info page
+├── apps/
+│   ├── web/              # Main customer-facing application
+│   └── admin/            # Admin dashboard
+└── package.json          # @prism/core configuration
 ```
 
 ## Prerequisites
@@ -200,11 +205,47 @@ npm run database:push
 npm run database:studio
 ```
 
-## Shared Packages
+## Using Prism Core
 
-### Using Shared Packages
+### As a Standalone Package
 
-All apps can import from shared packages:
+Apps in separate repositories can import Prism Core as a dependency:
+
+**Add to your app's `package.json`:**
+
+```json
+{
+  "dependencies": {
+    "@prism/core": "file:../prism"
+  }
+}
+```
+
+**Import in your app:**
+
+```typescript
+// Import UI components
+import { Button, Card } from "@prism/core/ui";
+
+// Import database
+import { db } from "@prism/core/database";
+
+// Import AI utilities
+import { getAIModel } from "@prism/core/intelligence";
+
+// Import logger
+import { logger } from "@prism/core/logger";
+
+// Import utilities
+import { cn } from "@prism/core/utilities";
+
+// Import dev-sheet (for development pages)
+import { DevSheetPage } from "@prism/core/dev-sheet";
+```
+
+### Within the Monorepo
+
+Apps within this monorepo can use direct package imports:
 
 ```typescript
 // Import UI components
@@ -221,7 +262,88 @@ import { logger, logSuccess } from "logger/client";
 
 // Import logger (server-side)
 import { serverLogger as logger, logStart } from "logger/server";
+
+// Import dev-sheet
+import { DevSheetPage } from "dev-sheet";
 ```
+
+### Dev-Sheet
+
+Prism includes a shared development information page that shows environment details, git status, dependencies, and more.
+
+**Add to your app:**
+
+```typescript
+// app/dev-sheet/page.tsx
+import { DevSheetPage } from "dev-sheet";
+import type { DevSheetData } from "dev-sheet";
+import { headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
+async function fetchDevSheetData(): Promise<DevSheetData | null> {
+  try {
+    // Construct absolute URL for server component fetch
+    // In server components, relative URLs don't work with fetch()
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3001";
+    const protocol = process.env.VERCEL_URL
+      ? "https"
+      : host.includes("localhost")
+        ? "http"
+        : "https";
+    const baseUrl = `${protocol}://${host}`;
+
+    const res = await fetch(`${baseUrl}/api/dev-sheet`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.success ? json.data : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Page() {
+  // Hide in production unless explicitly enabled
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ENABLE_DEV_SHEET !== "true"
+  ) {
+    return null;
+  }
+
+  const data = await fetchDevSheetData();
+  return <DevSheetPage data={data} />;
+}
+```
+
+**Note:** Your app needs to implement an `/api/dev-sheet` route that returns development data. See `apps/admin/app/api/dev-sheet/route.ts` for a reference implementation.
+
+### Package Exports
+
+Prism Core uses the `exports` field in `package.json` to expose packages as subpath imports (e.g., `@prism/core/ui`).
+
+**Important Notes:**
+
+- **TypeScript Source Files**: The exports point directly to TypeScript source files (`.ts`), not compiled JavaScript. This works because:
+  - Next.js/Turbopack handles TypeScript compilation and bundling
+  - TypeScript path mappings in `tsconfig.json` resolve these imports
+  - This is designed for **monorepo/internal use** or apps using TypeScript with proper tooling
+
+- **For External Consumers**: If you plan to publish this package or use it in apps without TypeScript tooling:
+  - Consider adding a build step to compile TypeScript to JavaScript
+  - Update exports to point to compiled `.js` files
+  - Or ensure consuming apps have TypeScript configured with path mapping support
+
+- **Current Exports**:
+  - `@prism/core/ui` - UI components
+  - `@prism/core/database` - Database layer
+  - `@prism/core/intelligence` - AI utilities
+  - `@prism/core/logger` - Logging infrastructure
+  - `@prism/core/utilities` - Utility functions
+  - `@prism/core/dev-sheet` - Development info page
 
 ### Package Structure
 

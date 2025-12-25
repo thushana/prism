@@ -1,0 +1,23 @@
+{
+  "name": "dev-sheet",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts"
+  },
+  "dependencies": {
+    "ui": "*",
+    "utilities": "*"
+  },
+  "peerDependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.6",
+    "typescript": "^5.9.3"
+  }
+}
