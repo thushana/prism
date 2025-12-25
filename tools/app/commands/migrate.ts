@@ -5,13 +5,13 @@
  */
 
 import { Command } from "commander";
-import * as loggerModule from "../../../../packages/logger/source/server.ts";
+import * as loggerModule from "../../../packages/logger/source/server.ts";
 import { execSync } from "child_process";
 import * as path from "path";
 
 const { serverLogger: logger, logStart, logSuccess } = loggerModule;
 
-import type { BaseCommandOptions } from "../../../../packages/cli/source/command.ts";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
 
 export interface MigrateCommandOptions extends BaseCommandOptions {
   rollback?: boolean;
@@ -29,7 +29,7 @@ async function runMigrations(): Promise<void> {
     // Get the path to the database package
     const dbConfigPath = path.resolve(
       process.cwd(),
-      "../../packages/database/drizzle.config.ts"
+      "../packages/database/drizzle.config.ts"
     );
 
     // Run drizzle-kit migrate
@@ -57,7 +57,7 @@ async function generateMigrations(): Promise<void> {
   try {
     const dbConfigPath = path.resolve(
       process.cwd(),
-      "../../packages/database/drizzle.config.ts"
+      "../packages/database/drizzle.config.ts"
     );
 
     const command = `npx drizzle-kit generate --config=${dbConfigPath}`;
@@ -84,7 +84,7 @@ async function pushSchema(): Promise<void> {
   try {
     const dbConfigPath = path.resolve(
       process.cwd(),
-      "../../packages/database/drizzle.config.ts"
+      "../packages/database/drizzle.config.ts"
     );
 
     const command = `npx drizzle-kit push --config=${dbConfigPath}`;

@@ -8,7 +8,7 @@ import { Command } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import * as loggerModule from "../../../../packages/logger/source/server.ts";
+import * as loggerModule from "../../../packages/logger/source/server.ts";
 
 const { serverLogger: logger } = loggerModule;
 const log: {
@@ -18,7 +18,7 @@ const log: {
   debug: (...args: unknown[]) => void;
 } = (logger as unknown as typeof console) ?? console;
 
-import type { BaseCommandOptions } from "../../../../packages/cli/source/command.ts";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
 
 export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
@@ -120,7 +120,7 @@ function generatePackageJson(
   // Otherwise, use @prism/core file reference
   const prismDependencies = prismRoot
     ? {
-        // In monorepo, reference individual packages like apps/web and apps/admin
+        // In monorepo, reference individual packages (like apps/web)
         database: "*",
         intelligence: "*",
         logger: "*",

@@ -14,9 +14,9 @@
     "incremental": true,
     "allowImportingTsExtensions": true,
     "paths": {
-      "cli": ["../../packages/cli/source"],
-      "logger": ["../../packages/logger/source"],
-      "database": ["../../packages/database/source"]
+      "cli": ["../packages/cli/source"],
+      "logger": ["../packages/logger/source"],
+      "database": ["../packages/database/source"]
     }
   },
   "include": ["app/**/*.ts"],

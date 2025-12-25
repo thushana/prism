@@ -4,7 +4,7 @@
 
 ## Overview
 
-The CLI tool (`npm run tools`) provides a unified command-line interface for common development and maintenance tasks. It uses **Commander.js** for argument parsing and command registration, with a clean separation between generic CLI utilities (`packages/cli`) and specific commands (`apps/cli`).
+The CLI tool (`npm run tools`) provides a unified command-line interface for common development and maintenance tasks. It uses **Commander.js** for argument parsing and command registration, with a clean separation between generic CLI utilities (`packages/cli`) and specific commands (`tools`).
 
 ## Architecture
 
@@ -15,8 +15,8 @@ The CLI is split into two parts following monorepo best practices:
   - Command registry utilities
   - Common CLI utilities (path resolution, validation, etc.)
 
-- **`apps/cli`** - Specific CLI application for this project
-  - Actual command implementations (seed, migrate, export)
+- **`tools`** - Specific CLI application for this project
+  - Actual command implementations (seed, migrate, export, generate)
   - Integration with database and logger packages
   - Main tools.ts entry point
 
@@ -94,7 +94,7 @@ packages/cli/
     ├── registry.ts        # Command registration helpers
     └── utils.ts           # CLI utilities
 
-apps/cli/
+tools/
 ├── package.json
 ├── tsconfig.json
 ├── README.md

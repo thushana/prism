@@ -138,7 +138,7 @@ logStart("Processing started");
 
 ### Apps Structure
 
-Each app (`apps/web`, `apps/admin`) follows Next.js App Router conventions:
+Each app (`apps/web` and generated apps) follows Next.js App Router conventions:
 
 ```
 apps/web/

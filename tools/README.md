@@ -9,7 +9,7 @@ This CLI application provides a unified interface for common development tasks l
 ## Architecture
 
 - **`packages/cli`** - Generic CLI utilities and patterns (reusable)
-- **`apps/cli`** - Specific CLI commands for this project
+- **`tools`** - Specific CLI commands for this project
 
 ## Usage
 
@@ -187,7 +187,7 @@ npm run tools export --table users --format csv --output ./exports/users.csv --v
 
 ## Adding New Commands
 
-See the [CLI Documentation](../../docs/CLI.md) for detailed instructions on adding new commands.
+See the [CLI Documentation](../docs/CLI.md) for detailed instructions on adding new commands.
 
 Quick steps:
 
@@ -200,10 +200,10 @@ Quick steps:
 
 ```bash
 # Run typecheck
-npm run typecheck -w apps/cli
+npm run typecheck -w tools
 
-# Run CLI directly (from apps/cli directory)
-cd apps/cli
+# Run CLI directly (from tools directory)
+cd tools
 npm start -- --help
 npm start -- seed --count 5
 npm start -- generate my-app

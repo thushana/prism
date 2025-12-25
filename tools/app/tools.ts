@@ -8,7 +8,7 @@
  */
 
 import { Command } from "commander";
-import * as loggerModule from "../../../packages/logger/source/server.ts";
+import * as loggerModule from "../../packages/logger/source/server.ts";
 import * as dotenv from "dotenv";
 
 const { serverLogger: logger } = loggerModule;

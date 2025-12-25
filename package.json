@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "tools"
   ],
   "keywords": [
     "nextjs",
@@ -23,19 +24,15 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build -w apps/web",
-    "build:admin": "npm run build -w apps/admin",
     "vercel:build": "vercel build",
     "vercel:build:web": "vercel build --cwd apps/web",
-    "vercel:build:admin": "vercel build --cwd apps/admin",
     "vercel:test:web": "cd apps/web && npm run build",
-    "vercel:test:admin": "cd apps/admin && npm run build",
     "clean": "rm -rf js scripts/*.js *.tsbuildinfo apps/*/.next apps/*/node_modules/.cache",
     "clean:directories": "tsx scripts/clean-directories.ts",
-    "dev": "npm run dev:kill && concurrently --names \"web,admin\" --prefix-colors \"blue,green\" \"npm run dev:web\" \"npm run dev:admin\"",
+    "dev": "npm run dev:kill && npm run dev:web",
     "dev:all": "npm run dev",
     "dev:web": "npm run dev -w apps/web",
-    "dev:admin": "npm run dev -w apps/admin",
-    "dev:kill": "lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true; pkill -f 'tsc --watch' 2>/dev/null || true; pkill -f 'next dev' 2>/dev/null || true; echo 'Killed all dev servers'",
+    "dev:kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true; pkill -f 'tsc --watch' 2>/dev/null || true; pkill -f 'next dev' 2>/dev/null || true; echo 'Killed all dev servers'",
     "dev:setup": "./scripts/setup-hosts.sh",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,tsx,json}\" \"docs/**/*.md\" \"*.{js,mjs,json}\"",
     "format": "prettier --write \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,tsx,json}\" \"docs/**/*.md\" \"*.{js,mjs,json}\"",
@@ -50,13 +47,12 @@
     "quality:quick": "npm run typecheck && npm run lint && npm run format",
     "start": "npm run start --workspaces --if-present",
     "start:web": "npm run start -w apps/web",
-    "start:admin": "npm run start -w apps/admin",
     "test": "npm run test --workspaces --if-present",
     "test:run": "npm run test:run --workspaces --if-present",
     "test:ui": "npm run test:ui -w apps/web",
     "test:coverage": "npm run test:coverage -w apps/web",
-    "prism": "npm run start -w apps/cli --",
-    "tools": "npm run start -w apps/cli --",
+    "prism": "npm run start -w tools --",
+    "tools": "npm run start -w tools --",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "watch": "tsc --watch",
     "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\""

@@ -19,12 +19,12 @@ This project uses a monorepo architecture to organize multiple applications and 
 ```
 starter-project/
 ├── apps/
-│   ├── web/              # Main customer-facing application
-│   └── admin/            # Admin dashboard
+│   └── web/              # Sample application (generated apps go here)
 ├── packages/
 │   ├── ui/               # Shared UI components
 │   ├── database/         # Database layer
 │   └── utilities/        # Shared utilities
+├── tools/                 # CLI tools and generator
 └── package.json          # Root workspace configuration
 ```
 
@@ -51,14 +51,18 @@ Main customer-facing Next.js application:
 - `tsconfig.json` - TypeScript configuration with workspace paths
 - `vercel.json` - Vercel deployment configuration
 
-#### apps/admin
+#### Generated Apps
 
-Admin dashboard Next.js application:
+Apps generated via `npm run prism generate <app-name>` follow the same structure as `apps/web`:
 
-- `app/` - Admin pages (includes dev-sheet)
-- `app/dev-sheet/` - Development information page
-- Similar structure to web app
-- Runs on port 3001 in development
+- `app/` - Next.js App Router pages and layouts
+- `public/` - Static assets
+- `package.json` - App-specific dependencies
+- `next.config.ts` - Next.js configuration
+- `tsconfig.json` - TypeScript configuration with workspace paths
+- `vercel.json` - Vercel deployment configuration
+
+**Note:** The `apps/web` directory is kept as a sample reference. New apps can be generated using the CLI tool.
 
 ### Packages
 
@@ -154,11 +158,9 @@ Shared utility functions:
 
 - **Platform**: Vercel
 - **Strategy**: Independent deployment for each app
-- **Web App**: Deploy from `apps/web` root
-- **Admin App**: Deploy from `apps/admin` root
-- **Domains**:
-  - Web: `yourdomain.com`
-  - Admin: `admin.yourdomain.com`
+- **Web App**: Deploy from `apps/web` root (sample)
+- **Generated Apps**: Deploy from `apps/<app-name>` root
+- **Domains**: Configure per app in Vercel
 - **Build**: Vercel automatically detects and builds changed apps
 
 ### Git Workflow

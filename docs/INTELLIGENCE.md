@@ -54,7 +54,7 @@ apps/web/ai/tasks/               # Web app-specific tasks
     ├── prompt.ts                # Versioned prompts
     └── types.ts                 # Task-specific types + Zod schemas
 
-apps/admin/ai/tasks/            # Admin app-specific tasks
+apps/{app-name}/ai/tasks/        # Generated app-specific tasks
 ├── index.ts                     # Export all tasks
 └── {task-name}/                 # Self-contained task modules
     ├── index.ts                 # Task implementation
@@ -732,7 +732,7 @@ function isRetryableError(error: any): boolean {
 
 Centralized registry for task discovery and runtime execution.
 
-**Important:** The registry is app-specific. Each app maintains its own registry of tasks. Tasks registered in `apps/web/ai/tasks/` are only available to the web app, and tasks registered in `apps/admin/ai/tasks/` are only available to the admin app.
+**Important:** The registry is app-specific. Each app maintains its own registry of tasks. Tasks registered in `apps/web/ai/tasks/` are only available to the web app, and tasks registered in `apps/<app-name>/ai/tasks/` are only available to that specific app.
 
 **Purpose:**
 
@@ -822,7 +822,7 @@ apps/web/ai/tasks/my-task/       # Web app-specific task
 ├── prompt.ts      # Versioned prompt templates
 └── types.ts       # Input/output types with Zod schemas
 
-apps/admin/ai/tasks/admin-task/ # Admin app-specific task
+apps/{app-name}/ai/tasks/my-task/ # Generated app-specific task
 ├── index.ts       # Task implementation (extends BaseTask)
 ├── prompt.ts      # Versioned prompt templates
 └── types.ts       # Input/output types with Zod schemas
@@ -1133,7 +1133,7 @@ curl -X POST http://localhost:3000/api/ai/tasks/execute \
 ### CLI Integration
 
 ```typescript
-// apps/cli/app/commands/ai-generate.ts
+// tools/app/commands/ai-generate.ts
 import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias
 import { serverLogger as logger } from "logger";
 
@@ -1156,7 +1156,7 @@ export async function runAiGenerate(options: { task: string; input: string }) {
 npm run tools ai-generate --task my-task --input '{"field1":"value1"}'
 ```
 
-**Note:** Tasks are app-specific. The CLI app can only execute tasks that are registered in `apps/cli/ai/tasks/`.
+**Note:** Tasks are app-specific. The CLI tool can only execute tasks that are registered in `tools/ai/tasks/`.
 
 ## Prompt Versioning
 
@@ -1275,13 +1275,13 @@ Choose the appropriate app for your task:
 mkdir -p apps/web/ai/tasks/my-new-task
 
 # For admin app tasks
-mkdir -p apps/admin/ai/tasks/my-new-task
+mkdir -p apps/{app-name}/ai/tasks/my-new-task
 ```
 
 **2. Define Types with Zod Schemas**
 
 ```typescript
-// apps/web/ai/tasks/my-new-task/types.ts (or apps/admin/ai/tasks/...)
+// apps/web/ai/tasks/my-new-task/types.ts (or apps/{app-name}/ai/tasks/...)
 import { z } from "zod";
 
 export const MyInputSchema = z.object({
@@ -1301,7 +1301,7 @@ export type MyOutput = z.infer<typeof MyOutputSchema>;
 **3. Create Prompts**
 
 ```typescript
-// apps/web/ai/tasks/my-new-task/prompt.ts (or apps/admin/ai/tasks/...)
+// apps/web/ai/tasks/my-new-task/prompt.ts (or apps/{app-name}/ai/tasks/...)
 import type { MyInput } from "./types";
 
 export const PROMPTS = {
@@ -1324,7 +1324,7 @@ export function getUserPrompt(input: MyInput, version = PROMPTS.current) {
 **4. Implement Task**
 
 ```typescript
-// apps/web/ai/tasks/my-new-task/index.ts (or apps/admin/ai/tasks/...)
+// apps/web/ai/tasks/my-new-task/index.ts (or apps/{app-name}/ai/tasks/...)
 import { BaseTask } from "@intelligence/tasks/base"; // Import via path alias
 import { generateText } from "intelligence";
 import { getAIModel } from "@intelligence/client"; // Import via path alias
@@ -1364,7 +1364,7 @@ export const executeMyTask = (input: MyInput, config?: Partial<TaskConfig>) =>
 **5. Export and Register**
 
 ```typescript
-// apps/web/ai/tasks/index.ts (or apps/admin/ai/tasks/index.ts)
+// apps/web/ai/tasks/index.ts (or apps/{app-name}/ai/tasks/index.ts)
 export * from "./my-new-task";
 import { MyTask } from "./my-new-task";
 import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias

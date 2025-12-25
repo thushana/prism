@@ -16,8 +16,8 @@ prism/
 │   ├── utilities/        # Shared utility functions
 │   └── dev-sheet/        # Development info page
 ├── apps/
-│   ├── web/              # Main customer-facing application
-│   └── admin/            # Admin dashboard
+│   └── web/              # Sample application (generated apps go here)
+├── tools/                 # CLI tools and generator
 └── package.json          # @prism/core configuration
 ```
 
@@ -40,7 +40,7 @@ This will install dependencies for all workspaces (apps and packages).
 
 ### Development
 
-Run both apps concurrently in development mode:
+Run the web app in development mode:
 
 ```bash
 npm run dev
@@ -48,55 +48,36 @@ npm run dev
 
 This will:
 
-- Kill any existing dev servers on ports 3000 and 3001
-- Start both web and admin apps with colored output (blue for web, green for admin)
-- Web app: http://localhost:3000 (also http://www.localhost:3000 and http://web.localhost:3000)
-- Admin app: http://localhost:3001 (also http://admin.localhost:3001)
+- Kill any existing dev servers on port 3000
+- Start the web app
+- Web app: http://localhost:3000
 
-Or run individual apps:
+Or run the web app:
 
 ```bash
 # Web app (http://localhost:3000)
 npm run dev:web
-
-# Admin app (http://localhost:3001)
-npm run dev:admin
 ```
 
-#### Subdomain Setup (Optional)
-
-For subdomain routing (`www.localhost`, `web.localhost`, `admin.localhost`), run the setup script once:
-
-```bash
-npm run dev:setup
-```
-
-This adds the subdomains to your `/etc/hosts` file. Once set up, you can access:
-
-- Web: `http://www.localhost:3000` or `http://web.localhost:3000`
-- Admin: `http://admin.localhost:3001`
+**Note:** The `apps/web` directory is kept as a sample. You can generate new apps using `npm run prism generate <app-name>`, which will create them in the `apps/` directory.
 
 ## Available Scripts
 
 ### Development
 
-- `npm run dev` - Run all apps concurrently in development mode (kills existing servers first)
+- `npm run dev` - Run web app in development mode (kills existing servers first)
 - `npm run dev:web` - Run web app only (port 3000)
-- `npm run dev:admin` - Run admin app only (port 3001)
-- `npm run dev:kill` - Kill all development servers on ports 3000 and 3001
-- `npm run dev:setup` - Set up subdomain routing (adds entries to `/etc/hosts`)
+- `npm run dev:kill` - Kill all development servers on port 3000
 
 ### Building
 
 - `npm run build` - Build all apps
 - `npm run build:web` - Build web app only
-- `npm run build:admin` - Build admin app only
 
 ### Production
 
 - `npm run start` - Start all production servers
 - `npm run start:web` - Start web app (port 3000)
-- `npm run start:admin` - Start admin app (port 3001)
 
 ### Code Quality
 
@@ -138,8 +119,8 @@ This adds the subdomains to your `/etc/hosts` file. Once set up, you can access:
 
 ### Apps
 
-- **apps/web**: Main customer-facing Next.js application
-- **apps/admin**: Admin dashboard with dev-sheet for development info
+- **apps/web**: Sample Next.js application (reference implementation)
+- **apps/\***: Generated apps (created via `npm run prism generate <name>`)
 
 ### Packages
 
@@ -319,7 +300,7 @@ export default async function Page() {
 }
 ```
 
-**Note:** Your app needs to implement an `/api/dev-sheet` route that returns development data. See `apps/admin/app/api/dev-sheet/route.ts` for a reference implementation.
+**Note:** Your app needs to implement an `/api/dev-sheet` route that returns development data. See the generator templates for a reference implementation.
 
 ### Package Exports
 
@@ -363,15 +344,15 @@ This monorepo is designed to deploy each app independently on Vercel. See [DEPLO
 
 ### Quick Summary
 
-1. **Web App**: Deploy from `apps/web` root directory
-2. **Admin App**: Deploy from `apps/admin` root directory
+1. **Web App**: Deploy from `apps/web` root directory (sample)
+2. **Generated Apps**: Deploy from `apps/<app-name>` root directory
 
-Both projects can point to the same GitHub repository but with different root directories.
+Each app can be deployed independently from the same GitHub repository by setting different root directories in Vercel.
 
 ### Custom Domains
 
 - Web: `yourdomain.com` or `www.yourdomain.com`
-- Admin: `admin.yourdomain.com`
+- Generated apps: Configure per app in Vercel
 
 ### Database for Production
 

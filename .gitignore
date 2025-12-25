@@ -51,3 +51,7 @@ next-env.d.ts
 # database
 *.db
 *.db-journal
+
+# generated apps (keep apps/web as sample)
+/apps/*
+!/apps/web/

@@ -5,16 +5,16 @@
  */
 
 import { Command } from "commander";
-import * as cliModule from "../../../../packages/cli/source/index.ts";
-import * as db from "../../../../packages/database/source/index.ts";
-import * as loggerModule from "../../../../packages/logger/source/server.ts";
+import * as cliModule from "../../../packages/cli/source/index.ts";
+import * as db from "../../../packages/database/source/index.ts";
+import * as loggerModule from "../../../packages/logger/source/server.ts";
 import * as fs from "fs";
 
 const { requireOption, resolvePath, ensureDirectory, getDirectory } = cliModule;
 const { database, users } = db;
 const { serverLogger: logger, logStart, logSuccess, logStats } = loggerModule;
 
-import type { BaseCommandOptions } from "../../../../packages/cli/source/command.ts";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
 
 export interface ExportCommandOptions extends BaseCommandOptions {
   table: string;

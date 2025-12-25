@@ -1,10 +1,10 @@
 # Vercel Deployment Guide
 
-This monorepo contains two separate Next.js applications that can be deployed independently to Vercel.
+This monorepo contains sample and generated Next.js applications that can be deployed independently to Vercel.
 
 ## Setup
 
-### Project 1: Web App (apps/web)
+### Sample App: Web App (apps/web)
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
 2. Click "Add New" → "Project"
@@ -21,30 +21,32 @@ This monorepo contains two separate Next.js applications that can be deployed in
    - Go to Project Settings → Domains
    - Add: `yourdomain.com` or `www.yourdomain.com`
 
-### Project 2: Admin App (apps/admin)
+### Generated Apps
+
+Apps generated via `npm run prism generate <app-name>` can be deployed the same way:
 
 1. In Vercel Dashboard, click "Add New" → "Project"
 2. Import the **same** Git repository
 3. Configure:
-   - **Project Name**: `starter-project-admin` (or your preferred name)
+   - **Project Name**: `your-app-name` (or your preferred name)
    - **Framework Preset**: Next.js
-   - **Root Directory**: `apps/admin` ⚠️ **IMPORTANT**: This must be set!
-   - **Build Command**: `npm run build` (or leave default - Vercel will run from apps/admin)
+   - **Root Directory**: `apps/<app-name>` ⚠️ **IMPORTANT**: This must be set!
+   - **Build Command**: `npm run build` (or leave default)
    - **Output Directory**: `.next` (leave default - relative to root directory)
    - **Install Command**: `cd ../.. && npm install` (install from monorepo root for workspace dependencies)
 
 4. Add custom domain (optional):
    - Go to Project Settings → Domains
-   - Add: `admin.yourdomain.com`
+   - Add your custom domain
+
+**Note:** The `apps/web` directory is kept as a sample reference. Generated apps are created in `apps/` and can be deployed independently.
 
 ## Deployment Behavior
 
-- **Automatic Deployments**: Both projects will deploy automatically on push to main
+- **Automatic Deployments**: All projects will deploy automatically on push to main
 - **Smart Builds**: Vercel detects changes and only builds affected apps
 - **Independent Scaling**: Each app can be scaled independently
-- **Separate URLs**:
-  - Web: `starter-project-web.vercel.app` → `yourdomain.com`
-  - Admin: `starter-project-admin.vercel.app` → `admin.yourdomain.com`
+- **Separate URLs**: Each app gets its own Vercel URL and can have custom domains
 
 ## Database Configuration
 
@@ -65,7 +67,7 @@ If you need environment variables:
 
 ## Cost
 
-Both projects can run on Vercel's **Free (Hobby) tier**:
+All apps can run on Vercel's **Free (Hobby) tier**:
 
 - Unlimited deployments
 - 100 GB bandwidth/month (shared)
@@ -84,10 +86,7 @@ Run Next.js production builds directly:
 # Test web app build
 npm run vercel:test:web
 
-# Test admin app build
-npm run vercel:test:admin
-
-# Test both apps
+# Test all apps
 npm run build
 ```
 
@@ -110,8 +109,8 @@ For a more accurate simulation including environment variables and build setting
    cd apps/web
    vercel link
 
-   # For admin app
-   cd apps/admin
+   # For generated apps
+   cd apps/<app-name>
    vercel link
    ```
 
@@ -121,8 +120,9 @@ For a more accurate simulation including environment variables and build setting
    # Test web app with Vercel CLI
    npm run vercel:build:web
 
-   # Test admin app with Vercel CLI
-   npm run vercel:build:admin
+   # Test generated apps (from app directory)
+   cd apps/<app-name>
+   vercel build
    ```
 
 This simulates Vercel's exact build process, including environment variables, build commands, and output structure.
@@ -156,8 +156,8 @@ Deploy manually using Vercel CLI:
 cd apps/web
 vercel
 
-# Deploy admin app
-cd apps/admin
+# Deploy generated apps
+cd apps/<app-name>
 vercel
 ```
 
@@ -170,8 +170,8 @@ vercel
 1. Go to your Vercel project → Settings → General
 2. Scroll to "Root Directory"
 3. Set it to:
-   - `apps/web` for the web app
-   - `apps/admin` for the admin app
+   - `apps/web` for the sample web app
+   - `apps/<app-name>` for generated apps
 4. Save and redeploy
 
 ### Build fails with "husky: command not found"
@@ -236,5 +236,5 @@ Test builds in CI before deploying:
   run: |
     npm install
     npm run vercel:test:web
-    npm run vercel:test:admin
+    # Add tests for generated apps as needed
 ```

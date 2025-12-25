@@ -377,7 +377,7 @@ Edit `packages/ui/styles/globals.css`:
 
 ## Examples
 
-See `apps/admin/app/dev-sheet/page.tsx` for comprehensive examples of:
+See generated app templates or `apps/web` for comprehensive examples of:
 
 - All component variants
 - Font usage and typography
