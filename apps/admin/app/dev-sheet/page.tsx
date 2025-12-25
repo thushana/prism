@@ -5,17 +5,19 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function getProtocol(host: string): string {
+  if (process.env.VERCEL_URL) return "https";
+  if (host.includes("localhost")) return "http";
+  return "https";
+}
+
 async function fetchDevSheetData(): Promise<DevSheetData | null> {
   try {
     // Construct absolute URL for server component fetch
     // In server components, relative URLs don't work with fetch()
     const headersList = await headers();
     const host = headersList.get("host") || "localhost:3001";
-    const protocol = process.env.VERCEL_URL
-      ? "https"
-      : host.includes("localhost")
-        ? "http"
-        : "https";
+    const protocol = getProtocol(host);
     const baseUrl = `${protocol}://${host}`;
 
     const res = await fetch(`${baseUrl}/api/dev-sheet`, {
@@ -28,7 +30,10 @@ async function fetchDevSheetData(): Promise<DevSheetData | null> {
 
     const json = await res.json();
     return json?.success ? json.data : null;
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Failed to fetch dev-sheet data:", error);
+    }
     return null;
   }
 }

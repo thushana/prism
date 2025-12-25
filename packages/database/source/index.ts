@@ -29,14 +29,31 @@ function findProjectRoot(startDir: string): string {
   }
 
   // Fallback to cwd if not found
-  return process.cwd();
+  return startDir;
+}
+
+function hasWorkspaces(dir: string): boolean {
+  try {
+    const packageJsonPath = path.join(dir, "package.json");
+    if (!fs.existsSync(packageJsonPath)) return false;
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+    return Boolean(packageJson.workspaces);
+  } catch {
+    return false;
+  }
 }
 
 // Resolve database path relative to project root
 // Can be overridden with DB_PATH environment variable
-// Note: We use process.cwd() as the starting point since Next.js/Turbopack
-// handles module resolution and __dirname may not be available in all contexts
-const projectRoot = findProjectRoot(process.cwd());
+// Note: We start from process.cwd() but fall back to __dirname to handle
+// cases where the working directory differs from the package location.
+const projectRootFromCwd = findProjectRoot(process.cwd());
+const projectRootFromModule = findProjectRoot(__dirname);
+const projectRoot = hasWorkspaces(projectRootFromCwd)
+  ? projectRootFromCwd
+  : hasWorkspaces(projectRootFromModule)
+    ? projectRootFromModule
+    : projectRootFromCwd;
 const dbPath =
   process.env.DB_PATH || path.join(projectRoot, "data/database/sqlite.db");
 const dbDir = path.dirname(dbPath);
