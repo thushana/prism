@@ -129,10 +129,16 @@ async function getAppStatuses(): Promise<AppStatus[]> {
     },
   ];
 
-  for (const app of apps) {
+  // Skip port checks in production (Vercel) - localhost ports won't be accessible
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return apps;
+  }
+
+  // In development, check app statuses with shorter timeout and parallelize
+  const checkPromises = apps.map(async (app) => {
     for (const host of app.hosts) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 500); // Reduced from 2000ms
       try {
         const response = await fetch(`http://${host}:${app.port}`, {
           method: "GET",
@@ -151,7 +157,9 @@ async function getAppStatuses(): Promise<AppStatus[]> {
         continue;
       }
     }
-  }
+  });
+
+  await Promise.all(checkPromises);
 
   return apps;
 }

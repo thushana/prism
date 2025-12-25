@@ -141,16 +141,9 @@ function formatDateTimeWithRelative(dateString: string): string {
   return `${formatted} – ${relative}`;
 }
 
-function getBaseUrl() {
-  if (process.env.ADMIN_BASE_URL) return process.env.ADMIN_BASE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3001";
-}
-
 async function fetchDevSheetData(): Promise<DevSheetData | null> {
-  const baseUrl = getBaseUrl();
   try {
-    const res = await fetch(`${baseUrl}/api/dev-sheet`, {
+    const res = await fetch("/api/dev-sheet", {
       cache: "no-store",
     });
     if (!res.ok) {
