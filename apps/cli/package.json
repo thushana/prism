@@ -1,5 +1,5 @@
 {
-  "name": "cli-app",
+  "name": "tools",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "lint": "eslint app --ext .ts"
   },
   "dependencies": {
-    "cli": "*",
+    "@prism/tools": "*",
     "logger": "*",
     "database": "*",
     "commander": "^12.0.0",
