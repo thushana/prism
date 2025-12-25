@@ -21,7 +21,7 @@
     "utilities": "*",
     "intelligence": "*",
     "@radix-ui/react-slot": "^1.2.4",
-    "next": "16.0.3",
+    "next": "16.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
@@ -36,7 +36,7 @@
     "@vitest/coverage-v8": "^4.0.10",
     "@vitest/ui": "^4.0.10",
     "eslint": "^9.39.1",
-    "eslint-config-next": "16.0.3",
+    "eslint-config-next": "16.1.1",
     "jsdom": "^27.2.0",
     "lightningcss": "^1.30.2",
     "prettier": "^3.6.2",
