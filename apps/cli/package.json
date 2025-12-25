@@ -12,7 +12,7 @@
     "@prism/tools": "*",
     "logger": "*",
     "database": "*",
-    "commander": "^12.0.0",
+    "commander": "^14.0.2",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

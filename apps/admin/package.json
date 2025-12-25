@@ -11,15 +11,15 @@
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"*.{ts,tsx}\" \"*.{js,mjs}\""
   },
   "dependencies": {
-    "ui": "*",
-    "database": "*",
-    "logger": "*",
-    "utilities": "*",
-    "intelligence": "*",
     "@radix-ui/react-slot": "^1.2.4",
+    "database": "*",
+    "intelligence": "*",
+    "logger": "*",
     "next": "16.1.1",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "ui": "*",
+    "utilities": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

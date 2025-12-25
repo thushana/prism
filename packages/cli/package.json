@@ -8,7 +8,7 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "commander": "^12.0.0"
+    "commander": "^14.0.2"
   },
   "peerDependencies": {
     "logger": "*"
