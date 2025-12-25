@@ -17,15 +17,96 @@ From the project root:
 
 ```bash
 # Show help
-npm run tools --help
+npm run prism --help
 
 # Show help for a specific command
-npm run tools seed --help
-npm run tools migrate --help
-npm run tools export --help
+npm run prism seed --help
+npm run prism migrate --help
+npm run prism export --help
+npm run prism generate --help
 ```
 
+**Note**: You can also use `npm run tools` as an alias for `npm run prism`.
+
 ## Commands
+
+### Prism Generate
+
+Generate a new Next.js app with Prism core pre-wired.
+
+```bash
+# Generate a new app
+npm run prism generate my-app
+```
+
+This command scaffolds a complete Next.js application with:
+
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS (pre-configured)
+- Drizzle ORM + SQLite (dev) / PostgreSQL (prod-ready)
+- Prism core packages integration
+- Dev sheet page at `/dev-sheet`
+- Starter `intelligence/tasks/` folder
+- Sample CLI command in `cli/`
+- Documentation scaffold in `docs/`
+- Vercel deployment configuration
+
+The generator automatically:
+
+- Creates all necessary files and folder structure
+- Installs dependencies
+- Runs database migrations and seeds
+- Initializes git and makes the first commit
+
+**Generated App Structure:**
+
+```
+my-app/
+  package.json
+  tsconfig.json
+  next.config.js
+  vercel.json
+  .eslintrc
+  .prettierrc
+  .gitignore
+  .env.example
+  .env
+  app/
+    layout.tsx
+    page.tsx (Prism demo)
+    dev-sheet/
+      page.tsx
+    api/
+      dev-sheet/
+        route.ts
+  ui/
+    styles/
+      globals.css
+  docs/
+    index.mdx
+  database/
+    drizzle.config.ts
+    schema.ts
+    migrations/
+    seed.ts
+    db.ts
+  intelligence/
+    tasks/
+      exampleTask.ts
+  cli/
+    index.ts (sample command)
+  public/
+    .gitkeep
+```
+
+**Next Steps After Generation:**
+
+```bash
+cd my-app
+npm run dev
+```
+
+Visit http://localhost:3000 to see your app, and http://localhost:3000/dev-sheet for the dev sheet.
 
 ### Seed
 
@@ -113,7 +194,7 @@ Quick steps:
 1. Create a new command file in `app/commands/`
 2. Implement the command following the pattern in existing commands
 3. Register the command in `app/tools.ts`
-4. Test with `npm run tools <command-name> --help`
+4. Test with `npm run prism <command-name> --help`
 
 ## Development
 
@@ -125,6 +206,7 @@ npm run typecheck -w apps/cli
 cd apps/cli
 npm start -- --help
 npm start -- seed --count 5
+npm start -- generate my-app
 ```
 
 ## Integration with Database

@@ -54,6 +54,7 @@
     "test:run": "npm run test:run --workspaces --if-present",
     "test:ui": "npm run test:ui -w apps/web",
     "test:coverage": "npm run test:coverage -w apps/web",
+    "prism": "npm run start -w apps/cli --",
     "tools": "npm run start -w apps/cli --",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "watch": "tsc --watch",
