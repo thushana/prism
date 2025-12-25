@@ -30,6 +30,7 @@
     "vercel:test:web": "cd apps/web && npm run build",
     "vercel:test:admin": "cd apps/admin && npm run build",
     "clean": "rm -rf js scripts/*.js *.tsbuildinfo apps/*/.next apps/*/node_modules/.cache",
+    "clean:directories": "tsx scripts/clean-directories.ts",
     "dev": "npm run dev:kill && concurrently --names \"web,admin\" --prefix-colors \"blue,green\" \"npm run dev:web\" \"npm run dev:admin\"",
     "dev:all": "npm run dev",
     "dev:web": "npm run dev -w apps/web",
@@ -80,6 +81,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "overrides": {
