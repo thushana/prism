@@ -1,12 +1,12 @@
-import { readFileSync, readdirSync, statSync } from "fs";
-import { join } from "path";
-import { execSync } from "child_process";
 import { Geist_Mono } from "next/font/google";
 import { Card, CardContent, CardHeader, CardTitle } from "ui";
 import { Badge } from "ui";
 import { Button } from "ui";
 import { Icon } from "ui";
 import { satoshi, sentient, zodiak } from "ui";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({
@@ -53,103 +53,6 @@ const FONTS = [
     range: "100-900",
   },
 ] as const;
-
-async function checkPortAccessible(
-  host: string,
-  port: number
-): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
-
-    const response = await fetch(`http://${host}:${port}`, {
-      method: "GET",
-      signal: controller.signal,
-      cache: "no-store",
-      headers: {
-        "User-Agent": "dev-sheet-status-check",
-      },
-    });
-
-    clearTimeout(timeoutId);
-    return response.status < 500; // Any response < 500 means server is running
-  } catch {
-    // Timeout, connection refused, or other network error
-    return false;
-  }
-}
-
-async function getAppStatuses(): Promise<AppStatus[]> {
-  // Define apps with preferred hosts (subdomains first, then localhost)
-  const apps: AppStatus[] = [
-    {
-      name: "Web",
-      port: 3000,
-      hosts: ["www.localhost", "web.localhost", "localhost"],
-      url: `http://localhost:3000`,
-      isRunning: false,
-    },
-    {
-      name: "Admin",
-      port: 3001,
-      hosts: ["admin.localhost", "localhost"],
-      url: `http://localhost:3001`,
-      isRunning: false,
-    },
-  ];
-
-  // Check each app's status
-  for (const app of apps) {
-    // Try each host in order of preference
-    for (const host of app.hosts) {
-      try {
-        const isRunning = await checkPortAccessible(host, app.port);
-        if (isRunning) {
-          app.isRunning = true;
-          app.url = `http://${host}:${app.port}`;
-          break; // Use the first working host
-        }
-      } catch {
-        // Continue to next host
-        continue;
-      }
-    }
-  }
-
-  return apps;
-}
-
-function getRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  const diffMonths = Math.floor(diffDays / 30);
-  const diffYears = Math.floor(diffDays / 365);
-
-  if (diffSeconds < 60) {
-    return `${diffSeconds} ${diffSeconds === 1 ? "second" : "seconds"} ago`;
-  } else if (diffMinutes < 60) {
-    return `${diffMinutes} ${diffMinutes === 1 ? "minute" : "minutes"} ago`;
-  } else if (diffHours < 24) {
-    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
-  } else if (diffDays < 30) {
-    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
-  } else if (diffMonths < 12) {
-    return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
-  } else {
-    return `${diffYears} ${diffYears === 1 ? "year" : "years"} ago`;
-  }
-}
-
-function formatDateTimeWithRelative(dateString: string): string {
-  const date = new Date(dateString);
-  const formatted = date.toLocaleString();
-  const relative = getRelativeTime(date);
-  return `${formatted} – ${relative}`;
-}
 
 interface AppStatus {
   name: string;
@@ -206,440 +109,61 @@ interface DevSheetData {
   lastUpdated: string;
 }
 
-function getComponentsInDirectory(dirPath: string): string[] {
-  try {
-    const files = readdirSync(dirPath, { withFileTypes: true });
-    return files
-      .filter((file) => file.isFile() && file.name.endsWith(".tsx"))
-      .map((file) => file.name.replace(".tsx", ""));
-  } catch {
-    return [];
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds} ${diffSeconds === 1 ? "second" : "seconds"} ago`;
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? "minute" : "minutes"} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  } else if (diffDays < 30) {
+    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  } else if (diffMonths < 12) {
+    return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
+  } else {
+    return `${diffYears} ${diffYears === 1 ? "year" : "years"} ago`;
   }
 }
 
-function getAllComponents() {
-  // Get root directory (monorepo root)
-  // process.cwd() in Next.js will be the app directory (apps/admin) when running from there
-  // or the root when running from root. Try both.
-  let rootDir = process.cwd();
-
-  // If we're in apps/admin, go up to root
-  if (rootDir.endsWith("apps/admin") || rootDir.endsWith("apps\\admin")) {
-    rootDir = join(rootDir, "../..");
-  }
-  // If we're already at root, stay there
-
-  // UI components are in packages/ui/source
-  const shadcnComponents = getComponentsInDirectory(
-    join(rootDir, "packages", "ui", "source")
-  );
-
-  // Custom components would be in apps/web/components (if any)
-  const customComponents = getComponentsInDirectory(
-    join(rootDir, "apps", "web", "components")
-  ).filter((name) => name !== "ui");
-
-  // App-specific components
-  const appComponents = getComponentsInDirectory(
-    join(rootDir, "apps", "web", "app", "components")
-  );
-
-  return {
-    shadcn: shadcnComponents,
-    custom: customComponents,
-    app: appComponents,
-  };
+function formatDateTimeWithRelative(dateString: string): string {
+  const date = new Date(dateString);
+  const formatted = date.toLocaleString();
+  const relative = getRelativeTime(date);
+  return `${formatted} – ${relative}`;
 }
 
-function getShadcnConfig() {
-  try {
-    // components.json is in apps/web
-    let rootDir = process.cwd();
+function getBaseUrl() {
+  if (process.env.ADMIN_BASE_URL) return process.env.ADMIN_BASE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3001";
+}
 
-    // If we're in apps/admin, go up to root
-    if (rootDir.endsWith("apps/admin") || rootDir.endsWith("apps\\admin")) {
-      rootDir = join(rootDir, "../..");
+async function fetchDevSheetData(): Promise<DevSheetData | null> {
+  const baseUrl = getBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/dev-sheet`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return null;
     }
-
-    const configPath = join(rootDir, "apps", "web", "components.json");
-    const config = JSON.parse(readFileSync(configPath, "utf-8"));
-    return {
-      style: config.style || "default",
-      iconLibrary: config.iconLibrary || "lucide",
-      baseColor: config.tailwind?.baseColor || "neutral",
-    };
-  } catch {
-    return {
-      style: "unknown",
-      iconLibrary: "unknown",
-      baseColor: "unknown",
-    };
-  }
-}
-
-function getTechStack() {
-  try {
-    const packagePath = join(process.cwd(), "package.json");
-    const packageJson = JSON.parse(readFileSync(packagePath, "utf-8"));
-    const deps = {
-      ...packageJson.dependencies,
-      ...packageJson.devDependencies,
-    };
-
-    return {
-      framework: `Next.js ${deps.next || "unknown"}`,
-      language: `TypeScript ${deps.typescript || "unknown"}`,
-      styling: `Tailwind CSS ${deps.tailwindcss || "unknown"}`,
-      database: deps["drizzle-orm"]
-        ? `Drizzle ORM ${deps["drizzle-orm"]}`
-        : "None",
-      testing: deps.vitest ? `Vitest ${deps.vitest}` : "None",
-      nodeVersion: process.version,
-      environment: process.env.NODE_ENV || "development",
-    };
-  } catch {
-    return {
-      framework: "Unknown",
-      language: "Unknown",
-      styling: "Unknown",
-      database: "Unknown",
-      testing: "Unknown",
-      nodeVersion: process.version,
-      environment: process.env.NODE_ENV || "development",
-    };
-  }
-}
-
-function getGitRepositoryUrl(): string | undefined {
-  // Use Vercel environment variables in production
-  if (process.env.VERCEL) {
-    const repoOwner = process.env.VERCEL_GIT_REPO_OWNER;
-    const repoSlug = process.env.VERCEL_GIT_REPO_SLUG;
-    if (repoOwner && repoSlug) {
-      // Assume GitHub for Vercel deployments
-      return `https://github.com/${repoOwner}/${repoSlug}`;
+    const json = await res.json();
+    if (json?.success && json.data) {
+      return json.data as DevSheetData;
     }
-  }
-
-  // Fallback to git command in development
-  try {
-    const remoteUrl = execSync("git config --get remote.origin.url", {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-
-    // Convert SSH to HTTPS URL (git@github.com:user/repo.git -> https://github.com/user/repo)
-    if (remoteUrl.startsWith("git@")) {
-      const match = remoteUrl.match(/git@([^:]+):(.+)\.git$/);
-      if (match) {
-        const [, host, repo] = match;
-        return `https://${host}/${repo}`;
-      }
-    }
-
-    // Convert HTTPS URL (remove .git if present)
-    if (remoteUrl.startsWith("http")) {
-      return remoteUrl.replace(/\.git$/, "");
-    }
-
-    return remoteUrl;
+    return null;
   } catch {
-    return undefined;
+    return null;
   }
-}
-
-function getGitRepositoryName(): string | undefined {
-  const repoUrl = getGitRepositoryUrl();
-  if (!repoUrl) return undefined;
-
-  // Extract repository name from URL
-  // e.g., https://github.com/user/repo -> "GitHub"
-  // or we could extract the repo name: "user/repo"
-  if (repoUrl.includes("github.com")) {
-    return "GitHub";
-  } else if (repoUrl.includes("gitlab.com")) {
-    return "GitLab";
-  } else if (repoUrl.includes("bitbucket.org")) {
-    return "Bitbucket";
-  }
-
-  return undefined;
-}
-
-function getGitCommitUrl(commitSha?: string): string | undefined {
-  const repoUrl = getGitRepositoryUrl();
-  if (!repoUrl) return undefined;
-
-  const sha =
-    commitSha ||
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    (() => {
-      try {
-        return execSync("git rev-parse HEAD", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
-        }).trim();
-      } catch {
-        return undefined;
-      }
-    })();
-
-  if (!sha) return undefined;
-
-  // Generate commit URL for GitHub, GitLab, etc.
-  if (repoUrl.includes("github.com")) {
-    return `${repoUrl}/commit/${sha}`;
-  } else if (repoUrl.includes("gitlab.com")) {
-    return `${repoUrl}/-/commit/${sha}`;
-  } else if (repoUrl.includes("bitbucket.org")) {
-    return `${repoUrl}/commits/${sha}`;
-  }
-
-  return undefined;
-}
-
-function getGitStatus(): string {
-  // In production (Vercel), assume clean since it's from a committed state
-  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
-    return "clean";
-  }
-
-  // Only check git status in development
-  try {
-    const status = execSync("git status --porcelain", {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-    return status.length === 0 ? "clean" : "dirty";
-  } catch {
-    return "unknown";
-  }
-}
-
-function getBuildTime(): string {
-  try {
-    const nextDir = join(process.cwd(), ".next");
-    const stats = statSync(nextDir);
-    return stats.mtime.toISOString();
-  } catch {
-    return new Date().toISOString();
-  }
-}
-
-function getCommitDate(commitSha?: string): string | undefined {
-  const sha =
-    commitSha ||
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    (() => {
-      try {
-        return execSync("git rev-parse HEAD", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
-        }).trim();
-      } catch {
-        return undefined;
-      }
-    })();
-
-  if (!sha) return undefined;
-
-  try {
-    const dateStr = execSync(`git log -1 --format=%ci ${sha}`, {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-    return dateStr ? new Date(dateStr).toISOString() : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function getCommitMessage(commitSha?: string): string | undefined {
-  // Use Vercel's environment variable in production
-  if (process.env.VERCEL_GIT_COMMIT_MESSAGE) {
-    return process.env.VERCEL_GIT_COMMIT_MESSAGE;
-  }
-
-  const sha =
-    commitSha ||
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    (() => {
-      try {
-        return execSync("git rev-parse HEAD", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
-        }).trim();
-      } catch {
-        return undefined;
-      }
-    })();
-
-  if (!sha) return undefined;
-
-  try {
-    const message = execSync(`git log -1 --format=%s ${sha}`, {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-    return message || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function getCommitAuthor(commitSha?: string): string | undefined {
-  // Use Vercel's environment variable in production
-  if (process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME) {
-    return process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME;
-  }
-
-  const sha =
-    commitSha ||
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    (() => {
-      try {
-        return execSync("git rev-parse HEAD", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
-        }).trim();
-      } catch {
-        return undefined;
-      }
-    })();
-
-  if (!sha) return undefined;
-
-  try {
-    const author = execSync(`git log -1 --format=%an ${sha}`, {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-    return author || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function getGitBranch(): string | undefined {
-  // Use Vercel's environment variable in production
-  if (process.env.VERCEL_GIT_COMMIT_REF) {
-    return process.env.VERCEL_GIT_COMMIT_REF;
-  }
-
-  // Fallback to git command in development
-  try {
-    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-      encoding: "utf-8",
-      cwd: process.cwd(),
-    }).trim();
-    return branch || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function getGitInfo() {
-  const commitSha =
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    (() => {
-      try {
-        return execSync("git rev-parse HEAD", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
-        }).trim();
-      } catch {
-        return undefined;
-      }
-    })();
-
-  return {
-    repositoryUrl: getGitRepositoryUrl(),
-    repositoryName: getGitRepositoryName(),
-    status: getGitStatus(),
-    branch: getGitBranch(),
-    commitSha: commitSha || undefined,
-    commitUrl: getGitCommitUrl(commitSha),
-    commitAuthor: getCommitAuthor(commitSha),
-    commitDate: getCommitDate(commitSha),
-    commitMessage: getCommitMessage(commitSha),
-  };
-}
-
-function getKeyDependencies(): string[] {
-  try {
-    const packagePath = join(process.cwd(), "package.json");
-    const packageJson = JSON.parse(readFileSync(packagePath, "utf-8"));
-    const allDeps = {
-      ...packageJson.dependencies,
-      ...packageJson.devDependencies,
-    };
-
-    const keyDeps = [
-      "next",
-      "react",
-      "react-dom",
-      "typescript",
-      "tailwindcss",
-      "drizzle-orm",
-      "vitest",
-      "eslint",
-      "prettier",
-    ];
-
-    return keyDeps
-      .filter((dep) => allDeps[dep])
-      .map((dep) => `${dep}@${allDeps[dep]}`);
-  } catch {
-    return [];
-  }
-}
-
-function getVercelInfo() {
-  // Only return Vercel info if running on Vercel
-  if (!process.env.VERCEL) {
-    return undefined;
-  }
-
-  return {
-    env: process.env.VERCEL_ENV || "unknown",
-    url: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : undefined,
-    branchUrl: process.env.VERCEL_BRANCH_URL
-      ? `https://${process.env.VERCEL_BRANCH_URL}`
-      : undefined,
-    productionUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : undefined,
-    region: process.env.VERCEL_REGION || undefined,
-    buildTime: getBuildTime(),
-  };
-}
-
-async function getDevSheetData(): Promise<DevSheetData> {
-  const apps = await getAppStatuses();
-  const shadcnConfig = getShadcnConfig();
-  const allComponents = getAllComponents();
-  const techStack = getTechStack();
-  const git = getGitInfo();
-  const dependencies = getKeyDependencies();
-  const vercel = getVercelInfo();
-
-  return {
-    apps,
-    shadcn: {
-      ...shadcnConfig,
-      components: allComponents.shadcn,
-    },
-    components: allComponents,
-    techStack,
-    git,
-    dependencies: {
-      key: dependencies,
-    },
-    vercel,
-    lastUpdated: new Date().toISOString(),
-  };
 }
 
 // Helper function to check if a weight is supported by a font
@@ -769,7 +293,18 @@ function renderComponentExample(componentName: string) {
 }
 
 export default async function DevSheetPage() {
-  const data = await getDevSheetData();
+  const data = await fetchDevSheetData();
+
+  if (!data) {
+    return (
+      <div className="container mx-auto p-8 space-y-8">
+        <h1 className="mb-2">Development Sheet</h1>
+        <p className="text-muted-foreground">
+          Unable to load development data. Please try again in a moment.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
