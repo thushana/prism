@@ -2,8 +2,8 @@
  * Logger package - Centralized logging infrastructure
  *
  * Usage:
- * - Client components: import from "logger/source/client"
- * - Server code: import from "logger/source/server"
+ * - Client components: import from "@logger/client"
+ * - Server code: import from "@logger/server"
  * - Or use direct exports for convenience
  */
 

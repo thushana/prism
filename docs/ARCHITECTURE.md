@@ -104,7 +104,7 @@ Shared utility functions:
 - **Package Names**: Simple names without scope (`ui`, `database`, `utilities`)
 - **Directory Convention**: `source/` instead of `src/` for packages
 - **Versioning**: All packages use `*` for workspace dependencies
-- **Import Style**: Direct imports from package names (`import { Button } from "ui"`)
+- **Import Style**: @ prefixed imports from package names (`import { Button } from "@ui"`)
 
 ### Application Architecture
 
@@ -197,9 +197,9 @@ Each workspace has its own `tsconfig.json`:
 TypeScript path mapping allows imports like:
 
 ```typescript
-import { Button } from "ui"; // Resolves to packages/ui/source
-import { db } from "database"; // Resolves to packages/database/source
-import { cn } from "utilities"; // Resolves to packages/utilities/source
+import { Button } from "@ui"; // Resolves to packages/ui/source
+import { db } from "@database"; // Resolves to packages/database/source
+import { cn } from "@utilities"; // Resolves to packages/utilities/source
 ```
 
 ## Build Process

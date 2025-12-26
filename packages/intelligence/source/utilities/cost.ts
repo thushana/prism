@@ -3,7 +3,7 @@
  * Calculates costs from token usage and logs them
  */
 
-import { serverLogger as logger, logCost } from "logger";
+import { serverLogger as logger, logCost } from "@logger";
 import {
   calculateCost as calculateCostFromModel,
   getModelConfig,

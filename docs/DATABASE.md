@@ -31,8 +31,8 @@ The shared database package exports both `database` and `db` (they are aliases):
 
 ```typescript
 // Both of these work - they reference the same instance
-import { db } from "database";
-import { database } from "database"; // Also available
+import { db } from "@database";
+import { database } from "@database"; // Also available
 
 // Query users
 const users = await db.query.users.findMany();
@@ -57,7 +57,7 @@ await db.update(users).set({ name: "Jane Doe" }).where(eq(users.id, 1));
 **Shared Package (`packages/database`)**:
 
 - Used by CLI tools, shared utilities, and cross-app functionality
-- Import with: `import { db } from "database"` or `import { database } from "database"`
+- Import with: `import { db } from "@database"` or `import { database } from "@database"`
 - Schema defined in `packages/database/source/schema.ts`
 - Database file location: `data/database/sqlite.db` (at project root)
 
@@ -93,9 +93,9 @@ export const users = sqliteTable("users", {
 
 ```typescript
 // You can use either 'db' or 'database' - they're the same
-import { db } from "database";
-// or: import { database } from "database";
-import { users } from "database/schema";
+import { db } from "@database";
+// or: import { database } from "@database";
+import { users } from "@database/schema";
 import { eq } from "drizzle-orm";
 
 // Find all

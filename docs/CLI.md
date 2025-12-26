@@ -138,7 +138,7 @@ Each command will follow this structure:
 ```typescript
 import { Command } from "commander";
 import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
-import type { BaseCommandOptions } from "cli";
+import type { BaseCommandOptions } from "@cli";
 
 export interface MyCommandOptions extends BaseCommandOptions {
   flag?: boolean;
@@ -182,7 +182,7 @@ Create `tools/app/commands/my-command.ts`:
 ```typescript
 import { Command } from "commander";
 import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
-import type { BaseCommandOptions } from "cli";
+import type { BaseCommandOptions } from "@cli";
 
 export interface MyCommandOptions extends BaseCommandOptions {
   input?: string;
@@ -232,7 +232,7 @@ import {
   withErrorHandling,
   parseNumber,
   requireOption,
-} from "cli";
+} from "@cli";
 
 interface HelloOptions extends BaseCommandOptions {
   name?: string;
@@ -331,8 +331,8 @@ console.log("Processing...");
 ```typescript
 // ✅ Good - Package-style imports (configured via tsconfig.json paths)
 import { serverLogger as logger } from "@logger/server";
-import { parseNumber } from "cli";
-import { database } from "database";
+import { parseNumber } from "@cli";
+import { database } from "@database";
 
 // ❌ Bad - Relative imports (hard to maintain, break on refactoring)
 import { serverLogger as logger } from "../../../packages/logger/source/server";
@@ -430,7 +430,7 @@ function loadConfig() {
 ### Database Access
 
 ```typescript
-import { database } from "database";
+import { database } from "@database";
 import * as path from "path";
 
 const dbPath = path.join(process.cwd(), "businesses.db");

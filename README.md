@@ -164,7 +164,7 @@ This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite for devel
 ### Usage Example
 
 ```typescript
-import { db } from "database";
+import { db } from "@database";
 
 // Both apps can import from the shared database package
 const data = await db.query.users.findMany();
@@ -230,13 +230,13 @@ Apps within this monorepo can use direct package imports:
 
 ```typescript
 // Import UI components
-import { Button, Card } from "ui";
+import { Button, Card } from "@ui";
 
 // Import database
-import { db } from "database";
+import { db } from "@database";
 
 // Import utilities
-import { cn } from "utilities";
+import { cn } from "@utilities";
 
 // Import logger (client-side)
 import { logger, logSuccess } from "@logger/client";
@@ -245,7 +245,7 @@ import { logger, logSuccess } from "@logger/client";
 import { serverLogger as logger, logStart } from "@logger/server";
 
 // Import dev-sheet
-import { DevSheetPage } from "dev-sheet";
+import { DevSheetPage } from "@dev-sheet";
 ```
 
 ### Dev-Sheet
@@ -256,8 +256,8 @@ Prism includes a shared development information page that shows environment deta
 
 ```typescript
 // app/dev-sheet/page.tsx
-import { DevSheetPage } from "dev-sheet";
-import type { DevSheetData } from "dev-sheet";
+import { DevSheetPage } from "@dev-sheet";
+import type { DevSheetData } from "@dev-sheet";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";

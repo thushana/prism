@@ -1,5 +1,5 @@
-import { Button } from "ui";
-import { Card, CardContent, CardHeader, CardTitle } from "ui";
+import { Button } from "@ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@ui";
 import { db } from "../database/db";
 
 export default async function Home() {

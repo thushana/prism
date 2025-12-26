@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
 import { serverLogger } from "@logger/server";
-import type { BaseCommandOptions } from "cli";
+import type { BaseCommandOptions } from "@cli";
 
 const logger = serverLogger;
 const log: {
@@ -193,12 +193,13 @@ function generateTsConfig(targetDir: string, inMonorepo: boolean): void {
     ? {
         "@/*": ["./*"],
         // Monorepo paths (like apps/web)
-        database: ["../../packages/database/source"],
-        intelligence: ["../../packages/intelligence/source"],
-        logger: ["../../packages/logger/source"],
-        ui: ["../../packages/ui/source"],
-        utilities: ["../../packages/utilities/source"],
-        "dev-sheet": ["../../packages/dev-sheet/source"],
+        "@database": ["../../packages/database/source"],
+        "@intelligence": ["../../packages/intelligence/source"],
+        "@logger": ["../../packages/logger/source"],
+        "@logger/*": ["../../packages/logger/source/*"],
+        "@ui": ["../../packages/ui/source"],
+        "@utilities": ["../../packages/utilities/source"],
+        "@dev-sheet": ["../../packages/dev-sheet/source"],
       }
     : {
         "@/*": ["./*"],

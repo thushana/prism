@@ -4,7 +4,7 @@
  */
 
 import type { z } from "zod";
-import { serverLogger as logger } from "logger";
+import { serverLogger as logger } from "@logger";
 import { trackCost } from "../utilities/cost";
 import { withRetry, getErrorMessage } from "../utilities/retry";
 import type { Task, TaskConfig, TaskResult, ExecutionResult } from "./types";

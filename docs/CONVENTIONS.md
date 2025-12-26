@@ -188,16 +188,16 @@ packages/
 
 ### Import Path Conventions
 
-- Use workspace package names for shared packages: `import { Button } from "ui"`
+- Use @ prefixed package names for shared packages: `import { Button } from "@ui"`
 - Use `@/*` path alias for app-specific imports (points to app root)
 - Use relative imports for local files
 - Examples:
 
   ```typescript
   // Workspace packages (shared)
-  import { Button, Card } from "ui";
-  import { db } from "database";
-  import { cn } from "utilities";
+  import { Button, Card } from "@ui";
+  import { db } from "@database";
+  import { cn } from "@utilities";
 
   // App-specific imports (using @ alias)
   import { MyComponent } from "@/components/MyComponent";
@@ -228,14 +228,39 @@ packages/
 ```typescript
 // ✅ Good - Package-style imports
 import { serverLogger, logStart, logSuccess } from "@logger/server";
-import { parseNumber, requireOption } from "cli";
-import { database, users } from "database";
-import type { BaseCommandOptions } from "cli";
+import { parseNumber, requireOption } from "@cli";
+import { database, users } from "@database";
+import type { BaseCommandOptions } from "@cli";
 
 // ❌ Bad - Relative imports (hard to maintain)
 import { serverLogger } from "../../../packages/logger/source/server";
 import { parseNumber } from "../../../packages/cli/source/index";
+
+// ❌ Bad - Non-prefixed package imports (will fail ESLint)
+import { Button } from "ui";
+import { db } from "database";
 ```
+
+### Enforcement
+
+The `@` prefix requirement is automatically enforced:
+
+1. **ESLint Rule**: The `no-restricted-imports` rule prevents non-prefixed package imports
+   - Configured in `eslint.config.mjs`
+   - Blocks: `database`, `cli`, `logger`, `ui`, `utilities`, `intelligence`, `dev-sheet`
+   - Requires: `@database`, `@cli`, `@logger`, `@ui`, `@utilities`, `@intelligence`, `@dev-sheet`
+
+2. **Pre-commit Hook**: Runs `lint-staged` which executes ESLint with `--fix` on staged files
+   - Automatically fixes violations when possible
+   - Blocks commits if violations cannot be auto-fixed
+
+3. **CI/CD**: GitHub Actions runs `npm run lint` on every push/PR
+   - Ensures all code conforms before merging
+   - Part of the quality checks workflow
+
+4. **TypeScript**: Path mappings in `tsconfig.json` only support `@` prefixed paths
+   - Non-prefixed imports will fail type checking
+   - Ensures consistency across the codebase
 
 **Relative imports are only acceptable** for local files within the same directory/subdirectory:
 

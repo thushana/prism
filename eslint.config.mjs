@@ -21,6 +21,53 @@ const eslintConfig = defineConfig([
     ".next",
     "**/.next",
   ]),
+  {
+    rules: {
+      // Enforce @ prefixed imports for packages (only exact matches, not relative paths)
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "database",
+              message:
+                "Package imports must use @ prefix. Use '@database' instead of 'database'.",
+            },
+            {
+              name: "cli",
+              message:
+                "Package imports must use @ prefix. Use '@cli' instead of 'cli'.",
+            },
+            {
+              name: "logger",
+              message:
+                "Package imports must use @ prefix. Use '@logger' instead of 'logger'.",
+            },
+            {
+              name: "ui",
+              message:
+                "Package imports must use @ prefix. Use '@ui' instead of 'ui'.",
+            },
+            {
+              name: "utilities",
+              message:
+                "Package imports must use @ prefix. Use '@utilities' instead of 'utilities'.",
+            },
+            {
+              name: "intelligence",
+              message:
+                "Package imports must use @ prefix. Use '@intelligence' instead of 'intelligence'.",
+            },
+            {
+              name: "dev-sheet",
+              message:
+                "Package imports must use @ prefix. Use '@dev-sheet' instead of 'dev-sheet'.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -31,8 +31,8 @@ packages/ui/
 The UI package is automatically available in all apps via npm workspaces. No installation needed - just import:
 
 ```typescript
-import { Button, Card, Badge, Icon } from "ui";
-import { satoshi, sentient, zodiak, gambarino } from "ui";
+import { Button, Card, Badge, Icon } from "@ui";
+import { satoshi, sentient, zodiak, gambarino } from "@ui";
 ```
 
 ## Components
@@ -44,7 +44,7 @@ A versatile button component with multiple variants and sizes.
 **Import:**
 
 ```typescript
-import { Button } from "ui";
+import { Button } from "@ui";
 ```
 
 **Variants:**
@@ -80,7 +80,7 @@ A container component for grouping related content.
 **Import:**
 
 ```typescript
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "ui";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@ui";
 ```
 
 **Example:**
@@ -106,7 +106,7 @@ A small status indicator or label component.
 **Import:**
 
 ```typescript
-import { Badge } from "ui";
+import { Badge } from "@ui";
 ```
 
 **Variants:**
@@ -131,7 +131,7 @@ A wrapper component for Material Symbols Rounded icons.
 **Import:**
 
 ```typescript
-import { Icon } from "ui";
+import { Icon } from "@ui";
 ```
 
 **Props:**
@@ -165,13 +165,13 @@ The UI package includes four custom font families configured for Next.js.
 **Import:**
 
 ```typescript
-import { satoshi, sentient, zodiak, gambarino } from "ui";
+import { satoshi, sentient, zodiak, gambarino } from "@ui";
 ```
 
 **In Layout:**
 
 ```tsx
-import { satoshi } from "ui";
+import { satoshi } from "@ui";
 
 export default function RootLayout({ children }) {
   return (
@@ -281,7 +281,7 @@ The `@layer base` section includes:
 In your app's root layout (`app/layout.tsx`):
 
 ```tsx
-import { satoshi } from "ui";
+import { satoshi } from "@ui";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -298,7 +298,7 @@ export default function RootLayout({ children }) {
 Simply import and use:
 
 ```tsx
-import { Button, Card, CardContent, CardHeader, CardTitle } from "ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@ui";
 
 export default function MyPage() {
   return (
@@ -369,7 +369,7 @@ Edit `packages/ui/styles/globals.css`:
 
 ## Best Practices
 
-1. **Import from `ui` package** - Always use `import { Component } from "ui"` not relative paths
+1. **Import from `@ui` package** - Always use `import { Component } from "@ui"` not relative paths
 2. **Use CSS variables** - Leverage theme variables for colors and spacing
 3. **Follow variant patterns** - Use CVA for component variants
 4. **Consistent styling** - Use Tailwind utilities and theme variables
@@ -388,6 +388,6 @@ See generated app templates or `apps/web` for comprehensive examples of:
 
 If migrating from the old `packages/styles` and `packages/fonts` structure:
 
-1. Update imports: `import { satoshi } from "styles"` → `import { satoshi } from "ui"`
+1. Update imports: `import { satoshi } from "styles"` → `import { satoshi } from "@ui"`
 2. Font paths are now relative to `packages/ui/fonts/`
 3. All UI-related code is now in `packages/ui/`

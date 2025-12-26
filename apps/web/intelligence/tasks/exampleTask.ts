@@ -5,8 +5,8 @@
  * Replace with your own tasks following the BaseTask pattern.
  */
 
-import { BaseTask } from "intelligence/tasks/base";
-import type { TaskConfig, ExecutionResult } from "intelligence/tasks/types";
+import { BaseTask } from "@intelligence/tasks/base";
+import type { TaskConfig, ExecutionResult } from "@intelligence/tasks/types";
 import { z } from "zod";
 
 const inputSchema = z.object({

@@ -416,7 +416,7 @@ const model = getAIModel("openai/gpt-5-nano");
 const defaultModel = getDefaultModel();
 
 // Use in server actions
-import { generateText } from "intelligence";
+import { generateText } from "@intelligence";
 import { getAIModel } from "@intelligence/client";
 
 // Using provider/model format
@@ -580,7 +580,7 @@ This approach provides immediate cost tracking without additional API calls.
 ```typescript
 import { calculateCost, getModelConfig } from "./models";
 // Import from packages/logger
-import { serverLogger as logger, logCost } from "logger";
+import { serverLogger as logger, logCost } from "@logger";
 
 export function trackCost(
   usage: { promptTokens: number; completionTokens: number },
@@ -862,7 +862,7 @@ export function getUserPrompt(input: MyInput, version = PROMPTS.current) {
 
 // index.ts
 import { BaseTask } from "../base";
-import { generateText } from "intelligence";
+import { generateText } from "@intelligence";
 import { getAIModel } from "@intelligence/client";
 import { MyInputSchema, MyOutputSchema, MyInput, MyOutput } from "./types";
 import { getSystemPrompt, getUserPrompt } from "./prompt";
@@ -1123,7 +1123,7 @@ curl -X POST http://localhost:3000/api/ai/tasks/execute \
 ```typescript
 // tools/app/commands/ai-generate.ts
 import { TaskRegistry } from "@intelligence/tasks/registry"; // Import via path alias
-import { serverLogger as logger } from "logger";
+import { serverLogger as logger } from "@logger";
 
 export async function runAiGenerate(options: { task: string; input: string }) {
   const input = JSON.parse(options.input);
@@ -1310,7 +1310,7 @@ export function getUserPrompt(input: MyInput, version = PROMPTS.current) {
 ```typescript
 // apps/{app}/intelligence/tasks/my-new-task/index.ts
 import { BaseTask } from "@intelligence/tasks/base"; // Import via path alias
-import { generateText } from "intelligence";
+import { generateText } from "@intelligence";
 import { getAIModel } from "@intelligence/client"; // Import via path alias
 import type { TaskConfig } from "@intelligence/tasks/types"; // Import via path alias
 import { MyInputSchema, MyOutputSchema, MyInput, MyOutput } from "./types";
@@ -1411,7 +1411,7 @@ const result = await executeMyTask(
 "use server";
 
 import { executeMyTask } from "@/intelligence/tasks"; // Import from app's tasks
-import { getItemById, updateItem } from "database";
+import { getItemById, updateItem } from "@database";
 
 export async function generateItem(itemId: number) {
   // Your database access here
@@ -1655,7 +1655,7 @@ All AI operations are automatically logged using your logger infrastructure.
 
 ```typescript
 // Adjust import path to match your logger
-import { serverLogger as logger } from "logger"; // Import from packages/logger
+import { serverLogger as logger } from "@logger"; // Import from packages/logger
 logger.level = "debug";
 ```
 

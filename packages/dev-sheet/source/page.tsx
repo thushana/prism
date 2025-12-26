@@ -1,7 +1,7 @@
 import { Geist_Mono } from "next/font/google";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "ui";
-import { Icon } from "ui";
-import { satoshi, sentient, zodiak } from "ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@ui";
+import { Icon } from "@ui";
+import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
 import type { DevSheetConfig, DevSheetData } from "./types";
 

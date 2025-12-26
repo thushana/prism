@@ -1,5 +1,5 @@
-import { DevSheetPage } from "dev-sheet";
-import type { DevSheetData } from "dev-sheet";
+import { DevSheetPage } from "@dev-sheet";
+import type { DevSheetData } from "@dev-sheet";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";

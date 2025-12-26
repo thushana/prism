@@ -63,6 +63,11 @@
       "prettier --write"
     ],
     "packages/**/*.{ts,tsx,js,jsx,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "tools/**/*.{ts,tsx,js,jsx,mjs}": [
+      "eslint --fix",
       "prettier --write"
     ],
     "**/*.{json,md}": [

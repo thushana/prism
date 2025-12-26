@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { DevSheetData } from "dev-sheet";
+import type { DevSheetData } from "@dev-sheet";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

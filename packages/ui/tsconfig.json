@@ -14,7 +14,7 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "utilities": ["../../packages/utilities/source"]
+      "@utilities": ["../../packages/utilities/source"]
     }
   },
   "include": ["source/**/*.ts", "source/**/*.tsx"],

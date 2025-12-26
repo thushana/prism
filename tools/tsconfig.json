@@ -14,10 +14,10 @@
     "incremental": true,
     "allowImportingTsExtensions": true,
     "paths": {
-      "cli": ["../packages/cli/source"],
-      "logger": ["../packages/logger/source"],
+      "@cli": ["../packages/cli/source"],
+      "@logger": ["../packages/logger/source"],
       "@logger/*": ["../packages/logger/source/*"],
-      "database": ["../packages/database/source"]
+      "@database": ["../packages/database/source"]
     }
   },
   "include": ["app/**/*.ts"],

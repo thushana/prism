@@ -3,9 +3,9 @@
  * Centralized LLM infrastructure for model-powered features
  *
  * Usage:
- * - Client: import { getAIModel, getDefaultModel } from "intelligence/client"
- * - Utilities: import { trackCost, withRetry } from "intelligence/utilities/*"
- * - Tasks: import { BaseTask, TaskRegistry } from "intelligence/tasks/*"
+ * - Client: import { getAIModel, getDefaultModel } from "@intelligence/client"
+ * - Utilities: import { trackCost, withRetry } from "@intelligence/utilities/*"
+ * - Tasks: import { BaseTask, TaskRegistry } from "@intelligence/tasks/*"
  */
 
 // Re-export client

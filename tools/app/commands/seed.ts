@@ -5,10 +5,15 @@
  */
 
 import { Command } from "commander";
-import { parseNumber } from "cli";
-import { database, users } from "database";
-import { serverLogger as logger, logStart, logSuccess, logStats } from "@logger/server";
-import type { BaseCommandOptions } from "cli";
+import { parseNumber } from "@cli";
+import { database, users } from "@database";
+import {
+  serverLogger as logger,
+  logStart,
+  logSuccess,
+  logStats,
+} from "@logger/server";
+import type { BaseCommandOptions } from "@cli";
 
 export interface SeedCommandOptions extends BaseCommandOptions {
   count?: string;
