@@ -117,7 +117,7 @@ The centralized logging infrastructure is implemented and available via the `log
 **Client-side (React components):**
 
 ```typescript
-import { logger, logSuccess } from "logger/client";
+import { logger, logSuccess } from "@logger/client";
 
 logger.info("Component mounted");
 logger.error("Error occurred", { error });
@@ -127,7 +127,7 @@ logSuccess("Operation completed");
 **Server-side (API routes, server components):**
 
 ```typescript
-import { serverLogger as logger, logStart } from "logger/server";
+import { serverLogger as logger, logStart } from "@logger/server";
 
 logger.info("Request received");
 logger.error("Database error", { error });
@@ -227,7 +227,7 @@ packages/
 
 ```typescript
 // ✅ Good - Package-style imports
-import { serverLogger, logStart, logSuccess } from "logger/server";
+import { serverLogger, logStart, logSuccess } from "@logger/server";
 import { parseNumber, requireOption } from "cli";
 import { database, users } from "database";
 import type { BaseCommandOptions } from "cli";

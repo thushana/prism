@@ -5,7 +5,7 @@
  */
 
 import { Command } from "commander";
-import { serverLogger, logStart, logSuccess } from "logger/server";
+import { serverLogger, logStart, logSuccess } from "@logger/server";
 import { execSync } from "child_process";
 import * as path from "path";
 import type { BaseCommandOptions } from "cli";

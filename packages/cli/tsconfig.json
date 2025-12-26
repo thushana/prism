@@ -13,7 +13,8 @@
     "isolatedModules": true,
     "incremental": true,
     "paths": {
-      "logger": ["../../packages/logger/source"]
+      "logger": ["../../packages/logger/source"],
+      "@logger/*": ["../../packages/logger/source/*"]
     }
   },
   "include": ["source/**/*.ts"],

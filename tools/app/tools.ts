@@ -8,7 +8,7 @@
  */
 
 import { Command } from "commander";
-import { serverLogger as logger } from "logger/server";
+import { serverLogger as logger } from "@logger/server";
 import * as dotenv from "dotenv";
 
 // Load environment variables

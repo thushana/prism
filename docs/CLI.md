@@ -137,7 +137,7 @@ Each command will follow this structure:
 
 ```typescript
 import { Command } from "commander";
-import { serverLogger as logger, logStart, logSuccess } from "logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
 import type { BaseCommandOptions } from "cli";
 
 export interface MyCommandOptions extends BaseCommandOptions {
@@ -164,7 +164,7 @@ export function registerMyCommand(program: Command) {
     .action(async (options: MyCommandOptions) => {
       try {
         await runMyCommand(options);
-        logger.success("Command completed");
+        logSuccess("Command completed");
       } catch (error) {
         logger.error("Command failed", { error });
         process.exitCode = 1;
@@ -181,7 +181,7 @@ Create `tools/app/commands/my-command.ts`:
 
 ```typescript
 import { Command } from "commander";
-import { serverLogger as logger, logStart, logSuccess } from "logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
 import type { BaseCommandOptions } from "cli";
 
 export interface MyCommandOptions extends BaseCommandOptions {
@@ -306,7 +306,7 @@ export function registerMyCommand(program: Command) {
 
 ```typescript
 // ✅ Good
-import { serverLogger as logger, logStart, logSuccess } from "logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
 logger.info("Processing...");
 
 // ❌ Bad
@@ -330,7 +330,7 @@ console.log("Processing...");
 
 ```typescript
 // ✅ Good - Package-style imports (configured via tsconfig.json paths)
-import { serverLogger as logger } from "logger/server";
+import { serverLogger as logger } from "@logger/server";
 import { parseNumber } from "cli";
 import { database } from "database";
 
@@ -446,7 +446,7 @@ try {
 ### Progress Reporting
 
 ```typescript
-import { logStart, logStats } from "logger/server";
+import { logStart, logStats } from "@logger/server";
 
 for (let i = 0; i < items.length; i++) {
   logStart(`[${i + 1}/${items.length}] Processing ${items[i].name}`);
@@ -470,7 +470,7 @@ If a command doesn't appear in help:
 
 If you see module resolution errors:
 
-1. Use package-style imports (`logger/server`, `cli`, `database`) - never relative imports for packages
+1. Use package-style imports (`@logger/server`, `cli`, `database`) - never relative imports for packages
 2. Verify `tsconfig.json` has the correct path mappings configured
 3. Check that the file is in the correct directory
 4. Verify TypeScript compilation

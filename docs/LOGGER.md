@@ -147,7 +147,7 @@ setLogLevel("debug"); // Enable debug logging
 setLogLevel("error"); // Only show errors
 ```
 
-**Note**: Client-side `setLogLevel()` is a no-op. Client log levels are determined by environment variables only.
+**Note**: Client-side `setLogLevel()` is a no-op. Client log levels are determined by environment variables only. The client logger does not expose a `level` property.
 
 ## Error Handling
 
@@ -266,23 +266,23 @@ logger.info(`Place saved: ${placeId}, ${name}, ${category}`); // Hard to parse
 | **Environment Variable**  | `NEXT_PUBLIC_LOG_LEVEL`     | `LOG_LEVEL`                |
 | **Runtime setLogLevel()** | No-op (not supported)       | Works                      |
 | **Bundling**              | No external dependencies    | Uses Winston (server-only) |
-| **File**                  | `logger-client.ts`          | `logger-server.ts`         |
+| **File**                  | `client.ts`                 | `server.ts`                |
 
 ### When to Use Which
 
-- **Client Components** (React components, pages): Use `logger-client.ts`
+- **Client Components** (React components, pages): Use `@logger/client`
 
   ```typescript
   import { logger } from "@logger/client";
   ```
 
-- **API Routes**: Use `logger-server.ts`
+- **API Routes**: Use `@logger/server`
 
   ```typescript
   import { serverLogger as logger } from "@logger/server";
   ```
 
-- **Server Components**: Use `logger-server.ts`
+- **Server Components**: Use `@logger/server`
 
   ```typescript
   import { serverLogger as logger } from "@logger/server";
@@ -313,6 +313,8 @@ Next.js/Turbopack analyzes all `require()` statements at build time, even when t
 ### Adding New Context Loggers
 
 To add a new context-specific logger, update both `packages/logger/source/client.ts` and `packages/logger/source/server.ts`:
+
+**Note**: The actual file paths are `client.ts` and `server.ts` in the `source` directory, not `logger-client.ts` or `logger-server.ts`.
 
 **In both files:**
 
@@ -386,7 +388,7 @@ logger.warn("Deprecated feature used");
 
 ## API Reference
 
-### Client Logger (`logger-client.ts`)
+### Client Logger (`client.ts`)
 
 **Exported Functions:**
 
@@ -410,6 +412,12 @@ logger.warn("Deprecated feature used");
 - `logger.log(level: string, message, meta?)` - Generic log method
 
 ### Server Logger (`server.ts`)
+
+**Note**: The server logger also exports `logger` as an alias for `serverLogger` for convenience:
+
+```typescript
+import { logger } from "@logger/server"; // Same as serverLogger
+```
 
 **Exported Functions:**
 

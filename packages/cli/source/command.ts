@@ -6,7 +6,7 @@ import type { Command } from "commander";
 
 // Import logger (peer dependency)
 // Using path alias configured in tsconfig.json
-import { serverLogger } from "logger/server";
+import { serverLogger } from "@logger/server";
 
 // Use serverLogger for error logging
 const logger = serverLogger;

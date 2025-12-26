@@ -239,10 +239,10 @@ import { db } from "database";
 import { cn } from "utilities";
 
 // Import logger (client-side)
-import { logger, logSuccess } from "logger/client";
+import { logger, logSuccess } from "@logger/client";
 
 // Import logger (server-side)
-import { serverLogger as logger, logStart } from "logger/server";
+import { serverLogger as logger, logStart } from "@logger/server";
 
 // Import dev-sheet
 import { DevSheetPage } from "dev-sheet";

@@ -24,6 +24,7 @@
       "database": ["../../packages/database/source"],
       "intelligence": ["../../packages/intelligence/source"],
       "logger": ["../../packages/logger/source"],
+      "@logger/*": ["../../packages/logger/source/*"],
       "ui": ["../../packages/ui/source"],
       "utilities": ["../../packages/utilities/source"],
       "dev-sheet": ["../../packages/dev-sheet/source"]

@@ -8,7 +8,7 @@ import { Command } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import { serverLogger } from "logger/server";
+import { serverLogger } from "@logger/server";
 import type { BaseCommandOptions } from "cli";
 
 const logger = serverLogger;
