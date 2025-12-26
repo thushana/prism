@@ -248,24 +248,47 @@ function generateTsConfig(targetDir: string, inMonorepo: boolean): void {
 
 /**
  * Get templates directory path
- * Resolves relative to the tools directory (where this command lives)
+ * Uses apps/web as the template source (the actual working app)
  */
 function getTemplatesDir(): string {
-  // Find tools directory by looking for tools/package.json
+  // Find Prism root by looking for package.json with workspaces
   let currentDir = process.cwd();
   while (currentDir !== path.dirname(currentDir)) {
-    const toolsDir = path.join(currentDir, "tools");
-    if (fs.existsSync(path.join(toolsDir, "package.json"))) {
-      return path.join(toolsDir, "templates");
+    const packageJsonPath = path.join(currentDir, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      try {
+        const packageJson = JSON.parse(
+          fs.readFileSync(packageJsonPath, "utf-8")
+        );
+        if (
+          packageJson.workspaces &&
+          (packageJson.name === "@prism/core" ||
+            packageJson.name?.includes("prism"))
+        ) {
+          const appsWebPath = path.join(currentDir, "apps", "web");
+          if (fs.existsSync(appsWebPath)) {
+            return appsWebPath;
+          }
+        }
+      } catch {
+        // Continue searching
+      }
     }
     currentDir = path.dirname(currentDir);
   }
-  // Fallback: assume we're in the project root
-  return path.resolve(process.cwd(), "tools/templates");
+  // Fallback: try relative to current directory
+  const fallbackPath = path.resolve(process.cwd(), "apps", "web");
+  if (fs.existsSync(fallbackPath)) {
+    return fallbackPath;
+  }
+  throw new Error(
+    "Could not find apps/web directory. Make sure you're running from the Prism monorepo root."
+  );
 }
 
 /**
- * Recursively copy template files from templates directory
+ * Recursively copy template files from apps/web directory
+ * Skips build artifacts, dependencies, and generated files
  */
 function copyTemplateFiles(
   sourceDir: string,
@@ -273,8 +296,47 @@ function copyTemplateFiles(
   vars: Record<string, string>
 ): void {
   if (!fs.existsSync(sourceDir)) {
-    log.error(`Templates directory not found: ${sourceDir}`);
-    throw new Error(`Templates directory not found: ${sourceDir}`);
+    log.error(`Template source directory not found: ${sourceDir}`);
+    throw new Error(`Template source directory not found: ${sourceDir}`);
+  }
+
+  // Files and directories to skip when copying from apps/web
+  const skipPatterns = [
+    ".git",
+    "node_modules",
+    ".next",
+    "out",
+    "build",
+    "coverage",
+    ".pnp",
+    ".pnp.js",
+    ".DS_Store",
+    "*.pem",
+    "npm-debug.log*",
+    "yarn-debug.log*",
+    "yarn-error.log*",
+    ".env",
+    ".env*.local",
+    ".vercel",
+    "*.tsbuildinfo",
+    "next-env.d.ts",
+    "*.db",
+    "*.db-wal",
+    "*.db-shm",
+    "data", // Skip data directory (contains database files)
+  ];
+
+  function shouldSkip(name: string): boolean {
+    return skipPatterns.some((pattern) => {
+      // Simple pattern matching
+      if (pattern.includes("*")) {
+        const regex = new RegExp(
+          "^" + pattern.replace(/\*/g, ".*").replace(/\./g, "\\.") + "$"
+        );
+        return regex.test(name);
+      }
+      return name === pattern;
+    });
   }
 
   function processDirectory(
@@ -284,14 +346,15 @@ function copyTemplateFiles(
     const entries = fs.readdirSync(currentSource, { withFileTypes: true });
 
     for (const entry of entries) {
+      // Skip files/directories that shouldn't be copied
+      if (shouldSkip(entry.name)) {
+        continue;
+      }
+
       const sourcePath = path.join(currentSource, entry.name);
       const targetPath = path.join(currentTarget, entry.name);
 
       if (entry.isDirectory()) {
-        // Skip .git directories
-        if (entry.name === ".git") {
-          continue;
-        }
         if (!fs.existsSync(targetPath)) {
           fs.mkdirSync(targetPath, { recursive: true });
         }
@@ -309,7 +372,7 @@ function copyTemplateFiles(
 }
 
 /**
- * Generate all template files from templates directory
+ * Generate all template files from apps/web directory
  */
 function generateTemplateFiles(
   targetDir: string,
@@ -327,8 +390,8 @@ function generateTemplateFiles(
     DEV_SHEET_IMPORT: inMonorepo ? "dev-sheet" : "@prism/core/dev-sheet",
   };
 
-  const templatesDir = getTemplatesDir();
-  copyTemplateFiles(templatesDir, targetDir, vars);
+  const templateSourceDir = getTemplatesDir();
+  copyTemplateFiles(templateSourceDir, targetDir, vars);
 
   // Create .env files (they're gitignored, so copy manually)
   const envExampleContent = `# Database
