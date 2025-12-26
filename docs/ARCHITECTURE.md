@@ -17,7 +17,7 @@
 This project uses a monorepo architecture to organize multiple applications and shared packages:
 
 ```
-starter-project/
+prism/
 ├── apps/
 │   └── web/              # Sample application (generated apps go here)
 ├── packages/

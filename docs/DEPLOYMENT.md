@@ -10,7 +10,7 @@ This monorepo contains sample and generated Next.js applications that can be dep
 2. Click "Add New" → "Project"
 3. Import your Git repository
 4. Configure:
-   - **Project Name**: `starter-project-web` (or your preferred name)
+   - **Project Name**: `prism-web` (or your preferred name)
    - **Framework Preset**: Next.js
    - **Root Directory**: `apps/web` ⚠️ **IMPORTANT**: This must be set!
    - **Build Command**: `npm run build` (or leave default - Vercel will run from apps/web)
