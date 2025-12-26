@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
+      "cli": ["../../packages/cli/source"],
       "database": ["../../packages/database/source"],
       "intelligence": ["../../packages/intelligence/source"],
       "logger": ["../../packages/logger/source"],

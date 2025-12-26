@@ -1,5 +1,5 @@
 {
-  "name": "@prism/tools",
+  "name": "@prism/cli",
   "version": "0.1.0",
   "private": true,
   "main": "./source/index.ts",

@@ -5,13 +5,12 @@
  */
 
 import { Command } from "commander";
-import * as loggerModule from "../../../packages/logger/source/server.ts";
+import { serverLogger, logStart, logSuccess } from "logger/server";
 import { execSync } from "child_process";
 import * as path from "path";
+import type { BaseCommandOptions } from "cli";
 
-const { serverLogger: logger, logStart, logSuccess } = loggerModule;
-
-import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
+const logger = serverLogger;
 
 export interface MigrateCommandOptions extends BaseCommandOptions {
   rollback?: boolean;

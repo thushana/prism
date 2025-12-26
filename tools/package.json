@@ -9,7 +9,7 @@
     "lint": "eslint app --ext .ts"
   },
   "dependencies": {
-    "@prism/tools": "*",
+    "@prism/cli": "*",
     "logger": "*",
     "database": "*",
     "commander": "^14.0.2",

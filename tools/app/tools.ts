@@ -8,10 +8,8 @@
  */
 
 import { Command } from "commander";
-import * as loggerModule from "../../packages/logger/source/server.ts";
+import { serverLogger as logger } from "logger/server";
 import * as dotenv from "dotenv";
-
-const { serverLogger: logger } = loggerModule;
 
 // Load environment variables
 dotenv.config();

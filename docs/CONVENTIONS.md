@@ -210,16 +210,41 @@ packages/
 
 ## CLI Commands
 
-> **Note**: CLI tool infrastructure is planned but not yet implemented. See [docs/CLI.md](./CLI.md) for future implementation details.
-
-When implemented:
+> The CLI tool is implemented. See [docs/CLI.md](./CLI.md) for usage and patterns.
 
 - CLI tool entry point: `npm run tools`
-- Commands will be defined in a CLI package (e.g., `packages/cli/`)
-- Each command will have:
+- Commands are defined under `tools/app/commands`
+- Each command has:
   - A `run*` function with the implementation
   - A `register*` function that registers the command with Commander
 - Use TypeScript interfaces for command options
+- Prefer `createCommand`/`withErrorHandling` from `packages/cli` for consistency
+- Reuse utilities like `parseNumber`, `requireOption`, and `createRegistry`
+
+### Import Patterns for CLI Commands
+
+**Always use package-style imports** - never relative imports for shared packages:
+
+```typescript
+// ✅ Good - Package-style imports
+import { serverLogger, logStart, logSuccess } from "logger/server";
+import { parseNumber, requireOption } from "cli";
+import { database, users } from "database";
+import type { BaseCommandOptions } from "cli";
+
+// ❌ Bad - Relative imports (hard to maintain)
+import { serverLogger } from "../../../packages/logger/source/server";
+import { parseNumber } from "../../../packages/cli/source/index";
+```
+
+**Relative imports are only acceptable** for local files within the same directory/subdirectory:
+
+```typescript
+// ✅ Acceptable - Local file in same directory
+import { helper } from "./helper";
+import { types } from "../types";
+```
+
 - Use the centralized logger from `"logger/server"` for all logging
 - Handle errors gracefully and set `process.exitCode` instead of throwing
 

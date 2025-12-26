@@ -4,6 +4,13 @@
 
 import type { Command } from "commander";
 
+// Import logger (peer dependency)
+// Using path alias configured in tsconfig.json
+import { serverLogger } from "logger/server";
+
+// Use serverLogger for error logging
+const logger = serverLogger;
+
 /**
  * Base command options that all commands should support
  */
@@ -73,7 +80,7 @@ export function createCommand<T extends BaseCommandOptions>(
       try {
         await definition.handler(options);
       } catch (error) {
-        console.error(`Command failed:`, error);
+        logger.error("Command failed", { error });
         process.exitCode = 1;
       }
     });
@@ -90,7 +97,7 @@ export function withErrorHandling<T extends BaseCommandOptions>(
     try {
       await handler(options);
     } catch (error) {
-      console.error("Command failed:", error);
+      logger.error("Command failed", { error });
       process.exitCode = 1;
       throw error;
     }

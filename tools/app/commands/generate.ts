@@ -8,17 +8,16 @@ import { Command } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import * as loggerModule from "../../../packages/logger/source/server.ts";
+import { serverLogger } from "logger/server";
+import type { BaseCommandOptions } from "cli";
 
-const { serverLogger: logger } = loggerModule;
+const logger = serverLogger;
 const log: {
   info: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   debug: (...args: unknown[]) => void;
 } = (logger as unknown as typeof console) ?? console;
-
-import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
 
 export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;

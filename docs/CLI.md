@@ -1,9 +1,5 @@
 # CLI Tool Documentation
 
-> **Status**: ✅ Implemented - The CLI infrastructure is now fully functional with seed, migrate, and export commands.
-
-## Overview
-
 The CLI tool (`npm run tools`) provides a unified command-line interface for common development and maintenance tasks. It uses **Commander.js** for argument parsing and command registration, with a clean separation between generic CLI utilities (`packages/cli`) and specific commands (`tools`).
 
 ## Architecture
@@ -58,6 +54,18 @@ npm run tools seed
 npm run tools seed --count 100
 ```
 
+#### `generate`
+
+Scaffold a new Prism-powered Next.js app.
+
+```bash
+# Generate a new app
+npm run tools generate my-app
+
+# Overwrite existing directory if needed
+npm run tools generate my-app --force
+```
+
 #### `migrate`
 
 Run database migrations manually.
@@ -90,7 +98,7 @@ packages/cli/
 ├── tsconfig.json
 └── source/
     ├── index.ts           # Package exports
-    ├── command.ts         # Base command patterns/interfaces
+    ├── command.ts         # Base command patterns/interfaces (createCommand, withErrorHandling)
     ├── registry.ts        # Command registration helpers
     └── utils.ts           # CLI utilities
 
@@ -101,41 +109,50 @@ tools/
 └── app/
     ├── tools.ts           # Main CLI entry point
     └── commands/
+        ├── generate.ts     # App scaffolding command
         ├── seed.ts        # Database seeding command
         ├── migrate.ts     # Migration runner
         └── export.ts      # Data export command
 ```
 
-### Command Registration Pattern (Planned)
+### Command Registration Pattern
 
-Commands will be registered in the main `tools.ts` file:
+Commands are registered in the main `tools.ts` file:
 
 ```typescript
+import { registerGenerateCommand } from "./commands/generate";
 import { registerSeedCommand } from "./commands/seed";
 import { registerMigrateCommand } from "./commands/migrate";
+import { registerExportCommand } from "./commands/export";
 
+registerGenerateCommand(program);
 registerSeedCommand(program);
 registerMigrateCommand(program);
+registerExportCommand(program);
 ```
 
-### Command Implementation Pattern (Planned)
+### Command Implementation Pattern
 
 Each command will follow this structure:
 
 ```typescript
 import { Command } from "commander";
-// Note: Logger infrastructure not yet implemented
-// import { serverLogger as logger } from "../../library/logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "logger/server";
+import type { BaseCommandOptions } from "cli";
 
-export interface MyCommandOptions {
+export interface MyCommandOptions extends BaseCommandOptions {
   flag?: boolean;
   option?: string;
 }
 
 export async function runMyCommand(options: MyCommandOptions) {
-  // Command implementation
-  logger.info("Command started");
-  // ... logic
+  if (options.debug || options.verbose) {
+    logger.level = "debug";
+  }
+
+  logStart("Command started");
+  // ... command logic
+  logSuccess("Command completed");
 }
 
 export function registerMyCommand(program: Command) {
@@ -160,17 +177,14 @@ export function registerMyCommand(program: Command) {
 
 ### Step 1: Create Command File
 
-Create `source/cli/commands/my-command.ts`:
+Create `tools/app/commands/my-command.ts`:
 
 ```typescript
 import { Command } from "commander";
-import {
-  serverLogger as logger,
-  logStart,
-  logSuccess,
-} from "../../library/logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "logger/server";
+import type { BaseCommandOptions } from "cli";
 
-export interface MyCommandOptions {
+export interface MyCommandOptions extends BaseCommandOptions {
   input?: string;
   output?: string;
   verbose?: boolean;
@@ -208,9 +222,39 @@ export function registerMyCommand(program: Command) {
 }
 ```
 
+### `packages/cli` helpers (current)
+
+Use the shared CLI helpers for consistency:
+
+```typescript
+import {
+  createCommand,
+  withErrorHandling,
+  parseNumber,
+  requireOption,
+} from "cli";
+
+interface HelloOptions extends BaseCommandOptions {
+  name?: string;
+}
+
+export const registerHelloCommand = createCommand<HelloOptions>({
+  name: "hello",
+  description: "Say hello",
+  options: [{ flags: "-n, --name <name>", description: "Name to greet" }],
+  handler: withErrorHandling(async (options) => {
+    requireOption(options.name, "name", "hello");
+    if (options.debug || options.verbose) {
+      logger.level = "debug";
+    }
+    logger.info(`Hello, ${options.name}!`);
+  }),
+});
+```
+
 ### Step 2: Register Command
 
-Add to `source/cli/tools.ts`:
+Add to `tools/app/tools.ts`:
 
 ```typescript
 import { registerMyCommand } from "./commands/my-command";
@@ -262,11 +306,7 @@ export function registerMyCommand(program: Command) {
 
 ```typescript
 // ✅ Good
-import {
-  serverLogger as logger,
-  logStart,
-  logSuccess,
-} from "../../library/logger/server";
+import { serverLogger as logger, logStart, logSuccess } from "logger/server";
 logger.info("Processing...");
 
 // ❌ Bad
@@ -286,15 +326,22 @@ console.log("Processing...");
 .description('Crawl')
 ```
 
-### 5. Use Relative Imports
+### 5. Use Package-Style Imports
 
 ```typescript
-// ✅ Good
-import { serverLogger as logger } from "../../library/logger/server";
+// ✅ Good - Package-style imports (configured via tsconfig.json paths)
+import { serverLogger as logger } from "logger/server";
+import { parseNumber } from "cli";
+import { database } from "database";
 
-// ❌ Bad
-import { serverLogger as logger } from "@/library/logger/server"; // Path aliases don't work in CLI
+// ❌ Bad - Relative imports (hard to maintain, break on refactoring)
+import { serverLogger as logger } from "../../../packages/logger/source/server";
+
+// ❌ Bad - Path aliases don't work in CLI context
+import { serverLogger as logger } from "@/library/logger/server";
 ```
+
+**Note**: Package-style imports are enabled via `tsconfig.json` path mappings. Never use relative imports (`../../../packages/...`) for shared packages - always use the package name directly.
 
 ### 6. Validate Required Arguments
 
@@ -353,7 +400,7 @@ npm run tools my-command --input test.txt --verbose
 Commands can be tested by importing the `run*` function:
 
 ```typescript
-import { runMyCommand } from "../cli/commands/my-command";
+import { runMyCommand } from "./my-command";
 
 describe("MyCommand", () => {
   it("should process input", async () => {
@@ -362,27 +409,6 @@ describe("MyCommand", () => {
   });
 });
 ```
-
-## Legacy Script Compatibility
-
-Old test scripts (`source/scripts/test-*.ts`) are thin wrappers that call CLI commands:
-
-```typescript
-import { runCrawl } from "../cli/commands/crawl";
-import { serverLogger as logger } from "../library/logger/server";
-
-async function main() {
-  const args = process.argv.slice(2);
-  // Parse args and call runCrawl()
-}
-
-main().catch((error) => {
-  logger.error("Crawl failed", { error });
-  process.exit(1);
-});
-```
-
-This maintains backward compatibility with existing npm scripts while using the new CLI infrastructure.
 
 ## Common Patterns
 
@@ -404,11 +430,11 @@ function loadConfig() {
 ### Database Access
 
 ```typescript
-import { createLocalDatabase } from "../../library/core/database";
+import { database } from "database";
 import * as path from "path";
 
 const dbPath = path.join(process.cwd(), "businesses.db");
-const db = createLocalDatabase(dbPath);
+const db = database.withConfig({ url: dbPath });
 
 try {
   // Use db
@@ -420,7 +446,7 @@ try {
 ### Progress Reporting
 
 ```typescript
-import { logStart, logStats } from "../../library/logger/server";
+import { logStart, logStats } from "logger/server";
 
 for (let i = 0; i < items.length; i++) {
   logStart(`[${i + 1}/${items.length}] Processing ${items[i].name}`);
@@ -444,9 +470,10 @@ If a command doesn't appear in help:
 
 If you see module resolution errors:
 
-1. Use relative imports, not path aliases (`@/library/...`)
-2. Check that the file is in the correct directory
-3. Verify TypeScript compilation
+1. Use package-style imports (`logger/server`, `cli`, `database`) - never relative imports for packages
+2. Verify `tsconfig.json` has the correct path mappings configured
+3. Check that the file is in the correct directory
+4. Verify TypeScript compilation
 
 ### Logger Not Working
 

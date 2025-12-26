@@ -5,15 +5,10 @@
  */
 
 import { Command } from "commander";
-import * as cliModule from "../../../packages/cli/source/index.ts";
-import * as db from "../../../packages/database/source/index.ts";
-import * as loggerModule from "../../../packages/logger/source/server.ts";
-
-const { parseNumber } = cliModule;
-const { database, users } = db;
-const { serverLogger: logger, logStart, logSuccess, logStats } = loggerModule;
-
-import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts";
+import { parseNumber } from "cli";
+import { database, users } from "database";
+import { serverLogger as logger, logStart, logSuccess, logStats } from "logger/server";
+import type { BaseCommandOptions } from "cli";
 
 export interface SeedCommandOptions extends BaseCommandOptions {
   count?: string;
