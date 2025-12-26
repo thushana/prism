@@ -8,7 +8,10 @@ import { Command } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import { serverLogger } from "@logger/server";
+// TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
+// Workaround: Use namespace import due to tsx bug with package.json exports
+import * as LoggerModule from "../../../packages/logger/source/server";
+const serverLogger = LoggerModule.serverLogger;
 import type { BaseCommandOptions } from "@cli";
 
 const logger = serverLogger;
@@ -22,6 +25,7 @@ const log: {
 export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
   force?: boolean;
+  path?: string;
 }
 
 /**
@@ -117,7 +121,7 @@ function generatePackageJson(
 ): void {
   // Determine dependencies based on location
   // If in monorepo, use workspace references like existing apps
-  // Otherwise, use @prism/core file reference
+  // For standalone, use file: dependencies to link Prism packages (enables CSS imports to work)
   const prismDependencies = prismRoot
     ? {
         // In monorepo, reference individual packages (like apps/web)
@@ -129,8 +133,15 @@ function generatePackageJson(
         "dev-sheet": "*",
       }
     : {
-        // Standalone app, use @prism/core
-        "@prism/core": "file:../prism",
+        // Standalone app: use file: refs to Prism packages
+        // Assumes Prism is at ../prism (sibling directory or git submodule)
+        // This enables CSS imports like @import "ui/styles/globals.css" to resolve
+        database: "file:../prism/packages/database",
+        intelligence: "file:../prism/packages/intelligence",
+        logger: "file:../prism/packages/logger",
+        ui: "file:../prism/packages/ui",
+        utilities: "file:../prism/packages/utilities",
+        "dev-sheet": "file:../prism/packages/dev-sheet",
       };
 
   const packageJson = {
@@ -170,6 +181,7 @@ function generatePackageJson(
       eslint: "^9.39.1",
       "eslint-config-next": "16.1.1",
       lightningcss: "^1.30.2",
+      "postcss-import": "^16.1.1",
       prettier: "^3.6.2",
       tailwindcss: "^4.1.17",
       tsx: "^4.20.6",
@@ -189,29 +201,33 @@ function generatePackageJson(
  * Generate tsconfig.json
  */
 function generateTsConfig(targetDir: string, inMonorepo: boolean): void {
-  const paths = inMonorepo
-    ? {
-        "@/*": ["./*"],
-        // Monorepo paths (like apps/web)
-        "@database": ["../../packages/database/source"],
-        "@intelligence": ["../../packages/intelligence/source"],
-        "@logger": ["../../packages/logger/source"],
-        "@logger/*": ["../../packages/logger/source/*"],
-        "@ui": ["../../packages/ui/source"],
-        "@utilities": ["../../packages/utilities/source"],
-        "@dev-sheet": ["../../packages/dev-sheet/source"],
-      }
-    : {
-        "@/*": ["./*"],
-        // Standalone app paths
-        "@prism/core/*": ["../packages/*/source"],
-        "@prism/core/ui": ["../packages/ui/source"],
-        "@prism/core/database": ["../packages/database/source"],
-        "@prism/core/intelligence": ["../packages/intelligence/source"],
-        "@prism/core/logger": ["../packages/logger/source"],
-        "@prism/core/utilities": ["../packages/utilities/source"],
-        "@prism/core/dev-sheet": ["../packages/dev-sheet/source"],
-      };
+  // Both monorepo and standalone use the same import style (@ui, @database, etc.)
+  // Standalone uses file: dependencies to link packages, so paths are the same
+  const paths = {
+    "@/*": ["./*"],
+    // Package paths - work in both monorepo and standalone (via file: dependencies)
+    "@database": inMonorepo
+      ? ["../../packages/database/source"]
+      : ["../prism/packages/database/source"],
+    "@intelligence": inMonorepo
+      ? ["../../packages/intelligence/source"]
+      : ["../prism/packages/intelligence/source"],
+    "@logger": inMonorepo
+      ? ["../../packages/logger/source"]
+      : ["../prism/packages/logger/source"],
+    "@logger/*": inMonorepo
+      ? ["../../packages/logger/source/*"]
+      : ["../prism/packages/logger/source/*"],
+    "@ui": inMonorepo
+      ? ["../../packages/ui/source"]
+      : ["../prism/packages/ui/source"],
+    "@utilities": inMonorepo
+      ? ["../../packages/utilities/source"]
+      : ["../prism/packages/utilities/source"],
+    "@dev-sheet": inMonorepo
+      ? ["../../packages/dev-sheet/source"]
+      : ["../prism/packages/dev-sheet/source"],
+  };
 
   const tsconfig = {
     compilerOptions: {
@@ -324,6 +340,8 @@ function copyTemplateFiles(
     "*.db-wal",
     "*.db-shm",
     "data", // Skip data directory (contains database files)
+    "package.json", // Skip package.json (generated separately with correct name)
+    "tsconfig.json", // Skip tsconfig.json (generated separately with correct paths)
   ];
 
   function shouldSkip(name: string): boolean {
@@ -374,20 +392,16 @@ function copyTemplateFiles(
 /**
  * Generate all template files from apps/web directory
  */
-function generateTemplateFiles(
-  targetDir: string,
-  appName: string,
-  inMonorepo: boolean
-): void {
+function generateTemplateFiles(targetDir: string, appName: string): void {
+  // Both monorepo and standalone use the same import style (@ui, @database, etc.)
+  // Standalone uses file: dependencies, so imports are identical
   const vars = {
     APP_NAME: appName,
-    UI_IMPORT: inMonorepo ? "ui" : "@prism/core/ui",
-    DATABASE_IMPORT: inMonorepo ? "database" : "@prism/core/database",
-    INTELLIGENCE_IMPORT: inMonorepo
-      ? "intelligence"
-      : "@prism/core/intelligence",
-    LOGGER_IMPORT: inMonorepo ? "logger" : "@prism/core/logger",
-    DEV_SHEET_IMPORT: inMonorepo ? "dev-sheet" : "@prism/core/dev-sheet",
+    UI_IMPORT: "@ui",
+    DATABASE_IMPORT: "@database",
+    INTELLIGENCE_IMPORT: "@intelligence",
+    LOGGER_IMPORT: "@logger",
+    DEV_SHEET_IMPORT: "@dev-sheet",
   };
 
   const templateSourceDir = getTemplatesDir();
@@ -444,15 +458,20 @@ export async function runGenerateCommand(
   const appName = options.name;
 
   // Determine target directory
+  // If --path is specified, use it (for standalone apps)
   // If we're in the Prism monorepo, save to apps/
   // Otherwise, save to current directory
   const prismRoot = findPrismRoot(process.cwd());
-  const targetDir = prismRoot
-    ? path.resolve(prismRoot, "apps", appName)
-    : path.resolve(process.cwd(), appName);
+  const targetDir = options.path
+    ? path.resolve(process.cwd(), options.path)
+    : prismRoot
+      ? path.resolve(prismRoot, "apps", appName)
+      : path.resolve(process.cwd(), appName);
 
   log.info(`Generating Prism app: ${appName}`);
-  if (prismRoot) {
+  if (options.path) {
+    log.info(`Saving to: ${targetDir}`);
+  } else if (prismRoot) {
     log.info(`Saving to monorepo: ${targetDir}`);
   }
 
@@ -478,10 +497,11 @@ export async function runGenerateCommand(
 
     // Generate files
     log.info("Generating template files...");
-    const inMonorepo = !!prismRoot;
-    generatePackageJson(targetDir, appName, prismRoot);
+    // If --path is specified, treat as standalone (even if in monorepo)
+    const inMonorepo = !!prismRoot && !options.path;
+    generatePackageJson(targetDir, appName, inMonorepo ? prismRoot : null);
     generateTsConfig(targetDir, inMonorepo);
-    generateTemplateFiles(targetDir, appName, inMonorepo);
+    generateTemplateFiles(targetDir, appName);
 
     // Auto-copy .env.example to .env
     log.info("Setting up environment files...");
@@ -497,8 +517,8 @@ export async function runGenerateCommand(
 
     // Install dependencies
     // If in monorepo, rebuild native modules (better-sqlite3) from root
-    // Otherwise, install in the generated app
-    if (prismRoot) {
+    // For standalone, install dependencies in the generated app
+    if (inMonorepo) {
       log.info("Rebuilding native modules for monorepo...");
       try {
         execSync("npm rebuild better-sqlite3", {
@@ -511,12 +531,18 @@ export async function runGenerateCommand(
         );
       }
     } else {
-      log.info("Installing dependencies...");
+      log.info("Installing dependencies in generated app...");
       const installCmd = getInstallCommand(pm);
-      execSync(installCmd, {
-        cwd: targetDir,
-        stdio: "inherit",
-      });
+      try {
+        execSync(installCmd, {
+          cwd: targetDir,
+          stdio: "inherit",
+        });
+        log.info("✅ Dependencies installed successfully");
+      } catch (error) {
+        log.warn("Failed to install dependencies automatically");
+        log.warn("Please run 'npm install' manually in the generated app");
+      }
     }
 
     // Ensure database directory exists for drizzle (e.g., ./data/database/sqlite.db)
@@ -577,7 +603,8 @@ export async function runGenerateCommand(
 
     log.info(`✅ Successfully generated ${appName}!`);
     log.info(`\nNext steps:`);
-    log.info(`  cd ${appName}`);
+    const relativePath = path.relative(process.cwd(), targetDir);
+    log.info(`  cd ${relativePath}`);
     log.info(`  npm run dev`);
   } catch (error) {
     log.error(`Failed to generate app: ${error}`);
@@ -596,6 +623,10 @@ export function registerGenerateCommand(program: Command): void {
     .option("-v, --verbose", "Enable verbose logging", false)
     .option("-d, --debug", "Enable debug logging", false)
     .option("-f, --force", "Overwrite existing directory if it exists", false)
+    .option(
+      "-p, --path <path>",
+      "Target directory path (for standalone apps outside monorepo)"
+    )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {
         await runGenerateCommand({ ...options, name });

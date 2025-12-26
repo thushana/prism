@@ -8,7 +8,10 @@
  */
 
 import { Command } from "commander";
-import { serverLogger as logger } from "@logger/server";
+// TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
+// Workaround: Use namespace import due to tsx bug with package.json exports
+import * as LoggerModule from "../../packages/logger/source/server";
+const logger = LoggerModule.serverLogger;
 import * as dotenv from "dotenv";
 
 // Load environment variables
