@@ -835,6 +835,95 @@ export async function GET() {
     -webkit-font-smoothing: antialiased;
   }
 }
+
+@layer components {
+  .typography-h1 {
+    font-family: var(--font-satoshi);
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+  }
+  .typography-h2 {
+    font-family: var(--font-satoshi);
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 600;
+  }
+  .typography-h3 {
+    font-family: var(--font-satoshi);
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+  }
+  .typography-h4 {
+    font-family: var(--font-satoshi);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+  }
+  .typography-h5 {
+    font-family: var(--font-satoshi);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+  }
+  .typography-h6 {
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+  }
+  .typography-subtitle1 {
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
+  }
+  .typography-subtitle2 {
+    font-family: var(--font-satoshi);
+    font-size: 0.95rem;
+    line-height: 1.4rem;
+    font-weight: 500;
+  }
+  .typography-body1 {
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+  .typography-body2 {
+    font-family: var(--font-satoshi);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+  }
+  .typography-button {
+    font-family: var(--font-satoshi);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+  }
+  .typography-caption {
+    font-family: var(--font-satoshi);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+  }
+  .typography-overline {
+    font-family: var(--font-satoshi);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .typography-label {
+    font-family: var(--font-satoshi);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+  }
+}
 `,
     vars
   );
