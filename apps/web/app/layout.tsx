@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { satoshi } from "ui";
-import "./globals.css";
+import "../ui/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Prism Sample",
-  description: "Prism Core sample application",
+  title: "web",
+  description: "Generated with Prism",
   other: {
     "material-symbols-font":
       "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional",

@@ -1,8 +1,5 @@
 @import "tailwindcss";
 @source "../**/*.{ts,tsx,js,jsx,mdx}";
-@source "../../../packages/ui/source/**/*.{ts,tsx}";
-@source "../../../packages/utilities/source/**/*.{ts,tsx}";
-@source "../../../packages/dev-sheet/source/**/*.{ts,tsx}";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -158,48 +155,91 @@
   }
 }
 
-@layer utilities {
-  /* Typography Variants - MUI-style */
+@layer components {
   .typography-h1 {
-    @apply text-4xl font-bold;
+    font-family: var(--font-satoshi);
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
   }
   .typography-h2 {
-    @apply text-3xl font-semibold;
+    font-family: var(--font-satoshi);
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 600;
   }
   .typography-h3 {
-    @apply text-2xl font-semibold;
+    font-family: var(--font-satoshi);
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
   }
   .typography-h4 {
-    @apply text-xl font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
   }
   .typography-h5 {
-    @apply text-lg font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 500;
   }
   .typography-h6 {
-    @apply text-base font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
   }
   .typography-subtitle1 {
-    @apply text-base font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
   }
   .typography-subtitle2 {
-    @apply text-sm font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 0.95rem;
+    line-height: 1.4rem;
+    font-weight: 500;
   }
   .typography-body1 {
-    @apply text-base font-normal;
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
   }
   .typography-body2 {
-    @apply text-sm font-normal;
+    font-family: var(--font-satoshi);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
   }
   .typography-button {
-    @apply text-sm font-medium uppercase tracking-wide;
+    font-family: var(--font-satoshi);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
   }
   .typography-caption {
-    @apply text-xs font-normal;
+    font-family: var(--font-satoshi);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
   }
   .typography-overline {
-    @apply text-xs font-normal uppercase tracking-widest;
+    font-family: var(--font-satoshi);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .typography-label {
-    @apply text-sm font-medium;
+    font-family: var(--font-satoshi);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 500;
   }
 }

@@ -1107,7 +1107,7 @@ seed();
  */
 
 import { BaseTask } from "{{INTELLIGENCE_IMPORT}}/tasks/base";
-import type { TaskConfig } from "{{INTELLIGENCE_IMPORT}}/tasks/types";
+import type { TaskConfig, ExecutionResult } from "{{INTELLIGENCE_IMPORT}}/tasks/types";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -1136,8 +1136,8 @@ export class ExampleTask extends BaseTask<Input, Output> {
 
   protected async executeTask(
     input: Input,
-    config: TaskConfig
-  ): Promise<{ data: Output; usage?: any }> {
+    _config: TaskConfig
+  ): Promise<ExecutionResult<Output>> {
     // TODO: Implement your task logic here
     // This is a placeholder that returns the input as output
     return {
@@ -1248,7 +1248,9 @@ export async function runGenerateCommand(
   // Check if directory already exists
   if (fs.existsSync(targetDir)) {
     if (options.force) {
-      log.warn(`Directory ${targetDir} already exists. Removing it due to --force flag...`);
+      log.warn(
+        `Directory ${targetDir} already exists. Removing it due to --force flag...`
+      );
       fs.rmSync(targetDir, { recursive: true, force: true });
     } else {
       log.error(`Directory ${targetDir} already exists`);

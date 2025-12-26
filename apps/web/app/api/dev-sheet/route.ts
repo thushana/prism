@@ -44,31 +44,11 @@ async function getGitInfo() {
         ? "clean"
         : "dirty";
 
-  const repositoryName = repositoryUrl
-    ? repositoryUrl
-        .replace(/\.git$/, "")
-        .split("/")
-        .pop()
-    : undefined;
-
-  const commitUrl =
-    repositoryUrl && commitSha
-      ? `${repositoryUrl.replace(/\.git$/, "")}/commit/${commitSha}`
-      : undefined;
-
-  const commitAuthor = await safeExec("git", ["log", "-1", "--format=%an"]);
-
-  const commitDate = await safeExec("git", ["log", "-1", "--format=%ci"]);
-
   return {
     repositoryUrl: repositoryUrl?.replace(/\.git$/, ""),
-    repositoryName,
     status: status || "unknown",
     branch: branch || undefined,
     commitSha: commitSha || undefined,
-    commitUrl,
-    commitAuthor: commitAuthor || undefined,
-    commitDate: commitDate || undefined,
     commitMessage: commitMessage || undefined,
   };
 }
@@ -79,12 +59,6 @@ function getVercelInfo() {
     env: process.env.VERCEL_ENV || "unknown",
     url: process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : undefined,
-    branchUrl: process.env.VERCEL_BRANCH_URL
-      ? `https://${process.env.VERCEL_BRANCH_URL}`
-      : undefined,
-    productionUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : undefined,
     region: process.env.VERCEL_REGION || undefined,
     buildTime: new Date().toISOString(),
@@ -114,7 +88,7 @@ export async function GET() {
         language: "TypeScript 5.9.3",
         styling: "Tailwind CSS 4.1.17",
         database: "Drizzle ORM beta",
-        testing: "Vitest 4.0.10",
+        testing: "None",
         nodeVersion: process.version,
         environment: process.env.NODE_ENV || "development",
       },
