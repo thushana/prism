@@ -16,18 +16,18 @@
     "db:seed": "tsx database/seed.ts"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "better-sqlite3": "^12.4.1",
     "database": "*",
+    "dev-sheet": "*",
+    "drizzle-orm": "beta",
     "intelligence": "*",
     "logger": "*",
-    "ui": "*",
-    "utilities": "*",
-    "dev-sheet": "*",
-    "@radix-ui/react-slot": "^1.2.4",
     "next": "16.1.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "better-sqlite3": "^12.4.1",
-    "drizzle-orm": "beta"
+    "ui": "*",
+    "utilities": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
@@ -40,6 +40,7 @@
     "eslint": "^9.39.1",
     "eslint-config-next": "16.1.1",
     "lightningcss": "^1.30.2",
+    "postcss-import": "^16.1.1",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.20.6",

@@ -160,7 +160,12 @@ Shared CLI utilities used by generator/ops commands:
 ### Styling
 
 - **Framework**: Tailwind CSS 4.1.17 (CSS-first configuration)
-- **Configuration**: Each app's `globals.css` includes `@source` directives to scan workspace packages
+- **Centralized Scanning**: The `packages/ui/styles/globals.css` file contains all `@source` directives for scanning Prism packages
+- **Path Resolution**: Uses relative paths (`../../utilities`, `../../dev-sheet`) that work in both:
+  - **Monorepo**: From `packages/ui/styles/` → `packages/utilities/`
+  - **Standalone**: From `node_modules/ui/styles/` → `node_modules/utilities/`
+- **App Integration**: Apps import Prism's base styles via `@import "ui/styles/globals.css"` and only scan their own files
+- **Location Independence**: Apps never use relative paths to packages - all package scanning happens in the UI package
 - **Fonts**: Custom fonts (Satoshi, Sentient, Zodiak, Gambarino) in `packages/ui/fonts/`
 - **Font Configuration**: Font exports from `packages/ui/styles/fonts.ts` using Next.js `localFont`
 - **Global Styles**: Base styles and theme variables in `packages/ui/styles/globals.css`

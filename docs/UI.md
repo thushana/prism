@@ -318,18 +318,28 @@ export default function MyPage() {
 
 Each app has its own `globals.css` that:
 
-1. Imports Tailwind CSS
-2. Includes `@source` directives to scan workspace packages
+1. Imports Prism's base styles from the UI package
+2. Adds `@source` directives to scan app-specific files
 3. Can extend or override UI package styles
 
-**Example `apps/web/app/globals.css`:**
+**Example `apps/web/ui/styles/globals.css`:**
 
 ```css
-@import "tailwindcss";
+/* Import Prism's base styles (includes Tailwind + all package scanning) */
+@import "ui/styles/globals.css";
+
+/* Scan app-specific files */
 @source "../**/*.{ts,tsx,js,jsx,mdx}";
-@source "../../../packages/ui/source/**/*.{ts,tsx}";
-@source "../../../packages/utilities/source/**/*.{ts,tsx}";
 ```
+
+**Key Benefits:**
+
+- **Location Independence**: Apps never use relative paths to packages - all scanning happens in `ui/styles/globals.css`
+- **Rails-like Framework**: One import gives you everything (Tailwind, theme, components, all package scanning)
+- **Works Everywhere**: The UI package's `@source` paths work in both monorepo and standalone:
+  - Monorepo: `../../utilities` from `packages/ui/styles/` → `packages/utilities/`
+  - Standalone: `../../utilities` from `node_modules/ui/styles/` → `node_modules/utilities/`
+- **Future-Proof**: Works with npm packages, git submodules, or monorepo workspaces
 
 ## Package Dependencies
 
@@ -359,6 +369,46 @@ The UI package depends on:
 3. Export from `packages/ui/styles/index.ts`
 4. Update documentation
 
+### Package-Level CSS Architecture
+
+Prism uses a **centralized CSS scanning** approach where the UI package handles all Tailwind source scanning:
+
+```
+packages/
+├── ui/
+│   └── styles/
+│       └── globals.css          # Main styles + scans all Prism packages
+├── dev-sheet/
+│   └── source/                  # Scanned by ui/styles/globals.css
+└── utilities/
+    └── source/                  # Scanned by ui/styles/globals.css
+```
+
+**How it works:**
+
+1. `packages/ui/styles/globals.css` contains all `@source` directives:
+
+   ```css
+   @source "../source/**/*.{ts,tsx}"; /* UI package */
+   @source "../../utilities/source/**/*.{ts,tsx}"; /* Utilities package */
+   @source "../../dev-sheet/source/**/*.{ts,tsx}"; /* Dev-sheet package */
+   ```
+
+2. These paths work in both contexts:
+   - **Monorepo**: `../../utilities` from `packages/ui/styles/` → `packages/utilities/`
+   - **Standalone**: `../../utilities` from `node_modules/ui/styles/` → `node_modules/utilities/`
+
+3. Apps import `ui/styles/globals.css` once to get everything (Tailwind, theme, all package scanning)
+
+4. Apps only need to scan their own files: `@source "../**/*.{ts,tsx,js,jsx,mdx}"`
+
+**Benefits:**
+
+- Apps never use relative paths to packages
+- Each package is self-contained
+- Works identically in monorepo and standalone contexts
+- Rails-like: one import gives you the full framework
+
 ### Modifying Theme
 
 Edit `packages/ui/styles/globals.css`:
@@ -370,10 +420,12 @@ Edit `packages/ui/styles/globals.css`:
 ## Best Practices
 
 1. **Import from `@ui` package** - Always use `import { Component } from "@ui"` not relative paths
-2. **Use CSS variables** - Leverage theme variables for colors and spacing
-3. **Follow variant patterns** - Use CVA for component variants
-4. **Consistent styling** - Use Tailwind utilities and theme variables
-5. **Type safety** - All components are fully typed with TypeScript
+2. **CSS imports use package names** - Use `@import "ui/styles/globals.css"` not relative paths like `../../../packages/ui/styles/globals.css`
+3. **Use CSS variables** - Leverage theme variables for colors and spacing
+4. **Follow variant patterns** - Use CVA for component variants
+5. **Consistent styling** - Use Tailwind utilities and theme variables
+6. **Type safety** - All components are fully typed with TypeScript
+7. **Never hardcode package paths** - Apps should work identically in monorepo and standalone contexts
 
 ## Examples
 

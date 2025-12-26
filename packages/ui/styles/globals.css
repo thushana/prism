@@ -1,7 +1,16 @@
 @import "tailwindcss";
-@source "../../../apps/**/*.{ts,tsx,js,jsx,mdx}";
+
+/* Scan UI package source files */
 @source "../source/**/*.{ts,tsx}";
+
+/* Scan other Prism packages
+ * These paths work in both contexts:
+ * - Monorepo: ../../utilities from packages/ui/styles/ → packages/utilities/
+ * - Standalone: ../../utilities from node_modules/ui/styles/ → node_modules/utilities/
+ */
 @source "../../utilities/source/**/*.{ts,tsx}";
+@source "../../dev-sheet/source/**/*.{ts,tsx}";
+
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

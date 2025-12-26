@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { satoshi } from "@ui";
+import { satoshi, sentient, zodiak } from "@ui";
 import "../ui/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -25,7 +25,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${satoshi.variable} antialiased`}>{children}</body>
+      <body
+        className={`${satoshi.variable} ${sentient.variable} ${zodiak.variable} antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
