@@ -166,6 +166,7 @@ function generatePackageJson(
       "@types/node": "^24.10.1",
       "@types/react": "^19.2.6",
       "@types/react-dom": "^19.2.3",
+      commander: "^12.1.0",
       "drizzle-kit": "beta",
       eslint: "^9.39.1",
       "eslint-config-next": "16.1.1",
@@ -235,7 +236,7 @@ function generateTsConfig(targetDir: string, inMonorepo: boolean): void {
       paths,
     },
     include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    exclude: ["node_modules"],
+    exclude: ["node_modules", "cli"],
   };
 
   fs.writeFileSync(
