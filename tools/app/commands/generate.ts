@@ -22,6 +22,7 @@ import type { BaseCommandOptions } from "../../../packages/cli/source/command.ts
 
 export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
+  force?: boolean;
 }
 
 /**
@@ -1157,9 +1158,15 @@ export async function runGenerateCommand(
 
   // Check if directory already exists
   if (fs.existsSync(targetDir)) {
-    log.error(`Directory ${targetDir} already exists`);
-    process.exitCode = 1;
-    return;
+    if (options.force) {
+      log.warn(`Directory ${targetDir} already exists. Removing it due to --force flag...`);
+      fs.rmSync(targetDir, { recursive: true, force: true });
+    } else {
+      log.error(`Directory ${targetDir} already exists`);
+      log.error(`Use --force to overwrite the existing directory`);
+      process.exitCode = 1;
+      return;
+    }
   }
 
   try {
@@ -1286,6 +1293,7 @@ export function registerGenerateCommand(program: Command): void {
     .description("Generate a new Next.js app with Prism core")
     .option("-v, --verbose", "Enable verbose logging", false)
     .option("-d, --debug", "Enable debug logging", false)
+    .option("-f, --force", "Overwrite existing directory if it exists", false)
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {
         await runGenerateCommand({ ...options, name });
