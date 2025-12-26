@@ -106,8 +106,8 @@ Style and naming conventions for this codebase.
 The centralized logging infrastructure is implemented and available via the `logger` package.
 
 - **Avoid `console.log/error/warn`** - Use the centralized logger instead
-- **Client components**: Import from `"logger/client"` or `"logger"`
-- **Server code**: Import from `"logger/server"` or `"logger"`
+- **Client components**: Import from `"@logger/client"` (or `@prism/core/logger` when consuming Prism as a package)
+- **Server code**: Import from `"@logger/server"` (or `@prism/core/logger` when consuming Prism as a package)
 - Use appropriate log levels: `error`, `warn`, `info`, `debug`, `verbose`, `silly`
 - Include structured metadata for errors and context
 - See [docs/LOGGER.md](./LOGGER.md) for detailed documentation
@@ -165,9 +165,29 @@ packages/
 │   └── source/
 │       ├── schema.ts
 │       └── index.ts
-└── utilities/              # Shared utilities
+├── utilities/              # Shared utilities
+│   └── source/
+│       ├── classnames.ts
+│       └── index.ts
+├── logger/                 # Centralized logging (client/server)
+│   └── source/
+│       ├── client.ts
+│       ├── server.ts
+│       └── index.ts
+├── intelligence/           # AI task registry and helpers
+│   └── source/
+│       ├── tasks/
+│       ├── utilities/
+│       └── index.ts
+├── dev-sheet/              # Developer cheatsheet primitives
+│   └── source/
+│       ├── page.tsx
+│       ├── data.ts
+│       └── index.ts
+└── cli/                    # Shared CLI utilities
     └── source/
-        ├── classnames.ts
+        ├── command.ts
+        ├── registry.ts
         └── index.ts
 ```
 
@@ -176,6 +196,10 @@ packages/
 - **`packages/ui/source/`** - Shared UI components (Button, Card, Badge, Icon)
 - **`packages/database/source/`** - Database schema and queries
 - **`packages/utilities/source/`** - Utility functions (classnames, etc.)
+- **`packages/logger/source/`** - Centralized logging for client/server
+- **`packages/intelligence/source/`** - AI helpers, tasks, and utilities
+- **`packages/dev-sheet/source/`** - Developer cheatsheet primitives
+- **`packages/cli/source/`** - Shared CLI helpers used by tools
 - **`apps/*/app/`** - Next.js App Router pages and layouts
 - **`apps/*/app/components/`** - App-specific React components
 
@@ -207,6 +231,8 @@ packages/
   import { helper } from "./helper";
   import { types } from "../types";
   ```
+
+- When consuming Prism outside this monorepo, use the published subpaths: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, and `@prism/core/dev-sheet`.
 
 ## CLI Commands
 
@@ -270,7 +296,7 @@ import { helper } from "./helper";
 import { types } from "../types";
 ```
 
-- Use the centralized logger from `"logger/server"` for all logging
+- Use the centralized logger from `"@logger/server"` for all logging
 - Handle errors gracefully and set `process.exitCode` instead of throwing
 
 ### Command Naming (Future)

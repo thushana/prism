@@ -2,10 +2,10 @@
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.0.3 (App Router)
+- **Framework**: Next.js 16.1.1 (App Router)
 - **Language**: TypeScript 5.9.3 (target: ES2022)
 - **Styling**: Tailwind CSS 4.1.17
-- **Database**: Drizzle ORM 0.44.7 with SQLite (better-sqlite3)
+- **Database**: Drizzle ORM (beta) with SQLite (better-sqlite3)
 - **Testing**: Vitest 4.0.10 with React Testing Library
 - **Linting**: ESLint 9.39.1
 - **Formatting**: Prettier 3.6.2
@@ -23,8 +23,12 @@ prism/
 ├── packages/
 │   ├── ui/               # Shared UI components
 │   ├── database/         # Database layer
-│   └── utilities/        # Shared utilities
-├── tools/                 # CLI tools and generator
+│   ├── utilities/        # Shared utilities
+│   ├── logger/           # Centralized logging
+│   ├── intelligence/     # AI helpers and task registry
+│   ├── dev-sheet/        # Developer cheatsheet app primitives
+│   └── cli/              # Shared CLI utilities
+├── tools/                 # CLI entrypoint and generator
 └── package.json          # Root workspace configuration
 ```
 
@@ -96,12 +100,44 @@ Shared utility functions:
 - `source/classnames.ts` - Tailwind class name merger (`cn`)
 - Includes tests for utilities
 
+#### packages/logger
+
+Centralized logging used across server and client:
+
+- `source/` - Client and server loggers with transport abstractions
+- `source/server.ts` - Server logger, lifecycle helpers
+- `source/client.ts` - Client logger with browser-safe outputs
+- Tests cover client/server usage
+
+#### packages/intelligence
+
+AI task registry and helpers:
+
+- `source/tasks/` - Task definitions and registry
+- `source/utilities/` - Cost tracking, retry logic, model helpers
+- `models.config.json` - Model configuration defaults
+
+#### packages/dev-sheet
+
+Shared primitives for the developer cheatsheet experience:
+
+- `source/page.tsx` - Main cheatsheet page component
+- `source/data.ts` - Reference data exposed to apps
+- `source/types.ts` - Types for cheatsheet entries
+
+#### packages/cli
+
+Shared CLI utilities used by generator/ops commands:
+
+- `source/` - Commander helpers, registry utilities, parsing helpers
+- Consumed by `tools/app/commands/*`
+
 ## Key Decisions
 
 ### Monorepo Architecture
 
 - **Workspace Management**: Using npm workspaces (native npm feature)
-- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`)
+- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `dev-sheet`, `cli`)
 - **Directory Convention**: `source/` instead of `src/` for packages
 - **Versioning**: All packages use `*` for workspace dependencies
 - **Import Style**: @ prefixed imports from package names (`import { Button } from "@ui"`)
@@ -179,12 +215,24 @@ Each app declares dependencies on shared packages:
   "dependencies": {
     "ui": "*",
     "database": "*",
-    "utilities": "*"
+    "utilities": "*",
+    "logger": "*",
+    "intelligence": "*",
+    "dev-sheet": "*"
   }
 }
 ```
 
 The `*` version means "use the local workspace version" during development.
+
+### Using Prism as a Package
+
+Prism is intended to be consumed as a dependency when building new apps:
+
+- Install `@prism/core` (from npm or a Git source) and import subpaths per package.
+- Subpath exports map to the workspace packages: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, and `@prism/core/dev-sheet`.
+- Inside this monorepo we use path aliases like `@ui` and `@logger`; external apps can import the same modules via the `@prism/core/*` subpaths without custom path mapping.
+- Generated apps scaffolded by the CLI are already wired to use these imports.
 
 ## TypeScript Configuration
 
@@ -197,9 +245,12 @@ Each workspace has its own `tsconfig.json`:
 TypeScript path mapping allows imports like:
 
 ```typescript
-import { Button } from "@ui"; // Resolves to packages/ui/source
-import { db } from "@database"; // Resolves to packages/database/source
-import { cn } from "@utilities"; // Resolves to packages/utilities/source
+import { Button } from "@ui"; // packages/ui
+import { db } from "@database"; // packages/database
+import { cn } from "@utilities"; // packages/utilities
+import { serverLogger } from "@logger/server"; // packages/logger
+import { getDefaultModel } from "@intelligence"; // packages/intelligence
+import { DevSheetPage } from "@dev-sheet"; // packages/dev-sheet
 ```
 
 ## Build Process
@@ -241,15 +292,13 @@ For larger monorepos, consider:
 1. **Local Development**:
 
    ```bash
-   npm run dev        # Run all apps concurrently (kills existing servers first)
-   npm run dev:web    # Run web only (port 3000)
-   npm run dev:admin  # Run admin only (port 3001)
+   npm run dev        # Kill stale servers, then run the web app on :3000
+   npm run dev:web    # Run web only (alias)
    npm run dev:setup  # Set up subdomain routing (one-time setup)
    ```
 
    **Subdomain Routing**: After running `npm run dev:setup`, you can access:
    - Web: `http://www.localhost:3000` or `http://web.localhost:3000`
-   - Admin: `http://admin.localhost:3001`
 
 2. **Making Changes**:
    - Edit files in any workspace
