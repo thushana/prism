@@ -27,8 +27,12 @@ npm run database:studio
 
 ## Connecting
 
+The shared database package exports both `database` and `db` (they are aliases):
+
 ```typescript
+// Both of these work - they reference the same instance
 import { db } from "database";
+import { database } from "database"; // Also available
 
 // Query users
 const users = await db.query.users.findMany();
@@ -47,6 +51,24 @@ await db.insert(users).values({
 // Update
 await db.update(users).set({ name: "Jane Doe" }).where(eq(users.id, 1));
 ```
+
+### Shared Package vs App-Specific Database
+
+**Shared Package (`packages/database`)**:
+
+- Used by CLI tools, shared utilities, and cross-app functionality
+- Import with: `import { db } from "database"` or `import { database } from "database"`
+- Schema defined in `packages/database/source/schema.ts`
+- Database file location: `data/database/sqlite.db` (at project root)
+
+**App-Specific Database (`apps/web/database`)**:
+
+- Used for app-specific database needs and custom configurations
+- Import with: `import { db } from "../database/db"` (relative import)
+- Schema defined in `apps/web/database/schema.ts`
+- Database file location: `apps/web/data/database/sqlite.db` (app-specific)
+
+Choose the shared package for CLI tools and shared functionality. Use app-specific database for app-specific schemas and configurations.
 
 ## Schema Definition
 
@@ -70,7 +92,9 @@ export const users = sqliteTable("users", {
 ### Querying
 
 ```typescript
+// You can use either 'db' or 'database' - they're the same
 import { db } from "database";
+// or: import { database } from "database";
 import { users } from "database/schema";
 import { eq } from "drizzle-orm";
 

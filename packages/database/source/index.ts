@@ -67,5 +67,8 @@ const sqlite = new Database(dbPath);
 // @ts-expect-error - Beta version type definitions don't match runtime API yet
 export const database = drizzle(sqlite, { schema });
 
+// Export db as an alias for backward compatibility and consistency
+export const db = database;
+
 // Export schema for convenience
 export * from "./schema";
