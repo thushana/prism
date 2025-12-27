@@ -6,6 +6,7 @@ Write a commit message for the changes on disk
 - Cover all unstaged changes in the commit
 - Craft a holistic and descriptive message
 - It must be in this format: **Emoji** + **ALL CAPS** slug + dash + brief description
+- If the repository has submodules, then we need commit messages for the sub repos as well separately
 
 ```
 🎯 EMOJI ALL CAPS SLUG - Brief description of the feature succinctly
@@ -27,3 +28,5 @@ Write a commit message for the changes on disk
 `🎨` UI `🐛` Fix `✨` Feature `🗄️` Database `⚙️` Config `📝` Docs `🔧` Tooling `🎯` Dev tools `🚀` Deploy `♻️` Refactor `⚡` Performance `🔒` Security
 
 Return it as a copyable Markdown block
+
+Ask the user if they'd like to have it committed for them. If so, commit the submodules with the deepest first (to establish their commit hashes), then commit this repository so the submodule references can be updated.
