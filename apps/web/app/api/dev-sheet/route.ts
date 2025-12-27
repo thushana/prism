@@ -65,39 +65,44 @@ function getVercelInfo() {
   };
 }
 
+export async function getDevSheetData(): Promise<DevSheetData> {
+  const git = await getGitInfo();
+  const vercel = getVercelInfo();
+
+  const data: DevSheetData = {
+    apps: [],
+    shadcn: {
+      style: "default",
+      iconLibrary: "material-symbols",
+      baseColor: "neutral",
+      components: [],
+    },
+    components: {
+      shadcn: [],
+      custom: [],
+      app: [],
+    },
+    techStack: {
+      framework: "Next.js 16.1.1",
+      language: "TypeScript 5.9.3",
+      styling: "Tailwind CSS 4.1.17",
+      database: "Drizzle ORM beta",
+      testing: "None",
+      nodeVersion: process.version,
+      environment: process.env.NODE_ENV || "development",
+    },
+    git,
+    dependencies: { key: [] },
+    vercel,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  return data;
+}
+
 export async function GET() {
   try {
-    const git = await getGitInfo();
-    const vercel = getVercelInfo();
-
-    const data: DevSheetData = {
-      apps: [],
-      shadcn: {
-        style: "default",
-        iconLibrary: "material-symbols",
-        baseColor: "neutral",
-        components: [],
-      },
-      components: {
-        shadcn: [],
-        custom: [],
-        app: [],
-      },
-      techStack: {
-        framework: "Next.js 16.1.1",
-        language: "TypeScript 5.9.3",
-        styling: "Tailwind CSS 4.1.17",
-        database: "Drizzle ORM beta",
-        testing: "None",
-        nodeVersion: process.version,
-        environment: process.env.NODE_ENV || "development",
-      },
-      git,
-      dependencies: { key: [] },
-      vercel,
-      lastUpdated: new Date().toISOString(),
-    };
-
+    const data = await getDevSheetData();
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Failed to get dev-sheet data:", error);

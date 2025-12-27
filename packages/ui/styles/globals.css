@@ -131,6 +131,42 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1 {
+    font-family: var(--font-satoshi);
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+  }
+  h2 {
+    font-family: var(--font-satoshi);
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 600;
+  }
+  h3 {
+    font-family: var(--font-satoshi);
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+  }
+  h4 {
+    font-family: var(--font-satoshi);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+  }
+  h5 {
+    font-family: var(--font-satoshi);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+  }
+  h6 {
+    font-family: var(--font-satoshi);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+  }
   .material-symbols-rounded {
     font-family: "Material Symbols Rounded";
     font-weight: normal;
