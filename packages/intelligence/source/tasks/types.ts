@@ -6,6 +6,16 @@
 import type { z } from "zod";
 
 /**
+ * Type alias for Zod schemas that output a specific type
+ * This is more permissive than z.ZodType to allow any Zod schema structure.
+ * Uses a structural type that accepts any object with parse and safeParse methods.
+ */
+export type ZodSchema<T> = {
+  parse: (input: unknown) => T;
+  safeParse: (input: unknown) => z.SafeParseReturnType<unknown, T> | z.ZodSafeParseReturnType<unknown, T>;
+};
+
+/**
  * Result returned by task execution
  */
 export interface TaskResult<T> {
@@ -39,8 +49,8 @@ export interface TaskConfig {
 export interface Task<TInput, TOutput> {
   name: string;
   description: string;
-  inputSchema: z.ZodSchema<TInput>;
-  outputSchema: z.ZodSchema<TOutput>;
+  inputSchema: ZodSchema<TInput>;
+  outputSchema: ZodSchema<TOutput>;
   defaultConfig: TaskConfig;
   execute(
     input: TInput,
@@ -66,6 +76,6 @@ export interface ExecutionResult<T> {
 export interface TaskMetadata {
   name: string;
   description: string;
-  inputSchema: z.ZodSchema<any>;
-  outputSchema: z.ZodSchema<any>;
+  inputSchema: ZodSchema<unknown>;
+  outputSchema: ZodSchema<unknown>;
 }

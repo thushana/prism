@@ -7,7 +7,7 @@ import type { z } from "zod";
 import { serverLogger as logger } from "@logger";
 import { trackCost } from "../utilities/cost";
 import { withRetry, getErrorMessage } from "../utilities/retry";
-import type { Task, TaskConfig, TaskResult, ExecutionResult } from "./types";
+import type { Task, TaskConfig, TaskResult, ExecutionResult, ZodSchema } from "./types";
 
 /**
  * Abstract base class for AI tasks
@@ -19,8 +19,8 @@ export abstract class BaseTask<TInput, TOutput> implements Task<
 > {
   abstract name: string;
   abstract description: string;
-  abstract inputSchema: z.ZodSchema<TInput>;
-  abstract outputSchema: z.ZodSchema<TOutput>;
+  abstract inputSchema: ZodSchema<TInput>;
+  abstract outputSchema: ZodSchema<TOutput>;
 
   defaultConfig: TaskConfig = {
     model: "google/gemini-3-flash",
