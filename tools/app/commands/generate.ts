@@ -265,7 +265,7 @@ export default nextConfig;
  * Generate .nvmrc file to ensure Node.js version consistency
  */
 function generateNvmrc(targetDir: string): void {
-  const nvmrcContent = "22\n";
+  const nvmrcContent = "24.11.1\n";
   fs.writeFileSync(path.join(targetDir, ".nvmrc"), nvmrcContent, "utf-8");
 }
 
