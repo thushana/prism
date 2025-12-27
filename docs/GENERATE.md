@@ -154,30 +154,51 @@ import { DevSheetPage } from "@prism/core/dev-sheet";
 
 For standalone apps (generated outside the monorepo), you have two options:
 
-### Option 1: Git Dependency (Recommended for Deployment)
+### Option 1: Git Submodule (Recommended - One Deployable Repo)
 
-Generate with the `--prism-repo` flag to use Prism from GitHub:
-
-```bash
-npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-```
-
-This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process.
-
-### Option 2: File Dependencies (For Local Iteration)
-
-Generate without `--prism-repo` to use local file dependencies:
+Generate without `--prism-repo` to add Prism as a git submodule inside your app:
 
 ```bash
 npm run prism generate my-app --path ../my-app
 ```
 
-This assumes Prism is at `../prism` (as a git submodule or sibling directory). Perfect for fast iteration when developing both Prism and your app simultaneously.
+This automatically:
 
-**For deployment**, you'll need to either:
+- Adds Prism as a git submodule at `./prism` inside your app
+- Uses `file:./prism/packages/...` dependencies for fast iteration
+- Creates a single deployable repo (your app + Prism submodule)
 
-- Switch to git dependency: `npm install --save git+https://github.com/thushana/prism.git`
-- Or use git submodule (Vercel supports this automatically)
+**Workflow:**
+
+```bash
+cd my-app
+
+# Make changes to Prism
+vim prism/packages/ui/source/button.tsx
+
+# Commit to Prism (pushes to github.com/thushana/prism)
+cd prism
+git add . && git commit -m "UI - Update button"
+git push
+cd ..
+
+# Update submodule reference in app
+git add prism
+git commit -m "Update Prism submodule"
+git push  # Deploys to Vercel
+```
+
+Vercel automatically handles git submodules during deployment.
+
+### Option 2: Git Dependency (Alternative for Deployment)
+
+Generate with the `--prism-repo` flag to use Prism from GitHub as an npm dependency:
+
+```bash
+npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+```
+
+This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process. Note: You won't be able to commit Prism changes from within your app with this approach.
 
 ## Customization
 
@@ -264,7 +285,7 @@ If imports fail:
 
 - **Monorepo apps**: Ensure workspace dependencies are installed: `npm install` (from monorepo root)
 - **Standalone apps with git dependency**: Ensure Prism repo is accessible and `npm install` completes
-- **Standalone apps with file dependencies**: Ensure Prism is at `../prism` (git submodule or sibling directory)
+- **Standalone apps with file dependencies**: Ensure Prism submodule is initialized: `git submodule update --init --recursive`
 - Check that TypeScript paths in `tsconfig.json` are correctly configured
 
 ### Build Errors

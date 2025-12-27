@@ -236,7 +236,7 @@ packages/
   - Generated apps use path aliases (`@ui`, `@database`, etc.) that work with both git and file dependencies
   - The generator automatically configures TypeScript paths to resolve these imports
   - Prism is available at: `git+https://github.com/thushana/prism.git`
-  - For local iteration, use git submodule: `git submodule add https://github.com/thushana/prism.git ../prism`
+  - The generator automatically adds Prism as a git submodule at `./prism` inside your app (one deployable repo)
 
 ## CLI Commands
 

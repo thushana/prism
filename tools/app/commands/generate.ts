@@ -143,17 +143,17 @@ function generatePackageJson(
         }
       : {
           // Standalone app: use file: refs to Prism packages (local dev only)
-          // Assumes Prism is at ../prism (sibling directory or git submodule)
+          // Prism is added as a git submodule at ./prism (inside the app)
           // This enables CSS imports like @import "ui/styles/globals.css" to resolve
           // For deployment, you'll need to either:
           // 1. Use --prism-repo flag to generate with git dependency
           // 2. Or manually change to git dependency before deploying
-          database: "file:../prism/packages/database",
-          intelligence: "file:../prism/packages/intelligence",
-          logger: "file:../prism/packages/logger",
-          ui: "file:../prism/packages/ui",
-          utilities: "file:../prism/packages/utilities",
-          "dev-sheet": "file:../prism/packages/dev-sheet",
+          database: "file:./prism/packages/database",
+          intelligence: "file:./prism/packages/intelligence",
+          logger: "file:./prism/packages/logger",
+          ui: "file:./prism/packages/ui",
+          utilities: "file:./prism/packages/utilities",
+          "dev-sheet": "file:./prism/packages/dev-sheet",
         };
 
   const packageJson = {
@@ -223,7 +223,7 @@ function generateNextConfig(
 import path from "path";
 
 const nextConfig: NextConfig = {
-  // Webpack configuration for file dependencies (symlinks outside project root)
+  // Webpack configuration for file dependencies (Prism as git submodule at ./prism)
   // Turbopack is disabled via --webpack flag in package.json scripts
   turbopack: {}, // Empty config to silence Turbopack warnings
   webpack: (config) => {
@@ -231,17 +231,17 @@ const nextConfig: NextConfig = {
     // These match the paths in tsconfig.json
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@database": path.resolve(__dirname, "../prism/packages/database/source"),
-      "@intelligence": path.resolve(__dirname, "../prism/packages/intelligence/source"),
-      "@intelligence/tasks": path.resolve(__dirname, "../prism/packages/intelligence/source/tasks"),
-      "@logger": path.resolve(__dirname, "../prism/packages/logger/source"),
-      "@logger/client": path.resolve(__dirname, "../prism/packages/logger/source/client"),
-      "@logger/server": path.resolve(__dirname, "../prism/packages/logger/source/server"),
-      "@ui": path.resolve(__dirname, "../prism/packages/ui/source"),
-      "@utilities": path.resolve(__dirname, "../prism/packages/utilities/source"),
-      "@dev-sheet": path.resolve(__dirname, "../prism/packages/dev-sheet/source"),
+      "@database": path.resolve(__dirname, "./prism/packages/database/source"),
+      "@intelligence": path.resolve(__dirname, "./prism/packages/intelligence/source"),
+      "@intelligence/tasks": path.resolve(__dirname, "./prism/packages/intelligence/source/tasks"),
+      "@logger": path.resolve(__dirname, "./prism/packages/logger/source"),
+      "@logger/client": path.resolve(__dirname, "./prism/packages/logger/source/client"),
+      "@logger/server": path.resolve(__dirname, "./prism/packages/logger/source/server"),
+      "@ui": path.resolve(__dirname, "./prism/packages/ui/source"),
+      "@utilities": path.resolve(__dirname, "./prism/packages/utilities/source"),
+      "@dev-sheet": path.resolve(__dirname, "./prism/packages/dev-sheet/source"),
     };
-    // Allow resolving symlinks outside project root
+    // Allow resolving symlinks (submodule creates symlinks in node_modules)
     config.resolve.symlinks = true;
     return config;
   },
@@ -300,21 +300,20 @@ function generateTsConfig(
         }
       : {
           "@/*": ["./*"],
-          // File dependencies: point directly to source files (bypass symlinks)
+          // File dependencies: Prism is a git submodule at ./prism
+          // Point directly to source files (bypass symlinks)
           // Turbopack doesn't support symlinks outside project root, so use direct paths
-          "@database": ["../prism/packages/database/source"],
-          "@intelligence": ["../prism/packages/intelligence/source"],
-          "@logger": ["../prism/packages/logger/source"],
-          "@logger/*": ["../prism/packages/logger/source/*"],
-          "@intelligence/tasks": [
-            "../prism/packages/intelligence/source/tasks",
-          ],
+          "@database": ["./prism/packages/database/source"],
+          "@intelligence": ["./prism/packages/intelligence/source"],
+          "@logger": ["./prism/packages/logger/source"],
+          "@logger/*": ["./prism/packages/logger/source/*"],
+          "@intelligence/tasks": ["./prism/packages/intelligence/source/tasks"],
           "@intelligence/tasks/*": [
-            "../prism/packages/intelligence/source/tasks/*",
+            "./prism/packages/intelligence/source/tasks/*",
           ],
-          "@ui": ["../prism/packages/ui/source"],
-          "@utilities": ["../prism/packages/utilities/source"],
-          "@dev-sheet": ["../prism/packages/dev-sheet/source"],
+          "@ui": ["./prism/packages/ui/source"],
+          "@utilities": ["./prism/packages/utilities/source"],
+          "@dev-sheet": ["./prism/packages/dev-sheet/source"],
         };
 
   const tsconfig = {
@@ -570,7 +569,21 @@ export async function runGenerateCommand(
       log.warn(
         `Directory ${targetDir} already exists. Removing it due to --force flag...`
       );
-      fs.rmSync(targetDir, { recursive: true, force: true });
+      try {
+        // Try Node.js method first
+        fs.rmSync(targetDir, { recursive: true, force: true });
+      } catch (error) {
+        // Fallback to shell command for stubborn directories (e.g., with git submodules)
+        log.warn("Node.js removal failed, trying shell command...");
+        try {
+          execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+        } catch (shellError) {
+          log.error(`Failed to remove directory: ${targetDir}`);
+          log.error("Please remove it manually and try again");
+          process.exitCode = 1;
+          return;
+        }
+      }
     } else {
       log.error(`Directory ${targetDir} already exists`);
       log.error(`Use --force to overwrite the existing directory`);
@@ -590,39 +603,41 @@ export async function runGenerateCommand(
     const inMonorepo = !!prismRoot && !options.path;
     // For standalone apps:
     // - If --prism-repo is specified, use git dependency (deployable)
-    // - If --prism-repo is NOT specified and ../prism exists, use file: dependencies (local iteration)
-    // - If --prism-repo is NOT specified and ../prism doesn't exist, default to git dependency (deployable)
+    // - If --prism-repo is NOT specified, add Prism as git submodule at ./prism (one deployable repo)
     let useGitDependency = false;
     let prismRepoUrl: string | undefined = undefined;
     if (!inMonorepo) {
       if (options.prismRepo !== undefined) {
-        // User explicitly specified git repo
+        // User explicitly specified git repo - use as npm dependency
         useGitDependency = true;
         prismRepoUrl = options.prismRepo;
         log.info(`📦 Using Prism from git: ${prismRepoUrl}`);
         log.info(
-          "💡 This creates a deployable app. For local iteration, use git submodule instead."
+          "💡 This creates a deployable app with Prism as npm dependency."
         );
       } else {
-        // Check if local Prism exists
-        const localPrismPath = path.resolve(targetDir, "..", "prism");
-        if (fs.existsSync(localPrismPath)) {
-          // Local Prism exists - use file: dependencies for fast iteration
-          useGitDependency = false;
-          log.info(
-            "✅ Found local Prism at ../prism - using file: dependencies for fast iteration"
-          );
-        } else {
-          // No local Prism - default to git dependency for deployment
-          useGitDependency = true;
-          prismRepoUrl = "git+https://github.com/thushana/prism.git";
-          log.info(
-            "📦 No local Prism found - using git dependency (deployable)"
-          );
-          log.info("💡 For local iteration, add Prism as git submodule:");
-          log.info(
-            "   git submodule add https://github.com/thushana/prism.git ../prism"
-          );
+        // Default: add Prism as git submodule inside the app (one deployable repo)
+        useGitDependency = false;
+        const prismSubmodulePath = path.join(targetDir, "prism");
+        const defaultPrismRepo = "https://github.com/thushana/prism.git";
+        log.info("📦 Adding Prism as git submodule at ./prism");
+        try {
+          // Initialize git first if not already initialized
+          if (!fs.existsSync(path.join(targetDir, ".git"))) {
+            execSync("git init", { cwd: targetDir, stdio: "pipe" });
+          }
+          // Add Prism as submodule
+          execSync(`git submodule add ${defaultPrismRepo} prism`, {
+            cwd: targetDir,
+            stdio: "inherit",
+          });
+          log.info("✅ Prism submodule added successfully");
+        } catch (error) {
+          log.warn("Failed to add Prism submodule automatically");
+          log.warn("Please add it manually:");
+          log.warn(`  cd ${targetDir}`);
+          log.warn(`  git submodule add ${defaultPrismRepo} prism`);
+          // Continue anyway - user can add it manually
         }
       }
     }
@@ -721,10 +736,12 @@ export async function runGenerateCommand(
       log.warn("Seed failed (this is okay if seed script has issues)");
     }
 
-    // Initialize git
+    // Initialize git (if not already initialized for submodule)
     log.info("Initializing git repository...");
     try {
-      execSync("git init", { cwd: targetDir, stdio: "inherit" });
+      if (!fs.existsSync(path.join(targetDir, ".git"))) {
+        execSync("git init", { cwd: targetDir, stdio: "inherit" });
+      }
       execSync("git add .", { cwd: targetDir, stdio: "inherit" });
       execSync(
         'git commit -m "✨ INITIAL - Scaffold Prism Next.js app with core packages"',

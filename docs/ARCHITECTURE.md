@@ -236,28 +236,29 @@ Prism is intended to be consumed as a dependency when building new apps:
 
 **For Standalone Apps (Outside Monorepo):**
 
-1. **Git Dependency** (recommended for deployment):
+1. **Git Submodule** (recommended - one deployable repo):
 
    ```bash
+   # Generate app (automatically adds Prism as submodule at ./prism)
+   npm run prism generate my-app --path ../my-app
+   ```
+
+   - Prism is added as a git submodule inside your app at `./prism`
+   - Uses `file:./prism/packages/...` dependencies
+   - One repo to deploy (your app + Prism submodule)
+   - Can commit Prism changes from within your app
+   - Perfect for iterative development and deployment
+
+2. **Git Dependency** (alternative for deployment):
+
+   ```bash
+   # Generate app with git dependency
    npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
    ```
 
    - Vercel will clone Prism from GitHub during build
    - Works seamlessly for deployment
-
-2. **File Dependencies** (for local iteration):
-
-   ```bash
-   # Add Prism as git submodule
-   git submodule add https://github.com/thushana/prism.git ../prism
-
-   # Generate app (auto-detects local Prism)
-   npm run prism generate my-app --path ../my-app
-   ```
-
-   - Uses `file:../prism/packages/...` dependencies
-   - Instant updates when developing both Prism and your app
-   - Perfect for iterative development
+   - Note: You won't be able to commit Prism changes from within your app
 
 **Import Patterns:**
 

@@ -192,26 +192,28 @@ npm run database:studio
 
 Apps in separate repositories can import Prism Core as a dependency. The generator handles this automatically:
 
-**Option 1: Git Dependency (Recommended for Deployment)**
+**Option 1: Git Submodule (Recommended - One Deployable Repo)**
+
+```bash
+# Generate app (automatically adds Prism as submodule at ./prism)
+npm run prism generate my-app --path ../my-app
+```
+
+This automatically:
+
+- Adds Prism as a git submodule inside your app at `./prism`
+- Uses `file:./prism/packages/...` dependencies for fast iteration
+- Creates a single deployable repo (your app + Prism submodule)
+- Allows committing Prism changes from within your app
+
+**Option 2: Git Dependency (Alternative for Deployment)**
 
 ```bash
 # Generate app with git dependency
 npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 
-This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process.
-
-**Option 2: File Dependencies (For Local Iteration)**
-
-```bash
-# Add Prism as git submodule
-git submodule add https://github.com/thushana/prism.git ../prism
-
-# Generate app (auto-detects local Prism)
-npm run prism generate my-app --path ../my-app
-```
-
-This uses `file:../prism/packages/...` dependencies for instant updates when developing both Prism and your app.
+This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process. Note: You won't be able to commit Prism changes from within your app with this approach.
 
 **Import in your app:**
 
