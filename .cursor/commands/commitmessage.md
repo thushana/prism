@@ -29,4 +29,4 @@ Write a commit message for the changes on disk
 
 Return it as a copyable Markdown block
 
-Ask the user if they'd like to have it committed for them. If so, commit the submodules with the deepest first (to establish their commit hashes), then commit this repository so the submodule references can be updated.
+Ask the user if they'd like to have it committed for them. If so, commit the submodules with the deepest first (to establish their commit hashes), then commit this repository so the submodule references can be updated. Once commited, push the code.
