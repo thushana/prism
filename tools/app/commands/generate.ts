@@ -262,6 +262,14 @@ export default nextConfig;
 }
 
 /**
+ * Generate .nvmrc file to ensure Node.js version consistency
+ */
+function generateNvmrc(targetDir: string): void {
+  const nvmrcContent = "22\n";
+  fs.writeFileSync(path.join(targetDir, ".nvmrc"), nvmrcContent, "utf-8");
+}
+
+/**
  * Generate tsconfig.json
  */
 function generateTsConfig(
@@ -651,6 +659,7 @@ export async function runGenerateCommand(
     );
     generateTsConfig(targetDir, inMonorepo, useGitDependency);
     generateNextConfig(targetDir, !inMonorepo && !useGitDependency);
+    generateNvmrc(targetDir);
     generateTemplateFiles(targetDir, appName);
 
     // Auto-copy .env.example to .env
