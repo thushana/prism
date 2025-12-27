@@ -42,6 +42,12 @@ function syncScripts(): void {
   }
 
   if (!fs.existsSync(MAIN_PACKAGE_JSON)) {
+    // If running from inside prism and no parent project exists, skip gracefully
+    if (isInPrism) {
+      console.log(`ℹ️  No parent project found at: ${MAIN_PACKAGE_JSON}`);
+      console.log(`   Skipping script sync (prism is standalone)`);
+      return;
+    }
     console.error(`❌ Main package.json not found at: ${MAIN_PACKAGE_JSON}`);
     process.exit(1);
   }
