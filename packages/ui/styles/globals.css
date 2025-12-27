@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Scan UI package source files */
 @source "../source/**/*.{ts,tsx}";
@@ -10,8 +11,6 @@
  */
 @source "../../utilities/source/**/*.{ts,tsx}";
 @source "../../dev-sheet/source/**/*.{ts,tsx}";
-
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 

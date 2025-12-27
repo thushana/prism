@@ -12,7 +12,7 @@ import type { z } from "zod";
  */
 export type ZodSchema<T> = {
   parse: (input: unknown) => T;
-  safeParse: (input: unknown) => z.SafeParseReturnType<unknown, T> | z.ZodSafeParseReturnType<unknown, T>;
+  safeParse: (input: unknown) => any;
 };
 
 /**
