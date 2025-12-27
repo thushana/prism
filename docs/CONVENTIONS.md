@@ -232,7 +232,11 @@ packages/
   import { types } from "../types";
   ```
 
-- When consuming Prism outside this monorepo, use the published subpaths: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, and `@prism/core/dev-sheet`.
+- When consuming Prism outside this monorepo:
+  - Generated apps use path aliases (`@ui`, `@database`, etc.) that work with both git and file dependencies
+  - The generator automatically configures TypeScript paths to resolve these imports
+  - Prism is available at: `git+https://github.com/thushana/prism.git`
+  - For local iteration, use git submodule: `git submodule add https://github.com/thushana/prism.git ../prism`
 
 ## CLI Commands
 

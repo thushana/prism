@@ -234,10 +234,37 @@ The `*` version means "use the local workspace version" during development.
 
 Prism is intended to be consumed as a dependency when building new apps:
 
-- Install `@prism/core` (from npm or a Git source) and import subpaths per package.
+**For Standalone Apps (Outside Monorepo):**
+
+1. **Git Dependency** (recommended for deployment):
+
+   ```bash
+   npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+   ```
+
+   - Vercel will clone Prism from GitHub during build
+   - Works seamlessly for deployment
+
+2. **File Dependencies** (for local iteration):
+
+   ```bash
+   # Add Prism as git submodule
+   git submodule add https://github.com/thushana/prism.git ../prism
+
+   # Generate app (auto-detects local Prism)
+   npm run prism generate my-app --path ../my-app
+   ```
+
+   - Uses `file:../prism/packages/...` dependencies
+   - Instant updates when developing both Prism and your app
+   - Perfect for iterative development
+
+**Import Patterns:**
+
+- Install `@prism/core` (from git or file source) and import subpaths per package.
 - Subpath exports map to the workspace packages: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, and `@prism/core/dev-sheet`.
 - Inside this monorepo we use path aliases like `@ui` and `@logger`; external apps can import the same modules via the `@prism/core/*` subpaths without custom path mapping.
-- Generated apps scaffolded by the CLI are already wired to use these imports.
+- Generated apps scaffolded by the CLI are already wired to use these imports (with path aliases like `@ui` that work in both modes).
 
 ## TypeScript Configuration
 

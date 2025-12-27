@@ -41,6 +41,37 @@ Apps generated via `npm run prism generate <app-name>` can be deployed the same 
 
 **Note:** The `apps/web` directory is kept as a sample reference. Generated apps are created in `apps/` and can be deployed independently.
 
+### Standalone Apps (Outside Monorepo)
+
+Apps generated outside the Prism monorepo can also be deployed to Vercel:
+
+1. **Generate with git dependency** (recommended for deployment):
+
+   ```bash
+   npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+   ```
+
+2. **In Vercel Dashboard**, click "Add New" → "Project"
+3. **Import your app's Git repository** (separate from Prism repo)
+4. **Configure**:
+   - **Project Name**: `my-app` (or your preferred name)
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `.` (root of the app repo)
+   - **Build Command**: `npm run build` (default)
+   - **Output Directory**: `.next` (default)
+   - **Install Command**: `npm install` (default)
+
+5. **Vercel will automatically**:
+   - Clone Prism from GitHub during build (via git dependency)
+   - Install all dependencies
+   - Build and deploy your app
+
+**For local iteration** (developing both Prism and your app):
+
+- Use git submodule: `git submodule add https://github.com/thushana/prism.git ../prism`
+- Generate without `--prism-repo` flag - generator will auto-detect local Prism
+- This uses `file:` dependencies for instant updates
+
 ## Deployment Behavior
 
 - **Automatic Deployments**: All projects will deploy automatically on push to main

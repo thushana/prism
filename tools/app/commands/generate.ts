@@ -26,6 +26,7 @@ export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
   force?: boolean;
   path?: string;
+  prismRepo?: string; // Git URL for Prism (e.g., "git+https://github.com/user/prism.git")
 }
 
 /**
@@ -117,11 +118,13 @@ function writeTemplateFile(
 function generatePackageJson(
   targetDir: string,
   appName: string,
-  prismRoot: string | null
+  prismRoot: string | null,
+  prismRepo?: string,
+  useFileDependencies: boolean = false
 ): void {
   // Determine dependencies based on location
   // If in monorepo, use workspace references like existing apps
-  // For standalone, use file: dependencies to link Prism packages (enables CSS imports to work)
+  // For standalone, use git dependencies (deployable) or file: (local dev)
   const prismDependencies = prismRoot
     ? {
         // In monorepo, reference individual packages (like apps/web)
@@ -132,25 +135,34 @@ function generatePackageJson(
         utilities: "*",
         "dev-sheet": "*",
       }
-    : {
-        // Standalone app: use file: refs to Prism packages
-        // Assumes Prism is at ../prism (sibling directory or git submodule)
-        // This enables CSS imports like @import "ui/styles/globals.css" to resolve
-        database: "file:../prism/packages/database",
-        intelligence: "file:../prism/packages/intelligence",
-        logger: "file:../prism/packages/logger",
-        ui: "file:../prism/packages/ui",
-        utilities: "file:../prism/packages/utilities",
-        "dev-sheet": "file:../prism/packages/dev-sheet",
-      };
+    : prismRepo
+      ? {
+          // Standalone app with git dependency: use @prism/core from git repo
+          // This works for deployment - Vercel will clone the repo during build
+          "@prism/core": prismRepo,
+        }
+      : {
+          // Standalone app: use file: refs to Prism packages (local dev only)
+          // Assumes Prism is at ../prism (sibling directory or git submodule)
+          // This enables CSS imports like @import "ui/styles/globals.css" to resolve
+          // For deployment, you'll need to either:
+          // 1. Use --prism-repo flag to generate with git dependency
+          // 2. Or manually change to git dependency before deploying
+          database: "file:../prism/packages/database",
+          intelligence: "file:../prism/packages/intelligence",
+          logger: "file:../prism/packages/logger",
+          ui: "file:../prism/packages/ui",
+          utilities: "file:../prism/packages/utilities",
+          "dev-sheet": "file:../prism/packages/dev-sheet",
+        };
 
   const packageJson = {
     name: appName,
     version: "0.1.0",
     private: true,
     scripts: {
-      dev: "next dev",
-      build: "next build",
+      dev: useFileDependencies ? "next dev --webpack" : "next dev",
+      build: useFileDependencies ? "next build --webpack" : "next build",
       start: "next start",
       lint: "eslint app --ext .ts,.tsx",
       format: 'prettier --write "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
@@ -198,36 +210,112 @@ function generatePackageJson(
 }
 
 /**
+ * Generate next.config.ts
+ */
+function generateNextConfig(
+  targetDir: string,
+  useFileDependencies: boolean
+): void {
+  // For file dependencies, we need to configure Next.js to allow external paths
+  // Turbopack doesn't support this, so we disable it and use webpack
+  const nextConfig = useFileDependencies
+    ? `import type { NextConfig } from "next";
+import path from "path";
+
+const nextConfig: NextConfig = {
+  // Webpack configuration for file dependencies (symlinks outside project root)
+  // Turbopack is disabled via --webpack flag in package.json scripts
+  turbopack: {}, // Empty config to silence Turbopack warnings
+  webpack: (config) => {
+    // Configure webpack to resolve TypeScript paths
+    // These match the paths in tsconfig.json
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@database": path.resolve(__dirname, "../prism/packages/database/source"),
+      "@intelligence": path.resolve(__dirname, "../prism/packages/intelligence/source"),
+      "@intelligence/tasks": path.resolve(__dirname, "../prism/packages/intelligence/source/tasks"),
+      "@logger": path.resolve(__dirname, "../prism/packages/logger/source"),
+      "@logger/client": path.resolve(__dirname, "../prism/packages/logger/source/client"),
+      "@logger/server": path.resolve(__dirname, "../prism/packages/logger/source/server"),
+      "@ui": path.resolve(__dirname, "../prism/packages/ui/source"),
+      "@utilities": path.resolve(__dirname, "../prism/packages/utilities/source"),
+      "@dev-sheet": path.resolve(__dirname, "../prism/packages/dev-sheet/source"),
+    };
+    // Allow resolving symlinks outside project root
+    config.resolve.symlinks = true;
+    return config;
+  },
+};
+
+export default nextConfig;
+`
+    : `import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+`;
+
+  fs.writeFileSync(path.join(targetDir, "next.config.ts"), nextConfig, "utf-8");
+}
+
+/**
  * Generate tsconfig.json
  */
-function generateTsConfig(targetDir: string, inMonorepo: boolean): void {
+function generateTsConfig(
+  targetDir: string,
+  inMonorepo: boolean,
+  useGitDependency: boolean
+): void {
   // Both monorepo and standalone use the same import style (@ui, @database, etc.)
-  // Standalone uses file: dependencies to link packages, so paths are the same
-  const paths = {
-    "@/*": ["./*"],
-    // Package paths - work in both monorepo and standalone (via file: dependencies)
-    "@database": inMonorepo
-      ? ["../../packages/database/source"]
-      : ["../prism/packages/database/source"],
-    "@intelligence": inMonorepo
-      ? ["../../packages/intelligence/source"]
-      : ["../prism/packages/intelligence/source"],
-    "@logger": inMonorepo
-      ? ["../../packages/logger/source"]
-      : ["../prism/packages/logger/source"],
-    "@logger/*": inMonorepo
-      ? ["../../packages/logger/source/*"]
-      : ["../prism/packages/logger/source/*"],
-    "@ui": inMonorepo
-      ? ["../../packages/ui/source"]
-      : ["../prism/packages/ui/source"],
-    "@utilities": inMonorepo
-      ? ["../../packages/utilities/source"]
-      : ["../prism/packages/utilities/source"],
-    "@dev-sheet": inMonorepo
-      ? ["../../packages/dev-sheet/source"]
-      : ["../prism/packages/dev-sheet/source"],
-  };
+  // For git dependencies, we still use path aliases pointing to node_modules
+  const paths = inMonorepo
+    ? {
+        "@/*": ["./*"],
+        // Monorepo: point to workspace packages
+        "@database": ["../../packages/database/source"],
+        "@intelligence": ["../../packages/intelligence/source"],
+        "@logger": ["../../packages/logger/source"],
+        "@logger/*": ["../../packages/logger/source/*"],
+        "@ui": ["../../packages/ui/source"],
+        "@utilities": ["../../packages/utilities/source"],
+        "@dev-sheet": ["../../packages/dev-sheet/source"],
+      }
+    : useGitDependency
+      ? {
+          "@/*": ["./*"],
+          // Git dependency: point to @prism/core subpaths in node_modules
+          // Paths are relative to tsconfig.json location (app root)
+          "@database": ["node_modules/@prism/core/packages/database/source"],
+          "@intelligence": [
+            "node_modules/@prism/core/packages/intelligence/source",
+          ],
+          "@logger": ["node_modules/@prism/core/packages/logger/source"],
+          "@logger/*": ["node_modules/@prism/core/packages/logger/source/*"],
+          "@ui": ["node_modules/@prism/core/packages/ui/source"],
+          "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
+          "@dev-sheet": ["node_modules/@prism/core/packages/dev-sheet/source"],
+        }
+      : {
+          "@/*": ["./*"],
+          // File dependencies: point directly to source files (bypass symlinks)
+          // Turbopack doesn't support symlinks outside project root, so use direct paths
+          "@database": ["../prism/packages/database/source"],
+          "@intelligence": ["../prism/packages/intelligence/source"],
+          "@logger": ["../prism/packages/logger/source"],
+          "@logger/*": ["../prism/packages/logger/source/*"],
+          "@intelligence/tasks": [
+            "../prism/packages/intelligence/source/tasks",
+          ],
+          "@intelligence/tasks/*": [
+            "../prism/packages/intelligence/source/tasks/*",
+          ],
+          "@ui": ["../prism/packages/ui/source"],
+          "@utilities": ["../prism/packages/utilities/source"],
+          "@dev-sheet": ["../prism/packages/dev-sheet/source"],
+        };
 
   const tsconfig = {
     compilerOptions: {
@@ -342,6 +430,7 @@ function copyTemplateFiles(
     "data", // Skip data directory (contains database files)
     "package.json", // Skip package.json (generated separately with correct name)
     "tsconfig.json", // Skip tsconfig.json (generated separately with correct paths)
+    "next.config.ts", // Skip next.config.ts (generated separately with correct config)
   ];
 
   function shouldSkip(name: string): boolean {
@@ -499,8 +588,54 @@ export async function runGenerateCommand(
     log.info("Generating template files...");
     // If --path is specified, treat as standalone (even if in monorepo)
     const inMonorepo = !!prismRoot && !options.path;
-    generatePackageJson(targetDir, appName, inMonorepo ? prismRoot : null);
-    generateTsConfig(targetDir, inMonorepo);
+    // For standalone apps:
+    // - If --prism-repo is specified, use git dependency (deployable)
+    // - If --prism-repo is NOT specified and ../prism exists, use file: dependencies (local iteration)
+    // - If --prism-repo is NOT specified and ../prism doesn't exist, default to git dependency (deployable)
+    let useGitDependency = false;
+    let prismRepoUrl: string | undefined = undefined;
+    if (!inMonorepo) {
+      if (options.prismRepo !== undefined) {
+        // User explicitly specified git repo
+        useGitDependency = true;
+        prismRepoUrl = options.prismRepo;
+        log.info(`📦 Using Prism from git: ${prismRepoUrl}`);
+        log.info(
+          "💡 This creates a deployable app. For local iteration, use git submodule instead."
+        );
+      } else {
+        // Check if local Prism exists
+        const localPrismPath = path.resolve(targetDir, "..", "prism");
+        if (fs.existsSync(localPrismPath)) {
+          // Local Prism exists - use file: dependencies for fast iteration
+          useGitDependency = false;
+          log.info(
+            "✅ Found local Prism at ../prism - using file: dependencies for fast iteration"
+          );
+        } else {
+          // No local Prism - default to git dependency for deployment
+          useGitDependency = true;
+          prismRepoUrl = "git+https://github.com/thushana/prism.git";
+          log.info(
+            "📦 No local Prism found - using git dependency (deployable)"
+          );
+          log.info("💡 For local iteration, add Prism as git submodule:");
+          log.info(
+            "   git submodule add https://github.com/thushana/prism.git ../prism"
+          );
+        }
+      }
+    }
+    const useFileDeps = !inMonorepo && !useGitDependency;
+    generatePackageJson(
+      targetDir,
+      appName,
+      inMonorepo ? prismRoot : null,
+      useGitDependency ? prismRepoUrl : undefined,
+      useFileDeps
+    );
+    generateTsConfig(targetDir, inMonorepo, useGitDependency);
+    generateNextConfig(targetDir, !inMonorepo && !useGitDependency);
     generateTemplateFiles(targetDir, appName);
 
     // Auto-copy .env.example to .env
@@ -626,6 +761,10 @@ export function registerGenerateCommand(program: Command): void {
     .option(
       "-p, --path <path>",
       "Target directory path (for standalone apps outside monorepo)"
+    )
+    .option(
+      "--prism-repo <url>",
+      "Git URL for Prism (default: 'git+https://github.com/thushana/prism.git'). Use this for deployable standalone apps. For local dev iteration, omit and use file: dependencies with git submodule."
     )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {

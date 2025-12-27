@@ -150,11 +150,34 @@ import { logger } from "@prism/core/logger";
 import { DevSheetPage } from "@prism/core/dev-sheet";
 ```
 
-**Note**: The generated app references `@prism/core` via `file:../prism` in `package.json`. For standalone apps, you'll need to:
+## Standalone App Deployment
 
-- Install `@prism/core` as a dependency, or
-- Link it locally, or
-- Publish and install from npm
+For standalone apps (generated outside the monorepo), you have two options:
+
+### Option 1: Git Dependency (Recommended for Deployment)
+
+Generate with the `--prism-repo` flag to use Prism from GitHub:
+
+```bash
+npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+```
+
+This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process.
+
+### Option 2: File Dependencies (For Local Iteration)
+
+Generate without `--prism-repo` to use local file dependencies:
+
+```bash
+npm run prism generate my-app --path ../my-app
+```
+
+This assumes Prism is at `../prism` (as a git submodule or sibling directory). Perfect for fast iteration when developing both Prism and your app simultaneously.
+
+**For deployment**, you'll need to either:
+
+- Switch to git dependency: `npm install --save git+https://github.com/thushana/prism.git`
+- Or use git submodule (Vercel supports this automatically)
 
 ## Customization
 
@@ -237,11 +260,12 @@ npm run db:push
 
 ### Import Errors
 
-If `@prism/core` imports fail:
+If imports fail:
 
-- Ensure `@prism/core` is installed: `npm install`
-- Check that the Prism monorepo is accessible
-- For standalone apps, install `@prism/core` as a dependency
+- **Monorepo apps**: Ensure workspace dependencies are installed: `npm install` (from monorepo root)
+- **Standalone apps with git dependency**: Ensure Prism repo is accessible and `npm install` completes
+- **Standalone apps with file dependencies**: Ensure Prism is at `../prism` (git submodule or sibling directory)
+- Check that TypeScript paths in `tsconfig.json` are correctly configured
 
 ### Build Errors
 
