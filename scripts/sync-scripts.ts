@@ -167,6 +167,11 @@ function syncScripts(): void {
           .replace("--workspaces --if-present", "");
       }
 
+      // Adapt quality:all to run quality checks for both app and prism
+      if (key === "quality:all") {
+        adaptedValue = "npm run quality && cd prism && npm run quality";
+      }
+
       // Adapt clean script to work in main project
       if (key === "clean") {
         adaptedValue = "rm -rf .next node_modules/.cache *.tsbuildinfo";
