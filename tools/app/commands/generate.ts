@@ -175,16 +175,16 @@ function generatePackageJson(
     },
     dependencies: {
       ...prismDependencies,
+      "@neondatabase/serverless": "^1.0.2",
       "@radix-ui/react-slot": "^1.2.4",
       next: "16.1.1",
       react: "^19.2.3",
       "react-dom": "^19.2.3",
-      "better-sqlite3": "^12.4.1",
+      dotenv: "^17.2.3",
       "drizzle-orm": "beta",
     },
     devDependencies: {
       "@tailwindcss/postcss": "^4.1.17",
-      "@types/better-sqlite3": "^7.6.13",
       "@types/node": "^24.10.1",
       "@types/react": "^19.2.6",
       "@types/react-dom": "^19.2.3",
@@ -504,11 +504,31 @@ function generateTemplateFiles(targetDir: string, appName: string): void {
   copyTemplateFiles(templateSourceDir, targetDir, vars);
 
   // Create .env files (they're gitignored, so copy manually)
-  const envExampleContent = `# Database
-DATABASE_URL=./data/database/sqlite.db
+  const envExampleContent = `# Database - Neon PostgreSQL
+# Get your connection strings from: https://console.neon.tech
+# Recommended for most uses (with connection pooling) - used for runtime queries
+DATABASE_URL=postgresql://user:password@ep-xxxxx-pooler.region.aws.neon.tech/dbname?sslmode=require
 
-# For production, use a PostgreSQL connection string:
-# DATABASE_URL=postgresql://user:password@host:5432/dbname
+# For uses requiring a connection without pgbouncer - used for drizzle-kit operations (migrations, push)
+DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxxxx.region.aws.neon.tech/dbname?sslmode=require
+
+# Google Maps API
+# Get your API key from: https://console.cloud.google.com/apis/credentials
+# Required APIs: Places API, Timezone API, Geocoding API, Directions API
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# Admin Authentication
+# Generate a secure random string: openssl rand -hex 32
+# Used in x-api-key header for admin-only endpoints
+ADMIN_API_KEY=your_admin_api_key_here
+
+# Cron Security (Optional)
+# Generate a secure random string for verifying cron requests from Vercel
+# Recommended for production to prevent unauthorized cron triggers
+CRON_SECRET=your_cron_secret_here
+
+# Node Environment (automatically set by Vercel in production)
+NODE_ENV=development
 `;
   writeTemplateFile(targetDir, ".env.example", envExampleContent, vars);
   writeTemplateFile(targetDir, ".env", envExampleContent, vars);
@@ -580,12 +600,12 @@ export async function runGenerateCommand(
       try {
         // Try Node.js method first
         fs.rmSync(targetDir, { recursive: true, force: true });
-      } catch (error) {
+      } catch {
         // Fallback to shell command for stubborn directories (e.g., with git submodules)
         log.warn("Node.js removal failed, trying shell command...");
         try {
           execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
-        } catch (shellError) {
+        } catch {
           log.error(`Failed to remove directory: ${targetDir}`);
           log.error("Please remove it manually and try again");
           process.exitCode = 1;
@@ -626,7 +646,6 @@ export async function runGenerateCommand(
       } else {
         // Default: add Prism as git submodule inside the app (one deployable repo)
         useGitDependency = false;
-        const prismSubmodulePath = path.join(targetDir, "prism");
         const defaultPrismRepo = "https://github.com/thushana/prism.git";
         log.info("📦 Adding Prism as git submodule at ./prism");
         try {
@@ -640,7 +659,7 @@ export async function runGenerateCommand(
             stdio: "inherit",
           });
           log.info("✅ Prism submodule added successfully");
-        } catch (error) {
+        } catch {
           log.warn("Failed to add Prism submodule automatically");
           log.warn("Please add it manually:");
           log.warn(`  cd ${targetDir}`);
@@ -675,21 +694,8 @@ export async function runGenerateCommand(
     log.info(`Detected package manager: ${pm}`);
 
     // Install dependencies
-    // If in monorepo, rebuild native modules (better-sqlite3) from root
     // For standalone, install dependencies in the generated app
-    if (inMonorepo) {
-      log.info("Rebuilding native modules for monorepo...");
-      try {
-        execSync("npm rebuild better-sqlite3", {
-          cwd: prismRoot,
-          stdio: "inherit",
-        });
-      } catch {
-        log.warn(
-          "Failed to rebuild better-sqlite3 (this is okay, will use existing build)"
-        );
-      }
-    } else {
+    if (!inMonorepo) {
       log.info("Installing dependencies in generated app...");
       const installCmd = getInstallCommand(pm);
       try {
@@ -698,19 +704,14 @@ export async function runGenerateCommand(
           stdio: "inherit",
         });
         log.info("✅ Dependencies installed successfully");
-      } catch (error) {
+      } catch {
         log.warn("Failed to install dependencies automatically");
         log.warn("Please run 'npm install' manually in the generated app");
       }
     }
 
-    // Ensure database directory exists for drizzle (e.g., ./data/database/sqlite.db)
-    const dbPath = path.resolve(
-      targetDir,
-      process.env.DATABASE_URL || "./data/database/sqlite.db"
-    );
-    const dbDir = path.dirname(dbPath);
-    fs.mkdirSync(dbDir, { recursive: true });
+    // Note: Database connection is configured via DATABASE_URL environment variable
+    // No need to create local database directory for PostgreSQL
 
     // Run drizzle generate
     log.info("Generating database migrations...");

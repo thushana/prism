@@ -1,13 +1,13 @@
 # Database Guide
 
-This project uses **Drizzle ORM** with **SQLite** for local development. The database schema is defined in `packages/database/source/schema.ts`.
+This project uses **Drizzle ORM** with **Neon PostgreSQL**. The database schema is defined in `packages/database/source/schema.ts`.
 
 ## Philosophy
 
 - **Type-safe**: Drizzle ORM provides excellent TypeScript support
-- **Simple**: SQLite for local development, easy to migrate to PostgreSQL for production
+- **Production-ready**: Neon PostgreSQL for both development and production
 - **Schema-first**: Define schema in TypeScript, generate migrations automatically
-- **Zero-config**: Works out of the box with minimal setup
+- **Serverless-friendly**: Uses Neon's serverless driver for optimal performance
 
 ## Quick Start
 
@@ -59,14 +59,14 @@ await db.update(users).set({ name: "Jane Doe" }).where(eq(users.id, 1));
 - Used by CLI tools, shared utilities, and cross-app functionality
 - Import with: `import { db } from "@database"` or `import { database } from "@database"`
 - Schema defined in `packages/database/source/schema.ts`
-- Database file location: `data/database/sqlite.db` (at project root)
+- Database connection: Configure via `DATABASE_URL` environment variable (Neon PostgreSQL)
 
 **App-Specific Database (`apps/web/database`)**:
 
 - Used for app-specific database needs and custom configurations
 - Import with: `import { db } from "../database/db"` (relative import)
 - Schema defined in `apps/web/database/schema.ts`
-- Database file location: `apps/web/data/database/sqlite.db` (app-specific)
+- Database connection: Configure via `DATABASE_URL` environment variable (Neon PostgreSQL)
 
 Choose the shared package for CLI tools and shared functionality. Use app-specific database for app-specific schemas and configurations.
 
@@ -75,9 +75,9 @@ Choose the shared package for CLI tools and shared functionality. Use app-specif
 The schema is defined in `packages/database/source/schema.ts`:
 
 ```typescript
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -173,28 +173,20 @@ Opens a web interface at `http://localhost:4983` to browse and edit your databas
 
 ## Production Considerations
 
-**SQLite is for development only.** For production:
+**Neon PostgreSQL is used for both development and production.**
 
-1. **Use a managed database service**:
-   - PostgreSQL (Vercel Postgres, Supabase, Neon)
-   - MySQL (PlanetScale)
-   - Other serverless-compatible databases
+1. **Get your connection strings**:
+   - Sign up at [Neon Console](https://console.neon.tech)
+   - Create a new project
+   - Copy the connection strings (pooled and unpooled)
 
-2. **Update Drizzle config**:
-   - Change adapter from `better-sqlite3` to `postgres` or `mysql2`
-   - Update connection string to use environment variable
+2. **Configure environment variables**:
+   - `DATABASE_URL`: Pooled connection for runtime queries
+   - `DATABASE_URL_UNPOOLED`: Unpooled connection for migrations
 
-3. **Example PostgreSQL setup**:
-
-   ```typescript
-   // drizzle.config.ts
-   import { drizzle } from "drizzle-orm/postgres-js";
-   import postgres from "postgres";
-
-   const connectionString = process.env.DATABASE_URL!;
-   const client = postgres(connectionString);
-   export const db = drizzle(client);
-   ```
+3. **For Vercel deployment**:
+   - Add `DATABASE_URL` and `DATABASE_URL_UNPOOLED` in Vercel project settings
+   - The same configuration works for both development and production
 
 ## Adding Tables
 

@@ -1,32 +1,17 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { config } from "dotenv";
 import * as schema from "./schema";
-import * as path from "path";
-import * as fs from "fs";
 
-const dbPath = path.resolve(
-  process.cwd(),
-  process.env.DATABASE_URL || "./data/database/sqlite.db"
-);
-const dbDir = path.dirname(dbPath);
+// Load environment variables from .env
+config({ path: ".env" });
 
-// Ensure database directory exists
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is required");
 }
 
-const sqlite = new Database(dbPath);
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    created_at INTEGER NOT NULL
-  )
-`);
-// @ts-expect-error - Beta version type definitions don't match runtime API yet
-export const db = drizzle(sqlite, { schema });
-export const databasePath = dbPath;
+const sql = neon(process.env.DATABASE_URL);
+export const db = drizzle({ client: sql, schema });
 
 // Export schema for convenience
 export * from "./schema";

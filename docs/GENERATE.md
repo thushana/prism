@@ -20,7 +20,7 @@ The generator creates a fully functional Next.js app with:
 - **Next.js 16** with App Router
 - **TypeScript** (strict mode)
 - **Tailwind CSS 4** (pre-configured with Prism theme)
-- **Drizzle ORM** with SQLite (dev) / PostgreSQL (prod-ready)
+- **Drizzle ORM** with Neon PostgreSQL
 - **Prism core packages** integration
 
 ### Project Structure
@@ -117,17 +117,12 @@ npm run db:studio
 npm run db:seed
 ```
 
-### Development (SQLite)
+### Database (Neon PostgreSQL)
 
-- Uses SQLite with `better-sqlite3`
-- Database file: `./data/database/sqlite.db`
-- Fast and simple for local development
-
-### Production (PostgreSQL)
-
-- Update `DATABASE_URL` in `.env` to PostgreSQL connection string
-- Update `database/drizzle.config.ts` to use PostgreSQL adapter
-- Migrations work the same way
+- Uses Neon PostgreSQL with `@neondatabase/serverless`
+- Configure `DATABASE_URL` in `.env` with your Neon connection string
+- Pooled connection for runtime queries, unpooled for migrations
+- Get connection strings from [Neon Console](https://console.neon.tech)
 
 ## Prism Core Integration
 
