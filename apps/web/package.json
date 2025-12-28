@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
-    "better-sqlite3": "^12.4.1",
     "database": "*",
     "dev-sheet": "*",
     "drizzle-orm": "beta",
@@ -31,7 +30,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",

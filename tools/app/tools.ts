@@ -51,14 +51,14 @@ program
         registerMigrateCommand(program);
         registerExportCommand(program);
       } catch {
-        // If database commands fail to load (e.g., better-sqlite3 not compiled)
+        // If database commands fail to load (e.g., DATABASE_URL not configured)
         if (
           command === "seed" ||
           command === "migrate" ||
           command === "export"
         ) {
           logger.error(
-            "Database commands are not available. Run 'npm rebuild better-sqlite3' to fix."
+            "Database commands are not available. Ensure DATABASE_URL environment variable is set."
           );
           process.exit(1);
         }

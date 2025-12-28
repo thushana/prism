@@ -78,12 +78,12 @@ The schema is defined in `packages/database/source/schema.ts`:
 import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .defaultNow(),
 });
 ```
 
@@ -223,22 +223,23 @@ Opens a web interface at `http://localhost:4983` to browse and edit your databas
 
 ## Troubleshooting
 
-### Database Locked
+### Connection Issues
 
-If you see "database is locked" errors:
+If you see connection errors:
 
-- Close any open database connections
-- Close Drizzle Studio if it's open
-- Restart your dev server
+- Verify `DATABASE_URL` environment variable is set correctly
+- Check that your Neon database is running and accessible
+- Ensure the connection string includes `?sslmode=require` for SSL
+- For migrations, ensure `DATABASE_URL_UNPOOLED` is set (or `DATABASE_URL` will be used)
 
 ### Schema Mismatch
 
 If migrations fail:
 
 1. Check your schema matches the migration
-2. Consider resetting the database in development:
+2. Verify the database connection is working
+3. Consider pushing schema directly in development:
    ```bash
-   rm packages/database/*.db packages/database/*.db-wal packages/database/*.db-shm
    npm run database:push
    ```
 

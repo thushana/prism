@@ -43,7 +43,7 @@ This command scaffolds a complete Next.js application with:
 
 - Next.js 16 (App Router) + TypeScript
 - Tailwind CSS (pre-configured)
-- Drizzle ORM + SQLite (dev) / PostgreSQL (prod-ready)
+- Drizzle ORM + Neon PostgreSQL
 - Prism core packages integration
 - Dev sheet page at `/dev-sheet`
 - Starter `intelligence/tasks/` folder

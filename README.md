@@ -367,13 +367,14 @@ Each app can be deployed independently from the same GitHub repository by settin
 - Web: `yourdomain.com` or `www.yourdomain.com`
 - Generated apps: Configure per app in Vercel
 
-### Database for Production
+### Database
 
-**Important**: SQLite with `better-sqlite3` is for local development only. For production:
+**Neon PostgreSQL** is used for both development and production:
 
-- Use a managed database service (PostgreSQL, MySQL, etc.)
-- Consider Vercel Postgres or other serverless-compatible databases
-- Update the database package to use the appropriate Drizzle adapter
+- Configure via `DATABASE_URL` environment variable
+- Use pooled connection for runtime queries
+- Use unpooled connection (`DATABASE_URL_UNPOOLED`) for migrations
+- Serverless-friendly with Neon's serverless driver
 
 ## Environment Variables
 
