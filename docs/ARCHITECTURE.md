@@ -5,7 +5,7 @@
 - **Framework**: Next.js 16.1.1 (App Router)
 - **Language**: TypeScript 5.9.3 (target: ES2022)
 - **Styling**: Tailwind CSS 4.1.17
-- **Database**: Drizzle ORM (beta) with SQLite (better-sqlite3)
+- **Database**: Drizzle ORM (beta) with Neon PostgreSQL
 - **Testing**: Vitest 4.0.10 with React Testing Library
 - **Linting**: ESLint 9.39.1
 - **Formatting**: Prettier 3.6.2
@@ -89,7 +89,7 @@ Shared database layer:
 
 - `source/` - Database schema and queries
 - `drizzle.config.ts` - Drizzle ORM configuration
-- SQLite for development (consider PostgreSQL for production)
+- Neon PostgreSQL for both development and production
 - Type-safe queries with Drizzle ORM
 
 #### packages/utilities
@@ -152,7 +152,7 @@ Shared CLI utilities used by generator/ops commands:
 ### Database
 
 - **ORM**: Drizzle ORM for type safety and excellent TypeScript support
-- **Development**: SQLite with better-sqlite3 for local development
+- **Development**: Neon PostgreSQL with @neondatabase/serverless
 - **Production**: Consider managed PostgreSQL or other serverless-compatible databases
 - **Schema Location**: `packages/database/source/schema.ts`
 - **Migrations**: Managed by Drizzle Kit

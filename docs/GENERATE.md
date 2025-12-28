@@ -202,13 +202,13 @@ This creates a deployable app that Vercel can build. Prism will be cloned from G
 1. Edit `database/schema.ts`:
 
 ```typescript
-export const posts = sqliteTable("posts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .defaultNow(),
 });
 ```
 

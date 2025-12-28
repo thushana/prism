@@ -81,12 +81,12 @@ Apps generated outside the Prism monorepo can also be deployed to Vercel:
 
 ## Database Configuration
 
-The SQLite database in `packages/database` is for local development only. For production:
+The Neon PostgreSQL database is configured via environment variables. For production:
 
-1. Consider using a hosted database (PostgreSQL, MySQL, etc.)
+1. Get your connection strings from [Neon Console](https://console.neon.tech)
 2. Update environment variables in Vercel:
    - Go to Project Settings → Environment Variables
-   - Add `DATABASE_URL` for each project
+   - Add `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` for each project
 
 ## Environment Variables
 

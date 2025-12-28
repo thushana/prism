@@ -10,7 +10,7 @@ A [Next.js](https://nextjs.org) monorepo that can be used as a standalone packag
 prism/
 ├── packages/
 │   ├── ui/               # Shared UI components
-│   ├── database/         # Database layer (Drizzle ORM + SQLite)
+│   ├── database/         # Database layer (Drizzle ORM + Neon PostgreSQL)
 │   ├── intelligence/     # AI tasks and utilities
 │   ├── logger/           # Logging infrastructure
 │   ├── utilities/        # Shared utility functions
@@ -130,7 +130,7 @@ npm run dev:web
   - Material Symbols Rounded icons (via Google Fonts)
 - **packages/database**: Database layer
   - Drizzle ORM 0.44.7
-  - SQLite with better-sqlite3 (development)
+  - Neon PostgreSQL with @neondatabase/serverless
 - **packages/utilities**: Shared utility functions
   - `cn()` - Tailwind class name merger
 
@@ -159,7 +159,7 @@ npm run test:coverage
 
 ## Database
 
-This project uses [Drizzle ORM](https://orm.drizzle.team/) with SQLite for development. The database schema is defined in `packages/database/source/schema.ts`.
+This project uses [Drizzle ORM](https://orm.drizzle.team/) with Neon PostgreSQL. The database schema is defined in `packages/database/source/schema.ts`.
 
 ### Usage Example
 

@@ -19,7 +19,7 @@
 - `🎨 ADMIN UI - Simplify homepage to "Project" and remove unused public assets`
 - `🐛 DISPLAY FIX - Resolve image display issues in evaluation builder`
 - `✨ HOVER VIEW - Add new global hover state to structure view for metadata display`
-- `🗄️ DATABASE - Add Drizzle ORM with SQLite setup and database scripts`
+- `🗄️ DATABASE - Add Drizzle ORM with Neon PostgreSQL setup and database scripts`
 - `⚙️ CONFIG - Update ESLint rules and add new linting scripts`
 - `📝 DOCS - Add deployment instructions to README`
 - `🔧 HOOKS - Configure lint-staged to auto-stage formatted changes`
