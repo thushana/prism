@@ -167,10 +167,8 @@ function syncScripts(): void {
           .replace("--workspaces --if-present", "");
       }
 
-      // Adapt quality:all to run quality checks for both app and prism
-      if (key === "quality:all") {
-        adaptedValue = "npm run quality && cd prism && npm run quality";
-      }
+      // quality script is smart and handles both app and prism automatically
+      // No adaptation needed
 
       // Adapt clean script to work in main project
       if (key === "clean") {
