@@ -179,10 +179,17 @@ packages/
 │       ├── tasks/
 │       ├── utilities/
 │       └── index.ts
-├── dev-sheet/              # Developer cheatsheet primitives
+├── system-sheet/           # System information page primitives
 │   └── source/
 │       ├── page.tsx
 │       ├── data.ts
+│       └── index.ts
+├── authentication/         # Authentication utilities
+│   └── source/
+│       ├── core.ts
+│       ├── api.ts
+│       ├── web.ts
+│       ├── password-form.tsx
 │       └── index.ts
 └── cli/                    # Shared CLI utilities
     └── source/
@@ -198,7 +205,8 @@ packages/
 - **`packages/utilities/source/`** - Utility functions (classnames, etc.)
 - **`packages/logger/source/`** - Centralized logging for client/server
 - **`packages/intelligence/source/`** - AI helpers, tasks, and utilities
-- **`packages/dev-sheet/source/`** - Developer cheatsheet primitives
+- **`packages/system-sheet/source/`** - System information page primitives
+- **`packages/authentication/source/`** - Authentication utilities
 - **`packages/cli/source/`** - Shared CLI helpers used by tools
 - **`apps/*/app/`** - Next.js App Router pages and layouts
 - **`apps/*/app/components/`** - App-specific React components
@@ -277,8 +285,8 @@ The `@` prefix requirement is automatically enforced:
 
 1. **ESLint Rule**: The `no-restricted-imports` rule prevents non-prefixed package imports
    - Configured in `eslint.config.mjs`
-   - Blocks: `database`, `cli`, `logger`, `ui`, `utilities`, `intelligence`, `dev-sheet`
-   - Requires: `@database`, `@cli`, `@logger`, `@ui`, `@utilities`, `@intelligence`, `@dev-sheet`
+   - Blocks: `database`, `cli`, `logger`, `ui`, `utilities`, `intelligence`, `system-sheet`, `authentication`
+   - Requires: `@database`, `@cli`, `@logger`, `@ui`, `@utilities`, `@intelligence`, `@system-sheet`, `@authentication`
 
 2. **Pre-commit Hook**: Runs `lint-staged` which executes ESLint with `--fix` on staged files
    - Automatically fixes violations when possible

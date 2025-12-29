@@ -40,11 +40,11 @@ my-app/
   app/
     layout.tsx              # Root layout with Prism UI
     page.tsx                # Home page (Prism demo)
-    dev-sheet/
-      page.tsx              # Dev sheet page
+    system-sheet/
+      page.tsx              # System sheet page
     api/
-      dev-sheet/
-        route.ts            # Dev sheet API route
+      system-sheet/
+        route.ts            # System sheet API route
 
   ui/
     styles/
@@ -94,7 +94,7 @@ npm run dev
 Visit:
 
 - **App**: http://localhost:3000
-- **Dev Sheet**: http://localhost:3000/dev-sheet
+- **System Sheet**: http://localhost:3000/system-sheet
 
 ## Database Workflow
 
@@ -141,8 +141,8 @@ import { BaseTask } from "@prism/core/intelligence/tasks/base";
 // Logger
 import { logger } from "@prism/core/logger";
 
-// Dev sheet
-import { DevSheetPage } from "@prism/core/dev-sheet";
+// System sheet
+import { SystemSheetPage } from "@prism/core/system-sheet";
 ```
 
 ## Standalone App Deployment

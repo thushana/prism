@@ -10,7 +10,7 @@
  * - Standalone: ../../utilities from node_modules/ui/styles/ → node_modules/utilities/
  */
 @source "../../utilities/source/**/*.{ts,tsx}";
-@source "../../dev-sheet/source/**/*.{ts,tsx}";
+@source "../../system-sheet/source/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));
 

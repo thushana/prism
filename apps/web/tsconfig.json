@@ -29,7 +29,8 @@
       "@logger/*": ["../../packages/logger/source/*"],
       "@ui": ["../../packages/ui/source"],
       "@utilities": ["../../packages/utilities/source"],
-      "@dev-sheet": ["../../packages/dev-sheet/source"]
+      "@system-sheet": ["../../packages/system-sheet/source"],
+      "@authentication": ["../../packages/authentication/source"]
     }
   },
   "include": [

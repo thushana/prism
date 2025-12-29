@@ -99,7 +99,8 @@
     "./intelligence": "./packages/intelligence/source/index.ts",
     "./logger": "./packages/logger/source/index.ts",
     "./utilities": "./packages/utilities/source/index.ts",
-    "./dev-sheet": "./packages/dev-sheet/source/index.ts"
+    "./system-sheet": "./packages/system-sheet/source/index.ts",
+    "./authentication": "./packages/authentication/source/index.ts"
   },
   "peerDependencies": {
     "next": "^16.0.0",

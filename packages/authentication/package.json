@@ -1,0 +1,19 @@
+{
+  "name": "authentication",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts",
+    "./api": "./source/api.ts",
+    "./web": "./source/web.ts"
+  },
+  "dependencies": {
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

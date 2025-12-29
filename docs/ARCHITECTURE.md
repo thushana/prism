@@ -26,7 +26,8 @@ prism/
 │   ├── utilities/        # Shared utilities
 │   ├── logger/           # Centralized logging
 │   ├── intelligence/     # AI helpers and task registry
-│   ├── dev-sheet/        # Developer cheatsheet app primitives
+│   ├── system-sheet/     # System information page primitives
+│   ├── authentication/   # Authentication utilities (API and web)
 │   └── cli/              # Shared CLI utilities
 ├── tools/                 # CLI entrypoint and generator
 └── package.json          # Root workspace configuration
@@ -117,13 +118,23 @@ AI task registry and helpers:
 - `source/utilities/` - Cost tracking, retry logic, model helpers
 - `models.config.json` - Model configuration defaults
 
-#### packages/dev-sheet
+#### packages/system-sheet
 
-Shared primitives for the developer cheatsheet experience:
+Shared primitives for the system information page:
 
-- `source/page.tsx` - Main cheatsheet page component
+- `source/page.tsx` - Main system information page component
 - `source/data.ts` - Reference data exposed to apps
-- `source/types.ts` - Types for cheatsheet entries
+- `source/types.ts` - Types for system sheet entries
+
+#### packages/authentication
+
+Shared authentication utilities for API and web authentication:
+
+- `source/core.ts` - Shared core verification function
+- `source/api.ts` - API key authentication (header-based)
+- `source/web.ts` - Cookie-based web authentication
+- `source/password-form.tsx` - Password form component
+- `source/authentication_route.ts` - Authentication endpoint factory
 
 #### packages/cli
 
@@ -137,7 +148,7 @@ Shared CLI utilities used by generator/ops commands:
 ### Monorepo Architecture
 
 - **Workspace Management**: Using npm workspaces (native npm feature)
-- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `dev-sheet`, `cli`)
+- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `system-sheet`, `authentication`, `cli`)
 - **Directory Convention**: `source/` instead of `src/` for packages
 - **Versioning**: All packages use `*` for workspace dependencies
 - **Import Style**: @ prefixed imports from package names (`import { Button } from "@ui"`)
@@ -161,7 +172,7 @@ Shared CLI utilities used by generator/ops commands:
 
 - **Framework**: Tailwind CSS 4.1.17 (CSS-first configuration)
 - **Centralized Scanning**: The `packages/ui/styles/globals.css` file contains all `@source` directives for scanning Prism packages
-- **Path Resolution**: Uses relative paths (`../../utilities`, `../../dev-sheet`) that work in both:
+- **Path Resolution**: Uses relative paths (`../../utilities`, `../../system-sheet`) that work in both:
   - **Monorepo**: From `packages/ui/styles/` → `packages/utilities/`
   - **Standalone**: From `node_modules/ui/styles/` → `node_modules/utilities/`
 - **App Integration**: Apps import Prism's base styles via `@import "ui/styles/globals.css"` and only scan their own files
@@ -223,7 +234,8 @@ Each app declares dependencies on shared packages:
     "utilities": "*",
     "logger": "*",
     "intelligence": "*",
-    "dev-sheet": "*"
+    "system-sheet": "*",
+    "authentication": "*"
   }
 }
 ```
@@ -263,7 +275,7 @@ Prism is intended to be consumed as a dependency when building new apps:
 **Import Patterns:**
 
 - Install `@prism/core` (from git or file source) and import subpaths per package.
-- Subpath exports map to the workspace packages: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, and `@prism/core/dev-sheet`.
+- Subpath exports map to the workspace packages: `@prism/core/ui`, `@prism/core/database`, `@prism/core/utilities`, `@prism/core/logger`, `@prism/core/intelligence`, `@prism/core/system-sheet`, and `@prism/core/authentication`.
 - Inside this monorepo we use path aliases like `@ui` and `@logger`; external apps can import the same modules via the `@prism/core/*` subpaths without custom path mapping.
 - Generated apps scaffolded by the CLI are already wired to use these imports (with path aliases like `@ui` that work in both modes).
 
@@ -283,7 +295,8 @@ import { db } from "@database"; // packages/database
 import { cn } from "@utilities"; // packages/utilities
 import { serverLogger } from "@logger/server"; // packages/logger
 import { getDefaultModel } from "@intelligence"; // packages/intelligence
-import { DevSheetPage } from "@dev-sheet"; // packages/dev-sheet
+import { SystemSheetPage } from "@system-sheet"; // packages/system-sheet
+import { requireApiAuthentication } from "@authentication"; // packages/authentication
 ```
 
 ## Build Process

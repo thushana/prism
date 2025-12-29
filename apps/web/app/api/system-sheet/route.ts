@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import type { DevSheetData } from "@dev-sheet";
+import type { SystemSheetData } from "@system-sheet";
+import { serverLogger as logger } from "@logger/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -65,11 +66,11 @@ function getVercelInfo() {
   };
 }
 
-export async function getDevSheetData(): Promise<DevSheetData> {
+export async function getSystemSheetData(): Promise<SystemSheetData> {
   const git = await getGitInfo();
   const vercel = getVercelInfo();
 
-  const data: DevSheetData = {
+  const data: SystemSheetData = {
     apps: [],
     shadcn: {
       style: "default",
@@ -102,12 +103,13 @@ export async function getDevSheetData(): Promise<DevSheetData> {
 
 export async function GET() {
   try {
-    const data = await getDevSheetData();
+    const data = await getSystemSheetData();
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Failed to get dev-sheet data:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error("Failed to get system-sheet data", { error: errorMessage });
     return NextResponse.json(
-      { success: false, error: "Failed to fetch dev-sheet data" },
+      { success: false, error: "Failed to fetch system-sheet data" },
       { status: 500 }
     );
   }

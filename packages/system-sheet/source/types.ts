@@ -6,7 +6,7 @@ export interface AppStatus {
   isRunning: boolean;
 }
 
-export interface DevSheetData {
+export interface SystemSheetData {
   apps: AppStatus[];
   shadcn: {
     style: string;
@@ -53,7 +53,7 @@ export interface DevSheetData {
   lastUpdated: string;
 }
 
-export interface DevSheetConfig {
+export interface SystemSheetConfig {
   showEnvironment?: boolean;
   showGit?: boolean;
   showVercel?: boolean;

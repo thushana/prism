@@ -3,7 +3,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@ui";
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
-import type { DevSheetConfig, DevSheetData } from "./types";
+import type { SystemSheetConfig, SystemSheetData } from "./types";
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({
@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-interface DevSheetPageProps {
-  data?: DevSheetData | null;
-  config?: DevSheetConfig;
+interface SystemSheetPageProps {
+  data?: SystemSheetData | null;
+  config?: SystemSheetConfig;
 }
 
 // Helper function to render component examples
@@ -79,16 +79,16 @@ function renderComponentExample(componentName: string) {
 }
 
 /**
- * DevSheetPage - A reusable development info page
+ * SystemSheetPage - A reusable system information page
  *
  * Usage in your app:
  * ```tsx
- * import { DevSheetPage } from "@prism/core/dev-sheet";
+ * import { SystemSheetPage } from "@prism/core/system-sheet";
  * import { headers } from "next/headers";
  *
  * export const dynamic = "force-dynamic";
  *
- * async function fetchDevSheetData() {
+ * async function fetchSystemSheetData() {
  *   try {
  *     const headersList = await headers();
  *     const host = headersList.get("host") || "localhost:3001";
@@ -99,7 +99,7 @@ function renderComponentExample(componentName: string) {
  *         : "https";
  *     const baseUrl = `${protocol}://${host}`;
  *
- *     const res = await fetch(`${baseUrl}/api/dev-sheet`, {
+ *     const res = await fetch(`${baseUrl}/api/system-sheet`, {
  *       cache: "no-store",
  *     });
  *     if (!res.ok) return null;
@@ -111,16 +111,12 @@ function renderComponentExample(componentName: string) {
  * }
  *
  * export default async function Page() {
- *   if (process.env.NODE_ENV === "production" &&
- *       process.env.ENABLE_DEV_SHEET !== "true") {
- *     return null;
- *   }
- *   const data = await fetchDevSheetData();
- *   return <DevSheetPage data={data} />;
+ *   const data = await fetchSystemSheetData();
+ *   return <SystemSheetPage data={data} />;
  * }
  * ```
  */
-export function DevSheetPage({ data, config = {} }: DevSheetPageProps) {
+export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
   const {
     showEnvironment = true,
     showGit = true,
@@ -133,14 +129,16 @@ export function DevSheetPage({ data, config = {} }: DevSheetPageProps) {
   if (!data) {
     return (
       <div className="container mx-auto p-8 space-y-8">
-        <h1 className="mb-2">Development Sheet</h1>
+        <h1 className="mb-2">System Sheet</h1>
         <p className="text-muted-foreground">
-          Unable to load development data. Please try again in a moment.
+          Unable to load system data. Please try again in a moment.
         </p>
         <p className="text-sm text-muted-foreground">
           Make sure your app has an{" "}
-          <code className="bg-muted px-1 py-0.5 rounded">/api/dev-sheet</code>{" "}
-          endpoint that returns development data.
+          <code className="bg-muted px-1 py-0.5 rounded">
+            /api/system-sheet
+          </code>{" "}
+          endpoint that returns system data.
         </p>
       </div>
     );
@@ -149,7 +147,7 @@ export function DevSheetPage({ data, config = {} }: DevSheetPageProps) {
   return (
     <div className={`container mx-auto p-8 space-y-8 ${geistMono.variable}`}>
       <div>
-        <h1 className="mb-2">Development Sheet</h1>
+        <h1 className="mb-2">System Sheet</h1>
         <p className="text-muted-foreground">
           Overview of installed components, styles, and dependencies
         </p>
@@ -866,4 +864,4 @@ export function DevSheetPage({ data, config = {} }: DevSheetPageProps) {
   );
 }
 
-export default DevSheetPage;
+export default SystemSheetPage;

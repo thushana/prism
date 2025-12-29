@@ -62,7 +62,7 @@ function getInstallCommand(pm: string): string {
 function createDirectoryStructure(targetDir: string): void {
   const dirs = [
     "app",
-    "app/dev-sheet",
+    "app/system-sheet",
     "app/api",
     "ui/styles",
     "docs",
@@ -133,7 +133,7 @@ function generatePackageJson(
         logger: "*",
         ui: "*",
         utilities: "*",
-        "dev-sheet": "*",
+        "system-sheet": "*",
       }
     : prismRepo
       ? {
@@ -153,7 +153,7 @@ function generatePackageJson(
           logger: "file:./prism/packages/logger",
           ui: "file:./prism/packages/ui",
           utilities: "file:./prism/packages/utilities",
-          "dev-sheet": "file:./prism/packages/dev-sheet",
+          "system-sheet": "file:./prism/packages/system-sheet",
         };
 
   const packageJson = {
@@ -239,7 +239,7 @@ const nextConfig: NextConfig = {
       "@logger/server": path.resolve(__dirname, "./prism/packages/logger/source/server"),
       "@ui": path.resolve(__dirname, "./prism/packages/ui/source"),
       "@utilities": path.resolve(__dirname, "./prism/packages/utilities/source"),
-      "@dev-sheet": path.resolve(__dirname, "./prism/packages/dev-sheet/source"),
+      "@system-sheet": path.resolve(__dirname, "./prism/packages/system-sheet/source"),
     };
     // Allow resolving symlinks (submodule creates symlinks in node_modules)
     config.resolve.symlinks = true;
@@ -289,7 +289,7 @@ function generateTsConfig(
         "@logger/*": ["../../packages/logger/source/*"],
         "@ui": ["../../packages/ui/source"],
         "@utilities": ["../../packages/utilities/source"],
-        "@dev-sheet": ["../../packages/dev-sheet/source"],
+        "@system-sheet": ["../../packages/system-sheet/source"],
       }
     : useGitDependency
       ? {
@@ -304,7 +304,7 @@ function generateTsConfig(
           "@logger/*": ["node_modules/@prism/core/packages/logger/source/*"],
           "@ui": ["node_modules/@prism/core/packages/ui/source"],
           "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
-          "@dev-sheet": ["node_modules/@prism/core/packages/dev-sheet/source"],
+          "@system-sheet": ["node_modules/@prism/core/packages/system-sheet/source"],
         }
       : {
           "@/*": ["./*"],
@@ -321,7 +321,7 @@ function generateTsConfig(
           ],
           "@ui": ["./prism/packages/ui/source"],
           "@utilities": ["./prism/packages/utilities/source"],
-          "@dev-sheet": ["./prism/packages/dev-sheet/source"],
+          "@system-sheet": ["./prism/packages/system-sheet/source"],
         };
 
   const tsconfig = {
@@ -497,7 +497,7 @@ function generateTemplateFiles(targetDir: string, appName: string): void {
     DATABASE_IMPORT: "@database",
     INTELLIGENCE_IMPORT: "@intelligence",
     LOGGER_IMPORT: "@logger",
-    DEV_SHEET_IMPORT: "@dev-sheet",
+    SYSTEM_SHEET_IMPORT: "@system-sheet",
   };
 
   const templateSourceDir = getTemplatesDir();
@@ -517,10 +517,12 @@ DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxxxx.region.aws.neon.tech/d
 # Required APIs: Places API, Timezone API, Geocoding API, Directions API
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
-# Admin Authentication
-# Generate a secure random string: openssl rand -hex 32
-# Used in x-api-key header for admin-only endpoints
-ADMIN_API_KEY=your_admin_api_key_here
+# Prism Authentication
+# Generate secure random strings: openssl rand -hex 32
+# PRISM_KEY_API: Used in x-prism-api-key header for API route authentication
+PRISM_KEY_API=your_prism_api_key_here
+# PRISM_KEY_WEB: Used for web page authentication (password form, stored in cookie)
+PRISM_KEY_WEB=your_prism_web_key_here
 
 # Cron Security (Optional)
 # Generate a secure random string for verifying cron requests from Vercel

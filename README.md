@@ -14,7 +14,8 @@ prism/
 │   ├── intelligence/     # AI tasks and utilities
 │   ├── logger/           # Logging infrastructure
 │   ├── utilities/        # Shared utility functions
-│   └── dev-sheet/        # Development info page
+│   ├── system-sheet/     # System information page
+│   └── authentication/   # Authentication utilities
 ├── apps/
 │   └── web/              # Sample application (generated apps go here)
 ├── tools/                 # CLI tools and generator
@@ -233,8 +234,11 @@ import { logger } from "@prism/core/logger";
 // Import utilities
 import { cn } from "@prism/core/utilities";
 
-// Import dev-sheet (for development pages)
-import { DevSheetPage } from "@prism/core/dev-sheet";
+// Import system-sheet (for system information pages)
+import { SystemSheetPage } from "@prism/core/system-sheet";
+
+// Import authentication utilities
+import { requireApiAuthentication } from "@prism/core/authentication";
 ```
 
 ### Within the Monorepo
@@ -257,8 +261,11 @@ import { logger, logSuccess } from "@logger/client";
 // Import logger (server-side)
 import { serverLogger as logger, logStart } from "@logger/server";
 
-// Import dev-sheet
-import { DevSheetPage } from "@dev-sheet";
+// Import system-sheet
+import { SystemSheetPage } from "@system-sheet";
+
+// Import authentication
+import { requireApiAuthentication } from "@authentication";
 ```
 
 ### Dev-Sheet

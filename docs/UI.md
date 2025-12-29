@@ -378,7 +378,7 @@ packages/
 ├── ui/
 │   └── styles/
 │       └── globals.css          # Main styles + scans all Prism packages
-├── dev-sheet/
+├── system-sheet/
 │   └── source/                  # Scanned by ui/styles/globals.css
 └── utilities/
     └── source/                  # Scanned by ui/styles/globals.css
@@ -391,7 +391,7 @@ packages/
    ```css
    @source "../source/**/*.{ts,tsx}"; /* UI package */
    @source "../../utilities/source/**/*.{ts,tsx}"; /* Utilities package */
-   @source "../../dev-sheet/source/**/*.{ts,tsx}"; /* Dev-sheet package */
+   @source "../../system-sheet/source/**/*.{ts,tsx}"; /* System-sheet package */
    ```
 
 2. These paths work in both contexts:
