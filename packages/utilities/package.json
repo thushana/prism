@@ -18,6 +18,10 @@
   },
   "scripts": {
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'No linting configured'",
+    "format": "prettier --write \"source/**/*.{ts,tsx}\"",
+    "quality": "npm run typecheck && npm run lint && npm run format && npm run test:run"
   }
 }
