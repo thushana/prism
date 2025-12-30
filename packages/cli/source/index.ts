@@ -44,3 +44,6 @@ export {
   promptCustom,
   isPromptCancelled,
 } from "./prompts";
+
+// Styling utilities
+export { chalk, styles, statusMessage } from "./styling";
