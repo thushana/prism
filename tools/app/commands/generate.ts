@@ -519,15 +519,10 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 # Prism Authentication
 # Generate secure random strings: openssl rand -hex 32
-# PRISM_KEY_API: Used in x-prism-api-key header for API route authentication
+# PRISM_KEY_API: Used in x-prism-api-key header for API route authentication (including cron endpoint)
 PRISM_KEY_API=your_prism_api_key_here
 # PRISM_KEY_WEB: Used for web page authentication (password form, stored in cookie)
 PRISM_KEY_WEB=your_prism_web_key_here
-
-# Cron Security (Optional)
-# Generate a secure random string for verifying cron requests from Vercel
-# Recommended for production to prevent unauthorized cron triggers
-CRON_SECRET=your_cron_secret_here
 
 # Node Environment (automatically set by Vercel in production)
 NODE_ENV=development
