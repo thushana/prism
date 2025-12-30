@@ -13,6 +13,8 @@ import { execSync } from "child_process";
 import * as LoggerModule from "../../../packages/logger/source/server";
 const serverLogger = LoggerModule.serverLogger;
 import type { BaseCommandOptions } from "@cli";
+import { generateBanner } from "../../../packages/cli/source/styling.ts";
+import chalk from "chalk";
 
 const logger = serverLogger;
 const log: {
@@ -575,6 +577,13 @@ function findPrismRoot(startDir: string): string | null {
 export async function runGenerateCommand(
   options: GenerateCommandOptions
 ): Promise<void> {
+  // Display banner
+  const banner = generateBanner();
+  banner.split("\n").forEach((line) => {
+    if (line) log.info(line);
+  });
+  log.info("");
+
   const appName = options.name;
 
   // Determine target directory
@@ -588,7 +597,7 @@ export async function runGenerateCommand(
       ? path.resolve(prismRoot, "apps", appName)
       : path.resolve(process.cwd(), appName);
 
-  log.info(`Generating Prism app: ${appName}`);
+  log.info(`Generating ${chalk.bold("💎 Prism")} app: ${appName}`);
   if (options.path) {
     log.info(`Saving to: ${targetDir}`);
   } else if (prismRoot) {
@@ -643,7 +652,7 @@ export async function runGenerateCommand(
         // User explicitly specified git repo - use as npm dependency
         useGitDependency = true;
         prismRepoUrl = options.prismRepo;
-        log.info(`📦 Using Prism from git: ${prismRepoUrl}`);
+        log.info(`📦 Using ${chalk.bold("💎 Prism")} from git: ${prismRepoUrl}`);
         log.info(
           "💡 This creates a deployable app with Prism as npm dependency."
         );
@@ -651,7 +660,7 @@ export async function runGenerateCommand(
         // Default: add Prism as git submodule inside the app (one deployable repo)
         useGitDependency = false;
         const defaultPrismRepo = "https://github.com/thushana/prism.git";
-        log.info("📦 Adding Prism as git submodule at ./prism");
+        log.info(`📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`);
         try {
           // Initialize git first if not already initialized
           if (!fs.existsSync(path.join(targetDir, ".git"))) {
@@ -662,7 +671,7 @@ export async function runGenerateCommand(
             cwd: targetDir,
             stdio: "inherit",
           });
-          log.info("✅ Prism submodule added successfully");
+          log.info(`✅ ${chalk.bold("💎 Prism")} submodule added successfully`);
         } catch {
           log.warn("Failed to add Prism submodule automatically");
           log.warn("Please add it manually:");

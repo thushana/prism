@@ -228,3 +228,26 @@ export const colorNames: ColorName[] = [
 
 // Export materialColors for reference
 export { materialColors };
+
+/**
+ * Generate PRISM ASCII art banner with Material UI colors
+ */
+export function generateBanner(): string {
+  const bannerLines = [
+    "   ___  ___  __________  ___",
+    "  / _ \\/ _ \\/  _/ __/  |/  /",
+    " / ___/ , _// /_\\ \\/ /|_/ /",
+    "/_/  /_/|_/___/___/_/  /_/",
+  ];
+
+  const bannerColors = [
+    colors.pink.default,
+    colors.purple.default,
+    colors.deepPurple.default,
+    colors.indigo.default,
+  ];
+
+  return bannerLines
+    .map((line, index) => bannerColors[index](line))
+    .join("\n");
+}

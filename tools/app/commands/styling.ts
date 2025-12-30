@@ -5,7 +5,7 @@
 import { Command } from "commander";
 import type { BaseCommandOptions } from "@cli";
 import chalk from "chalk";
-import { styles, statusMessage, colors, colorNames, materialColors } from "../../../packages/cli/source/styling.ts";
+import { styles, statusMessage, colors, colorNames, materialColors, generateBanner } from "../../../packages/cli/source/styling.ts";
 // TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
 // Workaround: Use namespace import due to tsx bug with package.json exports
 import * as LoggerModule from "../../../packages/logger/source/server";
@@ -24,7 +24,12 @@ export async function runStylingCommand(
     logger.level = "debug";
   }
 
-  logger.info(chalk.bold.cyan("\n📋 Prism CLI Style Sheet\n"));
+  const banner = generateBanner();
+  // Log each line separately to ensure proper output
+  banner.split("\n").forEach((line) => {
+    if (line) logger.info(line);
+  });
+  logger.info(chalk.bold.cyan("\n📋 ") + chalk.bold("💎 Prism") + chalk.bold.cyan(" CLI Style Sheet\n"));
   logger.info(chalk.dim("=".repeat(60)));
 
   // All Material UI Colors (in order from materialui.co/colors)

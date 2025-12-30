@@ -6,6 +6,7 @@
 
 import { Command } from "commander";
 import { parseNumber } from "@cli";
+import { generateBanner } from "../../../packages/cli/source/styling.ts";
 import { database, users } from "@database";
 import {
   serverLogger as logger,
@@ -69,6 +70,13 @@ async function seedUsers(count: number): Promise<void> {
 export async function runSeedCommand(
   options: SeedCommandOptions
 ): Promise<void> {
+  // Display banner
+  const banner = generateBanner();
+  banner.split("\n").forEach((line) => {
+    if (line) logger.info(line);
+  });
+  logger.info("");
+
   // Parse options
   const count = options.count ? parseNumber(options.count, "count", 1) : 10;
   const table = options.table || "users";

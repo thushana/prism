@@ -9,6 +9,7 @@ import { serverLogger, logStart, logSuccess } from "@logger/server";
 import { execSync } from "child_process";
 import * as path from "path";
 import type { BaseCommandOptions } from "@cli";
+import { generateBanner } from "../../../packages/cli/source/styling.ts";
 
 const logger = serverLogger;
 
@@ -107,6 +108,13 @@ async function pushSchema(): Promise<void> {
 export async function runMigrateCommand(
   options: MigrateCommandOptions
 ): Promise<void> {
+  // Display banner
+  const banner = generateBanner();
+  banner.split("\n").forEach((line) => {
+    if (line) logger.info(line);
+  });
+  logger.info("");
+
   logStart("Starting migrate command");
 
   // Enable debug logging if requested
