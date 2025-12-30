@@ -524,6 +524,13 @@ PRISM_KEY_API=your_prism_api_key_here
 # PRISM_KEY_WEB: Used for web page authentication (password form, stored in cookie)
 PRISM_KEY_WEB=your_prism_web_key_here
 
+# Cron Security (Optional)
+# Generate a secure random string for verifying cron requests from Vercel
+# Vercel automatically sends this as Authorization: Bearer <CRON_SECRET> header
+# Works for both automatic cron jobs and manual triggers from dashboard
+# Recommended for production to prevent unauthorized cron triggers
+CRON_SECRET=your_cron_secret_here
+
 # Node Environment (automatically set by Vercel in production)
 NODE_ENV=development
 `;
