@@ -100,7 +100,7 @@ packages/cli/
     ├── index.ts           # Package exports
     ├── command.ts         # Base command patterns/interfaces (createCommand, withErrorHandling)
     ├── registry.ts        # Command registration helpers
-    └── utils.ts           # CLI utilities
+    └── utilities.ts       # CLI utilities
 
 tools/
 ├── package.json

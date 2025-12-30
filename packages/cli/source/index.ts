@@ -30,7 +30,7 @@ export {
   ensureDirectory,
   getDirectory,
   createProgressReporter,
-} from "./utils";
+} from "./utilities";
 
 // Interactive prompts
 export type { PromptChoice } from "./prompts";
