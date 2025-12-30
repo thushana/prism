@@ -245,6 +245,24 @@ const nextConfig: NextConfig = {
     };
     // Allow resolving symlinks (submodule creates symlinks in node_modules)
     config.resolve.symlinks = true;
+    
+    // Exclude CLI and tools directories from webpack watch mode
+    // These are not needed for the web app build and should be ignored
+    // This optimizes dev builds by preventing webpack from watching these directories
+    // Production builds already exclude unimported files via tree-shaking
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [
+        ...(Array.isArray(config.watchOptions?.ignored)
+          ? config.watchOptions.ignored
+          : config.watchOptions?.ignored
+          ? [config.watchOptions.ignored]
+          : []),
+        "**/cli/**",
+        "**/prism/tools/**",
+      ],
+    };
+    
     return config;
   },
 };
