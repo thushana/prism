@@ -60,7 +60,7 @@ Or run the web app:
 npm run dev:web
 ```
 
-**Note:** The `apps/web` directory is kept as a sample. You can generate new apps using `npm run prism generate <app-name>`, which will create them in the `apps/` directory.
+**Note:** The `apps/web` directory is kept as a sample. You can generate new apps using `prism generate <app-name>` (after `npm run setup`) or `npm run prism generate <app-name>`, which will create them in the `apps/` directory.
 
 ## Available Scripts
 
@@ -121,7 +121,7 @@ npm run dev:web
 ### Apps
 
 - **apps/web**: Sample Next.js application (reference implementation)
-- **apps/\***: Generated apps (created via `npm run prism generate <name>`)
+- **apps/\***: Generated apps (created via `prism generate <name>` or `npm run prism generate <name>`)
 
 ### Packages
 
@@ -196,7 +196,10 @@ Apps in separate repositories can import Prism Core as a dependency. The generat
 **Option 1: Git Submodule (Recommended - One Deployable Repo)**
 
 ```bash
-# Generate app (automatically adds Prism as submodule at ./prism)
+# Direct mode (recommended after npm run setup)
+prism generate my-app --path ../my-app
+
+# Or via npm script
 npm run prism generate my-app --path ../my-app
 ```
 
@@ -210,7 +213,10 @@ This automatically:
 **Option 2: Git Dependency (Alternative for Deployment)**
 
 ```bash
-# Generate app with git dependency
+# Direct mode (recommended after npm run setup)
+prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+
+# Or via npm script
 npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 

@@ -21,6 +21,9 @@
   "engines": {
     "node": ">=24.0.0"
   },
+  "bin": {
+    "prism": "./tools/app/tools.mjs"
+  },
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build -w apps/web",
@@ -43,6 +46,7 @@
     "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\"",
     "prism": "npm run start -w tools --",
     "prism:sync": "tsx scripts/sync.ts",
+    "setup": "npm link && npm run prism:sync",
     "prism:sync:commands": "tsx scripts/sync-commands.ts",
     "prism:sync:git": "tsx scripts/sync-git.ts",
     "prism:sync:scripts": "tsx scripts/sync-scripts.ts",

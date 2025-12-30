@@ -4,9 +4,82 @@ The `prism generate` command scaffolds a complete Next.js application pre-wired 
 
 ## Quick Start
 
+**Recommended**: Set up direct command access (one-time setup):
+
 ```bash
-# From the Prism monorepo root
+# Run setup script to link CLI globally
+npm run setup
+
+# Now use the CLI directly
+prism generate my-app
+prism --help
+```
+
+## Usage Methods
+
+The CLI can be run in three ways. **Direct mode is recommended** after initial setup:
+
+### 1. Direct Command (Recommended) ⭐
+
+After running `npm run setup`, use the CLI directly:
+
+```bash
+# Generate a new app
+prism generate my-app
+
+# Show help
+prism --help
+```
+
+**Benefits**:
+- Cleaner command syntax
+- Works from any directory
+- No need to prefix with `npm run` or `npx`
+
+### 2. Via npx (No Setup Required)
+
+Use `npx` to run without setup:
+
+```bash
+# Generate a new app
+npx @prism/core generate my-app
+
+# Show help
+npx @prism/core --help
+```
+
+**Use when**: You haven't run `npm run setup` yet, or you're in a CI/CD environment.
+
+### 3. Via npm Script
+
+Use the npm script (useful for development):
+
+```bash
+# Generate a new app
 npm run prism generate my-app
+
+# Show help
+npm run prism -- --help
+```
+
+**Use when**: You prefer npm scripts or are in a development workflow.
+
+## Examples
+
+All examples below use direct mode (`prism`). Replace with `npx @prism/core` or `npm run prism` if you haven't run setup.
+
+```bash
+# Generate a new app
+prism generate my-app
+
+# Generate with force (overwrite existing)
+prism generate my-app --force
+
+# Generate standalone app outside monorepo
+prism generate my-app --path ../my-app
+
+# Generate with git dependency
+prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 
 That's it! The generator handles everything automatically.

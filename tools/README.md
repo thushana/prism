@@ -13,17 +13,52 @@ This CLI application provides a unified interface for common development tasks l
 
 ## Usage
 
-From the project root:
+**Recommended**: Set up direct command access (one-time setup):
+
+```bash
+# Run setup script to link CLI globally
+npm run setup
+
+# Now use the CLI directly
+prism --help
+prism generate my-app
+```
+
+### Usage Methods
+
+The CLI can be run in three ways. **Direct mode is recommended** after initial setup:
+
+#### 1. Direct Command (Recommended) ⭐
+
+After running `npm run setup`, use the CLI directly:
 
 ```bash
 # Show help
-npm run prism --help
+prism --help
 
 # Show help for a specific command
-npm run prism seed --help
-npm run prism migrate --help
-npm run prism export --help
-npm run prism generate --help
+prism seed --help
+prism migrate --help
+prism export --help
+prism generate --help
+```
+
+#### 2. Via npx (No Setup Required)
+
+Use `npx` to run without setup:
+
+```bash
+npx @prism/core --help
+npx @prism/core generate my-app
+```
+
+#### 3. Via npm Script
+
+Use the npm script (useful for development):
+
+```bash
+npm run prism --help
+npm run prism generate my-app
 ```
 
 **Note**: You can also use `npm run tools` as an alias for `npm run prism`.
@@ -35,7 +70,13 @@ npm run prism generate --help
 Generate a new Next.js app with Prism core pre-wired.
 
 ```bash
-# Generate a new app
+# Direct mode (recommended after setup)
+prism generate my-app
+
+# Or via npx (no setup needed)
+npx @prism/core generate my-app
+
+# Or via npm script
 npm run prism generate my-app
 ```
 
@@ -113,17 +154,15 @@ Visit http://localhost:3000 to see your app, and http://localhost:3000/dev-sheet
 Seed the database with sample data for development and testing.
 
 ```bash
-# Seed with default count (10 users)
+# Direct mode (recommended after setup)
+prism seed
+prism seed --count 50
+prism seed --table users --count 100
+prism seed --count 20 --verbose
+
+# Or via npm script
 npm run tools seed
-
-# Seed with specific count
 npm run tools seed --count 50
-
-# Seed a specific table
-npm run tools seed --table users --count 100
-
-# Enable verbose logging
-npm run tools seed --count 20 --verbose
 ```
 
 **Options:**
@@ -138,17 +177,15 @@ npm run tools seed --count 20 --verbose
 Run database migrations using Drizzle Kit.
 
 ```bash
-# Run all pending migrations
+# Direct mode (recommended after setup)
+prism migrate
+prism migrate --generate
+prism migrate --push
+prism migrate --verbose
+
+# Or via npm script
 npm run tools migrate
-
-# Generate migrations from schema changes
 npm run tools migrate --generate
-
-# Push schema directly without migrations
-npm run tools migrate --push
-
-# Enable verbose logging
-npm run tools migrate --verbose
 ```
 
 **Options:**
@@ -164,17 +201,14 @@ npm run tools migrate --verbose
 Export data from the database to CSV or JSON format.
 
 ```bash
-# Export users to JSON (default)
+# Direct mode (recommended after setup)
+prism export --table users
+prism export --table users --format csv
+prism export --table users --output ./data/users.json
+prism export --table users --format csv --output ./exports/users.csv --verbose
+
+# Or via npm script
 npm run tools export --table users
-
-# Export to CSV
-npm run tools export --table users --format csv
-
-# Export with custom output path
-npm run tools export --table users --output ./data/users.json
-
-# Export with all options
-npm run tools export --table users --format csv --output ./exports/users.csv --verbose
 ```
 
 **Options:**
