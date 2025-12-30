@@ -410,6 +410,137 @@ describe("MyCommand", () => {
 });
 ```
 
+## Interactive Prompts
+
+The CLI package includes interactive prompt utilities using `inquirer` for building user-friendly command-line interfaces.
+
+### Available Prompt Functions
+
+All prompt functions are exported from `@cli`:
+
+- `promptMultiSelect<T>()` - Multi-select checkboxes
+- `promptSelect<T>()` - Single-select lists
+- `promptConfirm()` - Yes/no confirmations
+- `promptInput()` - Text input
+- `promptPassword()` - Password input (hidden)
+- `promptNumber()` - Number input with validation
+- `promptCustom<T>()` - Custom inquirer prompts
+- `isPromptCancelled()` - Helper to detect Ctrl+C cancellation
+
+### Usage Examples
+
+#### Multi-Select (Checkbox)
+
+```typescript
+import { promptMultiSelect, type PromptChoice } from "@cli";
+
+const choices: PromptChoice<number>[] = [
+  { name: "Option 1", value: 1 },
+  { name: "Option 2", value: 2 },
+  { name: "Option 3", value: 3 },
+];
+
+const selected = await promptMultiSelect<number>(
+  "Select options (use space to select, enter to confirm):",
+  choices
+);
+
+// selected is number[] (e.g., [1, 3])
+```
+
+#### Single Select (List)
+
+```typescript
+import { promptSelect } from "@cli";
+
+const choices: PromptChoice<string>[] = [
+  { name: "Option A", value: "a" },
+  { name: "Option B", value: "b" },
+];
+
+const selected = await promptSelect<string>(
+  "Choose an option:",
+  choices
+);
+
+// selected is string (e.g., "a")
+```
+
+#### Confirmation
+
+```typescript
+import { promptConfirm } from "@cli";
+
+const confirmed = await promptConfirm("Proceed with operation?", true);
+if (!confirmed) {
+  logger.info("Operation cancelled");
+  return;
+}
+```
+
+#### Text Input
+
+```typescript
+import { promptInput } from "@cli";
+
+const name = await promptInput("Enter your name:", {
+  validate: (input) => {
+    if (input.length < 3) {
+      return "Name must be at least 3 characters";
+    }
+    return true;
+  },
+});
+```
+
+#### Number Input
+
+```typescript
+import { promptNumber } from "@cli";
+
+const count = await promptNumber("Enter count:", {
+  min: 1,
+  max: 100,
+  default: 10,
+});
+```
+
+#### Handling Cancellation
+
+```typescript
+import { promptMultiSelect, isPromptCancelled } from "@cli";
+
+try {
+  const selected = await promptMultiSelect("Select items:", choices);
+  // Process selection
+} catch (error) {
+  if (isPromptCancelled(error)) {
+    logger.info("Operation cancelled by user");
+    process.exitCode = 0;
+    return;
+  }
+  throw error;
+}
+```
+
+### Prompt Choice Interface
+
+```typescript
+interface PromptChoice<T = any> {
+  name: string;      // Display name
+  value: T;          // Value returned when selected
+  short?: string;    // Optional short name
+}
+```
+
+### Best Practices
+
+1. **Always handle cancellation**: Use `isPromptCancelled()` to gracefully handle Ctrl+C
+2. **Provide clear messages**: Make prompt messages descriptive and actionable
+3. **Validate input**: Use validation functions for text/number inputs
+4. **Use appropriate prompt types**: Choose the right prompt type for the use case
+5. **Type safety**: Use TypeScript generics for type-safe prompt results
+
 ## Common Patterns
 
 ### Loading Configuration

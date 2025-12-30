@@ -31,3 +31,16 @@ export {
   getDirectory,
   createProgressReporter,
 } from "./utils";
+
+// Interactive prompts
+export type { PromptChoice } from "./prompts";
+export {
+  promptMultiSelect,
+  promptSelect,
+  promptConfirm,
+  promptInput,
+  promptPassword,
+  promptNumber,
+  promptCustom,
+  isPromptCancelled,
+} from "./prompts";

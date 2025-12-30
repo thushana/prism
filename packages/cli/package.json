@@ -8,13 +8,17 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "commander": "^14.0.2"
+    "@types/inquirer": "^9.0.9",
+    "commander": "^14.0.2",
+    "inquirer": "^13.1.0"
   },
   "peerDependencies": {
     "logger": "*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "typescript": "^5.9.3"
+    "@vitest/ui": "^4.0.16",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }
