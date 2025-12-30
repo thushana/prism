@@ -230,9 +230,35 @@ export const colorNames: ColorName[] = [
 export { materialColors };
 
 /**
- * Generate PRISM ASCII art banner with Material UI colors
+ * Banner configuration - can be overridden by apps
+ */
+let bannerConfig: {
+  lines: string[];
+  colorSequence: Array<chalk.Chalk>;
+} | null = null;
+
+/**
+ * Set custom banner configuration (for apps to override default PRISM banner)
+ */
+export function setBannerConfig(config: {
+  lines: string[];
+  colorSequence: Array<chalk.Chalk>;
+}): void {
+  bannerConfig = config;
+}
+
+/**
+ * Generate ASCII art banner with Material UI colors
+ * Uses custom banner if set via setBannerConfig(), otherwise uses default PRISM banner
  */
 export function generateBanner(): string {
+  if (bannerConfig) {
+    return bannerConfig.lines
+      .map((line, index) => bannerConfig!.colorSequence[index % bannerConfig!.colorSequence.length](line))
+      .join("\n");
+  }
+
+  // Default PRISM banner
   const bannerLines = [
     "   ___  ___  __________  ___",
     "  / _ \\/ _ \\/  _/ __/  |/  /",

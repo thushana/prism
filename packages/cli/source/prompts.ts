@@ -225,9 +225,15 @@ export async function promptCustom<T>(
  * Check if user cancelled the prompt (Ctrl+C)
  */
 export function isPromptCancelled(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  
+  const message = error.message.toLowerCase();
   return (
-    error instanceof Error &&
-    (error.message === "User force closed the prompt with ctrl+c" ||
-      error.message.includes("cancel"))
+    message === "user force closed the prompt with ctrl+c" ||
+    message === "user force closed the prompt with sigint" ||
+    message.includes("cancel") ||
+    error.name === "ExitPromptError"
   );
 }

@@ -81,7 +81,7 @@ function formatMetadata(meta: any): string {
 }
 
 /**
- * Custom Winston format with timestamps and emojis
+ * Custom Winston format with timestamps and emojis (default mode)
  */
 const customFormat = winston.format.printf(
   ({ level, message, timestamp, emoji, ...meta }) => {
@@ -93,6 +93,21 @@ const customFormat = winston.format.printf(
 );
 
 /**
+ * Clean CLI format without timestamps and log levels (CLI mode)
+ */
+const cliFormat = winston.format.printf(
+  ({ message, emoji, ...meta }) => {
+    const emojiPrefix = emoji || "";
+    const metaStr = formatMetadata(meta);
+    // Only show metadata if it exists and CLI mode is enabled
+    return `${emojiPrefix}${emojiPrefix ? " " : ""}${message}${metaStr}`;
+  }
+);
+
+// Track CLI mode state
+let isCLIMode = false;
+
+/**
  * Main server logger instance (Winston)
  */
 export const serverLogger = winston.createLogger({
@@ -102,7 +117,33 @@ export const serverLogger = winston.createLogger({
     winston.format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",
     }),
-    customFormat
+    // Use dynamic format based on CLI mode
+    winston.format.printf((info) => {
+      if (isCLIMode) {
+        const emojiPrefix = info.emoji || "";
+        const metaStr = formatMetadata(
+          Object.keys(info).filter(
+            (key) => !["level", "message", "timestamp", "emoji", "splat", "Symbol(level)", "Symbol(message)"].includes(key)
+          ).reduce((acc, key) => {
+            acc[key] = (info as any)[key];
+            return acc;
+          }, {} as any)
+        );
+        return `${emojiPrefix}${emojiPrefix ? " " : ""}${info.message}${metaStr}`;
+      }
+      // Default format
+      const emojiPrefix =
+        info.emoji || contextEmojiMap[info.level as keyof typeof contextEmojiMap] || "";
+      const metaStr = formatMetadata(
+        Object.keys(info).filter(
+          (key) => !["level", "message", "timestamp", "emoji", "splat", "Symbol(level)", "Symbol(message)"].includes(key)
+        ).reduce((acc, key) => {
+          acc[key] = (info as any)[key];
+          return acc;
+        }, {} as any)
+      );
+      return `${info.timestamp} ${emojiPrefix} [${info.level.toUpperCase()}] ${info.message}${metaStr}`;
+    })
   ),
   transports: [new winston.transports.Console()],
 });
@@ -130,6 +171,13 @@ export const logStart = contextLogger(contextEmojiMap.start);
  */
 export function setLogLevel(level: LogLevel): void {
   serverLogger.level = level;
+}
+
+/**
+ * Enable CLI mode - removes timestamps and log levels for cleaner output
+ */
+export function setCLIMode(enabled: boolean = true): void {
+  isCLIMode = enabled;
 }
 
 /**
