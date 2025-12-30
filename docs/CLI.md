@@ -10,6 +10,7 @@ The CLI is split into two parts following monorepo best practices:
   - Command patterns and interfaces
   - Command registry utilities
   - Common CLI utilities (path resolution, validation, etc.)
+  - Styling utilities (chalk-based text styling for console output)
 
 - **`tools`** - Specific CLI application for this project
   - Actual command implementations (seed, migrate, export, generate)
@@ -100,7 +101,8 @@ packages/cli/
     ├── index.ts           # Package exports
     ├── command.ts         # Base command patterns/interfaces (createCommand, withErrorHandling)
     ├── registry.ts        # Command registration helpers
-    └── utilities.ts       # CLI utilities
+    ├── utilities.ts       # CLI utilities
+    └── styling.ts         # Styling utilities (chalk-based)
 
 tools/
 ├── package.json
@@ -232,6 +234,9 @@ import {
   withErrorHandling,
   parseNumber,
   requireOption,
+  chalk,
+  styles,
+  statusMessage,
 } from "@cli";
 
 interface HelloOptions extends BaseCommandOptions {
@@ -313,13 +318,147 @@ logger.info("Processing...");
 console.log("Processing...");
 ```
 
-### 4. Provide Helpful Descriptions
+### 4. Use Logger with Styling for Formatted Output
+
+Use the Winston logger for all output. Apply styling to logger messages for visual feedback:
+
+```typescript
+// ✅ Good
+import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
+import { styles, statusMessage } from "@cli";
+
+// Structured logging with styled messages
+logger.info(styles.success("Route created"));
+logger.error(styles.errorBold("Failed to import"));
+logger.info(statusMessage("success", "Import completed"));
+
+// Use logStart/logSuccess for command lifecycle
+logStart("Starting route import");
+logSuccess("Import completed successfully");
+
+// For formatted output (progress bars, summaries), use logger with styled strings
+logger.info(`${styles.checkmark} Route imported`);
+logger.warn(`${styles.warningSymbol} Quota approaching`);
+
+// ❌ Bad
+console.log("Route created"); // Use logger instead
+logger.info("Route created"); // No styling for visual feedback
+```
+
+### 5. Provide Helpful Descriptions
 
 ```typescript
 // ✅ Good
 .command('crawl <placeType>')
 .description('Crawl Google Maps for a specific place type')
 .option('--debug', 'Enable verbose debug logging', false)
+
+// ❌ Bad
+```
+
+## Styling Utilities
+
+The `@cli` package provides chalk-based styling utilities for consistent, colorful CLI output.
+
+### Available Exports
+
+```typescript
+import { chalk, styles, statusMessage } from "@cli";
+```
+
+### Direct Chalk Usage
+
+Use `chalk` directly for full control, then pass styled strings to logger:
+
+```typescript
+import { chalk } from "@cli";
+import { serverLogger as logger } from "@logger/server";
+
+logger.info(chalk.green("Success!"));
+logger.error(chalk.red.bold("Error!"));
+logger.info(chalk.cyan.underline("Info"));
+```
+
+### Pre-configured Styles
+
+Use the `styles` object for common patterns with logger:
+
+```typescript
+import { styles } from "@cli";
+import { serverLogger as logger } from "@logger/server";
+
+// Status colors
+logger.info(styles.success("Route created"));
+logger.error(styles.error("Import failed"));
+logger.warn(styles.warning("Quota approaching"));
+logger.info(styles.info("Processing routes"));
+
+// Text styles
+logger.info(styles.bold("Important message"));
+logger.debug(styles.dim("Secondary info"));
+
+// Combined styles
+logger.info(styles.successBold("Success!"));
+logger.error(styles.errorBold("Critical error!"));
+
+// Pre-styled symbols
+logger.info(`${styles.checkmark} Route imported`);
+logger.error(`${styles.cross} Route failed`);
+logger.warn(`${styles.warningSymbol} Quota exceeded`);
+logger.info(`${styles.infoSymbol} Processing...`);
+logger.info(`${styles.arrow} Next step`);
+```
+
+### Status Messages
+
+Use `statusMessage()` for formatted status output with logger:
+
+```typescript
+import { statusMessage } from "@cli";
+import { serverLogger as logger } from "@logger/server";
+
+logger.info(statusMessage("success", "Import completed"));
+logger.error(statusMessage("error", "Import failed"));
+logger.warn(statusMessage("warning", "Quota approaching"));
+logger.info(statusMessage("info", "Processing routes"));
+```
+
+Output (when logger outputs to console):
+```
+✓ Import completed
+✗ Import failed
+⚠ Quota approaching
+ℹ Processing routes
+```
+
+### Best Practices
+
+1. **Use logger, not console**: All output should go through the Winston logger instance
+2. **Apply styling to logger messages**: Style strings before passing to logger methods
+3. **Use styles for consistency**: Prefer `styles.success()` over `chalk.green()` for common patterns
+4. **Use statusMessage for status output**: Provides consistent symbol + color formatting
+5. **Respect terminal capabilities**: Chalk automatically detects color support
+
+### Example: Styled Command Output
+
+```typescript
+import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
+import { styles, statusMessage } from "@cli";
+
+export async function runImportCommand() {
+  logStart("Starting route import");
+  logger.info(styles.infoBold("Processing routes..."));
+  
+  try {
+    await processRoutes();
+    logSuccess("Import completed");
+    logger.info(styles.success(`Created ${count} routes`));
+  } catch (error) {
+    logger.error(statusMessage("error", "Import failed"));
+    logger.error(styles.errorBold(error.message));
+  }
+}
+```
 
 // ❌ Bad
 .command('crawl')

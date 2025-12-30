@@ -46,4 +46,4 @@ export {
 } from "./prompts";
 
 // Styling utilities
-export { chalk, styles, statusMessage } from "./styling";
+export { chalk, styles, statusMessage, colors, colorNames, materialColors } from "./styling";

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prism/cli": "*",
+    "chalk": "^4.1.2",
     "logger": "*",
     "database": "*",
     "commander": "^14.0.2",

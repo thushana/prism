@@ -2,6 +2,7 @@
   "name": "@prism/cli",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "./source/index.ts",
   "types": "./source/index.ts",
   "exports": {

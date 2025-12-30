@@ -29,14 +29,30 @@ program
 // Register all commands (lazy import to avoid loading database for generate command)
 (async () => {
   try {
-    // Always register generate first (doesn't need database)
+    // Always register commands that don't need database first
     const { registerGenerateCommand } = await import("./commands/generate.ts");
     registerGenerateCommand(program);
+    
+    try {
+      const { registerStylingCommand } = await import("./commands/styling.ts");
+      registerStylingCommand(program);
+    } catch (stylingError) {
+      // Silently fail if styling command can't load (e.g., @cli not available)
+      if (process.argv[2] === "styling") {
+        if (logger) {
+          logger.error("Styling command is not available", { error: stylingError });
+        } else {
+          console.error("Styling command is not available:", stylingError);
+        }
+        process.exit(1);
+      }
+    }
 
     // Try to register database commands, but don't fail if they can't load
     const command = process.argv[2];
     if (
       command !== "generate" &&
+      command !== "styling" &&
       command !== "--help" &&
       command !== "-h" &&
       !command?.startsWith("--")
@@ -65,7 +81,7 @@ program
         // Otherwise, silently continue - generate command will still work
       }
     } else {
-      // For help or generate, try to register all commands for help display
+      // For help or non-database commands, try to register all commands for help display
       // but catch errors gracefully
       try {
         const { registerSeedCommand } = await import("./commands/seed.ts");
@@ -76,7 +92,7 @@ program
         registerMigrateCommand(program);
         registerExportCommand(program);
       } catch {
-        // Silently fail - help will just show generate command
+        // Silently fail - help will just show non-database commands
       }
     }
 
@@ -88,7 +104,11 @@ program
       program.outputHelp();
     }
   } catch (error) {
-    logger.error("Failed to register commands", { error });
+    if (logger) {
+      logger.error("Failed to register commands", { error });
+    } else {
+      console.error("Failed to register commands:", error);
+    }
     process.exit(1);
   }
 })();
