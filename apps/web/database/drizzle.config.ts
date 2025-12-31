@@ -2,7 +2,7 @@ import { defineConfig } from "drizzle-kit";
 import { config } from "dotenv";
 
 // Load environment variables from .env
-config({ path: ".env", opsOff: true });
+config({ path: ".env", opsOff: true } as any);
 
 // Use unpooled connection for drizzle-kit operations (migrations, push, etc.)
 // The pooled connection is for runtime queries in the app

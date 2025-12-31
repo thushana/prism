@@ -15,7 +15,7 @@ const logger = LoggerModule.serverLogger;
 import * as dotenv from "dotenv";
 
 // Load environment variables
-dotenv.config({ opsOff: true });
+dotenv.config({ opsOff: true } as any);
 
 // Create the main program
 const program = new Command();
