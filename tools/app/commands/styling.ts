@@ -3,9 +3,9 @@
  */
 
 import { Command } from "commander";
-import type { BaseCommandOptions } from "@cli";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command";
 import chalk from "chalk";
-import { styles, statusMessage, colors, colorNames, materialColors } from "../../../packages/cli/source/styling.ts";
+import { styles, statusMessage, colors, colorNames, materialColors } from "../../../packages/cli/source/styling";
 // TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
 // Workaround: Use namespace import due to tsx bug with package.json exports
 import * as LoggerModule from "../../../packages/logger/source/server";

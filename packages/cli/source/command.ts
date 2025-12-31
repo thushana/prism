@@ -6,8 +6,8 @@ import type { Command } from "commander";
 
 // Import logger (peer dependency)
 // TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
-// Workaround: Use namespace import due to tsx bug with package.json exports
-import * as LoggerModule from "@logger/server";
+// Workaround: Use relative import due to tsx bug with package.json exports
+import * as LoggerModule from "../../logger/source/server";
 const serverLogger = LoggerModule.serverLogger;
 const setCLIMode = LoggerModule.setCLIMode;
 import { generateBanner } from "./styling";
@@ -16,7 +16,10 @@ import { generateBanner } from "./styling";
 const logger = serverLogger;
 
 // Enable CLI mode for cleaner output (no timestamps, no [INFO] prefixes)
-setCLIMode(true);
+// Only enable if setCLIMode is available (it's a peer dependency)
+if (setCLIMode && typeof setCLIMode === "function") {
+  setCLIMode(true);
+}
 
 /**
  * Base command options that all commands should support

@@ -50,4 +50,17 @@ export {
 } from "./prompts";
 
 // Styling utilities
-export { chalk, styles, statusMessage, colors, colorNames, materialColors, generateBanner, setBannerConfig } from "./styling";
+export type { ColorName, CLIConfig } from "./styling";
+export { 
+  chalk, 
+  styles, 
+  statusMessage, 
+  colors, 
+  colorNames, 
+  materialColors, 
+  generateBanner, 
+  setBannerConfig,
+  loadCLIConfig,
+  generateColorGradient,
+  initializeBannerFromConfig
+} from "./styling";

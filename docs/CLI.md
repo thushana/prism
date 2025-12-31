@@ -91,6 +91,44 @@ npm run tools export users --format csv
 npm run tools export users --format json
 ```
 
+#### `run`
+
+Kill existing servers, start development environment, and open browser tabs. This command is automatically available to child apps (apps using `@cli` package).
+
+```bash
+# Start dev environment (kills existing servers, starts dev server and Drizzle Studio, opens browser tabs)
+npm run tools run dev
+
+# With custom ports
+npm run tools run dev --port 3001 --drizzle-port 4984
+
+# Enable verbose logging
+npm run tools run dev --verbose
+```
+
+**What it does:**
+1. Kills all running dev servers and Drizzle Studio
+2. Starts the dev server (Next.js)
+3. Starts Drizzle Studio (if available)
+4. Waits for services to be ready
+5. Opens browser tabs for:
+   - Host project dashboard (if `HOST_PROJECT_DASHBOARD` env var is set)
+   - Host project deployments page
+   - Drizzle Studio (`https://local.drizzle.studio`)
+   - System sheet page (`/admin/system-sheet`)
+   - Main application (`http://localhost:3000`)
+
+**Options:**
+- `-p, --port <port>` - Port for dev server (default: 3000)
+- `-d, --drizzle-port <port>` - Port for Drizzle Studio (default: 4983)
+- `-v, --verbose` - Enable verbose logging
+- `--debug` - Enable debug logging
+
+**Environment Variables:**
+- `HOST_PROJECT_DASHBOARD` - URL to your hosting platform's project dashboard (e.g., `https://vercel.com/username/project`). Used to open dashboard and deployments pages.
+
+**Note:** This command is automatically inherited by child apps. For example, in a TimeTraveler app, you can run `timetraveler run dev` directly.
+
 ## Actual File Structure
 
 ```
@@ -355,6 +393,157 @@ logger.info("Route created"); // No styling for visual feedback
 
 // ❌ Bad
 ```
+
+## CLI Mode and Banner Display
+
+### CLI Mode
+
+**All CLI applications must use CLI mode** for cleaner output. CLI mode removes timestamps and log level prefixes, showing only the message and emoji. This provides a much cleaner, more readable output for command-line tools.
+
+**CLI Mode Output:**
+```
+🚀 Starting timetraveler server
+     ENVIRONMENT - development
+     APP ROOT - /Users/thushan/Code/timetraveler
+```
+
+**Default Mode Output (for comparison):**
+```
+2025-12-31 08:00:33 🚀 [INFO] Starting timetraveler server
+2025-12-31 08:00:33 ℹ️ [INFO] ENVIRONMENT - development
+```
+
+**How to enable CLI mode:**
+
+**Automatic CLI mode (already configured):**
+- `packages/cli/source/command.ts` - Automatically enabled for commands using `createCommand()`
+- `tools/app/tools.ts` - Enabled for prism tools entry point
+
+**For new CLI apps (required):**
+
+When creating a new CLI application, **you must enable CLI mode** at the entry point:
+
+```typescript
+// cli/index.ts or your CLI entry point
+import { Command } from "commander";
+import { setCLIMode } from "@logger/server";
+import { createCommand } from "@cli";
+
+// ⚠️ IMPORTANT: Enable CLI mode FIRST - before any logger calls
+setCLIMode(true);
+
+const program = new Command();
+// ... rest of CLI setup
+```
+
+**Why this is required:**
+- CLI mode provides clean, readable output without timestamps/log levels
+- All CLI apps in the Prism ecosystem should use CLI mode for consistency
+- Without CLI mode, output will include timestamps and log level prefixes which are unnecessary for CLI tools
+
+**Important:** 
+- CLI mode must be enabled **before** any logger calls are made
+- Enable it at the very top of your CLI entry point file, right after imports
+- This ensures all logger output throughout your CLI uses the clean format
+
+### Banner Display
+
+All CLI commands automatically display a banner at startup. The banner is ASCII art with Material UI colors.
+
+**How banners work:**
+1. **Default banner**: Prism CLI uses the default PRISM banner (loaded from `banner.txt` in `packages/cli/source/`)
+2. **Custom banners**: Child apps can override the banner using `setBannerConfig()`
+3. **Automatic display**: Banners are shown automatically via:
+   - `createCommand()` - Displays banner before command handler
+   - `tools/app/tools.ts` - Displays banner via `preAction` hook for all commands
+   - `registerRunCommand()` - Displays banner unless `skipBanner: true` is passed
+
+**Setting a custom banner (for child apps):**
+
+```typescript
+// cli/banner.ts
+import { setBannerConfig, colors } from "@cli";
+import * as fs from "fs";
+import * as path from "path";
+
+export function initializeBanner(): void {
+  // Load banner from cli.config.json
+  const configPath = path.join(__dirname, "cli.config.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  
+  // Generate color gradient with specified color on second row
+  // The gradient automatically cycles through Material UI colors
+  const colorOrder: ColorName[] = [
+    "red", "pink", "purple", "deepPurple", "indigo", "blue",
+    "lightBlue", "cyan", "teal", "green", "lightGreen", "lime",
+    "yellow", "amber", "orange", "deepOrange", "brown", "grey", "blueGrey"
+  ];
+  
+  // Find second row color index, then calculate start (one before)
+  const secondRowIndex = colorOrder.indexOf(config.color);
+  const startIndex = secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
+  
+  const bannerColors = config.banner.map((_: string, i: number) => {
+    const colorName = colorOrder[(startIndex + i) % colorOrder.length];
+    return colors[colorName].default;
+  });
+
+  setBannerConfig({
+    lines: config.banner,
+    colorSequence: bannerColors,
+  });
+}
+
+// cli/index.ts
+import { initializeBanner } from "./banner";
+initializeBanner(); // Call before registering commands
+```
+
+**Banner configuration files:**
+- Banners are stored in `cli.config.json` files in the appropriate directory
+- For Prism CLI: `packages/cli/source/cli.config.json`
+- For child apps: `cli/cli.config.json` (or wherever the banner initialization code is)
+- Format:
+  ```json
+  {
+    "banner": [
+      "   ___  ___  __________  ___",
+      "  / _ \\/ _ \\/  _/ __/  |/  /",
+      " / ___/ , _// /_\\ \\/ /|_/ /",
+      "/_/  /_/|_/___/___/_/  /_/"
+    ],
+    "color": "purple"
+  }
+  ```
+- `banner`: Array of strings, each representing a line of the ASCII art
+- `color`: Color name for the **second row** from Material UI palette (e.g., "pink", "purple", "indigo")
+- Colors are automatically generated as a gradient with the specified color on the second row
+- The first row uses the color before the specified color in the Material UI order
+- If config file is missing, falls back to showing app name in bold
+
+### Best Practice: Always Enable CLI Mode
+
+**All CLI applications should enable CLI mode** at their entry point. This ensures consistent, clean output across all CLI tools.
+
+**Example CLI entry point:**
+
+```typescript
+// cli/index.ts
+import { Command } from "commander";
+import { setCLIMode } from "@logger/server";
+import { createCommand } from "@cli";
+
+// Enable CLI mode FIRST - before any logger calls
+setCLIMode(true);
+
+// ... rest of CLI setup
+```
+
+**Why CLI mode?**
+- Removes noisy timestamps and log level prefixes
+- Makes output more readable and focused
+- Consistent experience across all CLI tools
+- Better for interactive command-line usage
 
 ## Styling Utilities
 

@@ -12,7 +12,7 @@ import { execSync } from "child_process";
 // Workaround: Use namespace import due to tsx bug with package.json exports
 import * as LoggerModule from "../../../packages/logger/source/server";
 const serverLogger = LoggerModule.serverLogger;
-import type { BaseCommandOptions } from "@cli";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command";
 import chalk from "chalk";
 
 const logger = serverLogger;

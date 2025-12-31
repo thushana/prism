@@ -7,7 +7,7 @@
  */
 
 import type { Command } from "commander";
-import { registerRunCommand as registerRunCommandFromCLI } from "@cli";
+import { registerRunCommand as registerRunCommandFromCLI } from "../../../packages/cli/source/run";
 
 // Re-export the register function from @cli, skipping banner (shown via hook)
 export function registerRunCommand(program: Command): void {
@@ -15,4 +15,4 @@ export function registerRunCommand(program: Command): void {
 }
 
 // Re-export types for consistency
-export type { RunCommandOptions } from "@cli";
+export type { RunCommandOptions } from "../../../packages/cli/source/run";

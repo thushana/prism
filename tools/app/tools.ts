@@ -14,10 +14,13 @@ import * as LoggerModule from "../../packages/logger/source/server";
 const logger = LoggerModule.serverLogger;
 const setCLIMode = LoggerModule.setCLIMode;
 import * as dotenv from "dotenv";
-import { displayBanner } from "@cli";
+import { displayBanner } from "../../packages/cli/source/command";
 
 // Enable CLI mode for cleaner output (no timestamps, no [INFO] prefixes)
-setCLIMode(true);
+// Only enable if setCLIMode is available (it's a peer dependency)
+if (setCLIMode && typeof setCLIMode === "function") {
+  setCLIMode(true);
+}
 
 // Load environment variables
 dotenv.config({ opsOff: true } as any);

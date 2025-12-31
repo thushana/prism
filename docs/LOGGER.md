@@ -170,6 +170,8 @@ The logger will:
 
 ## Output Format
 
+### Default Mode (Server/API Routes)
+
 Log messages follow this format:
 
 ```
@@ -183,6 +185,27 @@ Example:
 2024-01-15 10:30:46 ✅ [INFO] Found 5 places
 2024-01-15 10:30:47 ❌ [ERROR] Operation failed {"error": "Connection timeout"}
 ```
+
+### CLI Mode (CLI Applications)
+
+When CLI mode is enabled via `setCLIMode(true)`, output is cleaner without timestamps and log levels:
+
+```
+[EMOJI] message [metadata]
+```
+
+Example:
+
+```
+🔍 Searching for places... {"count": 10}
+✅ Found 5 places
+❌ Operation failed {"error": "Connection timeout"}
+```
+
+**When to use CLI mode:**
+- All CLI applications should use CLI mode for cleaner, more readable output
+- Enable it at the CLI entry point: `setCLIMode(true)`
+- See `prism/docs/CLI.md` for complete CLI mode documentation
 
 ## Best Practices
 
@@ -288,11 +311,19 @@ logger.info(`Place saved: ${placeId}, ${name}, ${category}`); // Hard to parse
   import { serverLogger as logger } from "@logger/server";
   ```
 
-- **CLI Scripts**: Use `@logger/server`
+- **CLI Scripts**: Use `@logger/server` with **CLI mode enabled**
 
   ```typescript
-  import { serverLogger as logger } from "@logger/server";
+  import { serverLogger as logger, setCLIMode } from "@logger/server";
+  
+  // Enable CLI mode for cleaner output (no timestamps/log levels)
+  setCLIMode(true);
+  
+  // Now all logger output will be clean
+  logger.info("Processing..."); // Shows: "Processing..." instead of "2024-01-15 10:30:45 ℹ️ [INFO] Processing..."
   ```
+
+  **Important**: All CLI applications should enable CLI mode at their entry point. See `prism/docs/CLI.md` for more details.
 
 - **Shared Server Code**: Use `@logger/server`
   ```typescript
@@ -428,6 +459,7 @@ import { logger } from "@logger/server"; // Same as serverLogger
 - `logCost(message, meta?)` - Cost information (💰)
 - `logStart(message, meta?)` - Start operations (🚀)
 - `setLogLevel(level: string)` - Change log level at runtime
+- `setCLIMode(enabled: boolean)` - Enable/disable CLI mode (removes timestamps/log levels for cleaner CLI output)
 
 **Logger Methods:**
 

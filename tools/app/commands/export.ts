@@ -10,7 +10,7 @@ import {
   resolvePath,
   ensureDirectory,
   getDirectory,
-} from "@cli";
+} from "../../../packages/cli/source/utilities";
 import { database, users } from "@database";
 import {
   serverLogger as logger,
@@ -19,7 +19,7 @@ import {
   logStats,
 } from "@logger/server";
 import * as fs from "fs";
-import type { BaseCommandOptions } from "@cli";
+import type { BaseCommandOptions } from "../../../packages/cli/source/command";
 
 export interface ExportCommandOptions extends BaseCommandOptions {
   table: string;
