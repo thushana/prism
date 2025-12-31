@@ -28,4 +28,5 @@ export {
   logCost,
   logStart,
   setLogLevel,
+  setCLIMode,
 } from "./server";

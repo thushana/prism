@@ -11,7 +11,6 @@ import {
   ensureDirectory,
   getDirectory,
 } from "@cli";
-import { generateBanner } from "../../../packages/cli/source/styling.ts";
 import { database, users } from "@database";
 import {
   serverLogger as logger,
@@ -113,12 +112,6 @@ async function exportUsers(format: string, output: string): Promise<void> {
 export async function runExportCommand(
   options: ExportCommandOptions
 ): Promise<void> {
-  // Display banner
-  const banner = generateBanner();
-  banner.split("\n").forEach((line) => {
-    if (line) logger.info(line);
-  });
-  logger.info("");
 
   logStart("Starting export command");
 

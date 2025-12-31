@@ -13,7 +13,6 @@ import { execSync } from "child_process";
 import * as LoggerModule from "../../../packages/logger/source/server";
 const serverLogger = LoggerModule.serverLogger;
 import type { BaseCommandOptions } from "@cli";
-import { generateBanner } from "../../../packages/cli/source/styling.ts";
 import chalk from "chalk";
 
 const logger = serverLogger;
@@ -551,6 +550,11 @@ PRISM_KEY_WEB=your_prism_web_key_here
 # Recommended for production to prevent unauthorized cron triggers
 CRON_SECRET=your_cron_secret_here
 
+# Host Project Dashboard (Optional)
+# URL to your hosting platform's project dashboard (e.g., Vercel, Netlify, etc.)
+# Used by "run dev" command to open project dashboard and deployments pages
+HOST_PROJECT_DASHBOARD=https://vercel.com/username/project
+
 # Node Environment (automatically set by Vercel in production)
 NODE_ENV=development
 `;
@@ -595,13 +599,6 @@ function findPrismRoot(startDir: string): string | null {
 export async function runGenerateCommand(
   options: GenerateCommandOptions
 ): Promise<void> {
-  // Display banner
-  const banner = generateBanner();
-  banner.split("\n").forEach((line) => {
-    if (line) log.info(line);
-  });
-  log.info("");
-
   const appName = options.name;
 
   // Determine target directory

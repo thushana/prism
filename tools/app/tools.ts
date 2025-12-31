@@ -12,7 +12,12 @@ import { Command } from "commander";
 // Workaround: Use namespace import due to tsx bug with package.json exports
 import * as LoggerModule from "../../packages/logger/source/server";
 const logger = LoggerModule.serverLogger;
+const setCLIMode = LoggerModule.setCLIMode;
 import * as dotenv from "dotenv";
+import { displayBanner } from "@cli";
+
+// Enable CLI mode for cleaner output (no timestamps, no [INFO] prefixes)
+setCLIMode(true);
 
 // Load environment variables
 dotenv.config({ opsOff: true } as any);
@@ -25,6 +30,19 @@ program
   .name("prism")
   .description("Prism CLI tools for database management and development")
   .version("0.1.0");
+
+// Automatically display banner before any command (except help)
+program.hook("preAction", (thisCommand, actionCommand) => {
+  // Don't show banner for help commands
+  if (
+    actionCommand.name() !== "" &&
+    actionCommand.name() !== "help" &&
+    !process.argv.includes("--help") &&
+    !process.argv.includes("-h")
+  ) {
+    displayBanner();
+  }
+});
 
 // Register all commands (lazy import to avoid loading database for generate command)
 (async () => {
@@ -48,11 +66,28 @@ program
       }
     }
 
+    // Register run command (doesn't need database)
+    try {
+      const { registerRunCommand } = await import("./commands/run.ts");
+      registerRunCommand(program);
+    } catch (runError) {
+      // Silently fail if run command can't load
+      if (process.argv[2] === "run") {
+        if (logger) {
+          logger.error("Run command is not available", { error: runError });
+        } else {
+          console.error("Run command is not available:", runError);
+        }
+        process.exit(1);
+      }
+    }
+
     // Try to register database commands, but don't fail if they can't load
     const command = process.argv[2];
     if (
       command !== "generate" &&
       command !== "styling" &&
+      command !== "run" &&
       command !== "--help" &&
       command !== "-h" &&
       !command?.startsWith("--")

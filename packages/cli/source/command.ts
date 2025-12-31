@@ -5,11 +5,18 @@
 import type { Command } from "commander";
 
 // Import logger (peer dependency)
-// Using path alias configured in tsconfig.json
-import { serverLogger } from "@logger/server";
+// TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
+// Workaround: Use namespace import due to tsx bug with package.json exports
+import * as LoggerModule from "@logger/server";
+const serverLogger = LoggerModule.serverLogger;
+const setCLIMode = LoggerModule.setCLIMode;
+import { generateBanner } from "./styling";
 
 // Use serverLogger for error logging
 const logger = serverLogger;
+
+// Enable CLI mode for cleaner output (no timestamps, no [INFO] prefixes)
+setCLIMode(true);
 
 /**
  * Base command options that all commands should support
@@ -75,9 +82,17 @@ export function createCommand<T extends BaseCommandOptions>(
       }
     }
 
-    // Add action handler
+    // Add action handler with automatic banner display
     command.action(async (options: T) => {
       try {
+        // Display banner automatically for all commands
+        const banner = generateBanner();
+        const log = (logger as unknown as typeof console) ?? console;
+        banner.split("\n").forEach((line) => {
+          if (line) log.info(line);
+        });
+        log.info("");
+
         await definition.handler(options);
       } catch (error) {
         logger.error("Command failed", { error });
@@ -102,4 +117,17 @@ export function withErrorHandling<T extends BaseCommandOptions>(
       throw error;
     }
   };
+}
+
+/**
+ * Display the Prism banner
+ * Can be used by commands that register directly (not using createCommand)
+ */
+export function displayBanner(): void {
+  const banner = generateBanner();
+  const log = (logger as unknown as typeof console) ?? console;
+  banner.split("\n").forEach((line) => {
+    if (line) log.info(line);
+  });
+  log.info("");
 }

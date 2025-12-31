@@ -14,7 +14,11 @@ export type {
   CommandOption,
 } from "./command";
 
-export { createCommand, withErrorHandling } from "./command";
+export { createCommand, withErrorHandling, displayBanner } from "./command";
+
+// Run command for child apps
+export type { RunCommandOptions } from "./run";
+export { registerRunCommand, runRunCommand } from "./run";
 
 // Command registry
 export type { CommandRegistry } from "./registry";
