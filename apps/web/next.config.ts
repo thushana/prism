@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // Empty turbopack config to silence Next.js 16 warning about webpack config
+  // We use webpack for watchOptions configuration
+  turbopack: {},
   webpack: (config) => {
     // Exclude CLI and tools directories from webpack watch mode
     // These are not needed for the web app build and should be ignored
