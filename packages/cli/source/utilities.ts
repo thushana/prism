@@ -4,6 +4,7 @@
 
 import * as path from "path";
 import * as fs from "fs";
+import stringWidth from "string-width";
 
 /**
  * Resolve a file path relative to the current working directory
@@ -163,4 +164,98 @@ export function createProgressReporter(total: number) {
       return (current / total) * 100;
     },
   };
+}
+
+/**
+ * Text alignment utilities using visual width (handles emojis, ANSI codes, wide characters)
+ */
+
+/**
+ * Get the visual width of a string (accounts for emojis, ANSI codes, wide characters)
+ */
+export function getVisualWidth(str: string): number {
+  return stringWidth(str);
+}
+
+/**
+ * Pad a string to a specific visual width
+ * @param str String to pad
+ * @param width Target visual width
+ * @param padChar Character to use for padding (default: space)
+ * @param align Alignment: 'left' | 'right' | 'center'
+ */
+export function padToWidth(
+  str: string,
+  width: number,
+  align: "left" | "right" | "center" = "left",
+  padChar: string = " "
+): string {
+  const visualWidth = getVisualWidth(str);
+  const paddingNeeded = Math.max(0, width - visualWidth);
+
+  if (paddingNeeded === 0) {
+    return str;
+  }
+
+  switch (align) {
+    case "right":
+      return padChar.repeat(paddingNeeded) + str;
+    case "center": {
+      const leftPad = Math.floor(paddingNeeded / 2);
+      const rightPad = paddingNeeded - leftPad;
+      return padChar.repeat(leftPad) + str + padChar.repeat(rightPad);
+    }
+    case "left":
+    default:
+      return str + padChar.repeat(paddingNeeded);
+  }
+}
+
+/**
+ * Format a key-value pair with aligned values
+ * @param items Array of { label, value } objects
+ * @param options Formatting options
+ */
+export interface AlignedItem {
+  label: string;
+  value: string | number;
+}
+
+export interface AlignOptions {
+  labelWidth?: number; // Auto-calculate if not provided
+  separator?: string; // Default: ": "
+  indent?: string; // Default: "   "
+}
+
+export function alignItems(
+  items: AlignedItem[],
+  options: AlignOptions = {}
+): string[] {
+  const { separator = ": ", indent = "   " } = options;
+
+  // Calculate max label width if not provided
+  let labelWidth = options.labelWidth;
+  if (labelWidth === undefined) {
+    labelWidth = Math.max(
+      ...items.map((item) => getVisualWidth(item.label))
+    );
+  }
+
+  return items.map((item) => {
+    const paddedLabel = padToWidth(item.label, labelWidth, "right");
+    return `${indent}${paddedLabel}${separator}${item.value}`;
+  });
+}
+
+/**
+ * Format a summary with aligned labels and values
+ * Useful for import summaries, statistics, etc.
+ */
+export function formatAlignedSummary(
+  title: string,
+  items: AlignedItem[],
+  options: AlignOptions = {}
+): string[] {
+  const lines = alignItems(items, options);
+  return [title, ...lines];
 }

@@ -34,7 +34,13 @@ export {
   ensureDirectory,
   getDirectory,
   createProgressReporter,
+  getVisualWidth,
+  padToWidth,
+  alignItems,
+  formatAlignedSummary,
 } from "./utilities";
+
+export type { AlignedItem, AlignOptions } from "./utilities";
 
 // Interactive prompts
 export type { PromptChoice } from "./prompts";

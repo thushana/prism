@@ -135,21 +135,57 @@ await db.delete(users).where(eq(users.id, 1));
 
 ## Migrations
 
-### Generate Migrations
+### Migration Workflow
 
-After updating the schema:
+1. **Make Schema Changes**: Edit the schema file (e.g., `packages/database/source/schema.ts`)
 
-```bash
-npm run database:generate
+2. **Generate Migration**:
+   ```bash
+   npm run database:generate
+   ```
+   This creates migration files in `packages/database/migrations/` with a timestamp and name.
+
+3. **Review Migration**: Always review the generated SQL:
+   ```bash
+   cat packages/database/migrations/[timestamp]_[name]/migration.sql
+   ```
+
+4. **Apply Migration**:
+   ```bash
+   npm run database:migrate
+   ```
+   
+   **Important**: This uses the runtime `migrate()` function (not `drizzle-kit migrate`), which respects the `__drizzle_migrations` table and only runs new migrations.
+
+### Best Practices
+
+#### ✅ DO: Use Migrations for Schema Changes
+
+- Always use `database:generate` → `database:migrate` workflow for schema changes
+- Migrations are version-controlled and reproducible
+- Safe for production deployments
+
+#### ❌ DON'T: Mix `database:push` and `database:migrate`
+
+**Problem**: If you initially created your database with `database:push`, then try to use `database:migrate`, the migration system will attempt to apply ALL migrations from scratch, including ones that create tables that already exist.
+
+**Solution**: 
+- Use migrations from the start, OR
+- If you must use `database:push` initially, archive old migrations and start fresh (see troubleshooting below)
+
+### Migration Tracking
+
+Drizzle-kit tracks applied migrations in the `__drizzle_migrations` table:
+
+```sql
+CREATE TABLE "__drizzle_migrations" (
+  id SERIAL PRIMARY KEY,
+  hash text NOT NULL,
+  created_at bigint
+);
 ```
 
-This creates migration files in `packages/database/migrations/`.
-
-### Apply Migrations
-
-```bash
-npm run database:migrate
-```
+Each migration is recorded with its hash (migration directory name) and timestamp.
 
 ### Development Shortcut
 
@@ -159,7 +195,7 @@ For rapid development, you can push schema changes directly (bypasses migrations
 npm run database:push
 ```
 
-**Note**: Only use `database:push` in development. Use migrations in production.
+**⚠️ Warning**: Only use `database:push` in development. Mixing `database:push` and `database:migrate` can cause issues (see troubleshooting below).
 
 ## Drizzle Studio
 
@@ -187,6 +223,16 @@ Opens a web interface at `http://localhost:4983` to browse and edit your databas
 3. **For Vercel deployment**:
    - Add `DATABASE_URL` and `DATABASE_URL_UNPOOLED` in Vercel project settings
    - The same configuration works for both development and production
+
+### Production Migration Guidelines
+
+For production deployments:
+
+1. **Never use `database:push`** - always use migrations
+2. **Test migrations** in staging first
+3. **Backup database** before applying migrations
+4. **Review migration SQL** before applying
+5. **Make migrations idempotent** when possible for safety
 
 ## Adding Tables
 
@@ -232,16 +278,24 @@ If you see connection errors:
 - Ensure the connection string includes `?sslmode=require` for SSL
 - For migrations, ensure `DATABASE_URL_UNPOOLED` is set (or `DATABASE_URL` will be used)
 
+### Migration Fails: "Table already exists"
+
+**Cause**: Database was created with `database:push`, then migrations are being applied.
+
+**Solution**: Archive old migrations and start fresh:
+1. Move existing migrations to an archive folder: `mv database/migrations/* database/migrations-archive/`
+2. Clear the migrations table: `TRUNCATE TABLE __drizzle_migrations;`
+3. Mark initial state as applied (or generate a new initial migration if needed)
+4. From now on, use the proper migration workflow going forward
+
 ### Schema Mismatch
 
 If migrations fail:
 
 1. Check your schema matches the migration
 2. Verify the database connection is working
-3. Consider pushing schema directly in development:
-   ```bash
-   npm run database:push
-   ```
+3. Review the migration SQL file for errors
+4. Consider making the migration idempotent if it's failing due to existing objects
 
 ## Related Docs
 
