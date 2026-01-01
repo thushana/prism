@@ -16,18 +16,9 @@ export interface BarChartProps extends Omit<BarSvgProps<BarDatum>, "theme"> {
 /**
  * BarChart - Thin wrapper around Nivo ResponsiveBar
  *
- * Automatically applies theme from CSS variables and sensible defaults.
- * All Nivo ResponsiveBar props are supported and can override defaults.
- *
- * @example
- * ```tsx
- * <BarChart
- *   data={data}
- *   keys={['value1', 'value2']}
- *   indexBy="category"
- *   margin={{ top: 20 }} // Override default margin
- * />
- * ```
+ * Eliminates boilerplate by automatically applying theme from CSS variables
+ * and sensible defaults. All Nivo ResponsiveBar props are supported and can
+ * override defaults. User props take precedence over defaults.
  */
 export function BarChart({
   theme,

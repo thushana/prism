@@ -3,7 +3,8 @@ import type { LineSvgProps, Serie } from "@nivo/line";
 import { getChartColors } from "./theme";
 
 /**
- * Default margins for charts
+ * Default margins for charts.
+ * Provides space for axes, legends, and labels.
  */
 export const defaultMargins = {
   top: 50,
@@ -13,7 +14,8 @@ export const defaultMargins = {
 };
 
 /**
- * Default axis configuration
+ * Default axis configuration.
+ * Applied to both X and Y axes unless overridden.
  */
 export const defaultAxisConfig = {
   tickSize: 5,
@@ -23,23 +25,26 @@ export const defaultAxisConfig = {
 };
 
 /**
- * Default tooltip configuration
+ * Default tooltip configuration.
+ * Enables interactive tooltips by default.
  */
 export const defaultTooltipConfig = {
   enable: true,
 };
 
 /**
- * Default responsive behavior
- * Note: sliceTooltip can be customized per chart instance
+ * Default responsive behavior.
+ * Disables slice tooltips by default (can be customized per chart).
  */
 export const defaultResponsiveConfig = {
   enableSlices: false,
 };
 
 /**
- * Default props for BarChart component
- * These can be overridden by passing props directly to the component
+ * Default props for BarChart component.
+ *
+ * Provides sensible defaults for margins, axes, legends, and styling.
+ * All defaults can be overridden by passing props directly to BarChart.
  */
 export function getDefaultBarChartProps(): Partial<BarSvgProps<BarDatum>> {
   return {
@@ -104,8 +109,10 @@ export function getDefaultBarChartProps(): Partial<BarSvgProps<BarDatum>> {
 }
 
 /**
- * Default props for LineChart component
- * These can be overridden by passing props directly to the component
+ * Default props for LineChart component.
+ *
+ * Provides sensible defaults for margins, axes, points, and interactivity.
+ * All defaults can be overridden by passing props directly to LineChart.
  */
 export function getDefaultLineChartProps(): Partial<LineSvgProps> {
   return {
@@ -143,8 +150,9 @@ export function getDefaultLineChartProps(): Partial<LineSvgProps> {
 }
 
 /**
- * Get default color scheme for charts
- * Uses chart colors from theme
+ * Get default color scheme for charts.
+ *
+ * Returns chart colors from CSS variables via theme system.
  */
 export function getDefaultColors(): string[] {
   return getChartColors();

@@ -1,5 +1,6 @@
 /**
- * Re-export key Nivo types for convenience
+ * Re-export key Nivo types for convenience.
+ * These types are used throughout the charts package and exported for consumers.
  */
 
 // Bar chart types
@@ -19,7 +20,9 @@ export type {
 } from "./helpers";
 
 /**
- * Helper type to safely merge chart props with defaults
- * This ensures type safety while allowing proper prop merging
+ * Helper type to safely merge chart props with defaults.
+ *
+ * Ensures type safety while allowing proper prop merging in chart components.
+ * User props take precedence over defaults.
  */
 export type MergedChartProps<TProps> = TProps;

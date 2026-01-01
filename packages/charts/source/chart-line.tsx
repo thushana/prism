@@ -16,16 +16,9 @@ export interface LineChartProps extends Omit<LineSvgProps, "theme"> {
 /**
  * LineChart - Thin wrapper around Nivo ResponsiveLine
  *
- * Automatically applies theme from CSS variables and sensible defaults.
- * All Nivo ResponsiveLine props are supported and can override defaults.
- *
- * @example
- * ```tsx
- * <LineChart
- *   data={data}
- *   margin={{ top: 20 }} // Override default margin
- * />
- * ```
+ * Eliminates boilerplate by automatically applying theme from CSS variables
+ * and sensible defaults. All Nivo ResponsiveLine props are supported and can
+ * override defaults. User props take precedence over defaults.
  */
 export function LineChart({
   theme,

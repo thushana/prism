@@ -2,37 +2,28 @@ import type { BarDatum } from "@nivo/bar";
 import type { Serie } from "@nivo/line";
 
 /**
- * Options for transforming data to bar chart format
+ * Options for transforming data to bar chart format.
  */
 export interface TransformToBarDataOptions {
   /**
-   * Field name to use as the index/category
+   * Field name to use as the index/category.
    */
   indexBy: string;
   /**
-   * Field names to use as values (keys)
+   * Field names to use as values (keys).
    */
   keys: string[];
   /**
-   * Optional function to transform each data item
+   * Optional function to transform each data item before conversion.
    */
   transform?: (item: any) => any;
 }
 
 /**
- * Transform app data to Nivo bar chart format
+ * Transform app data to Nivo bar chart format.
  *
- * @example
- * ```ts
- * const data = [
- *   { category: 'A', value1: 10, value2: 20 },
- *   { category: 'B', value1: 15, value2: 25 }
- * ];
- * const barData = transformToBarData(data, {
- *   indexBy: 'category',
- *   keys: ['value1', 'value2']
- * });
- * ```
+ * Converts application data structures to Nivo's BarDatum format, eliminating
+ * the need to manually reshape data arrays.
  */
 export function transformToBarData<T extends Record<string, any>>(
   data: T[],
@@ -55,50 +46,41 @@ export function transformToBarData<T extends Record<string, any>>(
 }
 
 /**
- * Options for transforming data to line chart format
+ * Options for transforming data to line chart format.
  */
 export interface TransformToLineDataOptions {
   /**
-   * Field name to use as the x-axis value
+   * Field name to use as the x-axis value.
    */
   xField: string;
   /**
-   * Field name(s) to use as the y-axis value(s)
-   * If multiple, creates multiple series
+   * Field name(s) to use as the y-axis value(s).
+   * If multiple, creates multiple series.
    */
   yFields: string | string[];
   /**
-   * Optional function to format x values
+   * Optional function to format x values.
    */
   formatX?: (value: any) => string | number;
   /**
-   * Optional function to format y values
+   * Optional function to format y values.
    */
   formatY?: (value: any) => number;
   /**
-   * Optional function to transform each data item
+   * Optional function to transform each data item before conversion.
    */
   transform?: (item: any) => any;
   /**
-   * Optional series IDs (if not provided, uses yField names)
+   * Optional series IDs (if not provided, uses yField names).
    */
   seriesIds?: string[];
 }
 
 /**
- * Transform app data to Nivo line chart format
+ * Transform app data to Nivo line chart format.
  *
- * @example
- * ```ts
- * const data = [
- *   { date: '2024-01-01', sales: 100, revenue: 1000 },
- *   { date: '2024-01-02', sales: 150, revenue: 1500 }
- * ];
- * const lineData = transformToLineData(data, {
- *   xField: 'date',
- *   yFields: ['sales', 'revenue']
- * });
- * ```
+ * Converts application data structures to Nivo's Serie format. Supports
+ * multiple series by providing multiple yFields.
  */
 export function transformToLineData<T extends Record<string, any>>(
   data: T[],
@@ -139,52 +121,43 @@ export function transformToLineData<T extends Record<string, any>>(
 }
 
 /**
- * Options for formatting time series data
+ * Options for formatting time series data.
  */
 export interface FormatTimeSeriesOptions {
   /**
-   * Field name containing the date/timestamp
+   * Field name containing the date/timestamp.
    */
   dateField: string;
   /**
-   * Field name(s) containing the value(s)
+   * Field name(s) containing the value(s).
    */
   valueFields: string | string[];
   /**
-   * Optional function to parse the date
+   * Optional function to parse the date.
+   * Defaults to `new Date(value)`.
    */
   parseDate?: (value: any) => Date;
   /**
-   * Optional function to format the date for display
+   * Optional function to format the date for display.
+   * Defaults to ISO date string (YYYY-MM-DD).
    */
   formatDate?: (date: Date) => string | number;
   /**
-   * Optional function to format values
+   * Optional function to format values.
+   * Defaults to `Number(value) || 0`.
    */
   formatValue?: (value: any) => number;
   /**
-   * Optional series IDs
+   * Optional series IDs (if not provided, uses valueField names).
    */
   seriesIds?: string[];
 }
 
 /**
- * Format time series data for line charts
- * Convenience wrapper around transformToLineData with date handling
+ * Format time series data for line charts.
  *
- * @example
- * ```ts
- * const data = [
- *   { timestamp: '2024-01-01T00:00:00Z', temperature: 20, humidity: 60 },
- *   { timestamp: '2024-01-02T00:00:00Z', temperature: 22, humidity: 65 }
- * ];
- * const timeSeries = formatTimeSeries(data, {
- *   dateField: 'timestamp',
- *   valueFields: ['temperature', 'humidity'],
- *   parseDate: (val) => new Date(val),
- *   formatDate: (date) => date.toISOString().split('T')[0]
- * });
- * ```
+ * Convenience wrapper around transformToLineData with date parsing and
+ * formatting. Handles common time series data structures automatically.
  */
 export function formatTimeSeries<T extends Record<string, any>>(
   data: T[],

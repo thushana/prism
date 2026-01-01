@@ -1,7 +1,8 @@
 import type { Theme } from "@nivo/core";
 
 /**
- * Get CSS variable value from computed styles
+ * Get CSS variable value from computed styles.
+ * Returns empty string during SSR (server-side rendering).
  */
 function getCSSVariable(variable: string): string {
   if (typeof window === "undefined") {
@@ -14,7 +15,8 @@ function getCSSVariable(variable: string): string {
 }
 
 /**
- * Check if dark mode is active
+ * Check if dark mode is active.
+ * Reserved for future dark mode theme enhancements.
  */
 function isDarkMode(): boolean {
   if (typeof window === "undefined") {
@@ -24,8 +26,11 @@ function isDarkMode(): boolean {
 }
 
 /**
- * Get Nivo theme configuration from CSS variables
- * Reads from Tailwind theme CSS variables and maps them to Nivo theme format
+ * Get Nivo theme configuration from CSS variables.
+ *
+ * Maps Tailwind theme CSS variables to Nivo theme format, enabling automatic
+ * theme integration without manual configuration. Charts automatically match
+ * app theme (light/dark mode) by reading CSS variables at runtime.
  */
 export function getNivoTheme(): Theme {
   // Get color values from CSS variables
@@ -167,8 +172,11 @@ export function getNivoTheme(): Theme {
 }
 
 /**
- * Get chart color scheme from CSS variables
- * Returns array of chart colors for use in Nivo charts
+ * Get chart color scheme from CSS variables.
+ *
+ * Returns array of 5 colors from `--chart-1` through `--chart-5` CSS variables
+ * for use in Nivo charts. Falls back to default colors if CSS variables are
+ * not defined.
  */
 export function getChartColors(): string[] {
   return [

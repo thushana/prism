@@ -1,10 +1,10 @@
 /**
  * Charts Package - Nivo charting library wrappers
  *
- * Provides thin wrapper components around Nivo charts with:
- * - Automatic theme integration from CSS variables
- * - Sensible defaults
- * - Data transformation utilities
+ * Provides thin wrapper components around Nivo charts to eliminate boilerplate:
+ * - Automatic theme integration from CSS variables (no manual theme config)
+ * - Sensible defaults (margins, axes, tooltips work out-of-the-box)
+ * - Data transformation utilities (convert app data to Nivo formats)
  */
 
 // Chart components
