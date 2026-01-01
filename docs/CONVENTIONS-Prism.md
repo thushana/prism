@@ -2,6 +2,8 @@
 
 Style and naming conventions for this codebase.
 
+**See also**: [DOCS-Prism.md](./DOCS-Prism.md) for documentation philosophy.
+
 ## URLs
 
 - Use **kebab-case** (lowercase with hyphens)

@@ -1,12 +1,15 @@
 Write a commit message for the changes on disk
 
+## Philosophy
+
+**One authoritative representation.** The commit message should capture *what* changed and *why* (if non-obvious), not *how* (the code shows that). Be concise but descriptive enough that someone reading git log understands the change.
+
 ## Rules
 
 - One line only
-- Cover all unstaged changes in the commit
-- Craft a holistic and descriptive message
-- It must be in this format: **Emoji** + **ALL CAPS** slug + dash + brief description
-- If the repository has submodules, then we need commit messages for the sub repos as well separately
+- Cover all unstaged changes in the commit holistically
+- Format: **Emoji** + **ALL CAPS** slug + dash + brief description
+- If repository has submodules, commit submodules first (deepest first), then main repo
 
 ```
 🎯 EMOJI ALL CAPS SLUG - Brief description of the feature succinctly
