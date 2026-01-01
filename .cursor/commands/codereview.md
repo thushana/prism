@@ -15,7 +15,7 @@ Small Next.js monorepo: TypeScript, React, Tailwind CSS, Radix UI, Drizzle/SQLit
 - Look at not just the diff but in context of the whole file that was touched
 - Load all the lines of code from the file so that you have a holistic look
 - Be curious and investigate upstream imports that may be relevant
-- If needed, read docs/CONVENTIONS.md to make sure it aligns
+- If needed, read docs/CONVENTIONS.md and docs/ARCHITECTURE.md to make sure it aligns
 
 **Core priorities:**
 
@@ -30,6 +30,10 @@ Small Next.js monorepo: TypeScript, React, Tailwind CSS, Radix UI, Drizzle/SQLit
 - Avoid: large components/classes, inline styling, complexity for complexity's sake
 - Prefer: Tailwind CSS classes over inline styles, small focused functions
 - Flag: unused imports, dead code, acronyms without context
+- TypeScript: Use Zod schemas for runtime validation and type inference
+  - Prefer `z.infer<typeof Schema>` over manual type definitions
+  - Use Zod for config files, API request/response validation, and any external data parsing
+  - See `app/config/index.ts` for example pattern
 
 **Philosophy check:**
 
