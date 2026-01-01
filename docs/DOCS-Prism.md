@@ -2,17 +2,17 @@
 
 ## The Rule
 
-**Code is truth for *how*. Docs explain *why* and *what*.**
+**Code is truth for _how_. Docs explain _why_ and _what_.**
 
 Every piece of knowledge gets one authoritative home. If it's in code, don't repeat it in docs.
 
 ## What Docs Should Do
 
-| Type | Purpose | Max Length |
-|------|---------|------------|
-| README | "How do I run this?" | 1 page |
-| ARCHITECTURE | "What's the mental model?" | 2-3 pages |
-| DECISIONS | "Why did we choose X?" | 1 page each |
+| Type         | Purpose                    | Max Length  |
+| ------------ | -------------------------- | ----------- |
+| README       | "How do I run this?"       | 1 page      |
+| ARCHITECTURE | "What's the mental model?" | 2-3 pages   |
+| DECISIONS    | "Why did we choose X?"     | 1 page each |
 
 ## Remove From Docs
 
@@ -52,12 +52,15 @@ Document decisions, not implementation.
 # 001-DECISION-npm-workspaces-over-pnpm
 
 ## Context
+
 We need a monorepo solution that works with Vercel and supports local file references.
 
 ## Decision
+
 Use npm workspaces with local file references (`file:./packages/package-name`).
 
 ## Consequences
+
 - ✅ Native npm support, no extra tooling
 - ✅ Works out-of-the-box with Vercel
 - ⚠️ Slower installs than pnpm (acceptable trade-off)
@@ -65,12 +68,12 @@ Use npm workspaces with local file references (`file:./packages/package-name`).
 
 ## Anti-Patterns
 
-| Pattern | Problem | Fix |
-|---------|---------|-----|
+| Pattern      | Problem                    | Fix                           |
+| ------------ | -------------------------- | ----------------------------- |
 | Encyclopedia | 2000-line doc nobody reads | 200-line mental model + links |
-| Duplicate | Version numbers in docs | Link to source file |
-| Tutorial | Step-by-step that drifts | Code with JSDoc |
-| Snapshot | Current state without why | Decision records |
+| Duplicate    | Version numbers in docs    | Link to source file           |
+| Tutorial     | Step-by-step that drifts   | Code with JSDoc               |
+| Snapshot     | Current state without why  | Decision records              |
 
 ## Inline Docs
 
@@ -81,7 +84,7 @@ Use JSDoc and TypeScript types. They stay with code, show in IDEs, and can't dri
 export async function generateApp(
   appName: string,
   options?: GenerateOptions
-): Promise<string>
+): Promise<string>;
 ```
 
 ## Update Docs When
@@ -90,7 +93,7 @@ export async function generateApp(
 ✅ New decisions  
 ✅ Breaking changes  
 ❌ Version bumps  
-❌ Code changes  
+❌ Code changes
 
 ## The Test
 
@@ -98,7 +101,7 @@ Before writing docs, ask:
 
 1. Is this already in code?
 2. Can I link instead of copy?
-3. Is this *why*, not *how*?
+3. Is this _why_, not _how_?
 4. Can I make it shorter?
 
 **If you need extensive docs to understand code, improve the code.**

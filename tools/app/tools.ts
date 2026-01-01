@@ -23,7 +23,8 @@ if (setCLIMode && typeof setCLIMode === "function") {
 }
 
 // Load environment variables
-dotenv.config({ opsOff: true } as any);
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+dotenv.config({ opsOff: true } as Parameters<typeof dotenv.config>[0]);
 
 // Create the main program
 const program = new Command();

@@ -94,9 +94,7 @@ export function parseList(value: string): string[] {
     items.push(current);
   }
 
-  return items
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
+  return items.map((item) => item.trim()).filter((item) => item.length > 0);
 }
 
 /**

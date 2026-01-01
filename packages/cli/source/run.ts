@@ -100,11 +100,7 @@ function killDevServers(): void {
     }
 
     // Kill processes by name pattern
-    const processes = [
-      "next dev",
-      "drizzle-kit studio",
-      "tsc --watch",
-    ];
+    const processes = ["next dev", "drizzle-kit studio", "tsc --watch"];
 
     for (const processName of processes) {
       try {
@@ -199,9 +195,7 @@ function startDevServer(
     throw new Error(`package.json not found at ${packageJsonPath}`);
   }
 
-  const packageJson = JSON.parse(
-    fs.readFileSync(packageJsonPath, "utf-8")
-  );
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
 
   if (!packageJson.scripts?.dev) {
     throw new Error("dev script not found in package.json");
@@ -226,16 +220,16 @@ function startDrizzleStudio(
   isChildApp: boolean,
   drizzlePort: string = "4983"
 ): void {
-  log.info(`     ${chalk.bold("🗄️  STARTING")} - Drizzle Studio on port ${drizzlePort}...`);
+  log.info(
+    `     ${chalk.bold("🗄️  STARTING")} - Drizzle Studio on port ${drizzlePort}...`
+  );
 
   const packageJsonPath = path.join(appRoot, "package.json");
   if (!fs.existsSync(packageJsonPath)) {
     throw new Error(`package.json not found at ${packageJsonPath}`);
   }
 
-  const packageJson = JSON.parse(
-    fs.readFileSync(packageJsonPath, "utf-8")
-  );
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
 
   const scriptName = isChildApp ? "db:studio" : "database:studio";
   if (!packageJson.scripts?.[scriptName]) {
@@ -344,7 +338,9 @@ async function openBrowserTabs(
 
   // Wait for Drizzle Studio to be ready before opening it
   if (hasDrizzle) {
-    log.info(`     ${chalk.bold("⏳ WAITING")} - For Drizzle Studio to be ready...`);
+    log.info(
+      `     ${chalk.bold("⏳ WAITING")} - For Drizzle Studio to be ready...`
+    );
     const drizzleReady = await waitForService("https://local.drizzle.studio");
     if (drizzleReady) {
       log.info(`     ${chalk.bold("✅ READY")} - Drizzle Studio is running`);
@@ -362,7 +358,7 @@ async function openBrowserTabs(
     log.info(`     ${chalk.bold("✅ READY")} - Dev server is running`);
     // Open system-sheet page before the main app
     openBrowser(`http://localhost:${port}/admin/system-sheet`);
-    
+
     setTimeout(() => {
       // Open localhost last (the actual app)
       openBrowser(`http://localhost:${port}`);
@@ -379,16 +375,14 @@ async function openBrowserTabs(
 /**
  * Run the dev command
  */
-export async function runRunCommand(
-  options: RunCommandOptions
-): Promise<void> {
+export async function runRunCommand(options: RunCommandOptions): Promise<void> {
   if (options.debug || options.verbose) {
     logger.level = "debug";
   }
 
   // Find app root
   const { appRoot, isChildApp } = findAppRoot();
-  
+
   // Load environment variables from .env file in app root
   const envPath = path.join(appRoot, ".env");
   if (fs.existsSync(envPath)) {
@@ -460,7 +454,9 @@ export function registerRunCommand(
 ): void {
   program
     .command("run <mode>")
-    .description("Kill existing servers, start dev environment, and open browser tabs")
+    .description(
+      "Kill existing servers, start dev environment, and open browser tabs"
+    )
     .option("-p, --port <port>", "Port for dev server (default: 3000)", "3000")
     .option(
       "-d, --drizzle-port <port>",

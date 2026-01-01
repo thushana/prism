@@ -203,6 +203,7 @@ Example:
 ```
 
 **When to use CLI mode:**
+
 - All CLI applications should use CLI mode for cleaner, more readable output
 - Enable it at the CLI entry point: `setCLIMode(true)`
 - See `prism/docs/CLI-Prism.md` for complete CLI mode documentation
@@ -315,10 +316,10 @@ logger.info(`Place saved: ${placeId}, ${name}, ${category}`); // Hard to parse
 
   ```typescript
   import { serverLogger as logger, setCLIMode } from "@logger/server";
-  
+
   // Enable CLI mode for cleaner output (no timestamps/log levels)
   setCLIMode(true);
-  
+
   // Now all logger output will be clean
   logger.info("Processing..."); // Shows: "Processing..." instead of "2024-01-15 10:30:45 ℹ️ [INFO] Processing..."
   ```

@@ -57,16 +57,16 @@ export {
 
 // Styling utilities
 export type { ColorName, CLIConfig } from "./styling";
-export { 
-  chalk, 
-  styles, 
-  statusMessage, 
-  colors, 
-  colorNames, 
-  materialColors, 
-  generateBanner, 
+export {
+  chalk,
+  styles,
+  statusMessage,
+  colors,
+  colorNames,
+  materialColors,
+  generateBanner,
   setBannerConfig,
   loadCLIConfig,
   generateColorGradient,
-  initializeBannerFromConfig
+  initializeBannerFromConfig,
 } from "./styling";

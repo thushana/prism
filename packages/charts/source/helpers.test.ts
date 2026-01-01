@@ -114,9 +114,7 @@ describe("Data Transformation Helpers", () => {
     });
 
     it("should use custom series IDs when provided", () => {
-      const data = [
-        { date: "2024-01-01", sales: 100, revenue: 1000 },
-      ];
+      const data = [{ date: "2024-01-01", sales: 100, revenue: 1000 }];
 
       const result = transformToLineData(data, {
         xField: "date",

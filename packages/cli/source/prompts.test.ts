@@ -59,11 +59,13 @@ describe("Interactive Prompts", () => {
       ];
 
       let capturedValidate: ((input: string[]) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ selected: [] });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ selected: [] });
+        });
 
       await promptMultiSelect("Select:", choices);
 
@@ -73,9 +75,7 @@ describe("Interactive Prompts", () => {
     });
 
     it("should use custom validation if provided", async () => {
-      const choices: PromptChoice<number>[] = [
-        { name: "Option 1", value: 1 },
-      ];
+      const choices: PromptChoice<number>[] = [{ name: "Option 1", value: 1 }];
 
       const customValidate = vi.fn((input: number[]) => {
         if (input.length < 2) {
@@ -85,11 +85,13 @@ describe("Interactive Prompts", () => {
       });
 
       let capturedValidate: ((input: number[]) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ selected: [1] });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ selected: [1] });
+        });
 
       await promptMultiSelect("Select:", choices, {
         validate: customValidate,
@@ -107,11 +109,13 @@ describe("Interactive Prompts", () => {
       ];
 
       let capturedDefault: number[] | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedDefault = questions[0].default;
-        return Promise.resolve({ selected: [1, 2] });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedDefault = questions[0].default;
+          return Promise.resolve({ selected: [1, 2] });
+        });
 
       await promptMultiSelect("Select:", choices, {
         default: [1],
@@ -150,11 +154,13 @@ describe("Interactive Prompts", () => {
       ];
 
       let capturedDefault: string | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedDefault = questions[0].default;
-        return Promise.resolve({ selected: "a" });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedDefault = questions[0].default;
+          return Promise.resolve({ selected: "a" });
+        });
 
       await promptSelect("Choose:", choices, {
         default: "a",
@@ -184,11 +190,13 @@ describe("Interactive Prompts", () => {
 
     it("should use default value", async () => {
       let capturedDefault: boolean | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedDefault = questions[0].default;
-        return Promise.resolve({ confirmed: false });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedDefault = questions[0].default;
+          return Promise.resolve({ confirmed: false });
+        });
 
       await promptConfirm("Proceed?", false);
 
@@ -223,11 +231,13 @@ describe("Interactive Prompts", () => {
       });
 
       let capturedValidate: ((input: string) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ input: "test" });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ input: "test" });
+        });
 
       await promptInput("Enter:", { validate });
 
@@ -240,11 +250,13 @@ describe("Interactive Prompts", () => {
       const filter = vi.fn((input: string) => input.trim().toUpperCase());
 
       let capturedFilter: ((input: string) => string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedFilter = questions[0].filter;
-        return Promise.resolve({ input: "TEST" });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedFilter = questions[0].filter;
+          return Promise.resolve({ input: "TEST" });
+        });
 
       await promptInput("Enter:", { filter });
 
@@ -280,16 +292,20 @@ describe("Interactive Prompts", () => {
       });
 
       let capturedValidate: ((input: string) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ password: "password123" });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ password: "password123" });
+        });
 
       await promptPassword("Enter:", { validate });
 
       expect(capturedValidate).toBeDefined();
-      expect(capturedValidate!("short")).toBe("Password must be at least 8 characters");
+      expect(capturedValidate!("short")).toBe(
+        "Password must be at least 8 characters"
+      );
       expect(capturedValidate!("longpassword")).toBe(true);
     });
   });
@@ -314,11 +330,13 @@ describe("Interactive Prompts", () => {
 
     it("should validate min/max constraints", async () => {
       let capturedValidate: ((input: number) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ number: 10 });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ number: 10 });
+        });
 
       await promptNumber("Enter:", {
         min: 1,
@@ -341,11 +359,13 @@ describe("Interactive Prompts", () => {
       });
 
       let capturedValidate: ((input: number) => boolean | string) | undefined;
-      
-      (mockInquirer.prompt as any) = vi.fn().mockImplementation((questions: any[]) => {
-        capturedValidate = questions[0].validate;
-        return Promise.resolve({ number: 4 });
-      });
+
+      (mockInquirer.prompt as any) = vi
+        .fn()
+        .mockImplementation((questions: any[]) => {
+          capturedValidate = questions[0].validate;
+          return Promise.resolve({ number: 4 });
+        });
 
       await promptNumber("Enter:", { validate });
 

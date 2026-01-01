@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
         ...(Array.isArray(config.watchOptions?.ignored)
           ? config.watchOptions.ignored
           : config.watchOptions?.ignored
-          ? [config.watchOptions.ignored]
-          : []),
+            ? [config.watchOptions.ignored]
+            : []),
         "**/cli/**",
         "**/tools/**",
         // Exclude tools directory from monorepo root (prism/tools)

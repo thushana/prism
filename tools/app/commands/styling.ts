@@ -13,13 +13,11 @@ const serverLogger = LoggerModule.serverLogger;
 
 const logger = serverLogger || console;
 
-export interface StylingCommandOptions extends BaseCommandOptions {}
-
 /**
  * Run styling command to display style sheet
  */
 export async function runStylingCommand(
-  options: StylingCommandOptions = {}
+  options: BaseCommandOptions = {}
 ): Promise<void> {
   if (options.debug || options.verbose) {
     logger.level = "debug";
@@ -179,7 +177,7 @@ export function registerStylingCommand(program: Command): void {
     .description("Display style sheet of available CLI styling utilities")
     .option("--debug", "Enable debug logging", false)
     .option("--verbose", "Enable verbose logging", false)
-    .action(async (options: StylingCommandOptions) => {
+    .action(async (options: BaseCommandOptions) => {
       try {
         await runStylingCommand(options);
       } catch (error) {

@@ -1,6 +1,6 @@
 /**
  * Interactive prompt utilities using inquirer
- * 
+ *
  * Provides reusable prompt patterns for CLI applications.
  */
 
@@ -228,7 +228,7 @@ export function isPromptCancelled(error: unknown): boolean {
   if (!(error instanceof Error)) {
     return false;
   }
-  
+
   const message = error.message.toLowerCase();
   return (
     message === "user force closed the prompt with ctrl+c" ||

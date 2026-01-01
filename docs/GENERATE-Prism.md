@@ -32,6 +32,7 @@ prism --help
 ```
 
 **Benefits**:
+
 - Cleaner command syntax
 - Works from any directory
 - No need to prefix with `npm run` or `npx`

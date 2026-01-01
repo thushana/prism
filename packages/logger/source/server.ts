@@ -95,14 +95,12 @@ const customFormat = winston.format.printf(
 /**
  * Clean CLI format without timestamps and log levels (CLI mode)
  */
-const cliFormat = winston.format.printf(
-  ({ message, emoji, ...meta }) => {
-    const emojiPrefix = emoji || "";
-    const metaStr = formatMetadata(meta);
-    // Only show metadata if it exists and CLI mode is enabled
-    return `${emojiPrefix}${emojiPrefix ? " " : ""}${message}${metaStr}`;
-  }
-);
+const cliFormat = winston.format.printf(({ message, emoji, ...meta }) => {
+  const emojiPrefix = emoji || "";
+  const metaStr = formatMetadata(meta);
+  // Only show metadata if it exists and CLI mode is enabled
+  return `${emojiPrefix}${emojiPrefix ? " " : ""}${message}${metaStr}`;
+});
 
 // Track CLI mode state
 let isCLIMode = false;
@@ -122,25 +120,49 @@ export const serverLogger = winston.createLogger({
       if (isCLIMode) {
         const emojiPrefix = info.emoji || "";
         const metaStr = formatMetadata(
-          Object.keys(info).filter(
-            (key) => !["level", "message", "timestamp", "emoji", "splat", "Symbol(level)", "Symbol(message)"].includes(key)
-          ).reduce((acc, key) => {
-            acc[key] = (info as any)[key];
-            return acc;
-          }, {} as any)
+          Object.keys(info)
+            .filter(
+              (key) =>
+                ![
+                  "level",
+                  "message",
+                  "timestamp",
+                  "emoji",
+                  "splat",
+                  "Symbol(level)",
+                  "Symbol(message)",
+                ].includes(key)
+            )
+            .reduce((acc, key) => {
+              acc[key] = (info as any)[key];
+              return acc;
+            }, {} as any)
         );
         return `${emojiPrefix}${emojiPrefix ? " " : ""}${info.message}${metaStr}`;
       }
       // Default format
       const emojiPrefix =
-        info.emoji || contextEmojiMap[info.level as keyof typeof contextEmojiMap] || "";
+        info.emoji ||
+        contextEmojiMap[info.level as keyof typeof contextEmojiMap] ||
+        "";
       const metaStr = formatMetadata(
-        Object.keys(info).filter(
-          (key) => !["level", "message", "timestamp", "emoji", "splat", "Symbol(level)", "Symbol(message)"].includes(key)
-        ).reduce((acc, key) => {
-          acc[key] = (info as any)[key];
-          return acc;
-        }, {} as any)
+        Object.keys(info)
+          .filter(
+            (key) =>
+              ![
+                "level",
+                "message",
+                "timestamp",
+                "emoji",
+                "splat",
+                "Symbol(level)",
+                "Symbol(message)",
+              ].includes(key)
+          )
+          .reduce((acc, key) => {
+            acc[key] = (info as any)[key];
+            return acc;
+          }, {} as any)
       );
       return `${info.timestamp} ${emojiPrefix} [${info.level.toUpperCase()}] ${info.message}${metaStr}`;
     })

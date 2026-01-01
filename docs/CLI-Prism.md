@@ -107,6 +107,7 @@ npm run tools run dev --verbose
 ```
 
 **What it does:**
+
 1. Kills all running dev servers and Drizzle Studio
 2. Starts the dev server (Next.js)
 3. Starts Drizzle Studio (if available)
@@ -119,12 +120,14 @@ npm run tools run dev --verbose
    - Main application (`http://localhost:3000`)
 
 **Options:**
+
 - `-p, --port <port>` - Port for dev server (default: 3000)
 - `-d, --drizzle-port <port>` - Port for Drizzle Studio (default: 4983)
 - `-v, --verbose` - Enable verbose logging
 - `--debug` - Enable debug logging
 
 **Environment Variables:**
+
 - `HOST_PROJECT_DASHBOARD` - URL to your hosting platform's project dashboard (e.g., `https://vercel.com/username/project`). Used to open dashboard and deployments pages.
 
 **Note:** This command is automatically inherited by child apps. For example, in a TimeTraveler app, you can run `timetraveler run dev` directly.
@@ -401,6 +404,7 @@ logger.info("Route created"); // No styling for visual feedback
 **All CLI applications must use CLI mode** for cleaner output. CLI mode removes timestamps and log level prefixes, showing only the message and emoji. This provides a much cleaner, more readable output for command-line tools.
 
 **CLI Mode Output:**
+
 ```
 🚀 Starting timetraveler server
      ENVIRONMENT - development
@@ -408,6 +412,7 @@ logger.info("Route created"); // No styling for visual feedback
 ```
 
 **Default Mode Output (for comparison):**
+
 ```
 2025-12-31 08:00:33 🚀 [INFO] Starting timetraveler server
 2025-12-31 08:00:33 ℹ️ [INFO] ENVIRONMENT - development
@@ -416,6 +421,7 @@ logger.info("Route created"); // No styling for visual feedback
 **How to enable CLI mode:**
 
 **Automatic CLI mode (already configured):**
+
 - `packages/cli/source/command.ts` - Automatically enabled for commands using `createCommand()`
 - `tools/app/tools.ts` - Enabled for prism tools entry point
 
@@ -437,11 +443,13 @@ const program = new Command();
 ```
 
 **Why this is required:**
+
 - CLI mode provides clean, readable output without timestamps/log levels
 - All CLI apps in the Prism ecosystem should use CLI mode for consistency
 - Without CLI mode, output will include timestamps and log level prefixes which are unnecessary for CLI tools
 
-**Important:** 
+**Important:**
+
 - CLI mode must be enabled **before** any logger calls are made
 - Enable it at the very top of your CLI entry point file, right after imports
 - This ensures all logger output throughout your CLI uses the clean format
@@ -451,6 +459,7 @@ const program = new Command();
 All CLI commands automatically display a banner at startup. The banner is ASCII art with Material UI colors.
 
 **How banners work:**
+
 1. **Default banner**: Prism CLI uses the default PRISM banner (loaded from `banner.txt` in `packages/cli/source/`)
 2. **Custom banners**: Child apps can override the banner using `setBannerConfig()`
 3. **Automatic display**: Banners are shown automatically via:
@@ -470,19 +479,36 @@ export function initializeBanner(): void {
   // Load banner from cli.config.json
   const configPath = path.join(__dirname, "cli.config.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  
+
   // Generate color gradient with specified color on second row
   // The gradient automatically cycles through Material UI colors
   const colorOrder: ColorName[] = [
-    "red", "pink", "purple", "deepPurple", "indigo", "blue",
-    "lightBlue", "cyan", "teal", "green", "lightGreen", "lime",
-    "yellow", "amber", "orange", "deepOrange", "brown", "grey", "blueGrey"
+    "red",
+    "pink",
+    "purple",
+    "deepPurple",
+    "indigo",
+    "blue",
+    "lightBlue",
+    "cyan",
+    "teal",
+    "green",
+    "lightGreen",
+    "lime",
+    "yellow",
+    "amber",
+    "orange",
+    "deepOrange",
+    "brown",
+    "grey",
+    "blueGrey",
   ];
-  
+
   // Find second row color index, then calculate start (one before)
   const secondRowIndex = colorOrder.indexOf(config.color);
-  const startIndex = secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
-  
+  const startIndex =
+    secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
+
   const bannerColors = config.banner.map((_: string, i: number) => {
     const colorName = colorOrder[(startIndex + i) % colorOrder.length];
     return colors[colorName].default;
@@ -500,6 +526,7 @@ initializeBanner(); // Call before registering commands
 ```
 
 **Banner configuration files:**
+
 - Banners are stored in `cli.config.json` files in the appropriate directory
 - For Prism CLI: `packages/cli/source/cli.config.json`
 - For child apps: `cli/cli.config.json` (or wherever the banner initialization code is)
@@ -540,6 +567,7 @@ setCLIMode(true);
 ```
 
 **Why CLI mode?**
+
 - Removes noisy timestamps and log level prefixes
 - Makes output more readable and focused
 - Consistent experience across all CLI tools
@@ -613,6 +641,7 @@ logger.info(statusMessage("info", "Processing routes"));
 ```
 
 Output (when logger outputs to console):
+
 ```
 ✓ Import completed
 ✗ Import failed
@@ -637,7 +666,7 @@ import { styles, statusMessage } from "@cli";
 export async function runImportCommand() {
   logStart("Starting route import");
   logger.info(styles.infoBold("Processing routes..."));
-  
+
   try {
     await processRoutes();
     logSuccess("Import completed");
@@ -652,7 +681,8 @@ export async function runImportCommand() {
 // ❌ Bad
 .command('crawl')
 .description('Crawl')
-```
+
+````
 
 ### 5. Use Package-Style Imports
 
@@ -667,7 +697,7 @@ import { serverLogger as logger } from "../../../packages/logger/source/server";
 
 // ❌ Bad - Path aliases don't work in CLI context
 import { serverLogger as logger } from "@/library/logger/server";
-```
+````
 
 **Note**: Package-style imports are enabled via `tsconfig.json` path mappings. Never use relative imports (`../../../packages/...`) for shared packages - always use the package name directly.
 
@@ -786,10 +816,7 @@ const choices: PromptChoice<string>[] = [
   { name: "Option B", value: "b" },
 ];
 
-const selected = await promptSelect<string>(
-  "Choose an option:",
-  choices
-);
+const selected = await promptSelect<string>("Choose an option:", choices);
 
 // selected is string (e.g., "a")
 ```
@@ -855,9 +882,9 @@ try {
 
 ```typescript
 interface PromptChoice<T = any> {
-  name: string;      // Display name
-  value: T;          // Value returned when selected
-  short?: string;    // Optional short name
+  name: string; // Display name
+  value: T; // Value returned when selected
+  short?: string; // Optional short name
 }
 ```
 

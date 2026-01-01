@@ -140,21 +140,25 @@ await db.delete(users).where(eq(users.id, 1));
 1. **Make Schema Changes**: Edit the schema file (e.g., `packages/database/source/schema.ts`)
 
 2. **Generate Migration**:
+
    ```bash
    npm run database:generate
    ```
+
    This creates migration files in `packages/database/migrations/` with a timestamp and name.
 
 3. **Review Migration**: Always review the generated SQL:
+
    ```bash
    cat packages/database/migrations/[timestamp]_[name]/migration.sql
    ```
 
 4. **Apply Migration**:
+
    ```bash
    npm run database:migrate
    ```
-   
+
    **Important**: This uses the runtime `migrate()` function (not `drizzle-kit migrate`), which respects the `__drizzle_migrations` table and only runs new migrations.
 
 ### Best Practices
@@ -169,7 +173,8 @@ await db.delete(users).where(eq(users.id, 1));
 
 **Problem**: If you initially created your database with `database:push`, then try to use `database:migrate`, the migration system will attempt to apply ALL migrations from scratch, including ones that create tables that already exist.
 
-**Solution**: 
+**Solution**:
+
 - Use migrations from the start, OR
 - If you must use `database:push` initially, archive old migrations and start fresh (see troubleshooting below)
 
@@ -283,6 +288,7 @@ If you see connection errors:
 **Cause**: Database was created with `database:push`, then migrations are being applied.
 
 **Solution**: Archive old migrations and start fresh:
+
 1. Move existing migrations to an archive folder: `mv database/migrations/* database/migrations-archive/`
 2. Clear the migrations table: `TRUNCATE TABLE __drizzle_migrations;`
 3. Mark initial state as applied (or generate a new initial migration if needed)

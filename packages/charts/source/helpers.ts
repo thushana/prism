@@ -86,14 +86,7 @@ export function transformToLineData<T extends Record<string, any>>(
   data: T[],
   options: TransformToLineDataOptions
 ): Serie[] {
-  const {
-    xField,
-    yFields,
-    formatX,
-    formatY,
-    transform,
-    seriesIds,
-  } = options;
+  const { xField, yFields, formatX, formatY, transform, seriesIds } = options;
 
   const yFieldArray = Array.isArray(yFields) ? yFields : [yFields];
   const ids = seriesIds || yFieldArray;
@@ -174,8 +167,7 @@ export function formatTimeSeries<T extends Record<string, any>>(
 
   const parseDateFn = parseDate || ((val) => new Date(val));
   const formatDateFn =
-    formatDate ||
-    ((date) => date.toISOString().split("T")[0]);
+    formatDate || ((date) => date.toISOString().split("T")[0]);
   const formatValueFn = formatValue || ((val) => Number(val) || 0);
 
   return transformToLineData(data, {

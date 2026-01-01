@@ -23,7 +23,7 @@ Both components merge user props with defaults (user props take precedence) and 
 ### Data Transformation Helpers
 
 - **`transformToBarData`** - Converts app data arrays to Nivo bar chart format
-- **`transformToLineData`** - Converts app data arrays to Nivo line chart format  
+- **`transformToLineData`** - Converts app data arrays to Nivo line chart format
 - **`formatTimeSeries`** - Convenience wrapper for time series with date parsing/formatting
 
 These helpers eliminate the need to manually reshape data. See [`source/helpers.ts`](../packages/charts/source/helpers.ts) for implementation and TypeScript types.
@@ -31,6 +31,7 @@ These helpers eliminate the need to manually reshape data. See [`source/helpers.
 ### Theme Integration
 
 The package reads CSS variables from your Tailwind theme at runtime:
+
 - `--foreground`, `--background`, `--muted`, `--muted-foreground`, `--border` for chart styling
 - `--chart-1` through `--chart-5` for the color palette
 
@@ -45,6 +46,7 @@ Nivo provides a comprehensive, well-maintained charting library with TypeScript 
 ### Why Thin Wrappers?
 
 Instead of building custom charts, we wrap Nivo to:
+
 - Leverage Nivo's battle-tested visualization logic
 - Maintain full API compatibility (all Nivo props work)
 - Reduce maintenance burden (Nivo handles updates)
@@ -53,6 +55,7 @@ Instead of building custom charts, we wrap Nivo to:
 ### Why CSS Variable Theme?
 
 Reading theme from CSS variables means:
+
 - Charts automatically match app theme (light/dark mode)
 - No prop drilling or context needed
 - Works with Tailwind's theme system
@@ -81,7 +84,12 @@ packages/charts/
 Import components and helpers from `@charts`:
 
 ```typescript
-import { BarChart, LineChart, transformToBarData, formatTimeSeries } from "@charts";
+import {
+  BarChart,
+  LineChart,
+  transformToBarData,
+  formatTimeSeries,
+} from "@charts";
 ```
 
 All Nivo props are supported. See component source files for JSDoc examples, and refer to [Nivo documentation](https://nivo.rocks/) for prop details.

@@ -163,19 +163,19 @@ export const styles = {
   error: colors.red.default,
   warning: colors.amber.default,
   info: colors.blue.default,
-  
+
   // Text styles
   bold: chalk.bold,
   dim: chalk.dim,
   italic: chalk.italic,
   underline: chalk.underline,
-  
+
   // Common combinations
   successBold: colors.green.default.bold,
   errorBold: colors.red.default.bold,
   warningBold: colors.amber.default.bold,
   infoBold: colors.blue.default.bold,
-  
+
   // Status symbols with colors (using emojis)
   checkmark: colors.green.default("✅"),
   cross: colors.red.default("❌"),
@@ -197,14 +197,14 @@ export function statusMessage(
     warning: "⚠️",
     info: "ℹ️",
   };
-  
+
   const colorMap = {
     success: colors.green.default,
     error: colors.red.default,
     warning: colors.amber.default,
     info: colors.blue.default,
   };
-  
+
   // Use tab separator for consistent column alignment
   return `${colorMap[type](symbols[type])}\t${message}`;
 }
@@ -265,7 +265,9 @@ export interface CLIConfig {
  * Load banner configuration from cli.config.json
  * @param configDir Optional directory path to load config from. If not provided, uses the directory of this file.
  */
-export function loadCLIConfig(configDir?: string): { banner: string[]; color: string } | null {
+export function loadCLIConfig(
+  configDir?: string
+): { banner: string[]; color: string } | null {
   try {
     let configPath: string;
     if (configDir) {
@@ -292,7 +294,10 @@ export function loadCLIConfig(configDir?: string): { banner: string[]; color: st
  * Uses the Material UI color order to create a gradient
  * The specified color will be used for the second row (index 1)
  */
-export function generateColorGradient(secondRowColorName: string, count: number): Array<chalk.Chalk> {
+export function generateColorGradient(
+  secondRowColorName: string,
+  count: number
+): Array<chalk.Chalk> {
   const colorOrder: ColorName[] = [
     "red",
     "pink",
@@ -322,20 +327,26 @@ export function generateColorGradient(secondRowColorName: string, count: number)
     const defaultColorIndex = colorOrder.indexOf("pink");
     // Handle wrap-around: if pink is at index 0 (shouldn't happen, but defensive),
     // or if pink not found, start from red (index 0)
-    const defaultStartIndex = defaultColorIndex === -1 
-      ? 0 
-      : (defaultColorIndex === 0 ? colorOrder.length - 1 : defaultColorIndex - 1);
-    
+    const defaultStartIndex =
+      defaultColorIndex === -1
+        ? 0
+        : defaultColorIndex === 0
+          ? colorOrder.length - 1
+          : defaultColorIndex - 1;
+
     // Generate gradient with wrap-around (blueGrey loops back to red)
-    return Array(count).fill(0).map((_, i) => {
-      const colorIndex = (defaultStartIndex + i) % colorOrder.length;
-      return colors[colorOrder[colorIndex]].default;
-    });
+    return Array(count)
+      .fill(0)
+      .map((_, i) => {
+        const colorIndex = (defaultStartIndex + i) % colorOrder.length;
+        return colors[colorOrder[colorIndex]].default;
+      });
   }
 
   // Calculate start index: second row uses the specified color, so first row is one before
   // Handle wrap-around: if secondRowIndex is 0 (red), first row should be last color (blueGrey)
-  const startIndex = secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
+  const startIndex =
+    secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
 
   // Generate gradient by cycling through colors from start position
   const gradient: Array<chalk.Chalk> = [];
@@ -373,7 +384,10 @@ export function initializeBannerFromConfig(
   }
 
   // Generate color gradient with specified color on second row
-  const bannerColors = generateColorGradient(config.color, config.banner.length);
+  const bannerColors = generateColorGradient(
+    config.color,
+    config.banner.length
+  );
 
   // If single line (fallback app name), use bold
   if (config.banner.length === 1) {
@@ -397,20 +411,27 @@ export function initializeBannerFromConfig(
 export function generateBanner(): string {
   if (bannerConfig) {
     return bannerConfig.lines
-      .map((line, index) => bannerConfig!.colorSequence[index % bannerConfig!.colorSequence.length](line))
+      .map((line, index) =>
+        bannerConfig!.colorSequence[index % bannerConfig!.colorSequence.length](
+          line
+        )
+      )
       .join("\n");
   }
 
   // Default PRISM banner - load from cli.config.json
   const config = loadCLIConfig();
-  
+
   // Fallback: show "PRISM" in bold if config not found
   if (!config || config.banner.length === 0) {
     return colors.pink.default.bold("PRISM");
   }
 
   // Generate color gradient with specified color on second row
-  const bannerColors = generateColorGradient(config.color, config.banner.length);
+  const bannerColors = generateColorGradient(
+    config.color,
+    config.banner.length
+  );
 
   // If single line (fallback app name), use bold
   if (config.banner.length === 1) {
