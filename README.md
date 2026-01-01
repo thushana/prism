@@ -366,7 +366,7 @@ packages/[package-name]/
 
 ## Deployment
 
-This monorepo is designed to deploy each app independently on Vercel. See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed instructions.
+This monorepo is designed to deploy each app independently on Vercel. See [DEPLOYMENT-Prism.md](./docs/DEPLOYMENT-Prism.md) for detailed instructions.
 
 ### Quick Summary
 
@@ -411,7 +411,7 @@ LOG_LEVEL=debug
 NEXT_PUBLIC_LOG_LEVEL=debug
 ```
 
-See [docs/LOGGER.md](./docs/LOGGER.md) for full logger documentation.
+See [docs/LOGGER-Prism.md](./docs/LOGGER-Prism.md) for full logger documentation.
 
 ## Learn More
 

@@ -167,7 +167,7 @@ export async function runStylingCommand(
   logger.info(`    ${colors.cyan.default("42")}`);
 
   logger.info(chalk.dim("\n" + "=".repeat(60)));
-  logger.info(chalk.dim("\nSee prism/docs/CLI.md for full documentation.\n"));
+  logger.info(chalk.dim("\nSee prism/docs/CLI-Prism.md for full documentation.\n"));
 }
 
 /**

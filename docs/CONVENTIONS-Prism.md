@@ -110,7 +110,7 @@ The centralized logging infrastructure is implemented and available via the `log
 - **Server code**: Import from `"@logger/server"` (or `@prism/core/logger` when consuming Prism as a package)
 - Use appropriate log levels: `error`, `warn`, `info`, `debug`, `verbose`, `silly`
 - Include structured metadata for errors and context
-- See [docs/LOGGER.md](./LOGGER.md) for detailed documentation
+- See [docs/LOGGER-Prism.md](./LOGGER-Prism.md) for detailed documentation
 
 ### Usage Examples
 
@@ -248,7 +248,7 @@ packages/
 
 ## CLI Commands
 
-> The CLI tool is implemented. See [docs/CLI.md](./CLI.md) for usage and patterns.
+> The CLI tool is implemented. See [docs/CLI-Prism.md](./CLI-Prism.md) for usage and patterns.
 
 - CLI tool entry point: `npm run tools`
 - Commands are defined under `tools/app/commands`

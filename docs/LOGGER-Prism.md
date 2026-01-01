@@ -205,7 +205,7 @@ Example:
 **When to use CLI mode:**
 - All CLI applications should use CLI mode for cleaner, more readable output
 - Enable it at the CLI entry point: `setCLIMode(true)`
-- See `prism/docs/CLI.md` for complete CLI mode documentation
+- See `prism/docs/CLI-Prism.md` for complete CLI mode documentation
 
 ## Best Practices
 
@@ -323,7 +323,7 @@ logger.info(`Place saved: ${placeId}, ${name}, ${category}`); // Hard to parse
   logger.info("Processing..."); // Shows: "Processing..." instead of "2024-01-15 10:30:45 ℹ️ [INFO] Processing..."
   ```
 
-  **Important**: All CLI applications should enable CLI mode at their entry point. See `prism/docs/CLI.md` for more details.
+  **Important**: All CLI applications should enable CLI mode at their entry point. See `prism/docs/CLI-Prism.md` for more details.
 
 - **Shared Server Code**: Use `@logger/server`
   ```typescript

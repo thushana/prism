@@ -380,7 +380,7 @@ The generator is **highly opinionated** - no configuration options beyond the ap
 
 ## Next Steps
 
-- Read the [Architecture Guide](./ARCHITECTURE.md)
-- Check the [Database Guide](./DATABASE.md)
-- Explore [Intelligence Tasks](./INTELLIGENCE.md)
-- Review [Deployment Guide](./DEPLOYMENT.md)
+- Read the [Architecture Guide](./ARCHITECTURE-Prism.md)
+- Check the [Database Guide](./DATABASE-Prism.md)
+- Explore [Intelligence Tasks](./INTELLIGENCE-Prism.md)
+- Review [Deployment Guide](./DEPLOYMENT-Prism.md)

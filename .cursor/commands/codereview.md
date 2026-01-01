@@ -15,7 +15,7 @@ Small Next.js monorepo: TypeScript, React, Tailwind CSS, Radix UI, Drizzle/SQLit
 - Look at not just the diff but in context of the whole file that was touched
 - Load all the lines of code from the file so that you have a holistic look
 - Be curious and investigate upstream imports that may be relevant
-- If needed, read docs/CONVENTIONS.md and docs/ARCHITECTURE.md to make sure it aligns
+- If needed, read docs/CONVENTIONS-Prism.md and docs/ARCHITECTURE-Prism.md to make sure it aligns
 
 **Core priorities:**
 

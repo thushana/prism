@@ -299,6 +299,6 @@ If migrations fail:
 
 ## Related Docs
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Overall architecture
-- [CONVENTIONS.md](./CONVENTIONS.md) - Naming & API conventions
+- [ARCHITECTURE-Prism.md](./ARCHITECTURE-Prism.md) - Overall architecture
+- [CONVENTIONS-Prism.md](./CONVENTIONS-Prism.md) - Naming & API conventions
 - [Drizzle ORM Docs](https://orm.drizzle.team/) - Official documentation

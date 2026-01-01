@@ -221,7 +221,7 @@ npm run tools export --table users
 
 ## Adding New Commands
 
-See the [CLI Documentation](../docs/CLI.md) for detailed instructions on adding new commands.
+See the [CLI Documentation](../docs/CLI-Prism.md) for detailed instructions on adding new commands.
 
 Quick steps:
 
