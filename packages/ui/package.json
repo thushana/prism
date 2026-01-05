@@ -7,12 +7,15 @@
   "exports": {
     ".": "./source/index.ts"
   },
+  "scripts": {
+    "generate:colors": "node scripts/generate-material-colors.js"
+  },
   "dependencies": {
-    "utilities": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "utilities": "*"
   },
   "peerDependencies": {
     "next": "^16.0.0",
@@ -20,6 +23,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.2.6",
+    "material-ui-colors": "^1.0.0",
     "typescript": "^5.9.3"
   }
 }

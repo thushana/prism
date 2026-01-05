@@ -180,6 +180,11 @@ function syncScripts(): void {
         adaptedValue = "tsx scripts/clean-directories.ts";
       }
 
+      // Adapt generate:colors to use correct path
+      if (key === "generate:colors") {
+        adaptedValue = "cd prism/packages/ui && npm run generate:colors";
+      }
+
       // Adapt vercel:build to work in main project
       if (key === "vercel:build") {
         adaptedValue = "vercel build";

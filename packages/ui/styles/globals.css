@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./colors.css" layer(theme);
+@import "./background-utilities.css";
 
 /* Scan UI package source files */
 @source "../source/**/*.{ts,tsx}";

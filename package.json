@@ -50,6 +50,7 @@
     "prism:sync:commands": "tsx scripts/sync-commands.ts",
     "prism:sync:git": "tsx scripts/sync-git.ts",
     "prism:sync:scripts": "tsx scripts/sync-scripts.ts",
+    "generate:colors": "cd packages/ui && npm run generate:colors",
     "quality": "tsx scripts/quality.ts",
     "quality:quick": "npm run typecheck && npm run lint && npm run format",
     "start": "npm run start --workspaces --if-present",
@@ -83,7 +84,8 @@
     ]
   },
   "dependencies": {
-    "lightningcss": "^1.30.2"
+    "lightningcss": "^1.30.2",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
