@@ -1,16 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { ResponsiveLine, type LineSvgProps } from "@nivo/line";
+import { ResponsiveLine, type LineSvgProps, type LineSeries } from "@nivo/line";
 import { getNivoTheme } from "./theme";
 import { getDefaultLineChartProps } from "./defaults";
-import type { MergedChartProps } from "./types";
-
-export interface LineChartProps extends Omit<LineSvgProps, "theme"> {
+export interface LineChartProps
+  extends Omit<LineSvgProps<LineSeries>, "theme" | "height" | "width"> {
   /**
    * Optional theme override. If not provided, uses theme from CSS variables.
    */
-  theme?: LineSvgProps["theme"];
+  theme?: LineSvgProps<LineSeries>["theme"];
+  /** Optional; ResponsiveLine fills from container. */
+  height?: number;
+  width?: number;
 }
 
 /**
@@ -45,7 +47,7 @@ export function LineChart({
       ...props.margin,
     },
     theme: nivoTheme,
-  } satisfies MergedChartProps<LineSvgProps>;
+  } as LineSvgProps<LineSeries>;
 
   return <ResponsiveLine {...mergedProps} />;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "utilities",
+  "name": "@prism/utilities",
   "version": "0.1.0",
   "private": true,
   "main": "./source/index.ts",

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "ui": "*",
-    "utilities": "*"
+    "@prism/utilities": "*"
   },
   "peerDependencies": {
     "next": "^16.0.0",

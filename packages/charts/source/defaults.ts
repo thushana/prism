@@ -1,5 +1,5 @@
 import type { BarDatum, BarSvgProps } from "@nivo/bar";
-import type { LineSvgProps, Serie } from "@nivo/line";
+import type { LineSvgProps, LineSeries } from "@nivo/line";
 import { getChartColors } from "./theme";
 
 /**
@@ -114,7 +114,7 @@ export function getDefaultBarChartProps(): Partial<BarSvgProps<BarDatum>> {
  * Provides sensible defaults for margins, axes, points, and interactivity.
  * All defaults can be overridden by passing props directly to LineChart.
  */
-export function getDefaultLineChartProps(): Partial<LineSvgProps> {
+export function getDefaultLineChartProps(): Partial<LineSvgProps<LineSeries>> {
   return {
     margin: defaultMargins,
     axisBottom: {

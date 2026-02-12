@@ -3,14 +3,18 @@
  * These types are used throughout the charts package and exported for consumers.
  */
 
+import type { LineSeries } from "@nivo/line";
+
 // Bar chart types
 export type { BarDatum, BarSvgProps } from "@nivo/bar";
 
-// Line chart types
-export type { Serie, LineSvgProps } from "@nivo/line";
+// Line chart types (Nivo 0.99: Serie was renamed to LineSeries)
+export type { LineSeries, LineSvgProps } from "@nivo/line";
+/** @deprecated Use LineSeries */
+export type Serie = LineSeries;
 
-// Core types
-export type { Theme } from "@nivo/core";
+// Theme from @nivo/theming (Nivo 0.99)
+export type { Theme } from "@nivo/theming";
 
 // Helper types
 export type {
