@@ -159,16 +159,15 @@ function syncScripts(): void {
         adaptedValue = "eslint app --ext .ts,.tsx --fix";
       }
 
-      // Adapt quality scripts to work without workspaces
-      if (key === "quality" || key === "quality:quick") {
-        adaptedValue = value
-          .replace("npm run test:run", "echo 'No tests configured'")
-          .replace("npm run test", "echo 'No tests configured'")
-          .replace("--workspaces --if-present", "");
+      // Apps defer quality to prism so one script defines format → lint → typecheck → test
+      if (key === "quality") {
+        adaptedValue = "tsx prism/scripts/quality.ts";
+      }
+      if (key === "quality:quick") {
+        adaptedValue = "npm run format && npm run lint && npm run typecheck";
       }
 
       // quality script is smart and handles both app and prism automatically
-      // No adaptation needed
 
       // Adapt clean script to work in main project
       if (key === "clean") {
@@ -193,6 +192,13 @@ function syncScripts(): void {
       mergedScripts[key] = adaptedValue;
       addedScripts.push(key);
     }
+  }
+
+  // Apps defer to prism for quality (single source of truth: prism/scripts/quality.ts)
+  const isTargetingApp = path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
+  if (isTargetingApp && mergedScripts) {
+    mergedScripts.quality = "tsx prism/scripts/quality.ts";
+    mergedScripts["quality:quick"] = "npm run format && npm run lint && npm run typecheck";
   }
 
   // Sort scripts alphabetically
