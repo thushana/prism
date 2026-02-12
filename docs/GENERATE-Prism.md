@@ -114,11 +114,18 @@ my-app/
   app/
     layout.tsx              # Root layout with Prism UI
     page.tsx                # Home page (Prism demo)
+    flags/
+      index.ts              # Feature flags (identify + standard flags)
     system-sheet/
       page.tsx              # System sheet page
+    .well-known/
+      vercel/flags/
+        route.ts            # Vercel Flags Explorer discovery (optional FLAGS_SECRET)
     api/
       system-sheet/
         route.ts            # System sheet API route
+
+  middleware.ts             # Forwards ?flag_* query params to request header for FeatureFlags
 
   ui/
     styles/
@@ -197,6 +204,10 @@ npm run db:seed
 - Configure `DATABASE_URL` in `.env` with your Neon connection string
 - Pooled connection for runtime queries, unpooled for migrations
 - Get connection strings from [Neon Console](https://console.neon.tech)
+
+## Feature Flags
+
+Generated apps include the Prism FeatureFlags package: root `middleware.ts`, `app/flags/index.ts` (identify + standard flags), and `app/.well-known/vercel/flags/route.ts` for Vercel Flags Explorer. Optional: set `FLAGS_SECRET` in env for the discovery endpoint. Add `authCheck` to `createIdentify` when using the authentication package. See [FEATUREFLAGS-Prism.md](./FEATUREFLAGS-Prism.md).
 
 ## Prism Core Integration
 

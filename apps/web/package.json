@@ -19,6 +19,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "database": "*",
     "dotenv": "^17.2.3",
+    "feature-flags": "*",
+    "flags": "^4.0.0",
     "system-sheet": "*",
     "drizzle-orm": "beta",
     "intelligence": "*",

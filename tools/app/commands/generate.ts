@@ -64,6 +64,7 @@ function createDirectoryStructure(targetDir: string): void {
   const dirs = [
     "app",
     "app/system-sheet",
+    "app/.well-known/vercel/flags",
     "app/api",
     "ui/styles",
     "docs",
@@ -135,6 +136,8 @@ function generatePackageJson(
         ui: "*",
         "@prism/utilities": "*",
         "system-sheet": "*",
+        "feature-flags": "*",
+        "flags": "^4.0.0",
       }
     : prismRepo
       ? {
@@ -155,6 +158,8 @@ function generatePackageJson(
           ui: "file:./prism/packages/ui",
           "@prism/utilities": "file:./prism/packages/utilities",
           "system-sheet": "file:./prism/packages/system-sheet",
+          "feature-flags": "file:./prism/packages/feature-flags",
+          "flags": "^4.0.0",
         };
 
   const packageJson = {
@@ -241,6 +246,7 @@ const nextConfig: NextConfig = {
       "@ui": path.resolve(__dirname, "./prism/packages/ui/source"),
       "@utilities": path.resolve(__dirname, "./prism/packages/utilities/source"),
       "@system-sheet": path.resolve(__dirname, "./prism/packages/system-sheet/source"),
+      "feature-flags": path.resolve(__dirname, "./prism/packages/feature-flags/source"),
     };
     // Allow resolving symlinks (submodule creates symlinks in node_modules)
     config.resolve.symlinks = true;
@@ -309,6 +315,7 @@ function generateTsConfig(
         "@ui": ["../../packages/ui/source"],
         "@utilities": ["../../packages/utilities/source"],
         "@system-sheet": ["../../packages/system-sheet/source"],
+        "feature-flags": ["../../packages/feature-flags/source"],
       }
     : useGitDependency
       ? {
@@ -324,6 +331,7 @@ function generateTsConfig(
           "@ui": ["node_modules/@prism/core/packages/ui/source"],
           "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
           "@system-sheet": ["node_modules/@prism/core/packages/system-sheet/source"],
+          "feature-flags": ["node_modules/@prism/core/packages/feature-flags/source"],
         }
       : {
           "@/*": ["./*"],
@@ -341,6 +349,7 @@ function generateTsConfig(
           "@ui": ["./prism/packages/ui/source"],
           "@utilities": ["./prism/packages/utilities/source"],
           "@system-sheet": ["./prism/packages/system-sheet/source"],
+          "feature-flags": ["./prism/packages/feature-flags/source"],
         };
 
   const tsconfig = {
@@ -554,6 +563,10 @@ CRON_SECRET=your_cron_secret_here
 # URL to your hosting platform's project dashboard (e.g., Vercel, Netlify, etc.)
 # Used by "run dev" command to open project dashboard and deployments pages
 HOST_PROJECT_DASHBOARD=https://vercel.com/username/project
+
+# Feature Flags (Optional – for Vercel Flags Explorer)
+# Generate with: openssl rand -base64 32
+# FLAGS_SECRET=your_base64_secret_here
 
 # Node Environment (automatically set by Vercel in production)
 NODE_ENV=development
