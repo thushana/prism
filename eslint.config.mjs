@@ -5,25 +5,33 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
+  // Replaces .eslintignore (flat config ignores)
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "**/.next/**",
     "out/**",
     "**/out/**",
     "build/**",
     "**/build/**",
+    "dist/**",
+    "**/dist/**",
     "next-env.d.ts",
     "**/next-env.d.ts",
+    "*.tsbuildinfo",
+    "**/*.tsbuildinfo",
     "node_modules/**",
     "**/node_modules/**",
     ".next",
     "**/.next",
+    ".cache/**",
+    "**/.cache/**",
+    ".vercel/**",
+    "**/.vercel/**",
+    "*.log",
+    "**/*.log",
   ]),
-  // Non-Next packages: avoid "Pages directory cannot be found" when linting packages/tools
+  // Prism root has no pages dir; packages/tools are not Next apps
   {
-    files: ["packages/**/*", "tools/**/*"],
     rules: {
       "@next/next/no-html-link-for-pages": "off",
     },
@@ -33,6 +41,19 @@ const eslintConfig = defineConfig([
     files: ["**/*.test.ts", "**/*.test.tsx"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  // Allow _prefixed vars/args for intentionally unused (e.g. _level, _error, _chart1)
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {
