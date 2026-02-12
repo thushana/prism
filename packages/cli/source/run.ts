@@ -142,7 +142,7 @@ function startBrowser(): void {
         detached: true,
       }).unref();
     }
-  } catch (error) {
+  } catch (_error) {
     // Silently fail - browser might already be running
   }
 }
@@ -315,7 +315,7 @@ async function waitForService(
  */
 async function openBrowserTabs(
   port: string = "3000",
-  drizzlePort: string = "4983",
+  _drizzlePort: string = "4983",
   hasDrizzle: boolean = true
 ): Promise<void> {
   log.info(`     ${chalk.bold("🌐 OPENING")} - Browser tabs...`);
@@ -386,7 +386,9 @@ export async function runRunCommand(options: RunCommandOptions): Promise<void> {
   // Load environment variables from .env file in app root
   const envPath = path.join(appRoot, ".env");
   if (fs.existsSync(envPath)) {
-    dotenv.config({ path: envPath, opsOff: true } as any);
+    dotenv.config({ path: envPath, opsOff: true } as Parameters<
+      typeof dotenv.config
+    >[0]);
   }
 
   // Get app name from package.json

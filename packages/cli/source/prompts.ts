@@ -10,7 +10,7 @@ import type { Question } from "inquirer";
 /**
  * Choice option for prompts
  */
-export interface PromptChoice<T = any> {
+export interface PromptChoice<T = unknown> {
   name: string;
   value: T;
   short?: string;

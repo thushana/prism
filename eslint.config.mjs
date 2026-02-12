@@ -21,6 +21,20 @@ const eslintConfig = defineConfig([
     ".next",
     "**/.next",
   ]),
+  // Non-Next packages: avoid "Pages directory cannot be found" when linting packages/tools
+  {
+    files: ["packages/**/*", "tools/**/*"],
+    rules: {
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
+  // Test files: allow explicit any for mocks and fixtures
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
   {
     rules: {
       // Enforce @ prefixed imports for packages (only exact matches, not relative paths)

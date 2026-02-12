@@ -19,9 +19,7 @@ export function createIsVerboseLoggingFlag(
     identify,
     decide: (context: FeatureFlagContext) => {
       if (context.urlOverrides?.isVerboseLogging !== undefined) {
-        return (
-          parseFlagOption(context.urlOverrides.isVerboseLogging) ?? false
-        );
+        return parseFlagOption(context.urlOverrides.isVerboseLogging) ?? false;
       }
       if (context.envFlags?.isVerboseLogging !== undefined) {
         return parseFlagOption(context.envFlags.isVerboseLogging) ?? false;

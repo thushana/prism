@@ -55,7 +55,10 @@ describe("Data Transformation Helpers", () => {
       const result = transformToBarData(data, {
         indexBy: "category",
         keys: ["value"],
-        transform: (item) => ({ ...item, value: item.value * 2 }),
+        transform: (item) => {
+          const i = item as { category: string; value: number };
+          return { ...i, value: i.value * 2 };
+        },
       });
 
       expect(result[0].value).toBe(20);
@@ -153,11 +156,11 @@ describe("Data Transformation Helpers", () => {
       const result = formatTimeSeries(data, {
         dateField: "date",
         valueFields: "value",
-        parseDate: (val) => {
-          const [month, day, year] = val.split("/");
+        parseDate: (val: unknown) => {
+          const [month, day, year] = String(val).split("/");
           return new Date(`${year}-${month}-${day}`);
         },
-        formatDate: (date) => date.toISOString().split("T")[0],
+        formatDate: (date: Date) => date.toISOString().split("T")[0],
       });
 
       expect(result[0].data[0].x).toContain("2024");

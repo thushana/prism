@@ -8,7 +8,7 @@ import winston from "winston";
 // Runtime check to prevent accidental use in browser
 if (
   typeof globalThis !== "undefined" &&
-  typeof (globalThis as any).window !== "undefined"
+  typeof (globalThis as unknown as { window?: unknown }).window !== "undefined"
 ) {
   throw new Error(
     "Server logger cannot be used in browser. Use logger/client instead."
@@ -60,7 +60,7 @@ function getLogLevel(): LogLevel {
 /**
  * Format metadata for logging
  */
-function formatMetadata(meta: any): string {
+function formatMetadata(meta: Record<string, unknown>): string {
   if (!meta || Object.keys(meta).length === 0) {
     return "";
   }
@@ -82,23 +82,24 @@ function formatMetadata(meta: any): string {
 
 /**
  * Custom Winston format with timestamps and emojis (default mode)
+ * Reserved for future use when switching from inline printf.
  */
-const customFormat = winston.format.printf(
+const _customFormat = winston.format.printf(
   ({ level, message, timestamp, emoji, ...meta }) => {
     const emojiPrefix =
       emoji || contextEmojiMap[level as keyof typeof contextEmojiMap] || "";
-    const metaStr = formatMetadata(meta);
+    const metaStr = formatMetadata(meta as Record<string, unknown>);
     return `${timestamp} ${emojiPrefix} [${level.toUpperCase()}] ${message}${metaStr}`;
   }
 );
 
 /**
  * Clean CLI format without timestamps and log levels (CLI mode)
+ * Reserved for future use when switching from inline printf.
  */
-const cliFormat = winston.format.printf(({ message, emoji, ...meta }) => {
+const _cliFormat = winston.format.printf(({ message, emoji, ...meta }) => {
   const emojiPrefix = emoji || "";
-  const metaStr = formatMetadata(meta);
-  // Only show metadata if it exists and CLI mode is enabled
+  const metaStr = formatMetadata(meta as Record<string, unknown>);
   return `${emojiPrefix}${emojiPrefix ? " " : ""}${message}${metaStr}`;
 });
 
@@ -133,10 +134,13 @@ export const serverLogger = winston.createLogger({
                   "Symbol(message)",
                 ].includes(key)
             )
-            .reduce((acc, key) => {
-              acc[key] = (info as any)[key];
-              return acc;
-            }, {} as any)
+            .reduce(
+              (acc, key) => {
+                acc[key] = (info as Record<string, unknown>)[key];
+                return acc;
+              },
+              {} as Record<string, unknown>
+            )
         );
         return `${emojiPrefix}${emojiPrefix ? " " : ""}${info.message}${metaStr}`;
       }
@@ -159,10 +163,13 @@ export const serverLogger = winston.createLogger({
                 "Symbol(message)",
               ].includes(key)
           )
-          .reduce((acc, key) => {
-            acc[key] = (info as any)[key];
-            return acc;
-          }, {} as any)
+          .reduce(
+            (acc, key) => {
+              acc[key] = (info as Record<string, unknown>)[key];
+              return acc;
+            },
+            {} as Record<string, unknown>
+          )
       );
       return `${info.timestamp} ${emojiPrefix} [${info.level.toUpperCase()}] ${info.message}${metaStr}`;
     })
@@ -174,7 +181,7 @@ export const serverLogger = winston.createLogger({
  * Create a context-specific logger with emoji prefix
  */
 function contextLogger(emoji: string) {
-  return (message: string, meta?: Record<string, any>) => {
+  return (message: string, meta?: Record<string, unknown>) => {
     serverLogger.log("info", message, { ...meta, emoji });
   };
 }

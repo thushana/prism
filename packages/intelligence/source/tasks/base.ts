@@ -3,7 +3,6 @@
  * All tasks extend this class to get validation, retry, cost tracking, etc.
  */
 
-import type { z } from "zod";
 import { serverLogger as logger } from "@logger";
 import { trackCost } from "../utilities/cost";
 import { withRetry, getErrorMessage } from "../utilities/retry";

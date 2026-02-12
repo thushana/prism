@@ -51,7 +51,7 @@ function getLogLevel(): LogLevel {
   return "debug";
 }
 
-let currentLogLevel: LogLevel = getLogLevel();
+const currentLogLevel: LogLevel = getLogLevel();
 
 /**
  * Check if a log level should be logged based on current log level
@@ -63,7 +63,7 @@ function shouldLog(level: LogLevel): boolean {
 /**
  * Format metadata for logging
  */
-function formatMetadata(meta?: Record<string, any>): string {
+function formatMetadata(meta?: Record<string, unknown>): string {
   if (!meta) return "";
 
   try {
@@ -85,7 +85,7 @@ function formatMetadata(meta?: Record<string, any>): string {
  * Create a context-specific logger with emoji prefix
  */
 function contextLogger(emoji: string) {
-  return (message: string, meta?: Record<string, any>) => {
+  return (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("info")) return;
 
     const timestamp = new Date()
@@ -101,7 +101,7 @@ function contextLogger(emoji: string) {
  * Main client logger instance
  */
 export const logger = {
-  error: (message: string, meta?: Record<string, any>) => {
+  error: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("error")) return;
 
     const timestamp = new Date()
@@ -114,7 +114,7 @@ export const logger = {
     );
   },
 
-  warn: (message: string, meta?: Record<string, any>) => {
+  warn: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("warn")) return;
 
     const timestamp = new Date()
@@ -127,7 +127,7 @@ export const logger = {
     );
   },
 
-  info: (message: string, meta?: Record<string, any>) => {
+  info: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("info")) return;
 
     const timestamp = new Date()
@@ -140,7 +140,7 @@ export const logger = {
     );
   },
 
-  http: (message: string, meta?: Record<string, any>) => {
+  http: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("http")) return;
 
     const timestamp = new Date()
@@ -153,7 +153,7 @@ export const logger = {
     );
   },
 
-  verbose: (message: string, meta?: Record<string, any>) => {
+  verbose: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("verbose")) return;
 
     const timestamp = new Date()
@@ -166,7 +166,7 @@ export const logger = {
     );
   },
 
-  debug: (message: string, meta?: Record<string, any>) => {
+  debug: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("debug")) return;
 
     const timestamp = new Date()
@@ -179,7 +179,7 @@ export const logger = {
     );
   },
 
-  silly: (message: string, meta?: Record<string, any>) => {
+  silly: (message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog("silly")) return;
 
     const timestamp = new Date()
@@ -192,7 +192,7 @@ export const logger = {
     );
   },
 
-  log: (level: LogLevel, message: string, meta?: Record<string, any>) => {
+  log: (level: LogLevel, message: string, meta?: Record<string, unknown>) => {
     if (!shouldLog(level)) return;
 
     const timestamp = new Date()
@@ -220,7 +220,7 @@ export const logStart = contextLogger(contextEmojiMap.start);
  * Set log level at runtime (no-op for client logger)
  * Client log level is determined by environment variables only
  */
-export function setLogLevel(level: LogLevel): void {
+export function setLogLevel(_level: LogLevel): void {
   // No-op for client logger - log level is environment-based only
   // This function exists for API compatibility with server logger
 }

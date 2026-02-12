@@ -15,6 +15,13 @@
   },
   "devDependencies": {
     "drizzle-kit": "beta",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint source",
+    "test": "vitest",
+    "test:run": "vitest run"
   }
 }

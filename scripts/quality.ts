@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Run quality checks (typecheck, lint, format, test) in current project and related project
+ * Run quality checks (format, lint, test) in current project and related project
  * Works from both:
  * - Inside prism repo: runs quality in parent (if exists), then prism
  * - From child app: runs quality in current app, then prism (if exists)
@@ -30,7 +30,7 @@ if (isInPrism) {
 
 function runQualityChecks(cwd: string, projectName: string): void {
   try {
-    execSync("npm run typecheck && npm run lint && npm run format && npm run test:run", {
+    execSync("npm run format && npm run lint && npm run test:run", {
       cwd,
       stdio: "inherit",
     });

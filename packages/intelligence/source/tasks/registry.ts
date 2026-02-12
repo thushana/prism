@@ -10,22 +10,22 @@ import type { Task, TaskConfig, TaskResult, TaskMetadata } from "./types";
  * Allows tasks to be registered and executed by name
  */
 export class TaskRegistry {
-  private static tasks = new Map<string, Task<any, any>>();
+  private static tasks = new Map<string, Task<unknown, unknown>>();
 
   /**
    * Register a task
    */
-  static register<T extends Task<any, any>>(task: T): void {
+  static register<T extends Task<unknown, unknown>>(task: T): void {
     if (this.tasks.has(task.name)) {
       throw new Error(`Task "${task.name}" is already registered`);
     }
-    this.tasks.set(task.name, task);
+    this.tasks.set(task.name, task as Task<unknown, unknown>);
   }
 
   /**
    * Get a task by name
    */
-  static get(name: string): Task<any, any> | undefined {
+  static get(name: string): Task<unknown, unknown> | undefined {
     return this.tasks.get(name);
   }
 
@@ -80,7 +80,7 @@ export class TaskRegistry {
     }
 
     try {
-      return await task.execute(input, config);
+      return (await task.execute(input, config)) as TaskResult<TOutput>;
     } catch (error) {
       return {
         success: false,

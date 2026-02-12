@@ -26,7 +26,11 @@ export function parseUrlOverrides(
   if (header === null || header === "") return {};
   try {
     const parsed = JSON.parse(header) as unknown;
-    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+    if (
+      parsed !== null &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed)
+    ) {
       const out: Record<string, string> = {};
       for (const [k, v] of Object.entries(parsed)) {
         if (typeof k === "string" && typeof v === "string") {

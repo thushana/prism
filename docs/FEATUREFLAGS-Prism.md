@@ -1,25 +1,25 @@
 # Feature Flags Package
 
-The `packages/feature-flags` package is Prism's standard feature-flag layer. It wraps [Flags SDK](https://flags-sdk.dev/) and adds a single evaluation context (env, env keys, URL overrides, auth, user type) so every app uses the same API and naming. **Server-side only** (middleware, Server Components, API routes).
+The `packages/feature-flags` package is Prism's standard feature-flag layer. It wraps [Flags SDK](https://flags-sdk.dev/) and adds a single evaluation context (env, env keys, URL overrides, auth, user type) so every app uses the same API and naming. **Server-side only** (proxy, Server Components, API routes).
 
 ## Mental Model
 
-Feature flags are evaluated per request. One **context** object is built per request (env, optional env vars, URL overrides from query params, and user from auth). Every flag's `decide(context)` receives that same shape. URL overrides are copied from the request URL into a header by **middleware**, so Server Components and API routes see them without receiving `searchParams` explicitly.
+Feature flags are evaluated per request. One **context** object is built per request (env, optional env vars, URL overrides from query params, and user from auth). Every flag's `decide(context)` receives that same shape. URL overrides are copied from the request URL into a header by the **proxy**, so Server Components and API routes see them without receiving `searchParams` explicitly.
 
-- **Why a wrapper?** Flags SDK gives `identify` and `decide` but doesn't pass URL or a standard context shape. We add middleware + a single context type so apps get env, URL, and auth in one place.
-- **Why server-side only (v1)?** Middleware and `identify` use request headers/cookies; client components don't have that. Client flags can be added later if needed.
+- **Why a wrapper?** Flags SDK gives `identify` and `decide` but doesn't pass URL or a standard context shape. We add a proxy + a single context type so apps get env, URL, and auth in one place.
+- **Why server-side only (v1)?** Proxy and `identify` use request headers/cookies; client components don't have that. Client flags can be added later if needed.
 
 ## What It Provides
 
 ### Context and identification
 
 - **`FeatureFlagContext`** – Single type: `env`, `envFlags?`, `urlOverrides?`, `user?`. Exported from the package; see [`source/types.ts`](../packages/feature-flags/source/types.ts).
-- **`createIdentify(options)`** – Builds the shared `identify` function. Options: `authCheck`, `envFlagPrefix`, `envFlagKeys`. Fills context from `process.env`, the `x-prism-flag-overrides` header (set by middleware), and auth. See [`source/identify.ts`](../packages/feature-flags/source/identify.ts).
+- **`createIdentify(options)`** – Builds the shared `identify` function. Options: `authCheck`, `envFlagPrefix`, `envFlagKeys`. Fills context from `process.env`, the `x-prism-flag-overrides` header (set by proxy), and auth. See [`source/identify.ts`](../packages/feature-flags/source/identify.ts).
 
-### Flags and middleware
+### Flags and proxy
 
 - **`createFlag(config)`** – Wraps Flags SDK `flag()`; your `decide(context: FeatureFlagContext)` receives the shared context. See [`source/flag.ts`](../packages/feature-flags/source/flag.ts).
-- **`getMiddleware(config)`** – Returns Next.js middleware that copies flag query params (prefix `flag_` or allowlist) into `x-prism-flag-overrides`. See [`source/middleware.ts`](../packages/feature-flags/source/middleware.ts).
+- **`getProxy(config)`** – Returns a request handler that copies flag query params (prefix `flag_` or allowlist) into `x-prism-flag-overrides`. Export it as `proxy` in root `proxy.ts`. See [`source/proxy.ts`](../packages/feature-flags/source/proxy.ts).
 
 ### Helpers and discovery
 
@@ -38,9 +38,9 @@ See [`source/standard/`](../packages/feature-flags/source/standard/) for impleme
 
 ## Design Decisions
 
-### Why middleware for URL overrides?
+### Why proxy for URL overrides?
 
-So every flag evaluation sees URL overrides without passing `searchParams` at each call site. Middleware runs once per request and sets a single header; `identify` reads it and fills `context.urlOverrides`.
+So every flag evaluation sees URL overrides without passing `searchParams` at each call site. The proxy runs once per request and sets a single header; `identify` reads it and fills `context.urlOverrides`.
 
 ### Why one context type?
 
@@ -59,7 +59,7 @@ packages/feature-flags/
 │   ├── helpers.ts         # parseFlagOption, parseUrlOverrides, getEnvFlags
 │   ├── identify.ts        # createIdentify
 │   ├── flag.ts            # createFlag
-│   ├── middleware.ts      # getMiddleware
+│   ├── proxy.ts           # getProxy (use in root proxy.ts as export const proxy = getProxy(...))
 │   ├── discovery.ts       # Re-exports for Flags Explorer
 │   ├── standard/          # Standard flag factories
 │   │   ├── isDebug.ts
@@ -84,7 +84,7 @@ packages/feature-flags/
 
 ## Usage
 
-Apps wire middleware (`getMiddleware({ paramPrefix: 'flag_' })`), create a flags file that calls `createIdentify` (with `authCheck` and optional `envFlagPrefix`) and the standard flag factories, then use flags in Server Components or API routes by awaiting the flag (e.g. `await isDebug()`). Override via URL: `?flag_<key>=on` or `?flag_<key>=off` (middleware strips the `flag_` prefix into `context.urlOverrides`). Optional: mount GET `/.well-known/vercel/flags` with `createFlagsDiscoveryEndpoint` and `getProviderData(yourFlags)` for Vercel Flags Explorer (requires `FLAGS_SECRET`).
+Apps use root `proxy.ts` with `export const proxy = getProxy({ paramPrefix: 'flag_' })`, create a flags file that calls `createIdentify` (with `authCheck` and optional `envFlagPrefix`) and the standard flag factories, then use flags in Server Components or API routes by awaiting the flag (e.g. `await isDebug()`). Override via URL: `?flag_<key>=on` or `?flag_<key>=off` (proxy strips the `flag_` prefix into `context.urlOverrides`). Optional: mount GET `/.well-known/vercel/flags` with `createFlagsDiscoveryEndpoint` and `getProviderData(yourFlags)` for Vercel Flags Explorer (requires `FLAGS_SECRET`).
 
 TypeScript types and JSDoc live in the source files.
 

@@ -18,7 +18,7 @@ function getCSSVariable(variable: string): string {
  * Check if dark mode is active.
  * Reserved for future dark mode theme enhancements.
  */
-function isDarkMode(): boolean {
+function _isDarkMode(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
@@ -34,25 +34,22 @@ function isDarkMode(): boolean {
  */
 export function getNivoTheme(): Theme {
   // Get color values from CSS variables
-  // Note: isDarkMode() is available for future dark mode enhancements
+  // Note: _isDarkMode() is available for future dark mode enhancements
   const foreground = getCSSVariable("--foreground") || "oklch(0.145 0 0)";
   const background = getCSSVariable("--background") || "oklch(1 0 0)";
-  const muted = getCSSVariable("--muted") || "oklch(0.97 0 0)";
+  const _muted = getCSSVariable("--muted") || "oklch(0.97 0 0)";
   const mutedForeground =
     getCSSVariable("--muted-foreground") || "oklch(0.556 0 0)";
   const border = getCSSVariable("--border") || "oklch(0.922 0 0)";
 
-  // Chart colors
-  const chart1 = getCSSVariable("--chart-1") || "oklch(0.646 0.222 41.116)";
-  const chart2 = getCSSVariable("--chart-2") || "oklch(0.6 0.118 184.704)";
-  const chart3 = getCSSVariable("--chart-3") || "oklch(0.398 0.07 227.392)";
-  const chart4 = getCSSVariable("--chart-4") || "oklch(0.828 0.189 84.429)";
-  const chart5 = getCSSVariable("--chart-5") || "oklch(0.769 0.188 70.08)";
+  // Chart colors (reserved for future multi-series theming)
+  const _chart1 = getCSSVariable("--chart-1") || "oklch(0.646 0.222 41.116)";
+  const _chart2 = getCSSVariable("--chart-2") || "oklch(0.6 0.118 184.704)";
+  const _chart3 = getCSSVariable("--chart-3") || "oklch(0.398 0.07 227.392)";
+  const _chart4 = getCSSVariable("--chart-4") || "oklch(0.828 0.189 84.429)";
+  const _chart5 = getCSSVariable("--chart-5") || "oklch(0.769 0.188 70.08)";
 
-  const textStyle = (
-    fontSize: number,
-    fill: string
-  ): Theme["text"] => ({
+  const textStyle = (fontSize: number, fill: string): Theme["text"] => ({
     fontFamily: "inherit",
     fontSize,
     fill,

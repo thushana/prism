@@ -20,6 +20,7 @@
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint source"
   }
 }

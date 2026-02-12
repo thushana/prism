@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import * as schema from "./schema";
 
 // Load environment variables from .env
-config({ path: ".env", opsOff: true } as any);
+config({ path: ".env", opsOff: true } as Parameters<typeof config>[0]);
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
