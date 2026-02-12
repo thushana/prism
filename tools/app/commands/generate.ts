@@ -133,7 +133,7 @@ function generatePackageJson(
         intelligence: "*",
         logger: "*",
         ui: "*",
-        utilities: "*",
+        "@prism/utilities": "*",
         "system-sheet": "*",
       }
     : prismRepo
@@ -153,7 +153,7 @@ function generatePackageJson(
           intelligence: "file:./prism/packages/intelligence",
           logger: "file:./prism/packages/logger",
           ui: "file:./prism/packages/ui",
-          utilities: "file:./prism/packages/utilities",
+          "@prism/utilities": "file:./prism/packages/utilities",
           "system-sheet": "file:./prism/packages/system-sheet",
         };
 

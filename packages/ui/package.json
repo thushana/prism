@@ -15,7 +15,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
     "tailwind-merge": "^3.4.0",
-    "utilities": "*"
+    "@prism/utilities": "*"
   },
   "peerDependencies": {
     "next": "^16.0.0",

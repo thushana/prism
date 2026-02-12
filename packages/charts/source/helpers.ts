@@ -1,5 +1,5 @@
 import type { BarDatum } from "@nivo/bar";
-import type { Serie } from "@nivo/line";
+import type { LineSeries } from "@nivo/line";
 
 /**
  * Options for transforming data to bar chart format.
@@ -79,13 +79,13 @@ export interface TransformToLineDataOptions {
 /**
  * Transform app data to Nivo line chart format.
  *
- * Converts application data structures to Nivo's Serie format. Supports
+ * Converts application data structures to Nivo's LineSeries format. Supports
  * multiple series by providing multiple yFields.
  */
 export function transformToLineData<T extends Record<string, any>>(
   data: T[],
   options: TransformToLineDataOptions
-): Serie[] {
+): LineSeries[] {
   const { xField, yFields, formatX, formatY, transform, seriesIds } = options;
 
   const yFieldArray = Array.isArray(yFields) ? yFields : [yFields];
@@ -155,7 +155,7 @@ export interface FormatTimeSeriesOptions {
 export function formatTimeSeries<T extends Record<string, any>>(
   data: T[],
   options: FormatTimeSeriesOptions
-): Serie[] {
+): LineSeries[] {
   const {
     dateField,
     valueFields,

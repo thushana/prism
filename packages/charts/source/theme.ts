@@ -1,4 +1,4 @@
-import type { Theme } from "@nivo/core";
+import type { Theme } from "@nivo/theming";
 
 /**
  * Get CSS variable value from computed styles.
@@ -49,14 +49,21 @@ export function getNivoTheme(): Theme {
   const chart4 = getCSSVariable("--chart-4") || "oklch(0.828 0.189 84.429)";
   const chart5 = getCSSVariable("--chart-5") || "oklch(0.769 0.188 70.08)";
 
+  const textStyle = (
+    fontSize: number,
+    fill: string
+  ): Theme["text"] => ({
+    fontFamily: "inherit",
+    fontSize,
+    fill,
+    outlineWidth: 0,
+    outlineColor: "transparent",
+    outlineOpacity: 0,
+  });
+
   return {
     background: "transparent",
-    text: {
-      fontSize: 11,
-      fill: foreground,
-      outlineWidth: 0,
-      outlineColor: "transparent",
-    },
+    text: textStyle(11, foreground),
     axis: {
       domain: {
         line: {
@@ -65,24 +72,14 @@ export function getNivoTheme(): Theme {
         },
       },
       legend: {
-        text: {
-          fontSize: 12,
-          fill: foreground,
-          outlineWidth: 0,
-          outlineColor: "transparent",
-        },
+        text: textStyle(12, foreground),
       },
       ticks: {
         line: {
           stroke: border,
           strokeWidth: 1,
         },
-        text: {
-          fontSize: 11,
-          fill: mutedForeground,
-          outlineWidth: 0,
-          outlineColor: "transparent",
-        },
+        text: textStyle(11, mutedForeground),
       },
     },
     grid: {
@@ -97,35 +94,26 @@ export function getNivoTheme(): Theme {
         stroke: foreground,
         strokeWidth: 1,
         strokeOpacity: 0.75,
+        strokeDasharray: "0",
       },
     },
     legends: {
+      hidden: {
+        symbol: {},
+        text: textStyle(11, mutedForeground),
+      },
       title: {
-        text: {
-          fontSize: 11,
-          fill: foreground,
-          outlineWidth: 0,
-          outlineColor: "transparent",
-        },
+        text: textStyle(11, foreground),
       },
-      text: {
-        fontSize: 11,
-        fill: mutedForeground,
-        outlineWidth: 0,
-        outlineColor: "transparent",
-      },
+      text: textStyle(11, mutedForeground),
       ticks: {
         line: {},
-        text: {
-          fontSize: 10,
-          fill: mutedForeground,
-          outlineWidth: 0,
-          outlineColor: "transparent",
-        },
+        text: textStyle(10, mutedForeground),
       },
     },
     annotations: {
       text: {
+        fontFamily: "inherit",
         fontSize: 13,
         fill: foreground,
         outlineWidth: 2,
@@ -152,6 +140,17 @@ export function getNivoTheme(): Theme {
         outlineColor: background,
         outlineOpacity: 1,
       },
+    },
+    labels: {
+      text: textStyle(11, foreground),
+    },
+    markers: {
+      lineColor: border,
+      lineStrokeWidth: 1,
+      text: textStyle(11, foreground),
+    },
+    dots: {
+      text: textStyle(11, foreground),
     },
     tooltip: {
       container: {
