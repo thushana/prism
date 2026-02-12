@@ -58,3 +58,4 @@ For each issue:
 - Go through the philosophies above and verbally say if it passes these bold line areas of focus
 - Provide specific change proposals if needed
 - If things look good, craft a commit message based on .cursor/commands/commitmessage.md
+- When you commit, do not tag a collaborator / co-author

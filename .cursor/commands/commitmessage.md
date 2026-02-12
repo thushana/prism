@@ -7,6 +7,7 @@ Write a commit message for the changes on disk
 ## Rules
 
 - One line only
+- Do not add Co-authored-by or tag collaborators on commits
 - Cover all unstaged changes in the commit holistically
 - Format: **Emoji** + **ALL CAPS** slug + dash + brief description
 - If repository has submodules, commit submodules first (deepest first), then main repo
