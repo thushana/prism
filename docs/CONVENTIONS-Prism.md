@@ -8,7 +8,7 @@ Style and naming conventions for this codebase.
 
 Lint, format, and tests are run **from the Prism root** so one config applies to all workspaces. New packages are included automatically.
 
-- **`npm run quality`** – Runs **format**, **lint**, and **test:run** in that order (for Prism and, when present, the parent app).
+- **`npm run quality`** – Runs **format → lint → typecheck → test:run** (for Prism and, when present, the parent app). Apps using Prism run `tsx prism/scripts/quality.ts` so this is defined once in Prism.
 - **`npm run lint`** – Single ESLint run over `packages/*/source`, `packages/*/styles`, `apps/*/app`, `tools/app` using root `eslint.config.mjs`.
 - **`npm run typecheck`** – Runs `tsc --noEmit` in every workspace that has a `tsconfig.json` (see `scripts/typecheck-workspaces.ts`).
 - **`npm run test:run`** – Runs `vitest run` in every workspace that has a Vitest config or `test:run` script (see `scripts/test-workspaces.ts`).

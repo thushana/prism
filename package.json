@@ -52,7 +52,7 @@
     "prism:sync:scripts": "tsx scripts/sync-scripts.ts",
     "generate:colors": "cd packages/ui && npm run generate:colors",
     "quality": "tsx scripts/quality.ts",
-    "quality:quick": "npm run typecheck && npm run lint && npm run format",
+    "quality:quick": "npm run format && npm run lint && npm run typecheck",
     "start": "npm run start --workspaces --if-present",
     "start:web": "npm run start -w apps/web",
     "test": "npm run test --workspaces --if-present",
