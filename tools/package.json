@@ -6,7 +6,9 @@
   "scripts": {
     "start": "tsx app/tools.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint app --ext .ts"
+    "lint": "eslint app --ext .ts",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@prism/cli": "*",
@@ -20,6 +22,7 @@
     "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

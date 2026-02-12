@@ -30,7 +30,7 @@ export function fileExists(filePath: string): boolean {
  * Validate that a required option is provided
  */
 export function requireOption(
-  value: any,
+  value: unknown,
   optionName: string,
   commandName?: string
 ): void {

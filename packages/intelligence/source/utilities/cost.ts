@@ -59,7 +59,10 @@ export function trackCost(
     };
 
     // Log cost with emoji prefix
-    logCost(`AI generation: $${cost.toFixed(6)}`, metadata);
+    logCost(
+      `AI generation: $${cost.toFixed(6)}`,
+      metadata as unknown as Record<string, unknown>
+    );
 
     return cost;
   } catch (error) {

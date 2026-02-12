@@ -15,7 +15,9 @@ export function createFlag<T>(config: CreateFlagConfig<T>) {
     description: config.description,
     defaultValue: config.defaultValue,
     ...(config.options !== undefined && {
-      options: config.options as Parameters<typeof flagsSDKFlag<T, FeatureFlagContext>>[0]["options"],
+      options: config.options as Parameters<
+        typeof flagsSDKFlag<T, FeatureFlagContext>
+      >[0]["options"],
     }),
     origin: config.origin,
     identify: config.identify,

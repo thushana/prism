@@ -12,10 +12,7 @@ export function createIdentify(options: CreateIdentifyOptions = {}) {
     cookies: { get: (name: string) => { value: string } | undefined };
   }): Promise<FeatureFlagContext> => {
     const context: FeatureFlagContext = {
-      env:
-        process.env.VERCEL_ENV ??
-        process.env.NODE_ENV ??
-        "development",
+      env: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? "development",
     };
 
     if (options.envFlagPrefix ?? options.envFlagKeys?.length) {

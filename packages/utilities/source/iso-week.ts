@@ -1,4 +1,10 @@
-import { startOfISOWeek, endOfISOWeek, addWeeks, parseISO, getISOWeek } from 'date-fns';
+import {
+  startOfISOWeek,
+  endOfISOWeek,
+  addWeeks,
+  parseISO,
+  getISOWeek,
+} from "date-fns";
 
 /**
  * Get start and end dates for an ISO 8601 week
@@ -6,19 +12,22 @@ import { startOfISOWeek, endOfISOWeek, addWeeks, parseISO, getISOWeek } from 'da
  * @param week - ISO week number (1-52 or 1-53)
  * @returns Object with start (Monday) and end (Sunday) dates
  */
-export function getISOWeekDates(year: number, week: number): { start: Date; end: Date } {
+export function getISOWeekDates(
+  year: number,
+  week: number
+): { start: Date; end: Date } {
   // Get first day of the year
   const firstDayOfYear = parseISO(`${year}-01-01`);
-  
+
   // Find the start of the first ISO week (may be in previous year)
   const firstISOWeekStart = startOfISOWeek(firstDayOfYear);
-  
+
   // Calculate the start of the desired week
   const desiredWeekStart = addWeeks(firstISOWeekStart, week - 1);
-  
+
   // Calculate the end of the desired week (Sunday)
   const desiredWeekEnd = endOfISOWeek(desiredWeekStart);
-  
+
   return { start: desiredWeekStart, end: desiredWeekEnd };
 }
 

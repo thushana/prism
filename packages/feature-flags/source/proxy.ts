@@ -1,12 +1,12 @@
 /**
- * FeatureFlags – getMiddleware copies flag query params into request header
+ * FeatureFlags – getProxy returns a request handler that copies flag query params into request header
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import type { MiddlewareConfig } from "./types";
+import type { ProxyConfig } from "./types";
 
-export function getMiddleware(config: MiddlewareConfig = {}) {
-  return function middleware(request: NextRequest): NextResponse {
+export function getProxy(config: ProxyConfig = {}) {
+  return function proxy(request: NextRequest): NextResponse {
     const { searchParams } = request.nextUrl;
     const overrides: Record<string, string> = {};
 
@@ -28,10 +28,7 @@ export function getMiddleware(config: MiddlewareConfig = {}) {
 
     if (Object.keys(overrides).length > 0) {
       const requestHeaders = new Headers(request.headers);
-      requestHeaders.set(
-        "x-prism-flag-overrides",
-        JSON.stringify(overrides)
-      );
+      requestHeaders.set("x-prism-flag-overrides", JSON.stringify(overrides));
       return NextResponse.next({
         request: { headers: requestHeaders },
       });

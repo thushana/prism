@@ -22,9 +22,9 @@ describe("Client Logger", () => {
     consoleLogSpy = vi.fn();
     consoleErrorSpy = vi.fn();
     consoleWarnSpy = vi.fn();
-    console.log = consoleLogSpy as any;
-    console.error = consoleErrorSpy as any;
-    console.warn = consoleWarnSpy as any;
+    console.log = consoleLogSpy as typeof console.log;
+    console.error = consoleErrorSpy as typeof console.error;
+    console.warn = consoleWarnSpy as typeof console.warn;
   });
 
   afterEach(() => {

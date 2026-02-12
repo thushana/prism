@@ -12,7 +12,12 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@logger": ["../logger/source"],
+      "@logger/*": ["../logger/source/*"]
+    }
   },
   "include": ["source/**/*", "models.config.json"],
   "exclude": ["node_modules"]

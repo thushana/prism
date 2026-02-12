@@ -4,8 +4,10 @@ import * as React from "react";
 import { ResponsiveLine, type LineSvgProps, type LineSeries } from "@nivo/line";
 import { getNivoTheme } from "./theme";
 import { getDefaultLineChartProps } from "./defaults";
-export interface LineChartProps
-  extends Omit<LineSvgProps<LineSeries>, "theme" | "height" | "width"> {
+export interface LineChartProps extends Omit<
+  LineSvgProps<LineSeries>,
+  "theme" | "height" | "width"
+> {
   /**
    * Optional theme override. If not provided, uses theme from CSS variables.
    */

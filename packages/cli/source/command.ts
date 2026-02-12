@@ -59,7 +59,7 @@ export interface CommandDefinition<
 export interface CommandOption {
   flags: string;
   description: string;
-  defaultValue?: any;
+  defaultValue?: string | boolean | string[];
 }
 
 /**
@@ -81,7 +81,11 @@ export function createCommand<T extends BaseCommandOptions>(
     // Add options if provided
     if (definition.options) {
       for (const option of definition.options) {
-        command.option(option.flags, option.description, option.defaultValue);
+        command.option(
+          option.flags,
+          option.description,
+          option.defaultValue as string | boolean | string[] | undefined
+        );
       }
     }
 

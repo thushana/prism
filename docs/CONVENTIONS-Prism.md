@@ -4,6 +4,17 @@ Style and naming conventions for this codebase.
 
 **See also**: [DOCS-Prism.md](./DOCS-Prism.md) for documentation philosophy.
 
+## Quality checks (prism-wide)
+
+Lint, format, and tests are run **from the Prism root** so one config applies to all workspaces. New packages are included automatically.
+
+- **`npm run quality`** – Runs **format**, **lint**, and **test:run** in that order (for Prism and, when present, the parent app).
+- **`npm run lint`** – Single ESLint run over `packages/*/source`, `packages/*/styles`, `apps/*/app`, `tools/app` using root `eslint.config.mjs`.
+- **`npm run typecheck`** – Runs `tsc --noEmit` in every workspace that has a `tsconfig.json` (see `scripts/typecheck-workspaces.ts`).
+- **`npm run test:run`** – Runs `vitest run` in every workspace that has a Vitest config or `test:run` script (see `scripts/test-workspaces.ts`).
+
+Workspaces can still define their own `lint` / `typecheck` / `test:run` scripts for local use; root commands do not require them.
+
 ## URLs
 
 - Use **kebab-case** (lowercase with hyphens)

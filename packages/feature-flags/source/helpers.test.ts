@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import {
-  parseFlagOption,
-  parseUrlOverrides,
-  getEnvFlags,
-} from "./helpers";
+import { parseFlagOption, parseUrlOverrides, getEnvFlags } from "./helpers";
 
 describe("parseFlagOption", () => {
   it("returns true for 'on' (case insensitive)", () => {
@@ -50,9 +46,9 @@ describe("parseUrlOverrides", () => {
   });
 
   it("ignores non-string values and keeps only string key-value pairs", () => {
-    expect(
-      parseUrlOverrides('{"a":"1","b":2,"c":null,"d":true}')
-    ).toEqual({ a: "1" });
+    expect(parseUrlOverrides('{"a":"1","b":2,"c":null,"d":true}')).toEqual({
+      a: "1",
+    });
   });
 
   it("returns {} for JSON array or null", () => {
@@ -75,7 +71,9 @@ describe("getEnvFlags", () => {
   it("returns env vars by explicit keys", () => {
     process.env.FEATURE_X = "on";
     process.env.FEATURE_Y = "off";
-    expect(getEnvFlags({ envFlagKeys: ["FEATURE_X", "FEATURE_Y", "MISSING"] })).toEqual({
+    expect(
+      getEnvFlags({ envFlagKeys: ["FEATURE_X", "FEATURE_Y", "MISSING"] })
+    ).toEqual({
       FEATURE_X: "on",
       FEATURE_Y: "off",
     });

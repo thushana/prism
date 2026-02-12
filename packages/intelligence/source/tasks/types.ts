@@ -3,8 +3,6 @@
  * Core interfaces and types for the AI task system
  */
 
-import type { z } from "zod";
-
 /**
  * Type alias for Zod schemas that output a specific type
  * This is more permissive than z.ZodType to allow any Zod schema structure.
@@ -12,7 +10,9 @@ import type { z } from "zod";
  */
 export type ZodSchema<T> = {
   parse: (input: unknown) => T;
-  safeParse: (input: unknown) => any;
+  safeParse: (
+    input: unknown
+  ) => { success: true; data: T } | { success: false; error: unknown };
 };
 
 /**

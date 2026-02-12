@@ -16,7 +16,7 @@ export interface TransformToBarDataOptions {
   /**
    * Optional function to transform each data item before conversion.
    */
-  transform?: (item: any) => any;
+  transform?: (item: unknown) => unknown;
 }
 
 /**
@@ -25,20 +25,20 @@ export interface TransformToBarDataOptions {
  * Converts application data structures to Nivo's BarDatum format, eliminating
  * the need to manually reshape data arrays.
  */
-export function transformToBarData<T extends Record<string, any>>(
+export function transformToBarData<T extends Record<string, unknown>>(
   data: T[],
   options: TransformToBarDataOptions
 ): BarDatum[] {
   const { indexBy, keys, transform } = options;
 
   return data.map((item) => {
-    const transformed = transform ? transform(item) : item;
+    const transformed = (transform ? transform(item) : item) as T;
     const result: BarDatum = {
-      [indexBy]: transformed[indexBy],
+      [indexBy]: transformed[indexBy] as string | number,
     };
 
     keys.forEach((key) => {
-      result[key] = transformed[key] ?? 0;
+      result[key] = (transformed[key] ?? 0) as number;
     });
 
     return result;
@@ -61,15 +61,15 @@ export interface TransformToLineDataOptions {
   /**
    * Optional function to format x values.
    */
-  formatX?: (value: any) => string | number;
+  formatX?: (value: unknown) => string | number;
   /**
    * Optional function to format y values.
    */
-  formatY?: (value: any) => number;
+  formatY?: (value: unknown) => number;
   /**
    * Optional function to transform each data item before conversion.
    */
-  transform?: (item: any) => any;
+  transform?: (item: unknown) => unknown;
   /**
    * Optional series IDs (if not provided, uses yField names).
    */
@@ -82,7 +82,7 @@ export interface TransformToLineDataOptions {
  * Converts application data structures to Nivo's LineSeries format. Supports
  * multiple series by providing multiple yFields.
  */
-export function transformToLineData<T extends Record<string, any>>(
+export function transformToLineData<T extends Record<string, unknown>>(
   data: T[],
   options: TransformToLineDataOptions
 ): LineSeries[] {
@@ -94,8 +94,10 @@ export function transformToLineData<T extends Record<string, any>>(
   return ids.map((id, index) => {
     const yField = yFieldArray[index];
     const points = data.map((item) => {
-      const transformed = transform ? transform(item) : item;
-      const x = formatX ? formatX(transformed[xField]) : transformed[xField];
+      const transformed = (transform ? transform(item) : item) as T;
+      const x = formatX
+        ? formatX(transformed[xField])
+        : (transformed[xField] as string | number);
       const y = formatY
         ? formatY(transformed[yField])
         : Number(transformed[yField]) || 0;
@@ -129,7 +131,7 @@ export interface FormatTimeSeriesOptions {
    * Optional function to parse the date.
    * Defaults to `new Date(value)`.
    */
-  parseDate?: (value: any) => Date;
+  parseDate?: (value: unknown) => Date;
   /**
    * Optional function to format the date for display.
    * Defaults to ISO date string (YYYY-MM-DD).
@@ -139,7 +141,7 @@ export interface FormatTimeSeriesOptions {
    * Optional function to format values.
    * Defaults to `Number(value) || 0`.
    */
-  formatValue?: (value: any) => number;
+  formatValue?: (value: unknown) => number;
   /**
    * Optional series IDs (if not provided, uses valueField names).
    */
@@ -152,7 +154,7 @@ export interface FormatTimeSeriesOptions {
  * Convenience wrapper around transformToLineData with date parsing and
  * formatting. Handles common time series data structures automatically.
  */
-export function formatTimeSeries<T extends Record<string, any>>(
+export function formatTimeSeries<T extends Record<string, unknown>>(
   data: T[],
   options: FormatTimeSeriesOptions
 ): LineSeries[] {
@@ -165,10 +167,11 @@ export function formatTimeSeries<T extends Record<string, any>>(
     seriesIds,
   } = options;
 
-  const parseDateFn = parseDate || ((val) => new Date(val));
+  const parseDateFn =
+    parseDate || ((val: unknown) => new Date(val as string | number | Date));
   const formatDateFn =
-    formatDate || ((date) => date.toISOString().split("T")[0]);
-  const formatValueFn = formatValue || ((val) => Number(val) || 0);
+    formatDate || ((date: Date) => date.toISOString().split("T")[0]);
+  const formatValueFn = formatValue || ((val: unknown) => Number(val) || 0);
 
   return transformToLineData(data, {
     xField: dateField,

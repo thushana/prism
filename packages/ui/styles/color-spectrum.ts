@@ -69,12 +69,11 @@ export function getColorVariableForIndex(
   return `--color-${kebabColor}-${shade}`;
 }
 
-
 /**
  * Get computed hex color value for a given index and shade
  * Returns direct hex values - useful when CSS variables can't be used
  * (e.g., in charts, canvas, inline styles, or when you need computed values)
- * 
+ *
  * @param index - 0-based index
  * @param shade - Color shade (default: 600)
  * @returns Hex color value like "#e53935"
@@ -95,7 +94,7 @@ export function getColorValueForIndex(
  * Get computed hex color value from CSS variable
  * Reads the actual computed value from the DOM (client-side only)
  * Falls back to direct hex lookup if CSS variable not available
- * 
+ *
  * @param variable - CSS variable name like "--color-red-600"
  * @param fallbackIndex - Optional index to use for fallback color lookup
  * @param fallbackShade - Optional shade to use for fallback color lookup
@@ -108,19 +107,20 @@ export function getComputedColorValue(
 ): string {
   // Try to get computed value from CSS variable (client-side only)
   if (typeof window !== "undefined") {
-    const computed = window.getComputedStyle(document.documentElement)
+    const computed = window
+      .getComputedStyle(document.documentElement)
       .getPropertyValue(variable)
       .trim();
     if (computed) {
       return computed;
     }
   }
-  
+
   // Fallback to direct hex lookup if index provided
   if (fallbackIndex !== undefined) {
     return getColorValueForIndex(fallbackIndex, fallbackShade);
   }
-  
+
   // Final fallback
   return "#e53935";
 }

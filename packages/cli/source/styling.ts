@@ -14,18 +14,25 @@ export { chalk };
 
 // Import Material UI colors from package (single source of truth)
 // Only extract the shades we need for CLI (50, 600, 900)
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- no ESM default export in material-ui-colors
 const materialUIColors = require("material-ui-colors");
 const materialColors = Object.keys(materialUIColors)
   .filter((name: string) => name !== "common")
-  .reduce((acc: Record<string, { 50: string; 600: string; 900: string }>, colorName: string) => {
-    const shades = materialUIColors[colorName];
-    acc[colorName] = {
-      50: shades[50],
-      600: shades[600],
-      900: shades[900],
-    };
-    return acc;
-  }, {} as Record<string, { 50: string; 600: string; 900: string }>);
+  .reduce(
+    (
+      acc: Record<string, { 50: string; 600: string; 900: string }>,
+      colorName: string
+    ) => {
+      const shades = materialUIColors[colorName];
+      acc[colorName] = {
+        50: shades[50],
+        600: shades[600],
+        900: shades[900],
+      };
+      return acc;
+    },
+    {} as Record<string, { 50: string; 600: string; 900: string }>
+  );
 
 // Create color objects with light, default (600), and dark variants
 type ColorName = keyof typeof materialColors;
@@ -49,7 +56,9 @@ const createColorVariant = (name: ColorName): ColorVariant => {
 export type { ColorName };
 
 // Create all color variants dynamically from materialColors
-export const colors: Record<ColorName, ColorVariant> = Object.keys(materialColors).reduce(
+export const colors: Record<ColorName, ColorVariant> = Object.keys(
+  materialColors
+).reduce(
   (acc, colorName) => {
     acc[colorName as ColorName] = createColorVariant(colorName as ColorName);
     return acc;
@@ -112,7 +121,9 @@ export function statusMessage(
 
 // Export color names for reference (in Material UI order)
 // Generated from materialColors keys to ensure consistency
-export const colorNames: ColorName[] = Object.keys(materialColors) as ColorName[];
+export const colorNames: ColorName[] = Object.keys(
+  materialColors
+) as ColorName[];
 
 // Export materialColors for reference
 export { materialColors };
@@ -166,7 +177,7 @@ export function loadCLIConfig(
       banner: config.banner,
       color: config.color,
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

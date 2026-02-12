@@ -20,9 +20,7 @@ export function createIsAuthenticatedFlag(
     identify,
     decide: (context: FeatureFlagContext) => {
       if (context.urlOverrides?.isAuthenticated !== undefined) {
-        return (
-          parseFlagOption(context.urlOverrides.isAuthenticated) ?? false
-        );
+        return parseFlagOption(context.urlOverrides.isAuthenticated) ?? false;
       }
       return context.user?.authenticated ?? false;
     },
