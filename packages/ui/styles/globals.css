@@ -21,6 +21,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-satoshi);
+  --font-serif: var(--font-sentient);
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   /* Semantic font roles (defaults; override per-page via .font-body-* / .font-headline-* on a wrapper) */
   --font-body: var(--font-satoshi);
@@ -206,6 +207,23 @@
   }
   .font-headline-zodiak {
     --font-headline: var(--font-zodiak);
+  }
+
+  /* Direct font-family utilities (bind to Prism sans / serif / mono); !important so they override any base button styles */
+  .font-sans,
+  button.font-sans,
+  span.font-sans {
+    font-family: var(--font-sans), system-ui, sans-serif !important;
+  }
+  .font-serif,
+  button.font-serif,
+  span.font-serif {
+    font-family: var(--font-serif), Georgia, serif !important;
+  }
+  .font-mono,
+  button.font-mono,
+  span.font-mono {
+    font-family: var(--font-mono), ui-monospace, monospace !important;
   }
 
   .typography-h1 {

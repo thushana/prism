@@ -247,7 +247,15 @@ All color variables have dark mode variants defined in `.dark` class.
 
 ### Typography Utilities
 
-MUI-style typography classes:
+**Font family (sans / serif / mono):**
+
+- `.font-sans` – Prism sans (Satoshi)
+- `.font-serif` – Prism serif (Sentient)
+- `.font-mono` – Monospace stack (ui-monospace, SF Mono, Menlo, …)
+
+Use on any element to set `font-family` to the bound Prism variable.
+
+**MUI-style typography classes:**
 
 - `.typography-h1` through `.typography-h6` - Heading styles
 - `.typography-subtitle1` / `.typography-subtitle2` - Subtitle styles
