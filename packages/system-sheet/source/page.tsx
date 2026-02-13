@@ -6,6 +6,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ContentBreakout,
+  ContentText,
+  LayoutWrappersReference,
 } from "@ui";
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
@@ -136,7 +139,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
 
   if (!data) {
     return (
-      <div className="container mx-auto p-8 space-y-8">
+      <div className="container mx-auto p-8 space-y-8 font-sans">
         <h1 className="mb-2">System Sheet</h1>
         <p className="text-muted-foreground">
           Unable to load system data. Please try again in a moment.
@@ -153,7 +156,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
   }
 
   return (
-    <div className={`container mx-auto p-8 space-y-8 ${geistMono.variable}`}>
+    <div
+      className={`container mx-auto p-8 space-y-8 font-sans ${geistMono.variable}`}
+    >
       <div>
         <h1 className="mb-2">System Sheet</h1>
         <p className="text-muted-foreground">
@@ -499,21 +504,13 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               {/* Column Headers */}
               <div className="grid grid-cols-4 gap-4 border-b pb-2">
                 <div>
-                  <h2
-                    className={satoshi.variable}
-                    style={{ fontFamily: "var(--font-satoshi)" }}
-                  >
-                    Satoshi
-                  </h2>
+                  <h2 className={`font-sans ${satoshi.variable}`}>Satoshi</h2>
                   <p className="text-sm text-muted-foreground">
                     Variable (300-900)
                   </p>
                 </div>
                 <div>
-                  <h2
-                    className={sentient.variable}
-                    style={{ fontFamily: "var(--font-sentient)" }}
-                  >
+                  <h2 className={`font-serif ${sentient.variable}`}>
                     Sentient
                   </h2>
                   <p className="text-sm text-muted-foreground">
@@ -521,21 +518,13 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   </p>
                 </div>
                 <div>
-                  <h2
-                    className={zodiak.variable}
-                    style={{ fontFamily: "var(--font-zodiak)" }}
-                  >
-                    Zodiak
-                  </h2>
+                  <h2 className={`font-serif ${zodiak.variable}`}>Zodiak</h2>
                   <p className="text-sm text-muted-foreground">
                     Variable (100-900)
                   </p>
                 </div>
                 <div>
-                  <h2
-                    className={geistMono.variable}
-                    style={{ fontFamily: "var(--font-geist-mono)" }}
-                  >
+                  <h2 className={`font-mono ${geistMono.variable}`}>
                     Geist Mono
                   </h2>
                   <p className="text-sm text-muted-foreground">
@@ -705,26 +694,17 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <h3 className="mb-4">Typography Variants</h3>
               <div className="grid grid-cols-3 gap-8 border-b pb-2 mb-4">
                 <div>
-                  <h4
-                    className={satoshi.variable}
-                    style={{ fontFamily: "var(--font-satoshi)" }}
-                  >
+                  <h4 className={`font-sans ${satoshi.variable}`}>
                     Satoshi (Sans)
                   </h4>
                 </div>
                 <div>
-                  <h4
-                    className={sentient.variable}
-                    style={{ fontFamily: "var(--font-sentient)" }}
-                  >
+                  <h4 className={`font-serif ${sentient.variable}`}>
                     Sentient (Serif)
                   </h4>
                 </div>
                 <div>
-                  <h4
-                    className={geistMono.variable}
-                    style={{ fontFamily: "var(--font-geist-mono)" }}
-                  >
+                  <h4 className={`font-mono ${geistMono.variable}`}>
                     Geist Mono
                   </h4>
                 </div>
@@ -871,217 +851,39 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
           </div>
         )}
 
-        {/* Break out of container so layout bands can use Tailwind breakpoint widths */}
-        <div
-          className="border-t pt-8"
-          style={{
-            width: "100vw",
-            position: "relative" as const,
-            left: "50%",
-            marginLeft: "-50vw",
-            paddingLeft: 24,
-            paddingRight: 24,
-          }}
-        >
-          {/* Layout wrappers sample — Tailwind breakpoint widths (sm 640, xl 1280, 2xl 1536) */}
-          <div className="mb-8">
-            <h2 className="mb-4">Layout Wrappers</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Tailwind container breakpoint widths. This section breaks out of
-              the page container so bands can reach their full width (e.g.
-              graphics-large 2xl 1536px).
-            </p>
-            <div className="space-y-6" style={{ marginTop: 32 }}>
-              {/* MUI palette order: red → pink → purple → indigo → blue (1px border, no radius) */}
-              <div
-                className="content-text"
-                style={{
-                  width: "100%",
-                  maxWidth: 640,
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                <div
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--color-red-500)",
-                    borderRadius: 0,
-                    backgroundColor: "var(--color-red-50)",
-                    color: "var(--color-red-700)",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  .content-text — sm 640px
-                </div>
-              </div>
-              <div
-                className="content-main"
-                style={{
-                  width: "100%",
-                  maxWidth: 1280,
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                <div
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--color-pink-500)",
-                    borderRadius: 0,
-                    backgroundColor: "var(--color-pink-50)",
-                    color: "var(--color-pink-700)",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  .content-main — xl 1280px
-                </div>
-              </div>
-              <div
-                className="graphics-main"
-                style={{
-                  width: "100%",
-                  maxWidth: 1280,
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                <div
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--color-purple-500)",
-                    borderRadius: 0,
-                    backgroundColor: "var(--color-purple-50)",
-                    color: "var(--color-purple-700)",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  .graphics-main — xl 1280px
-                </div>
-              </div>
-              <div
-                className="graphics-large"
-                style={{
-                  width: "100%",
-                  maxWidth: 1536,
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                <div
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--color-indigo-500)",
-                    borderRadius: 0,
-                    backgroundColor: "var(--color-indigo-50)",
-                    color: "var(--color-indigo-700)",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  .graphics-large — 2xl 1536px
-                </div>
-              </div>
-              <div className="graphics-full">
-                <div
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--color-blue-500)",
-                    borderRadius: 0,
-                    backgroundColor: "var(--color-blue-50)",
-                    color: "var(--color-blue-700)",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  .graphics-full — edge to edge
-                </div>
-              </div>
-            </div>
-          </div>
+        <LayoutWrappersReference />
 
-          {/* Layout sample: content-text with Prism blog post */}
+        {/* Layout sample: content-text with Prism blog post */}
+        <ContentBreakout className="mt-8">
           <div>
             <h2 className="mb-4">Layout sample — content-text</h2>
-            <div
-              className={`content-text space-y-4 ${sentient.variable}`}
-              style={{
-                width: "100%",
-                maxWidth: 640,
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
+            <ContentText
+              className={`space-y-4 font-serif ${sentient.variable}`}
             >
-              <h3
-                style={{
-                  fontFamily: "var(--font-satoshi)",
-                  fontSize: "2.25rem",
-                  lineHeight: "2.5rem",
-                  fontWeight: 700,
-                }}
-              >
-                What is Prism?
-              </h3>
-              <p
-                className="text-muted-foreground"
-                style={{
-                  fontFamily: "var(--font-sentient)",
-                  fontSize: "1rem",
-                  lineHeight: "1.5rem",
-                  fontWeight: 400,
-                }}
-              >
+              <h3 className="typography-h3 font-sans">What is Prism?</h3>
+              <p className="typography-body1 text-muted-foreground">
                 Prism is a full-stack app framework that gets you from zero to a
                 running Next.js app with a consistent stack: UI components,
                 database access, logging, feature flags, and deployment wiring.
                 It’s built for small teams and solo developers who want
                 structure without heavy boilerplate.
               </p>
-              <p
-                className="text-muted-foreground"
-                style={{
-                  fontFamily: "var(--font-sentient)",
-                  fontSize: "1rem",
-                  lineHeight: "1.5rem",
-                  fontWeight: 400,
-                }}
-              >
+              <p className="typography-body1 text-muted-foreground">
                 Out of the box you get a design system (Satoshi, Sentient,
                 Zodiak), layout wrappers for content and graphics, and a system
                 sheet for environment and dependency overview. The CLI can
                 scaffold new apps and packages, and the generator keeps your
                 config in sync across the monorepo.
               </p>
-              <p
-                className="text-muted-foreground"
-                style={{
-                  fontFamily: "var(--font-sentient)",
-                  fontSize: "1rem",
-                  lineHeight: "1.5rem",
-                  fontWeight: 400,
-                }}
-              >
+              <p className="typography-body1 text-muted-foreground">
                 Feature flags, authentication, and cost tracking plug in via
                 Prism packages so you can turn capabilities on when you need
                 them. If you want a single stack that stays consistent as the
                 product grows, Prism is built for that.
               </p>
-            </div>
+            </ContentText>
           </div>
-        </div>
+        </ContentBreakout>
       </div>
     </div>
   );
