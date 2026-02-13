@@ -1,8 +1,16 @@
 import { Geist_Mono } from "next/font/google";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@ui";
+import {
+  Badge,
+  Button as UiButton,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@ui";
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
+import { Button } from "./button";
 import type { SystemSheetConfig, SystemSheetData } from "./types";
 
 // Initialize Geist Mono font
@@ -25,17 +33,17 @@ function renderComponentExample(componentName: string) {
     case "button":
       return (
         <div className="flex flex-wrap gap-2 items-center">
-          <Button variant="default">Default</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="destructive">Destructive</Button>
-          <Button variant="link">Link</Button>
-          <Button size="icon">
+          <UiButton variant="default">Default</UiButton>
+          <UiButton variant="secondary">Secondary</UiButton>
+          <UiButton variant="outline">Outline</UiButton>
+          <UiButton variant="ghost">Ghost</UiButton>
+          <UiButton variant="destructive">Destructive</UiButton>
+          <UiButton variant="link">Link</UiButton>
+          <UiButton size="icon">
             <Icon name="settings" />
-          </Button>
-          <Button size="sm">Small</Button>
-          <Button size="lg">Large</Button>
+          </UiButton>
+          <UiButton size="sm">Small</UiButton>
+          <UiButton size="lg">Large</UiButton>
         </div>
       );
     case "badge":
@@ -857,8 +865,223 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 ))}
               </div>
             </div>
+
+            {/* Buttons — pill style; variants .plain, .icon, .uppercase + .icon */}
+            <Button />
           </div>
         )}
+
+        {/* Break out of container so layout bands can use Tailwind breakpoint widths */}
+        <div
+          className="border-t pt-8"
+          style={{
+            width: "100vw",
+            position: "relative" as const,
+            left: "50%",
+            marginLeft: "-50vw",
+            paddingLeft: 24,
+            paddingRight: 24,
+          }}
+        >
+          {/* Layout wrappers sample — Tailwind breakpoint widths (sm 640, xl 1280, 2xl 1536) */}
+          <div className="mb-8">
+            <h2 className="mb-4">Layout Wrappers</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Tailwind container breakpoint widths. This section breaks out of
+              the page container so bands can reach their full width (e.g.
+              graphics-large 2xl 1536px).
+            </p>
+            <div className="space-y-6" style={{ marginTop: 32 }}>
+              {/* MUI palette order: red → pink → purple → indigo → blue (1px border, no radius) */}
+              <div
+                className="content-text"
+                style={{
+                  width: "100%",
+                  maxWidth: 640,
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--color-red-500)",
+                    borderRadius: 0,
+                    backgroundColor: "var(--color-red-50)",
+                    color: "var(--color-red-700)",
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  .content-text — sm 640px
+                </div>
+              </div>
+              <div
+                className="content-main"
+                style={{
+                  width: "100%",
+                  maxWidth: 1280,
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--color-pink-500)",
+                    borderRadius: 0,
+                    backgroundColor: "var(--color-pink-50)",
+                    color: "var(--color-pink-700)",
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  .content-main — xl 1280px
+                </div>
+              </div>
+              <div
+                className="graphics-main"
+                style={{
+                  width: "100%",
+                  maxWidth: 1280,
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--color-purple-500)",
+                    borderRadius: 0,
+                    backgroundColor: "var(--color-purple-50)",
+                    color: "var(--color-purple-700)",
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  .graphics-main — xl 1280px
+                </div>
+              </div>
+              <div
+                className="graphics-large"
+                style={{
+                  width: "100%",
+                  maxWidth: 1536,
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--color-indigo-500)",
+                    borderRadius: 0,
+                    backgroundColor: "var(--color-indigo-50)",
+                    color: "var(--color-indigo-700)",
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  .graphics-large — 2xl 1536px
+                </div>
+              </div>
+              <div className="graphics-full">
+                <div
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--color-blue-500)",
+                    borderRadius: 0,
+                    backgroundColor: "var(--color-blue-50)",
+                    color: "var(--color-blue-700)",
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  .graphics-full — edge to edge
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Layout sample: content-text with Prism blog post */}
+          <div>
+            <h2 className="mb-4">Layout sample — content-text</h2>
+            <div
+              className={`content-text space-y-4 ${sentient.variable}`}
+              style={{
+                width: "100%",
+                maxWidth: 640,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              <h3
+                style={{
+                  fontFamily: "var(--font-satoshi)",
+                  fontSize: "2.25rem",
+                  lineHeight: "2.5rem",
+                  fontWeight: 700,
+                }}
+              >
+                What is Prism?
+              </h3>
+              <p
+                className="text-muted-foreground"
+                style={{
+                  fontFamily: "var(--font-sentient)",
+                  fontSize: "1rem",
+                  lineHeight: "1.5rem",
+                  fontWeight: 400,
+                }}
+              >
+                Prism is a full-stack app framework that gets you from zero to a
+                running Next.js app with a consistent stack: UI components,
+                database access, logging, feature flags, and deployment wiring.
+                It’s built for small teams and solo developers who want
+                structure without heavy boilerplate.
+              </p>
+              <p
+                className="text-muted-foreground"
+                style={{
+                  fontFamily: "var(--font-sentient)",
+                  fontSize: "1rem",
+                  lineHeight: "1.5rem",
+                  fontWeight: 400,
+                }}
+              >
+                Out of the box you get a design system (Satoshi, Sentient,
+                Zodiak), layout wrappers for content and graphics, and a system
+                sheet for environment and dependency overview. The CLI can
+                scaffold new apps and packages, and the generator keeps your
+                config in sync across the monorepo.
+              </p>
+              <p
+                className="text-muted-foreground"
+                style={{
+                  fontFamily: "var(--font-sentient)",
+                  fontSize: "1rem",
+                  lineHeight: "1.5rem",
+                  fontWeight: 400,
+                }}
+              >
+                Feature flags, authentication, and cost tracking plug in via
+                Prism packages so you can turn capabilities on when you need
+                them. If you want a single stack that stays consistent as the
+                product grows, Prism is built for that.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
