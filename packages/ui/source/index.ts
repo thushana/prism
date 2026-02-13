@@ -1,3 +1,4 @@
+export * from "./prism-button";
 export * from "./badge";
 export * from "./button";
 export * from "./card";

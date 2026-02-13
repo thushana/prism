@@ -265,6 +265,23 @@ MUI-style typography classes:
 <span className="typography-caption">Caption</span>
 ```
 
+### Layout Wrappers
+
+Named width wrappers for content vs graphics (defined in `styles/layout-wrappers.css`). Widths use Tailwind breakpoint values (px), centered with `margin-inline: auto` except graphics-full:
+
+- **`.content-text`** – sm 640px. Use for narrow text columns, captions.
+- **`.content-main`** – xl 1280px. Use for main content, headers, controls.
+- **`.graphics-main`** – xl 1280px. Use for charts/visuals that match content width.
+- **`.graphics-large`** – 2xl 1536px. Use for wider charts and visuals.
+- **`.graphics-full`** – Full width, edge to edge. Use for full-bleed sections.
+
+**Example:**
+
+```tsx
+<div className="content-main">…text and controls…</div>
+<div className="graphics-large"><LineChart … /></div>
+```
+
 ### Base Styles
 
 The `@layer base` section includes:

@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "./colors.css" layer(theme);
 @import "./background-utilities.css";
+@import "./layout-wrappers.css";
 
 /* Scan UI package source files */
 @source "../source/**/*.{ts,tsx}";
@@ -21,6 +22,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-satoshi);
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* Semantic font roles (defaults; override per-page via .font-body-* / .font-headline-* on a wrapper) */
+  --font-body: var(--font-satoshi);
+  --font-headline: var(--font-satoshi);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -131,42 +135,43 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headline);
   }
   h1 {
-    font-family: var(--font-satoshi);
     font-size: 2.25rem;
     line-height: 2.5rem;
     font-weight: 700;
   }
   h2 {
-    font-family: var(--font-satoshi);
     font-size: 1.875rem;
     line-height: 2.25rem;
     font-weight: 600;
   }
   h3 {
-    font-family: var(--font-satoshi);
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: 600;
   }
   h4 {
-    font-family: var(--font-satoshi);
     font-size: 1.25rem;
     line-height: 1.75rem;
     font-weight: 500;
   }
   h5 {
-    font-family: var(--font-satoshi);
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 500;
   }
   h6 {
-    font-family: var(--font-satoshi);
     font-size: 1rem;
     line-height: 1.5rem;
     font-weight: 500;
+  }
+  code, pre, kbd {
+    font-family: var(--font-mono);
   }
   .material-symbols-rounded {
     font-family: "Material Symbols Rounded";
@@ -186,80 +191,97 @@
 }
 
 @layer components {
+  /* Per-page font overrides: put on a wrapper (e.g. layout or main) to switch body/headline font for that page */
+  .font-body-sans {
+    --font-body: var(--font-satoshi);
+  }
+  .font-body-serif {
+    --font-body: var(--font-sentient);
+  }
+  .font-headline-sans {
+    --font-headline: var(--font-satoshi);
+  }
+  .font-headline-serif {
+    --font-headline: var(--font-sentient);
+  }
+  .font-headline-zodiak {
+    --font-headline: var(--font-zodiak);
+  }
+
   .typography-h1 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 2.25rem;
     line-height: 2.5rem;
     font-weight: 700;
   }
   .typography-h2 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 1.875rem;
     line-height: 2.25rem;
     font-weight: 600;
   }
   .typography-h3 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: 600;
   }
   .typography-h4 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 1.25rem;
     line-height: 1.75rem;
     font-weight: 500;
   }
   .typography-h5 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 500;
   }
   .typography-h6 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-headline);
     font-size: 1rem;
     line-height: 1.5rem;
     font-weight: 500;
   }
   .typography-subtitle1 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.5rem;
     font-weight: 600;
   }
   .typography-subtitle2 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.95rem;
     line-height: 1.4rem;
     font-weight: 500;
   }
   .typography-body1 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.5rem;
     font-weight: 400;
   }
   .typography-body2 {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-weight: 400;
   }
   .typography-button {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-weight: 600;
   }
   .typography-caption {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.75rem;
     line-height: 1rem;
     font-weight: 400;
   }
   .typography-overline {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.75rem;
     line-height: 1rem;
     font-weight: 600;
@@ -267,7 +289,7 @@
     text-transform: uppercase;
   }
   .typography-label {
-    font-family: var(--font-satoshi);
+    font-family: var(--font-body);
     font-size: 0.8125rem;
     line-height: 1.25rem;
     font-weight: 500;

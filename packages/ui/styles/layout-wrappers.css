@@ -1,0 +1,35 @@
+/**
+ * Named layout wrappers — Tailwind container breakpoint widths (px).
+ *
+ * - content-text: sm (640px)
+ * - content-main: xl (1280px)
+ * - graphics-main: xl (1280px)
+ * - graphics-large: 2xl (1536px)
+ * - graphics-full: edge to edge (100%)
+ */
+
+@layer components {
+  .content-text {
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .content-main {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+  .graphics-main {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+  .graphics-large {
+    width: 100%;
+    max-width: 1536px;
+    margin-inline: auto;
+  }
+  .graphics-full {
+    width: 100%;
+  }
+}
