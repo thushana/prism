@@ -167,8 +167,8 @@ function Row({
   noGap?: boolean;
 }) {
   return (
-    <div>
-      <p className="text-xs text-muted-foreground mb-2">{title}</p>
+    <div className="pb-12">
+      <code className="typography-caption mb-2 block">{title}</code>
       <div
         className={`flex flex-wrap items-center ${noGap ? "gap-0" : "gap-3"}`}
       >
@@ -257,350 +257,22 @@ export function Button() {
 
   return (
     <div className="mb-8">
-      <h3 className="mb-4">Buttons</h3>
+      <h3 className="mb-2">Buttons</h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        Toggle options to view appearances in the buttons below.{" "}
+        <a
+          href="../sheets/buttons"
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+        >
+          View all variants here.
+        </a>
+      </p>
       <div className="space-y-6">
-        <Row title=".plain">
-          {ACTION_BUTTONS.map(({ color, label }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="plain"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".icon (add icon to plain)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".icon-only (no text, alt/hover)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              iconOnly
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".uppercase">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              uppercase
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".shape-rectangle (90° corners)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              rectangle
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".shape-rectangle-rounded (slight curve)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              rectangleRounded
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".shape-line-bottom .shape-rectangle">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              line
-              rectangle
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".shape-line-no (no border)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              lineNo
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".color-background-no (no fill)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              colorVariant="background-no"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".color-monochrome">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              colorVariant="monochrome"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".color-gradient-sideways (L→R, next in palette)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              colorVariant="gradient-sideways"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".color-gradient-up">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              colorVariant="gradient-up"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".color-gradient-angle (45°)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              colorVariant="gradient-angle"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".tight (50% padding)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              tight
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".gap-no (segment radius: first / middle / last)" noGap>
-          {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              gapNo
-              segmentPosition={
-                i === 0
-                  ? "first"
-                  : i === ACTION_BUTTONS.length - 1
-                    ? "last"
-                    : "middle"
-              }
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".small (75%) + .uppercase">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              size="small"
-              uppercase
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".normal (100%)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              size="normal"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".large (1.5×)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              size="large"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".large2x (2×)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              size="large2x"
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".animation-no">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              animationNo
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".animation-no-grow">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              animationNoGrow
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".animation-no-color-change">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              animationNoColorChange
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".state-inverted">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              inverted
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".state-disabled (33% opacity, no interaction)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              disabled
-              asSpan
-            />
-          ))}
-        </Row>
-        <Row title=".state-toggled (locked hover state, no scaling)">
-          {ACTION_BUTTONS.map(({ color, label, icon }) => (
-            <PrismButton
-              key={color}
-              color={color}
-              label={label}
-              variant="icon"
-              icon={icon}
-              toggled
-              asSpan
-            />
-          ))}
-        </Row>
-
-        {/* Multi-select: combine appearances */}
-        <div className="pt-4 border-t">
-          <p className="text-sm font-medium mb-2">Customize (multi-select)</p>
-          <p className="text-xs text-muted-foreground mb-3">
-            Toggle options to combine appearances in the row below.
-          </p>
+        <div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
-                <p className="text-xs text-muted-foreground">{heading}</p>
+                <p className="typography-label">{heading}</p>
                 {keys.map((key) => (
                   <label
                     key={key}
@@ -645,6 +317,349 @@ export function Button() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** List of all PrismButton variant rows for use on /admin/sheets/buttons */
+export function ButtonVariantsList({
+  className,
+}: {
+  className?: string;
+} = {}) {
+  return (
+    <div className={className ?? "space-y-6"}>
+      <Row title=".plain">
+        {ACTION_BUTTONS.map(({ color, label }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="plain"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".icon (add icon to plain)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".icon-only (no text, alt/hover)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            iconOnly
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".uppercase">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            uppercase
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".shape-rectangle (90° corners)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            rectangle
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".shape-rectangle-rounded (slight curve)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            rectangleRounded
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".shape-line-bottom .shape-rectangle">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            line
+            rectangle
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".shape-line-no (no border)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            lineNo
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-background-no (no fill)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="background-no"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-monochrome">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="monochrome"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-gradient-sideways (L→R, next in palette)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="gradient-sideways"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-gradient-up">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="gradient-up"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-gradient-angle (45°)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="gradient-angle"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".tight (50% padding)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            tight
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".gap-no (segment radius: first / middle / last)" noGap>
+        {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            gapNo
+            segmentPosition={
+              i === 0
+                ? "first"
+                : i === ACTION_BUTTONS.length - 1
+                  ? "last"
+                  : "middle"
+            }
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".small (75%) + .uppercase">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            size="small"
+            uppercase
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".normal (100%)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            size="normal"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".large (1.5×)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            size="large"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".large2x (2×)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            size="large2x"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".animation-no">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            animationNo
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".animation-no-grow">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            animationNoGrow
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".animation-no-color-change">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            animationNoColorChange
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".state-inverted">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            inverted
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".state-disabled (33% opacity, no interaction)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            disabled
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".state-toggled (locked hover state, no scaling)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            toggled
+            asSpan
+          />
+        ))}
+      </Row>
     </div>
   );
 }
