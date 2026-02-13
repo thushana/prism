@@ -274,7 +274,8 @@ export function PrismButton({
           })()
         : hasFullBorder && isGradient
           ? {
-              border: "none",
+              /* Explicit border width so border-box > padding-box; dark layer in border ring, light in fill */
+              border: `${strokeWidth}px solid transparent`,
               backgroundImage: `${gradientBg}, ${gradientBorder}`,
               backgroundSize: "100% 100%, 100% 100%",
               backgroundOrigin: "padding-box, border-box",
@@ -308,18 +309,16 @@ export function PrismButton({
       ? bgHoverVar
       : bgVar;
   const useGradientBorderLayers = hasFullBorder && isGradient;
-  const paddingStyle = useGradientBorderLayers
-    ? `${paddingV + strokeWidth}px ${paddingH + strokeWidth}px`
-    : `${paddingV}px ${paddingH}px`;
-  /* Inset box-shadow for gradient border only when NOT in segment mode (else middle segments get left/right) */
-  const gradientBorderShadow =
-    useGradientBorderLayers && !segmentBorders
-      ? { boxShadow: `inset 0 0 0 ${strokeWidth}px var(--color-${kebab}-800)` }
-      : {};
-  /* Gradient fill (two-layer) when gradient + full border; apply even with segmentBorders so interior shows */
+  const paddingStyle = `${paddingV}px ${paddingH}px`;
+  /* No solid overlay for gradient: border is the gradient from gradientFillStyle (border-box layer) */
+  const gradientBorderShadow = useGradientBorderLayers ? {} : {};
+  /* Gradient fill (two-layer): hover = 800 gradient in fill; default = 100 in fill; border always 800 */
   const gradientFillStyle: React.CSSProperties = useGradientBorderLayers
     ? {
-        backgroundImage: `${gradientBg}, ${gradientBorder}`,
+        backgroundImage:
+          shouldChangeColor && effectiveHovered
+            ? `${bgHoverVar}, ${gradientBorder}`
+            : `${gradientBg}, ${gradientBorder}`,
         backgroundSize: "100% 100%, 100% 100%",
         backgroundOrigin: "padding-box, border-box",
         backgroundClip: "padding-box, border-box",
@@ -354,7 +353,7 @@ export function PrismButton({
     transform: transformValue,
     opacity: disabled ? 0.33 : 1,
     pointerEvents: disabled ? "none" : undefined,
-    ...(gapNo && { margin: 0 }),
+    ...(gapNo && { margin: 0, lineHeight: 1 }),
   };
 
   const content = (
