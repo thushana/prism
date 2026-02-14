@@ -17,6 +17,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "gsap": "^3.12.5",
     "lucide-react": "^0.562.0",
     "tailwind-merge": "^3.4.0",
     "@prism/utilities": "*"
