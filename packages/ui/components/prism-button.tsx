@@ -4,15 +4,17 @@
  * PrismButton: chainable appearance props.
  *
  * Variants: .plain | .icon
+ * Icon position: .icon-left (default) | .icon-right
  * Appearances: .icon-only, .uppercase, .rectangle, .rectangle-rounded, .line, .background-no, .monochrome, .tight, .gap-no
  * Sizes: .small (75%) | .normal (100%) | .large (1.5x) | .large2x (2x)
  * Fonts: .font-sans | .font-serif | .font-mono
- * Animations: .animation-no | .animation-no-grow | .animation-no-color-change
+ * Animations: .animation-no | .animation-no-grow | .animation-no-color-change (hover scale via GSAP)
  * States: .inverted | .disabled (33% opacity, no interaction) | .toggled (locks hover state)
  */
 
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
+import { gsap } from "gsap";
 import { colorSpectrum, type ColorName } from "../styles/color-spectrum";
 
 function colorToKebab(color: ColorName): string {
@@ -52,6 +54,8 @@ export interface PrismButtonProps {
   variant?: PrismButtonVariant;
   /** Lucide icon component; used when variant is "icon" */
   icon?: LucideIcon;
+  /** .icon-left (default) | .icon-right — icon position */
+  iconPosition?: "left" | "right";
   /** .icon-only — show only icon, label as alt/hover (aria-label, title) */
   iconOnly?: boolean;
   /** .uppercase — render label in uppercase */
@@ -64,9 +68,12 @@ export interface PrismButtonProps {
   line?: boolean;
   /** .shape-line-no — no border at all */
   lineNo?: boolean;
-  /** .color-background (default) | .color-background-no | .color-monochrome | .color-gradient-sideways | .color-gradient-up | .color-gradient-angle */
+  /** .color-background (default) | .color-background-light | .color-background-dark | .color-background-solid | .color-background-no | .color-monochrome | .color-gradient-* */
   colorVariant?:
     | "background"
+    | "background-light"
+    | "background-dark"
+    | "background-solid"
     | "background-no"
     | "monochrome"
     | "gradient-sideways"
@@ -103,12 +110,11 @@ export interface PrismButtonProps {
   /** Render as span for display-only (e.g. in style guide) */
   asSpan?: boolean;
   className?: string;
-  children?: React.ReactNode;
 }
 
-/** Bounce ease: slight overshoot then settle */
-const HOVER_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-const HOVER_TRANSITION = `transform 0.3s ${HOVER_EASE}, background-color 0.25s ease-in-out, border-color 0.25s ease-in-out, color 0.25s ease-in-out`;
+/** CSS transition for color/border (GSAP owns scale) */
+const COLOR_TRANSITION =
+  "background-color 0.25s ease-in-out, border-color 0.25s ease-in-out, color 0.25s ease-in-out";
 
 /**
  * Prism button: chainable appearances with animation controls and state modifiers.
@@ -118,6 +124,7 @@ export function PrismButton({
   label,
   variant = "icon",
   icon: IconComponent,
+  iconPosition = "left",
   iconOnly = false,
   uppercase = false,
   rectangle = false,
@@ -145,9 +152,39 @@ export function PrismButton({
 }: PrismButtonProps &
   (React.ComponentProps<"button"> | React.ComponentProps<"span">)) {
   const [hovered, setHovered] = React.useState(false);
+  const rootRef = React.useRef<HTMLButtonElement | HTMLSpanElement>(null);
 
   // Determine effective hover state: toggled locks hover state, disabled disables it
   const effectiveHovered = disabled ? false : toggled ? true : hovered;
+
+  // GSAP hover scale when shouldGrow; otherwise CSS handles transform or none
+  const shouldGrow = !animationNo && !animationNoGrow && !line && !toggled;
+  React.useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    if (!shouldGrow) {
+      gsap.set(el, { scale: 1 });
+      return;
+    }
+    if (effectiveHovered) {
+      gsap.to(el, {
+        scale: 1.1,
+        duration: 0.3,
+        ease: "back.out(1.56)",
+        overwrite: true,
+      });
+    } else {
+      gsap.to(el, {
+        scale: 1,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: true,
+      });
+    }
+    return () => {
+      gsap.killTweensOf(el);
+    };
+  }, [effectiveHovered, shouldGrow]);
 
   const kebab = colorToKebab(color);
   const effectiveBackgroundNo =
@@ -158,6 +195,7 @@ export function PrismButton({
     colorVariant === "gradient-sideways" ||
     colorVariant === "gradient-up" ||
     colorVariant === "gradient-angle";
+  const isBackgroundSolid = colorVariant === "background-solid";
 
   const secondColor: ColorName = colorSecondary ?? nextColorInSpectrum(color);
   const kebab2 = colorToKebab(secondColor);
@@ -170,24 +208,40 @@ export function PrismButton({
         : colorVariant === "gradient-angle"
           ? "135deg"
           : "to right";
-  const gradientBg = `linear-gradient(${gradientDir}, var(--color-${kebab}-100), var(--color-${kebab2}-100))`;
-  const gradientBorder = `linear-gradient(${gradientDir}, var(--color-${kebab}-800), var(--color-${kebab2}-800))`;
+  const backgroundShade = colorVariant === "background-dark" ? "dark" : "light";
+  const gradientBgLight = `linear-gradient(${gradientDir}, var(--color-${kebab}-100), var(--color-${kebab2}-100))`;
+  const gradientBgDark = `linear-gradient(${gradientDir}, var(--color-${kebab}-800), var(--color-${kebab2}-800))`;
+  const gradientBorder = gradientBgDark;
+  const gradientBg =
+    backgroundShade === "dark" ? gradientBgDark : gradientBgLight;
+  const gradientHoverBg =
+    backgroundShade === "dark" ? gradientBgLight : gradientBgDark;
 
   // Base colors (can be inverted)
   const baseBg = effectiveMonochrome
     ? "#ffffff"
     : isGradient
       ? gradientBg
-      : `var(--color-${kebab}-100)`;
-  const baseFg = effectiveMonochrome ? "#000000" : `var(--color-${kebab}-800)`;
+      : backgroundShade === "dark"
+        ? `var(--color-${kebab}-800)`
+        : `var(--color-${kebab}-100)`;
+  const baseFg = effectiveMonochrome
+    ? "#000000"
+    : backgroundShade === "dark"
+      ? `var(--color-${kebab}-100)`
+      : `var(--color-${kebab}-800)`;
   const baseHoverBg = effectiveMonochrome
     ? "#000000"
     : isGradient
-      ? `linear-gradient(${gradientDir}, var(--color-${kebab}-800), var(--color-${kebab2}-800))`
-      : `var(--color-${kebab}-800)`;
+      ? gradientHoverBg
+      : backgroundShade === "dark"
+        ? `var(--color-${kebab}-100)`
+        : `var(--color-${kebab}-800)`;
   const baseHoverFg = effectiveMonochrome
     ? "#ffffff"
-    : `var(--color-${kebab}-100)`;
+    : backgroundShade === "dark"
+      ? `var(--color-${kebab}-800)`
+      : `var(--color-${kebab}-100)`;
 
   // Apply inversion if requested (inversion applies to solid colors; gradients stay as-is for now)
   const bgVar = inverted && !isGradient ? baseFg : baseBg;
@@ -227,8 +281,14 @@ export function PrismButton({
   // Apply color changes only if not disabled by animationNoColorChange
   const shouldChangeColor = !animationNo && !animationNoColorChange;
 
-  const borderColorVar =
-    shouldChangeColor && effectiveHovered ? bgHoverVar : fgVar;
+  // .color-background-solid: outline and background match (same solid or same gradient)
+  const borderColorVar = isBackgroundSolid
+    ? shouldChangeColor && effectiveHovered
+      ? bgHoverVar
+      : bgVar
+    : shouldChangeColor && effectiveHovered
+      ? bgHoverVar
+      : fgVar;
   const borderSolidColor =
     isGradient && line
       ? `var(--color-${kebab}-800)`
@@ -249,8 +309,9 @@ export function PrismButton({
     : line
       ? {
           border: "none",
-          borderBottom: `${strokeWidth}px solid`,
-          ...(borderSolidColor && { borderColor: borderSolidColor }),
+          borderBottomWidth: strokeWidth,
+          borderBottomStyle: "solid",
+          ...(borderSolidColor && { borderBottomColor: borderSolidColor }),
         }
       : segmentBorders
         ? (() => {
@@ -272,21 +333,23 @@ export function PrismButton({
               borderBottomColor: color,
             } as React.CSSProperties;
           })()
-        : hasFullBorder && isGradient
-          ? {
-              /* Explicit border width so border-box > padding-box; dark layer in border ring, light in fill */
-              border: `${strokeWidth}px solid transparent`,
-              backgroundImage: `${gradientBg}, ${gradientBorder}`,
-              backgroundSize: "100% 100%, 100% 100%",
-              backgroundOrigin: "padding-box, border-box",
-              backgroundClip: "padding-box, border-box",
-              backgroundPosition: "0 0, 0 0",
-              backgroundRepeat: "no-repeat",
-            }
-          : {
-              border: `${borderWidth}px solid`,
-              ...(borderSolidColor && { borderColor: borderSolidColor }),
-            };
+        : hasFullBorder && isGradient && isBackgroundSolid
+          ? { border: `${strokeWidth}px solid transparent` }
+          : hasFullBorder && isGradient
+            ? {
+                /* Contrasting border (800) vs fill (100) */
+                border: `${strokeWidth}px solid transparent`,
+                backgroundImage: `${gradientBg}, ${gradientBorder}`,
+                backgroundSize: "100% 100%, 100% 100%",
+                backgroundOrigin: "padding-box, border-box",
+                backgroundClip: "padding-box, border-box",
+                backgroundPosition: "0 0, 0 0",
+                backgroundRepeat: "no-repeat",
+              }
+            : {
+                border: `${borderWidth}px solid`,
+                ...(borderSolidColor && { borderColor: borderSolidColor }),
+              };
 
   const fontFamily =
     font === "serif"
@@ -295,13 +358,11 @@ export function PrismButton({
         ? "var(--font-mono), ui-monospace, monospace"
         : "var(--font-satoshi), system-ui, sans-serif";
 
-  // Apply grow only if not disabled by animationNo, animationNoGrow, line, or toggled
-  const shouldGrow = !animationNo && !animationNoGrow && !line && !toggled;
-  const transformValue =
-    shouldGrow && effectiveHovered ? "scale(1.1)" : undefined;
+  // Transform: GSAP owns scale when shouldGrow; no scale otherwise
+  const transformValue = undefined;
 
-  // Transition: disable if animationNo is set
-  const transitionValue = animationNo ? "none" : HOVER_TRANSITION;
+  // Transition: GSAP owns scale; CSS handles color/border only
+  const transitionValue = animationNo ? "none" : COLOR_TRANSITION;
 
   const resolvedBg = effectiveBackgroundNo
     ? "transparent"
@@ -310,21 +371,31 @@ export function PrismButton({
       : bgVar;
   const useGradientBorderLayers = hasFullBorder && isGradient;
   const paddingStyle = `${paddingV}px ${paddingH}px`;
-  /* No solid overlay for gradient: border is the gradient from gradientFillStyle (border-box layer) */
-  const gradientBorderShadow = useGradientBorderLayers ? {} : {};
-  /* Gradient fill (two-layer): hover = 800 gradient in fill; default = 100 in fill; border always 800 */
+  /* Gradient: .color-background-solid = same gradient fill and border; else border contrasts (800) */
+  const resolvedGradient =
+    shouldChangeColor && effectiveHovered ? gradientHoverBg : gradientBg;
   const gradientFillStyle: React.CSSProperties = useGradientBorderLayers
-    ? {
-        backgroundImage:
-          shouldChangeColor && effectiveHovered
-            ? `${bgHoverVar}, ${gradientBorder}`
-            : `${gradientBg}, ${gradientBorder}`,
-        backgroundSize: "100% 100%, 100% 100%",
-        backgroundOrigin: "padding-box, border-box",
-        backgroundClip: "padding-box, border-box",
-        backgroundPosition: "0 0, 0 0",
-        backgroundRepeat: "no-repeat",
-      }
+    ? isBackgroundSolid
+      ? {
+          border: `${strokeWidth}px solid transparent`,
+          backgroundImage: `${resolvedGradient}, ${resolvedGradient}`,
+          backgroundSize: "100% 100%, 100% 100%",
+          backgroundOrigin: "padding-box, border-box",
+          backgroundClip: "padding-box, border-box",
+          backgroundPosition: "0 0, 0 0",
+          backgroundRepeat: "no-repeat",
+        }
+      : {
+          backgroundImage:
+            shouldChangeColor && effectiveHovered
+              ? `${bgHoverVar}, ${gradientBorder}`
+              : `${gradientBg}, ${gradientBorder}`,
+          backgroundSize: "100% 100%, 100% 100%",
+          backgroundOrigin: "padding-box, border-box",
+          backgroundClip: "padding-box, border-box",
+          backgroundPosition: "0 0, 0 0",
+          backgroundRepeat: "no-repeat",
+        }
     : {};
   const style: React.CSSProperties = {
     display: "inline-flex",
@@ -335,7 +406,6 @@ export function PrismButton({
     borderRadius: borderRadiusValue,
     ...borderStyle,
     ...gradientFillStyle,
-    ...gradientBorderShadow,
     ...(useGradientBorderLayers
       ? {}
       : typeof resolvedBg === "string" &&
@@ -351,19 +421,29 @@ export function PrismButton({
     transition: transitionValue,
     transformOrigin: "center",
     transform: transformValue,
+    willChange: shouldGrow ? "transform" : "auto",
     opacity: disabled ? 0.33 : 1,
     pointerEvents: disabled ? "none" : undefined,
     ...(gapNo && { margin: 0, lineHeight: 1 }),
   };
 
-  const content = (
+  const iconNode =
+    showIcon && IconComponent ? (
+      <span style={{ display: "inline-flex", color: "inherit" }}>
+        <IconComponent size={iconSize} strokeWidth={2.5} />
+      </span>
+    ) : null;
+  const content = iconOnly ? (
+    <>{iconNode}</>
+  ) : iconPosition === "right" ? (
     <>
-      {showIcon && IconComponent && (
-        <span style={{ display: "inline-flex", color: "inherit" }}>
-          <IconComponent size={iconSize} strokeWidth={2.5} />
-        </span>
-      )}
-      {!iconOnly && <span>{label}</span>}
+      <span>{label}</span>
+      {iconNode}
+    </>
+  ) : (
+    <>
+      {iconNode}
+      <span>{label}</span>
     </>
   );
 
@@ -373,9 +453,8 @@ export function PrismButton({
   const restSpan = rest as React.ComponentProps<"span">;
   const restButton = rest as React.ComponentProps<"button">;
   const onEnter = (e: React.PointerEvent<HTMLElement>) => {
-    // Only change hover state if not disabled or toggled
     if (!disabled && !toggled) {
-      setHovered(true);
+      requestAnimationFrame(() => setHovered(true));
     }
     if (asSpan)
       restSpan.onPointerEnter?.(e as React.PointerEvent<HTMLSpanElement>);
@@ -383,9 +462,8 @@ export function PrismButton({
       restButton.onPointerEnter?.(e as React.PointerEvent<HTMLButtonElement>);
   };
   const onLeave = (e: React.PointerEvent<HTMLElement>) => {
-    // Only change hover state if not disabled or toggled
     if (!disabled && !toggled) {
-      setHovered(false);
+      requestAnimationFrame(() => setHovered(false));
     }
     if (asSpan)
       restSpan.onPointerLeave?.(e as React.PointerEvent<HTMLSpanElement>);
@@ -395,6 +473,7 @@ export function PrismButton({
 
   const dataAttrs = {
     "data-variant": variant,
+    "data-icon-position": iconPosition !== "left" ? iconPosition : undefined,
     "data-uppercase": uppercase || undefined,
     "data-icon-only": iconOnly || undefined,
     "data-rectangle": rectangle || undefined,
@@ -425,6 +504,7 @@ export function PrismButton({
   if (asSpan) {
     return (
       <span
+        ref={rootRef as React.RefObject<HTMLSpanElement>}
         className={className}
         style={style}
         title={title}
@@ -441,6 +521,7 @@ export function PrismButton({
 
   return (
     <button
+      ref={rootRef as React.RefObject<HTMLButtonElement>}
       type="button"
       className={className}
       style={style}
