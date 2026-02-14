@@ -52,6 +52,8 @@ const ACTION_BUTTONS: { color: ColorName; label: string; icon: LucideIcon }[] =
 type AppearanceKey =
   | "icon"
   | "iconOnly"
+  | "iconLeft"
+  | "iconRight"
   | "uppercase"
   | "shapeRectangle"
   | "shapeRectangleRounded"
@@ -60,6 +62,9 @@ type AppearanceKey =
   | "shapeLineNo"
   | "shapeLineBottom"
   | "colorBackground"
+  | "colorBackgroundLight"
+  | "colorBackgroundDark"
+  | "colorBackgroundSolid"
   | "colorBackgroundNo"
   | "colorMonochrome"
   | "colorGradientSideways"
@@ -84,6 +89,8 @@ type AppearanceKey =
 const APPEARANCE_OPTIONS: { key: AppearanceKey; label: string }[] = [
   { key: "icon", label: ".icon" },
   { key: "iconOnly", label: ".icon-only" },
+  { key: "iconLeft", label: ".icon-left" },
+  { key: "iconRight", label: ".icon-right" },
   { key: "uppercase", label: ".uppercase" },
   { key: "shapeRectangle", label: ".shape-rectangle" },
   { key: "shapeRectangleRounded", label: ".shape-rectangle-rounded" },
@@ -92,6 +99,9 @@ const APPEARANCE_OPTIONS: { key: AppearanceKey; label: string }[] = [
   { key: "shapeLineNo", label: ".shape-line-no" },
   { key: "shapeLineBottom", label: ".shape-line-bottom" },
   { key: "colorBackground", label: ".color-background" },
+  { key: "colorBackgroundLight", label: ".color-background-light" },
+  { key: "colorBackgroundDark", label: ".color-background-dark" },
+  { key: "colorBackgroundSolid", label: ".color-background-solid" },
   { key: "colorBackgroundNo", label: ".color-background-no" },
   { key: "colorMonochrome", label: ".color-monochrome" },
   { key: "colorGradientSideways", label: ".color-gradient-sideways" },
@@ -115,7 +125,7 @@ const APPEARANCE_OPTIONS: { key: AppearanceKey; label: string }[] = [
 ];
 
 const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
-  { heading: "Icon", keys: ["icon", "iconOnly"] },
+  { heading: "Icon", keys: ["icon", "iconOnly", "iconLeft", "iconRight"] },
   { heading: "Type", keys: ["uppercase", "fontSans", "fontSerif", "fontMono"] },
   {
     heading: "Shape",
@@ -132,6 +142,9 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
     heading: "Coloring",
     keys: [
       "colorBackground",
+      "colorBackgroundLight",
+      "colorBackgroundDark",
+      "colorBackgroundSolid",
       "colorBackgroundNo",
       "colorMonochrome",
       "colorGradientSideways",
@@ -200,7 +213,11 @@ export function Button() {
           : selected.has("small")
             ? "small"
             : undefined;
-    const needsIcon = selected.has("icon") || selected.has("iconOnly");
+    const needsIcon =
+      selected.has("icon") ||
+      selected.has("iconOnly") ||
+      selected.has("iconLeft") ||
+      selected.has("iconRight");
     const font: "sans" | "serif" | "mono" | undefined = selected.has("fontMono")
       ? "mono"
       : selected.has("fontSerif")
@@ -213,9 +230,13 @@ export function Button() {
       : selected.has("shapeLineBottom")
         ? "bottom"
         : "border";
+    const iconPosition: "left" | "right" = selected.has("iconRight")
+      ? "right"
+      : "left";
     return {
       variant: needsIcon ? ("icon" as const) : ("plain" as const),
       iconOnly: selected.has("iconOnly") || undefined,
+      iconPosition,
       uppercase: selected.has("uppercase") || undefined,
       rectangle: selected.has("shapeRectangle") || undefined,
       rectangleRounded: selected.has("shapeRectangleRounded") || undefined,
@@ -231,10 +252,19 @@ export function Button() {
               ? "monochrome"
               : selected.has("colorBackgroundNo")
                 ? "background-no"
-                : selected.has("colorBackground")
-                  ? "background"
-                  : undefined) as
+                : selected.has("colorBackgroundDark")
+                  ? "background-dark"
+                  : selected.has("colorBackgroundLight")
+                    ? "background-light"
+                    : selected.has("colorBackgroundSolid")
+                      ? "background-solid"
+                      : selected.has("colorBackground")
+                        ? "background"
+                        : undefined) as
         | "background"
+        | "background-light"
+        | "background-dark"
+        | "background-solid"
         | "background-no"
         | "monochrome"
         | "gradient-sideways"
@@ -365,6 +395,19 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
+      <Row title=".icon-right">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            iconPosition="right"
+            asSpan
+          />
+        ))}
+      </Row>
       <Row title=".uppercase">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
@@ -427,6 +470,45 @@ export function ButtonVariantsList({
             variant="icon"
             icon={icon}
             lineNo
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-background-light (100 fill, default)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="background-light"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-background-dark (800 fill)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="background-dark"
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".color-background-solid (outline matches fill)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            colorVariant="background-solid"
             asSpan
           />
         ))}
