@@ -17,6 +17,11 @@
       "@utilities": ["../../packages/utilities/source"]
     }
   },
-  "include": ["source/**/*.ts", "source/**/*.tsx"],
+  "include": [
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "source/**/*.ts",
+    "source/**/*.tsx"
+  ],
   "exclude": ["node_modules"]
 }

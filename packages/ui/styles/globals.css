@@ -4,7 +4,8 @@
 @import "./background-utilities.css";
 @import "./layout-wrappers.css";
 
-/* Scan UI package source files */
+/* Scan UI package components and source */
+@source "../components/**/*.{ts,tsx}";
 @source "../source/**/*.{ts,tsx}";
 
 /* Scan other Prism packages

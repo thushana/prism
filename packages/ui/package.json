@@ -10,7 +10,7 @@
   "scripts": {
     "generate:colors": "node scripts/generate-material-colors.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint source styles",
+    "lint": "eslint components source styles",
     "test": "vitest",
     "test:run": "vitest run"
   },
