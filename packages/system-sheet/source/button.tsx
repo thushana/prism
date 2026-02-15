@@ -82,6 +82,8 @@ type AppearanceKey =
   | "animationNo"
   | "animationNoGrow"
   | "animationNoColorChange"
+  | "animationIcons"
+  | "animationIconsNo"
   | "stateInverted"
   | "stateDisabled"
   | "stateToggled";
@@ -119,6 +121,8 @@ const APPEARANCE_OPTIONS: { key: AppearanceKey; label: string }[] = [
   { key: "animationNo", label: ".animation-no" },
   { key: "animationNoGrow", label: ".animation-no-grow" },
   { key: "animationNoColorChange", label: ".animation-no-color-change" },
+  { key: "animationIcons", label: ".animation-icons" },
+  { key: "animationIconsNo", label: ".animation-icons-no" },
   { key: "stateInverted", label: ".state-inverted" },
   { key: "stateDisabled", label: ".state-disabled" },
   { key: "stateToggled", label: ".state-toggled" },
@@ -158,7 +162,13 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
   },
   {
     heading: "Animation",
-    keys: ["animationNo", "animationNoGrow", "animationNoColorChange"],
+    keys: [
+      "animationNo",
+      "animationNoGrow",
+      "animationNoColorChange",
+      "animationIcons",
+      "animationIconsNo",
+    ],
   },
   {
     heading: "States",
@@ -193,6 +203,9 @@ function Row({
 
 export function Button() {
   const [selected, setSelected] = useState<Set<AppearanceKey>>(new Set());
+  const [animationKey, setAnimationKey] = useState(0);
+
+  const replayAnimations = () => setAnimationKey((k) => k + 1);
 
   const toggle = (key: AppearanceKey) => {
     setSelected((prev) => {
@@ -279,6 +292,7 @@ export function Button() {
       animationNoGrow: selected.has("animationNoGrow") || undefined,
       animationNoColorChange:
         selected.has("animationNoColorChange") || undefined,
+      animationIconsNo: selected.has("animationIconsNo") || undefined,
       inverted: selected.has("stateInverted") || undefined,
       disabled: selected.has("stateDisabled") || undefined,
       toggled: selected.has("stateToggled") || undefined,
@@ -290,6 +304,14 @@ export function Button() {
       <h3 className="mb-2">Buttons</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Toggle options to view appearances in the buttons below.{" "}
+        <button
+          type="button"
+          onClick={replayAnimations}
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline font-medium"
+        >
+          Replay animations
+        </button>
+        {" · "}
         <a
           href="../sheets/buttons"
           className="text-sm text-muted-foreground hover:text-foreground hover:underline"
@@ -327,7 +349,7 @@ export function Button() {
           >
             {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
               <PrismButton
-                key={color}
+                key={`${color}-${animationKey}`}
                 color={color}
                 label={label}
                 icon={icon}
@@ -699,6 +721,31 @@ export function ButtonVariantsList({
             variant="icon"
             icon={icon}
             animationNoColorChange
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".animation-icons (default)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".animation-icons-no">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            animationIconsNo
             asSpan
           />
         ))}
