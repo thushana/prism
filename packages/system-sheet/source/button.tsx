@@ -54,11 +54,10 @@ type AppearanceKey =
   | "iconOnly"
   | "iconLeft"
   | "iconRight"
-  | "uppercase"
+  | "typeUppercase"
+  | "typeLowercase"
   | "shapeRectangle"
   | "shapeRectangleRounded"
-  | "shapeRounded"
-  | "shapeLineBorder"
   | "shapeLineNo"
   | "shapeLineBottom"
   | "colorBackground"
@@ -70,12 +69,12 @@ type AppearanceKey =
   | "colorGradientSideways"
   | "colorGradientUp"
   | "colorGradientAngle"
-  | "tight"
-  | "gapNo"
-  | "small"
-  | "normal"
-  | "large"
-  | "large2x"
+  | "shapeTight"
+  | "shapeGapNo"
+  | "sizeSmall"
+  | "sizeNormal"
+  | "sizeLarge"
+  | "sizeLarge2x"
   | "fontSans"
   | "fontSerif"
   | "fontMono"
@@ -88,58 +87,72 @@ type AppearanceKey =
   | "stateDisabled"
   | "stateToggled";
 
-const APPEARANCE_OPTIONS: { key: AppearanceKey; label: string }[] = [
-  { key: "icon", label: ".icon" },
-  { key: "iconOnly", label: ".icon-only" },
-  { key: "iconLeft", label: ".icon-left" },
-  { key: "iconRight", label: ".icon-right" },
-  { key: "uppercase", label: ".uppercase" },
-  { key: "shapeRectangle", label: ".shape-rectangle" },
-  { key: "shapeRectangleRounded", label: ".shape-rectangle-rounded" },
-  { key: "shapeRounded", label: ".shape-rounded" },
-  { key: "shapeLineBorder", label: ".shape-line-border" },
-  { key: "shapeLineNo", label: ".shape-line-no" },
-  { key: "shapeLineBottom", label: ".shape-line-bottom" },
-  { key: "colorBackground", label: ".color-background" },
-  { key: "colorBackgroundLight", label: ".color-background-light" },
-  { key: "colorBackgroundDark", label: ".color-background-dark" },
-  { key: "colorBackgroundSolid", label: ".color-background-solid" },
-  { key: "colorBackgroundNo", label: ".color-background-no" },
-  { key: "colorMonochrome", label: ".color-monochrome" },
-  { key: "colorGradientSideways", label: ".color-gradient-sideways" },
-  { key: "colorGradientUp", label: ".color-gradient-up" },
-  { key: "colorGradientAngle", label: ".color-gradient-angle" },
-  { key: "tight", label: ".tight" },
-  { key: "gapNo", label: ".gap-no" },
-  { key: "small", label: ".small" },
-  { key: "normal", label: ".normal" },
-  { key: "large", label: ".large" },
-  { key: "large2x", label: ".large2x" },
-  { key: "fontSans", label: ".font-sans" },
-  { key: "fontSerif", label: ".font-serif" },
-  { key: "fontMono", label: ".font-mono" },
-  { key: "animationNo", label: ".animation-no" },
-  { key: "animationNoGrow", label: ".animation-no-grow" },
-  { key: "animationNoColorChange", label: ".animation-no-color-change" },
-  { key: "animationIcons", label: ".animation-icons" },
-  { key: "animationIconsNo", label: ".animation-icons-no" },
-  { key: "stateInverted", label: ".state-inverted" },
-  { key: "stateDisabled", label: ".state-disabled" },
-  { key: "stateToggled", label: ".state-toggled" },
+/** All option keys (camelCase). Labels are "." + key (e.g. .shapeGapNo). */
+const APPEARANCE_KEYS: AppearanceKey[] = [
+  "icon",
+  "iconOnly",
+  "iconLeft",
+  "iconRight",
+  "typeUppercase",
+  "typeLowercase",
+  "shapeRectangle",
+  "shapeRectangleRounded",
+  "shapeLineNo",
+  "shapeLineBottom",
+  "colorBackground",
+  "colorBackgroundLight",
+  "colorBackgroundDark",
+  "colorBackgroundSolid",
+  "colorBackgroundNo",
+  "colorMonochrome",
+  "colorGradientSideways",
+  "colorGradientUp",
+  "colorGradientAngle",
+  "shapeTight",
+  "shapeGapNo",
+  "sizeSmall",
+  "sizeNormal",
+  "sizeLarge",
+  "sizeLarge2x",
+  "fontSans",
+  "fontSerif",
+  "fontMono",
+  "animationNo",
+  "animationNoGrow",
+  "animationNoColorChange",
+  "animationIcons",
+  "animationIconsNo",
+  "stateInverted",
+  "stateDisabled",
+  "stateToggled",
 ];
+
+/** Display label: .camelCase (matches key, e.g. .shapeGapNo). */
+const OPTION_LABEL: Record<AppearanceKey, string> = Object.fromEntries(
+  APPEARANCE_KEYS.map((key) => [key, `.${key}`])
+) as Record<AppearanceKey, string>;
 
 const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
   { heading: "Icon", keys: ["icon", "iconOnly", "iconLeft", "iconRight"] },
-  { heading: "Type", keys: ["uppercase", "fontSans", "fontSerif", "fontMono"] },
+  {
+    heading: "Type",
+    keys: [
+      "typeUppercase",
+      "typeLowercase",
+      "fontSans",
+      "fontSerif",
+      "fontMono",
+    ],
+  },
   {
     heading: "Shape",
     keys: [
       "shapeRectangle",
       "shapeRectangleRounded",
-      "shapeRounded",
-      "shapeLineBorder",
       "shapeLineNo",
       "shapeLineBottom",
+      "shapeTight",
+      "shapeGapNo",
     ],
   },
   {
@@ -158,7 +171,7 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
   },
   {
     heading: "Size",
-    keys: ["tight", "gapNo", "small", "normal", "large", "large2x"],
+    keys: ["sizeSmall", "sizeNormal", "sizeLarge", "sizeLarge2x"],
   },
   {
     heading: "Animation",
@@ -175,10 +188,6 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
     keys: ["stateInverted", "stateDisabled", "stateToggled"],
   },
 ];
-
-const OPTION_LABEL = Object.fromEntries(
-  APPEARANCE_OPTIONS.map((o) => [o.key, o.label])
-);
 
 function Row({
   title,
@@ -217,13 +226,13 @@ export function Button() {
   };
 
   const customProps = useMemo(() => {
-    const size: PrismButtonSize | undefined = selected.has("large2x")
+    const size: PrismButtonSize | undefined = selected.has("sizeLarge2x")
       ? "large2x"
-      : selected.has("large")
+      : selected.has("sizeLarge")
         ? "large"
-        : selected.has("normal")
+        : selected.has("sizeNormal")
           ? "normal"
-          : selected.has("small")
+          : selected.has("sizeSmall")
             ? "small"
             : undefined;
     const needsIcon =
@@ -250,11 +259,16 @@ export function Button() {
       variant: needsIcon ? ("icon" as const) : ("plain" as const),
       iconOnly: selected.has("iconOnly") || undefined,
       iconPosition,
-      uppercase: selected.has("uppercase") || undefined,
-      rectangle: selected.has("shapeRectangle") || undefined,
-      rectangleRounded: selected.has("shapeRectangleRounded") || undefined,
-      line: lineVariant === "bottom" || undefined,
-      lineNo: lineVariant === "no" || undefined,
+      typeUppercase: selected.has("typeUppercase")
+        ? true
+        : selected.has("typeLowercase")
+          ? false
+          : undefined,
+      typeLowercase: selected.has("typeLowercase") || undefined,
+      shapeRectangle: selected.has("shapeRectangle") || undefined,
+      shapeRectangleRounded: selected.has("shapeRectangleRounded") || undefined,
+      shapeLineBottom: lineVariant === "bottom" || undefined,
+      shapeLineNo: lineVariant === "no" || undefined,
       colorVariant: (selected.has("colorGradientAngle")
         ? "gradient-angle"
         : selected.has("colorGradientUp")
@@ -284,8 +298,8 @@ export function Button() {
         | "gradient-up"
         | "gradient-angle"
         | undefined,
-      tight: selected.has("tight") || undefined,
-      gapNo: selected.has("gapNo") || undefined,
+      shapeTight: selected.has("shapeTight") || undefined,
+      shapeGapNo: selected.has("shapeGapNo") || undefined,
       size,
       font,
       animationNo: selected.has("animationNo") || undefined,
@@ -293,9 +307,9 @@ export function Button() {
       animationNoColorChange:
         selected.has("animationNoColorChange") || undefined,
       animationIconsNo: selected.has("animationIconsNo") || undefined,
-      inverted: selected.has("stateInverted") || undefined,
-      disabled: selected.has("stateDisabled") || undefined,
-      toggled: selected.has("stateToggled") || undefined,
+      stateInverted: selected.has("stateInverted") || undefined,
+      stateDisabled: selected.has("stateDisabled") || undefined,
+      stateToggled: selected.has("stateToggled") || undefined,
     };
   }, [selected]);
 
@@ -345,7 +359,7 @@ export function Button() {
             ))}
           </div>
           <div
-            className={`flex flex-wrap items-center ${selected.has("gapNo") ? "gap-0" : "gap-3"}`}
+            className={`flex flex-wrap items-center ${selected.has("shapeGapNo") ? "gap-0" : "gap-3"}`}
           >
             {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
               <PrismButton
@@ -356,7 +370,7 @@ export function Button() {
                 asSpan
                 {...customProps}
                 segmentPosition={
-                  selected.has("gapNo")
+                  selected.has("shapeGapNo")
                     ? i === 0
                       ? "first"
                       : i === ACTION_BUTTONS.length - 1
@@ -404,7 +418,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".icon-only (no text, alt/hover)">
+      <Row title=".iconOnly (no text, alt/hover)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -417,7 +431,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".icon-right">
+      <Row title=".iconRight">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -430,7 +444,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".uppercase">
+      <Row title=".typeUppercase">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -438,12 +452,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            uppercase
+            typeUppercase
             asSpan
           />
         ))}
       </Row>
-      <Row title=".shape-rectangle (90° corners)">
+      <Row title=".typeLowercase (label in lowercase)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -451,12 +465,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            rectangle
+            typeLowercase
             asSpan
           />
         ))}
       </Row>
-      <Row title=".shape-rectangle-rounded (slight curve)">
+      <Row title=".shapeRectangle (90° corners)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -464,12 +478,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            rectangleRounded
+            shapeRectangle
             asSpan
           />
         ))}
       </Row>
-      <Row title=".shape-line-bottom .shape-rectangle">
+      <Row title=".shapeRectangleRounded (slight curve)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -477,13 +491,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            line
-            rectangle
+            shapeRectangleRounded
             asSpan
           />
         ))}
       </Row>
-      <Row title=".shape-line-no (no border)">
+      <Row title=".shapeLineBottom .shapeRectangle">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -491,12 +504,26 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            lineNo
+            shapeLineBottom
+            shapeRectangle
             asSpan
           />
         ))}
       </Row>
-      <Row title=".color-background-light (100 fill, default)">
+      <Row title=".shapeLineNo (no border)">
+        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+          <PrismButton
+            key={color}
+            color={color}
+            label={label}
+            variant="icon"
+            icon={icon}
+            shapeLineNo
+            asSpan
+          />
+        ))}
+      </Row>
+      <Row title=".colorBackgroundLight (100 fill, default)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -509,7 +536,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-background-dark (800 fill)">
+      <Row title=".colorBackgroundDark (800 fill)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -522,7 +549,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-background-solid (outline matches fill)">
+      <Row title=".colorBackgroundSolid (outline matches fill)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -535,7 +562,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-background-no (no fill)">
+      <Row title=".colorBackgroundNo (no fill)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -548,7 +575,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-monochrome">
+      <Row title=".colorMonochrome">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -561,7 +588,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-gradient-sideways (L→R, next in palette)">
+      <Row title=".colorGradientSideways (L→R, next in palette)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -574,7 +601,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-gradient-up">
+      <Row title=".colorGradientUp">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -587,7 +614,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".color-gradient-angle (45°)">
+      <Row title=".colorGradientAngle (45°)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -600,7 +627,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".tight (50% padding)">
+      <Row title=".shapeTight (50% padding)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -608,12 +635,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            tight
+            shapeTight
             asSpan
           />
         ))}
       </Row>
-      <Row title=".gap-no (segment radius: first / middle / last)" noGap>
+      <Row title=".shapeGapNo (segment radius: first / middle / last)" noGap>
         {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
           <PrismButton
             key={color}
@@ -621,7 +648,7 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            gapNo
+            shapeGapNo
             segmentPosition={
               i === 0
                 ? "first"
@@ -633,7 +660,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".small (75%) + .uppercase">
+      <Row title=".sizeSmall (75%) + .typeUppercase">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -642,12 +669,12 @@ export function ButtonVariantsList({
             variant="icon"
             icon={icon}
             size="small"
-            uppercase
+            typeUppercase
             asSpan
           />
         ))}
       </Row>
-      <Row title=".normal (100%)">
+      <Row title=".sizeNormal (100%)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -660,7 +687,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".large (1.5×)">
+      <Row title=".sizeLarge (1.5×)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -673,7 +700,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".large2x (2×)">
+      <Row title=".sizeLarge2x (2×)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -686,7 +713,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".animation-no">
+      <Row title=".animationNo">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -699,7 +726,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".animation-no-grow">
+      <Row title=".animationNoGrow">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -712,7 +739,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".animation-no-color-change">
+      <Row title=".animationNoColorChange">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -725,7 +752,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".animation-icons (default)">
+      <Row title=".animationIcons (default)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -737,7 +764,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".animation-icons-no">
+      <Row title=".animationIconsNo">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -750,7 +777,7 @@ export function ButtonVariantsList({
           />
         ))}
       </Row>
-      <Row title=".state-inverted">
+      <Row title=".stateInverted">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -758,12 +785,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            inverted
+            stateInverted
             asSpan
           />
         ))}
       </Row>
-      <Row title=".state-disabled (33% opacity, no interaction)">
+      <Row title=".stateDisabled (33% opacity, no interaction)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -771,12 +798,12 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            disabled
+            stateDisabled
             asSpan
           />
         ))}
       </Row>
-      <Row title=".state-toggled (locked hover state, no scaling)">
+      <Row title=".stateToggled (locked hover state, no scaling)">
         {ACTION_BUTTONS.map(({ color, label, icon }) => (
           <PrismButton
             key={color}
@@ -784,7 +811,7 @@ export function ButtonVariantsList({
             label={label}
             variant="icon"
             icon={icon}
-            toggled
+            stateToggled
             asSpan
           />
         ))}
