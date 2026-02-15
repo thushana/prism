@@ -446,11 +446,11 @@ Edit `packages/ui/styles/globals.css`:
 
 Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling.
 
-| Where | Form | Notes |
-|-------|------|--------|
-| **Code** (keys, state, props) | **camelCase** | `shapeGapNo`, `animationNoGrow`, `colorBackgroundLight`. This is the source of truth. |
-| **Display labels** (customizer, docs) | **.camelCase** | Same as the key with a dot prefix, e.g. `.shapeGapNo`, `.animationNoGrow`. No conversion. |
-| **DOM data attributes** | **data-kebab-case** | Derived from the camelCase name (e.g. `data-shape-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
+| Where                                 | Form                | Notes                                                                                                            |
+| ------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Code** (keys, state, props)         | **camelCase**       | `shapeGapNo`, `animationNoGrow`, `colorBackgroundLight`. This is the source of truth.                            |
+| **Display labels** (customizer, docs) | **.camelCase**      | Same as the key with a dot prefix, e.g. `.shapeGapNo`, `.animationNoGrow`. No conversion.                        |
+| **DOM data attributes**               | **data-kebab-case** | Derived from the camelCase name (e.g. `data-shape-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
 
 **Rules:**
 

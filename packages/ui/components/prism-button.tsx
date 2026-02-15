@@ -4,12 +4,12 @@
  * PrismButton: chainable appearance props.
  *
  * Variants: .plain | .icon
- * Icon position: .icon-left (default) | .icon-right
- * Appearances: .icon-only, .uppercase, .rectangle, .rectangle-rounded, .line, .background-no, .monochrome, .tight, .gap-no
- * Sizes: .small (75%) | .normal (100%) | .large (1.5x) | .large2x (2x)
- * Fonts: .font-sans | .font-serif | .font-mono
- * Animations: .animation-no | .animation-no-grow | .animation-no-color-change (hover scale via GSAP) | .animation-icons (default) | .animation-icons-no (no icon draw-in)
- * States: .inverted | .disabled (33% opacity, no interaction) | .toggled (locks hover state)
+ * Icon position: .iconLeft (default) | .iconRight
+ * Appearances: .iconOnly, .typeUppercase, .typeLowercase, .shapeRectangle, .shapeRectangleRounded, .shapeLineBottom, .shapeLineNo, .colorBackgroundNo, .colorMonochrome, .shapeTight, .shapeGapNo
+ * Sizes: .sizeSmall (75%) | .sizeNormal (100%) | .sizeLarge (1.5x) | .sizeLarge2x (2x)
+ * Fonts: .fontSans | .fontSerif | .fontMono
+ * Animations: .animationNo | .animationNoGrow | .animationNoColorChange (hover scale via GSAP) | .animationIcons (default) | .animationIconsNo (no icon draw-in)
+ * States: .stateInverted | .stateDisabled (33% opacity, no interaction) | .stateToggled (locks hover state)
  */
 
 import * as React from "react";
@@ -19,6 +19,23 @@ import { colorSpectrum, type ColorName } from "../styles/color-spectrum";
 
 function colorToKebab(color: ColorName): string {
   return color.replace(/([A-Z])/g, "-$1").toLowerCase();
+}
+
+/** camelCase → kebab-case for data-* attributes (DOM convention). */
+function camelToKebab(s: string): string {
+  return s.replace(/([A-Z])/g, (m) => `-${m.toLowerCase()}`);
+}
+
+/** Build data-* record from camelCase prop names; omit undefined/false. DOM stays kebab-case. */
+function toDataAttrs(
+  entries: Record<string, string | number | boolean | undefined>
+): Record<string, string | number | boolean | undefined> {
+  const out: Record<string, string | number | boolean | undefined> = {};
+  for (const [key, value] of Object.entries(entries)) {
+    if (value !== undefined && value !== false)
+      out[`data-${camelToKebab(key)}`] = value;
+  }
+  return out;
 }
 
 /** Next color in MUI palette order (wraps after blueGrey to red) */
@@ -40,8 +57,8 @@ const SIZE_SCALE: Record<PrismButtonSize, number> = {
   large2x: 2,
 };
 
-const BASE_PADDING_V = 8;
-const BASE_PADDING_H = 14;
+const BASE_PADDING_VERTICAL = 8;
+const BASE_PADDING_HORIZONTAL = 14;
 const BASE_FONT_SIZE = 14; // px
 const BASE_ICON_SIZE = 18;
 
@@ -58,21 +75,23 @@ export interface PrismButtonProps {
   variant?: PrismButtonVariant;
   /** Lucide icon component; used when variant is "icon" */
   icon?: LucideIcon;
-  /** .icon-left (default) | .icon-right — icon position */
+  /** .iconLeft (default) | .iconRight — icon position */
   iconPosition?: "left" | "right";
-  /** .icon-only — show only icon, label as alt/hover (aria-label, title) */
+  /** .iconOnly — show only icon, label as alt/hover (aria-label, title) */
   iconOnly?: boolean;
-  /** .uppercase — render label in uppercase */
-  uppercase?: boolean;
-  /** .shape-rectangle — 90° corners (border-radius 0) */
-  rectangle?: boolean;
-  /** .shape-rectangle-rounded — slight curve (border-radius 6px) */
-  rectangleRounded?: boolean;
-  /** .shape-line-bottom — only bottom line (no full border) */
-  line?: boolean;
-  /** .shape-line-no — no border at all */
-  lineNo?: boolean;
-  /** .color-background (default) | .color-background-light | .color-background-dark | .color-background-solid | .color-background-no | .color-monochrome | .color-gradient-* */
+  /** .typeUppercase — render label in uppercase */
+  typeUppercase?: boolean;
+  /** .typeLowercase — render label in lowercase */
+  typeLowercase?: boolean;
+  /** .shapeRectangle — 90° corners (border-radius 0) */
+  shapeRectangle?: boolean;
+  /** .shapeRectangleRounded — slight curve (border-radius 6px) */
+  shapeRectangleRounded?: boolean;
+  /** .shapeLineBottom — only bottom line (no full border) */
+  shapeLineBottom?: boolean;
+  /** .shapeLineNo — no border at all */
+  shapeLineNo?: boolean;
+  /** .colorBackground (default) | .colorBackgroundLight | .colorBackgroundDark | .colorBackgroundSolid | .colorBackgroundNo | .colorMonochrome | .colorGradient* */
   colorVariant?:
     | "background"
     | "background-light"
@@ -85,34 +104,30 @@ export interface PrismButtonProps {
     | "gradient-angle";
   /** Second color for gradients; if omitted, uses next color in MUI palette */
   colorSecondary?: ColorName;
-  /** @deprecated use colorVariant="background-no" */
-  backgroundNo?: boolean;
-  /** @deprecated use colorVariant="monochrome" */
-  monochrome?: boolean;
-  /** .tight — cut internal padding by 50% */
-  tight?: boolean;
-  /** .gap-no — no exterior margin; use with segmentPosition so only first/last have left/right edges */
-  gapNo?: boolean;
-  /** When gapNo: "first" = radius on left only, "last" = right only, "middle" = no horizontal radius */
+  /** .shapeTight — cut internal padding by 50% */
+  shapeTight?: boolean;
+  /** .shapeGapNo — no exterior margin; use with segmentPosition so only first/last have left/right edges */
+  shapeGapNo?: boolean;
+  /** When shapeGapNo: "first" = radius on left only, "last" = right only, "middle" = no horizontal radius */
   segmentPosition?: "first" | "middle" | "last";
-  /** Size: .small (75%), .normal (100%), .large (1.5x), .large2x (2x) */
+  /** Size: .sizeSmall (75%), .sizeNormal (100%), .sizeLarge (1.5x), .sizeLarge2x (2x) */
   size?: PrismButtonSize;
   /** Font: sans (Satoshi), serif (Sentient), mono (system mono) */
   font?: "sans" | "serif" | "mono";
-  /** .animation-no — disable all animations */
+  /** .animationNo — disable all animations */
   animationNo?: boolean;
-  /** .animation-no-grow — disable grow/scale animation only */
+  /** .animationNoGrow — disable grow/scale animation only */
   animationNoGrow?: boolean;
-  /** .animation-no-color-change — disable color change on hover */
+  /** .animationNoColorChange — disable color change on hover */
   animationNoColorChange?: boolean;
-  /** .animation-icons-no — disable icon stroke draw-in (default is .animation-icons = draw-in on) */
+  /** .animationIconsNo — disable icon stroke draw-in (default is .animationIcons = draw-in on) */
   animationIconsNo?: boolean;
-  /** .inverted — swap background and foreground colors */
-  inverted?: boolean;
-  /** .disabled — 33% opacity, no animation/hover/click */
-  disabled?: boolean;
-  /** .toggled — locks the hover/clicked state permanently */
-  toggled?: boolean;
+  /** .stateInverted — swap background and foreground colors */
+  stateInverted?: boolean;
+  /** .stateDisabled — 33% opacity, no animation/hover/click */
+  stateDisabled?: boolean;
+  /** .stateToggled — locks the hover/clicked state permanently */
+  stateToggled?: boolean;
   /** Render as span for display-only (e.g. in style guide) */
   asSpan?: boolean;
   className?: string;
@@ -132,17 +147,16 @@ export function PrismButton({
   icon: IconComponent,
   iconPosition = "left",
   iconOnly = false,
-  uppercase = false,
-  rectangle = false,
-  rectangleRounded = false,
-  line = false,
-  lineNo = false,
+  typeUppercase = false,
+  typeLowercase = false,
+  shapeRectangle = false,
+  shapeRectangleRounded = false,
+  shapeLineBottom = false,
+  shapeLineNo = false,
   colorVariant,
   colorSecondary,
-  backgroundNo = false,
-  monochrome = false,
-  tight = false,
-  gapNo = false,
+  shapeTight = false,
+  shapeGapNo = false,
   segmentPosition,
   size = "normal",
   font = "sans",
@@ -150,9 +164,9 @@ export function PrismButton({
   animationNoGrow = false,
   animationNoColorChange = false,
   animationIconsNo = false,
-  inverted = false,
-  disabled = false,
-  toggled = false,
+  stateInverted = false,
+  stateDisabled = false,
+  stateToggled = false,
   asSpan = false,
   className = "",
   ...rest
@@ -162,11 +176,16 @@ export function PrismButton({
   const rootRef = React.useRef<HTMLButtonElement | HTMLSpanElement>(null);
   const iconDrawDoneRef = React.useRef(false);
 
-  // Determine effective hover state: toggled locks hover state, disabled disables it
-  const effectiveHovered = disabled ? false : toggled ? true : hovered;
+  // Determine effective hover state: stateToggled locks hover state, stateDisabled disables it
+  const effectiveHovered = stateDisabled
+    ? false
+    : stateToggled
+      ? true
+      : hovered;
 
   // GSAP hover scale when shouldGrow; otherwise CSS handles transform or none
-  const shouldGrow = !animationNo && !animationNoGrow && !line && !toggled;
+  const shouldGrow =
+    !animationNo && !animationNoGrow && !shapeLineBottom && !stateToggled;
   React.useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -194,11 +213,9 @@ export function PrismButton({
     };
   }, [effectiveHovered, shouldGrow]);
 
-  const kebab = colorToKebab(color);
-  const effectiveBackgroundNo =
-    colorVariant === "background-no" || (colorVariant == null && backgroundNo);
-  const effectiveMonochrome =
-    colorVariant === "monochrome" || (colorVariant == null && monochrome);
+  const primaryColorKebab = colorToKebab(color);
+  const isBackgroundNo = colorVariant === "background-no";
+  const isMonochrome = colorVariant === "monochrome";
   const isGradient =
     colorVariant === "gradient-sideways" ||
     colorVariant === "gradient-up" ||
@@ -206,7 +223,7 @@ export function PrismButton({
   const isBackgroundSolid = colorVariant === "background-solid";
 
   const secondColor: ColorName = colorSecondary ?? nextColorInSpectrum(color);
-  const kebab2 = colorToKebab(secondColor);
+  const secondaryColorKebab = colorToKebab(secondColor);
 
   const gradientDir =
     colorVariant === "gradient-sideways"
@@ -217,45 +234,53 @@ export function PrismButton({
           ? "135deg"
           : "to right";
   const backgroundShade = colorVariant === "background-dark" ? "dark" : "light";
-  const gradientBgLight = `linear-gradient(${gradientDir}, var(--color-${kebab}-100), var(--color-${kebab2}-100))`;
-  const gradientBgDark = `linear-gradient(${gradientDir}, var(--color-${kebab}-800), var(--color-${kebab2}-800))`;
-  const gradientBorder = gradientBgDark;
-  const gradientBg =
-    backgroundShade === "dark" ? gradientBgDark : gradientBgLight;
-  const gradientHoverBg =
-    backgroundShade === "dark" ? gradientBgLight : gradientBgDark;
+  const gradientBackgroundLight = `linear-gradient(${gradientDir}, var(--color-${primaryColorKebab}-100), var(--color-${secondaryColorKebab}-100))`;
+  const gradientBackgroundDark = `linear-gradient(${gradientDir}, var(--color-${primaryColorKebab}-800), var(--color-${secondaryColorKebab}-800))`;
+  const gradientBorder = gradientBackgroundDark;
+  const gradientBackground =
+    backgroundShade === "dark"
+      ? gradientBackgroundDark
+      : gradientBackgroundLight;
+  const gradientHoverBackground =
+    backgroundShade === "dark"
+      ? gradientBackgroundLight
+      : gradientBackgroundDark;
 
   // Base colors (can be inverted)
-  const baseBg = effectiveMonochrome
+  const baseBackground = isMonochrome
     ? "#ffffff"
     : isGradient
-      ? gradientBg
+      ? gradientBackground
       : backgroundShade === "dark"
-        ? `var(--color-${kebab}-800)`
-        : `var(--color-${kebab}-100)`;
-  const baseFg = effectiveMonochrome
+        ? `var(--color-${primaryColorKebab}-800)`
+        : `var(--color-${primaryColorKebab}-100)`;
+  const baseForeground = isMonochrome
     ? "#000000"
     : backgroundShade === "dark"
-      ? `var(--color-${kebab}-100)`
-      : `var(--color-${kebab}-800)`;
-  const baseHoverBg = effectiveMonochrome
+      ? `var(--color-${primaryColorKebab}-100)`
+      : `var(--color-${primaryColorKebab}-800)`;
+  const baseHoverBackground = isMonochrome
     ? "#000000"
     : isGradient
-      ? gradientHoverBg
+      ? gradientHoverBackground
       : backgroundShade === "dark"
-        ? `var(--color-${kebab}-100)`
-        : `var(--color-${kebab}-800)`;
-  const baseHoverFg = effectiveMonochrome
+        ? `var(--color-${primaryColorKebab}-100)`
+        : `var(--color-${primaryColorKebab}-800)`;
+  const baseHoverForeground = isMonochrome
     ? "#ffffff"
     : backgroundShade === "dark"
-      ? `var(--color-${kebab}-800)`
-      : `var(--color-${kebab}-100)`;
+      ? `var(--color-${primaryColorKebab}-800)`
+      : `var(--color-${primaryColorKebab}-100)`;
 
   // Apply inversion if requested (inversion applies to solid colors; gradients stay as-is for now)
-  const bgVar = inverted && !isGradient ? baseFg : baseBg;
-  const fgVar = inverted && !isGradient ? baseBg : baseFg;
-  const bgHoverVar = inverted && !isGradient ? baseHoverFg : baseHoverBg;
-  const fgHoverVar = inverted && !isGradient ? baseHoverBg : baseHoverFg;
+  const backgroundValue =
+    stateInverted && !isGradient ? baseForeground : baseBackground;
+  const foregroundValue =
+    stateInverted && !isGradient ? baseBackground : baseForeground;
+  const hoverBackgroundValue =
+    stateInverted && !isGradient ? baseHoverForeground : baseHoverBackground;
+  const hoverForegroundValue =
+    stateInverted && !isGradient ? baseHoverBackground : baseHoverForeground;
 
   const showIcon = (variant === "icon" && IconComponent) || iconOnly;
 
@@ -292,64 +317,73 @@ export function PrismButton({
   }, [shouldDrawIcon]);
 
   const scaleFactor = SIZE_SCALE[size];
-  const tightMultiplier = tight ? 0.5 : 1;
-  const paddingV = Math.round(BASE_PADDING_V * scaleFactor * tightMultiplier);
-  const paddingH = Math.round(BASE_PADDING_H * scaleFactor * tightMultiplier);
+  const tightMultiplier = shapeTight ? 0.5 : 1;
+  const paddingV = Math.round(
+    BASE_PADDING_VERTICAL * scaleFactor * tightMultiplier
+  );
+  const paddingH = Math.round(
+    BASE_PADDING_HORIZONTAL * scaleFactor * tightMultiplier
+  );
   const fontSizePx = Math.round(BASE_FONT_SIZE * scaleFactor);
   const iconSize = Math.round(BASE_ICON_SIZE * scaleFactor);
   const gap = Math.round(6 * scaleFactor);
   const BASE_BORDER = 3;
   const strokeWidth = Math.max(2, Math.round(BASE_BORDER * scaleFactor));
-  const hasFullBorder = !lineNo && !line;
+  const hasFullBorder = !shapeLineNo && !shapeLineBottom;
   const borderWidth = hasFullBorder ? strokeWidth : 0;
 
   let baseRadius: number = 9999;
-  if (rectangleRounded) baseRadius = 6;
-  else if (rectangle) baseRadius = 0;
-  // rounded = pill (default when no rectangle/rectangleRounded)
+  if (shapeRectangleRounded) baseRadius = 6;
+  else if (shapeRectangle) baseRadius = 0;
+  // rounded = pill (default when no shapeRectangle/shapeRectangleRounded)
 
-  // When gapNo + segmentPosition: only first/last get left/right edges; middle gets 0
+  // When shapeGapNo + segmentPosition: only first/last get left/right edges; middle gets 0
   const borderRadiusValue: number | string =
-    gapNo && segmentPosition === "first"
+    shapeGapNo && segmentPosition === "first"
       ? `${baseRadius}px 0 0 ${baseRadius}px`
-      : gapNo && segmentPosition === "last"
+      : shapeGapNo && segmentPosition === "last"
         ? `0 ${baseRadius}px ${baseRadius}px 0`
-        : gapNo && segmentPosition === "middle"
+        : shapeGapNo && segmentPosition === "middle"
           ? 0
           : baseRadius;
 
   // Apply color changes only if not disabled by animationNoColorChange
   const shouldChangeColor = !animationNo && !animationNoColorChange;
 
-  // .color-background-solid: outline and background match (same solid or same gradient)
-  const borderColorVar = isBackgroundSolid
+  // .colorBackgroundSolid: outline and background match (same solid or same gradient)
+  const borderColorValue = isBackgroundSolid
     ? shouldChangeColor && effectiveHovered
-      ? bgHoverVar
-      : bgVar
+      ? hoverBackgroundValue
+      : backgroundValue
     : shouldChangeColor && effectiveHovered
-      ? bgHoverVar
-      : fgVar;
+      ? hoverBackgroundValue
+      : foregroundValue;
   const borderSolidColor =
-    isGradient && line
-      ? `var(--color-${kebab}-800)`
-      : typeof borderColorVar === "string"
-        ? borderColorVar
+    isGradient && shapeLineBottom
+      ? `var(--color-${primaryColorKebab}-800)`
+      : typeof borderColorValue === "string"
+        ? borderColorValue
         : undefined;
-  const segmentBorders = gapNo && segmentPosition && hasFullBorder;
+  const segmentBorders = shapeGapNo && segmentPosition && hasFullBorder;
   const segmentBorderColor =
     segmentBorders &&
     typeof borderSolidColor === "string" &&
     !borderSolidColor.startsWith("linear-gradient")
       ? borderSolidColor
       : segmentBorders
-        ? `var(--color-${kebab}-800)`
+        ? `var(--color-${primaryColorKebab}-800)`
         : undefined;
-  const borderStyle: React.CSSProperties = lineNo
-    ? { border: "none" }
-    : line
+  const borderStyle: React.CSSProperties = shapeLineNo
+    ? { borderWidth: 0, borderStyle: "none" }
+    : shapeLineBottom
       ? {
-          border: "none",
+          borderLeftWidth: 0,
+          borderTopWidth: 0,
+          borderRightWidth: 0,
           borderBottomWidth: strokeWidth,
+          borderLeftStyle: "none",
+          borderTopStyle: "none",
+          borderRightStyle: "none",
           borderBottomStyle: "solid",
           ...(borderSolidColor && { borderBottomColor: borderSolidColor }),
         }
@@ -374,12 +408,18 @@ export function PrismButton({
             } as React.CSSProperties;
           })()
         : hasFullBorder && isGradient && isBackgroundSolid
-          ? { border: `${strokeWidth}px solid transparent` }
+          ? {
+              borderWidth: strokeWidth,
+              borderStyle: "solid",
+              borderColor: "transparent",
+            }
           : hasFullBorder && isGradient
             ? {
                 /* Contrasting border (800) vs fill (100) */
-                border: `${strokeWidth}px solid transparent`,
-                backgroundImage: `${gradientBg}, ${gradientBorder}`,
+                borderWidth: strokeWidth,
+                borderStyle: "solid",
+                borderColor: "transparent",
+                backgroundImage: `${gradientBackground}, ${gradientBorder}`,
                 backgroundSize: "100% 100%, 100% 100%",
                 backgroundOrigin: "padding-box, border-box",
                 backgroundClip: "padding-box, border-box",
@@ -387,7 +427,8 @@ export function PrismButton({
                 backgroundRepeat: "no-repeat",
               }
             : {
-                border: `${borderWidth}px solid`,
+                borderWidth,
+                borderStyle: "solid",
                 ...(borderSolidColor && { borderColor: borderSolidColor }),
               };
 
@@ -404,20 +445,24 @@ export function PrismButton({
   // Transition: GSAP owns scale; CSS handles color/border only
   const transitionValue = animationNo ? "none" : COLOR_TRANSITION;
 
-  const resolvedBg = effectiveBackgroundNo
+  const resolvedBackground = isBackgroundNo
     ? "transparent"
     : shouldChangeColor && effectiveHovered
-      ? bgHoverVar
-      : bgVar;
+      ? hoverBackgroundValue
+      : backgroundValue;
   const useGradientBorderLayers = hasFullBorder && isGradient;
   const paddingStyle = `${paddingV}px ${paddingH}px`;
-  /* Gradient: .color-background-solid = same gradient fill and border; else border contrasts (800) */
+  /* Gradient: .colorBackgroundSolid = same gradient fill and border; else border contrasts (800) */
   const resolvedGradient =
-    shouldChangeColor && effectiveHovered ? gradientHoverBg : gradientBg;
+    shouldChangeColor && effectiveHovered
+      ? gradientHoverBackground
+      : gradientBackground;
   const gradientFillStyle: React.CSSProperties = useGradientBorderLayers
     ? isBackgroundSolid
       ? {
-          border: `${strokeWidth}px solid transparent`,
+          borderWidth: strokeWidth,
+          borderStyle: "solid",
+          borderColor: "transparent",
           backgroundImage: `${resolvedGradient}, ${resolvedGradient}`,
           backgroundSize: "100% 100%, 100% 100%",
           backgroundOrigin: "padding-box, border-box",
@@ -428,8 +473,8 @@ export function PrismButton({
       : {
           backgroundImage:
             shouldChangeColor && effectiveHovered
-              ? `${bgHoverVar}, ${gradientBorder}`
-              : `${gradientBg}, ${gradientBorder}`,
+              ? `${hoverBackgroundValue}, ${gradientBorder}`
+              : `${gradientBackground}, ${gradientBorder}`,
           backgroundSize: "100% 100%, 100% 100%",
           backgroundOrigin: "padding-box, border-box",
           backgroundClip: "padding-box, border-box",
@@ -448,23 +493,35 @@ export function PrismButton({
     ...gradientFillStyle,
     ...(useGradientBorderLayers
       ? {}
-      : typeof resolvedBg === "string" &&
-          resolvedBg.startsWith("linear-gradient")
-        ? { background: resolvedBg }
-        : { backgroundColor: resolvedBg }),
+      : typeof resolvedBackground === "string" &&
+          resolvedBackground.startsWith("linear-gradient")
+        ? { background: resolvedBackground }
+        : { backgroundColor: resolvedBackground }),
     fontFamily,
     fontWeight: 800,
     fontSize: `${fontSizePx}px`,
-    color: shouldChangeColor && effectiveHovered ? fgHoverVar : fgVar,
-    cursor: asSpan || disabled ? "default" : "pointer",
-    textTransform: uppercase ? "uppercase" : undefined,
+    color:
+      shouldChangeColor && effectiveHovered
+        ? hoverForegroundValue
+        : foregroundValue,
+    cursor: asSpan || stateDisabled ? "default" : "pointer",
+    textTransform: typeUppercase
+      ? "uppercase"
+      : typeLowercase
+        ? "lowercase"
+        : undefined,
     transition: transitionValue,
     transformOrigin: "center",
     transform: transformValue,
     willChange: shouldGrow ? "transform" : "auto",
-    opacity: disabled ? 0.33 : 1,
-    pointerEvents: disabled ? "none" : undefined,
-    ...(gapNo && { margin: 0, lineHeight: 1 }),
+    opacity: stateDisabled ? 0.33 : 1,
+    pointerEvents: stateDisabled ? "none" : undefined,
+    ...(shapeGapNo && {
+      margin: 0,
+      lineHeight: 1,
+      // Overlap non-first segments by 1px to avoid sub-pixel gap from flex rounding
+      ...(segmentPosition && segmentPosition !== "first" && { marginLeft: -1 }),
+    }),
   };
 
   const iconNode =
@@ -493,7 +550,7 @@ export function PrismButton({
   const restSpan = rest as React.ComponentProps<"span">;
   const restButton = rest as React.ComponentProps<"button">;
   const onEnter = (e: React.PointerEvent<HTMLElement>) => {
-    if (!disabled && !toggled) {
+    if (!stateDisabled && !stateToggled) {
       requestAnimationFrame(() => setHovered(true));
     }
     if (asSpan)
@@ -502,7 +559,7 @@ export function PrismButton({
       restButton.onPointerEnter?.(e as React.PointerEvent<HTMLButtonElement>);
   };
   const onLeave = (e: React.PointerEvent<HTMLElement>) => {
-    if (!disabled && !toggled) {
+    if (!stateDisabled && !stateToggled) {
       requestAnimationFrame(() => setHovered(false));
     }
     if (asSpan)
@@ -511,32 +568,43 @@ export function PrismButton({
       restButton.onPointerLeave?.(e as React.PointerEvent<HTMLButtonElement>);
   };
 
-  const dataAttrs = {
-    "data-variant": variant,
-    "data-icon-position": iconPosition !== "left" ? iconPosition : undefined,
-    "data-uppercase": uppercase || undefined,
-    "data-icon-only": iconOnly || undefined,
-    "data-rectangle": rectangle || undefined,
-    "data-rectangle-rounded": rectangleRounded || undefined,
-    "data-line": line || undefined,
-    "data-line-no": lineNo || undefined,
-    "data-segment-position": segmentPosition,
-    "data-color-variant": colorVariant,
-    "data-color-secondary": colorSecondary,
-    "data-background-no": backgroundNo || undefined,
-    "data-monochrome": monochrome || undefined,
-    "data-tight": tight || undefined,
-    "data-gap-no": gapNo || undefined,
-    "data-size": size !== "normal" ? size : undefined,
-    "data-animation-no": animationNo || undefined,
-    "data-animation-no-grow": animationNoGrow || undefined,
-    "data-animation-no-color-change": animationNoColorChange || undefined,
-    "data-animation-icons": (showIcon && !animationIconsNo) || undefined,
-    "data-animation-icons-no": animationIconsNo || undefined,
-    "data-inverted": inverted || undefined,
-    "data-disabled": disabled || undefined,
-    "data-toggled": toggled || undefined,
-  };
+  // One name everywhere: props = canonical names, data attrs same. Size/color derived from value props.
+  const dataAttrs = toDataAttrs({
+    variant,
+    iconPosition: iconPosition !== "left" ? iconPosition : undefined,
+    typeUppercase: typeUppercase || undefined,
+    typeLowercase: typeLowercase || undefined,
+    iconOnly: iconOnly || undefined,
+    shapeRectangle: shapeRectangle || undefined,
+    shapeRectangleRounded: shapeRectangleRounded || undefined,
+    shapeLineBottom: shapeLineBottom || undefined,
+    shapeLineNo: shapeLineNo || undefined,
+    segmentPosition,
+    colorBackground: colorVariant === "background" || undefined,
+    colorBackgroundLight: colorVariant === "background-light" || undefined,
+    colorBackgroundDark: colorVariant === "background-dark" || undefined,
+    colorBackgroundSolid: colorVariant === "background-solid" || undefined,
+    colorBackgroundNo: colorVariant === "background-no" || undefined,
+    colorMonochrome: colorVariant === "monochrome" || undefined,
+    colorGradientSideways: colorVariant === "gradient-sideways" || undefined,
+    colorGradientUp: colorVariant === "gradient-up" || undefined,
+    colorGradientAngle: colorVariant === "gradient-angle" || undefined,
+    colorSecondary,
+    shapeTight: shapeTight || undefined,
+    shapeGapNo: shapeGapNo || undefined,
+    sizeSmall: size === "small" || undefined,
+    sizeNormal: size === "normal" || undefined,
+    sizeLarge: size === "large" || undefined,
+    sizeLarge2x: size === "large2x" || undefined,
+    animationNo: animationNo || undefined,
+    animationNoGrow: animationNoGrow || undefined,
+    animationNoColorChange: animationNoColorChange || undefined,
+    animationIcons: showIcon && !animationIconsNo ? true : undefined,
+    animationIconsNo: animationIconsNo || undefined,
+    stateInverted: stateInverted || undefined,
+    stateDisabled: stateDisabled || undefined,
+    stateToggled: stateToggled || undefined,
+  });
 
   const { className: _omit, ...restSpanSafe } =
     rest as React.ComponentProps<"span">;
@@ -565,6 +633,7 @@ export function PrismButton({
     <button
       ref={rootRef as React.RefObject<HTMLButtonElement>}
       type="button"
+      disabled={stateDisabled}
       className={className}
       style={style}
       title={title}
