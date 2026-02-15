@@ -8,7 +8,7 @@
  * Appearances: .icon-only, .uppercase, .rectangle, .rectangle-rounded, .line, .background-no, .monochrome, .tight, .gap-no
  * Sizes: .small (75%) | .normal (100%) | .large (1.5x) | .large2x (2x)
  * Fonts: .font-sans | .font-serif | .font-mono
- * Animations: .animation-no | .animation-no-grow | .animation-no-color-change (hover scale via GSAP)
+ * Animations: .animation-no | .animation-no-grow | .animation-no-color-change (hover scale via GSAP) | .animation-icons (default) | .animation-icons-no (no icon draw-in)
  * States: .inverted | .disabled (33% opacity, no interaction) | .toggled (locks hover state)
  */
 
@@ -44,6 +44,10 @@ const BASE_PADDING_V = 8;
 const BASE_PADDING_H = 14;
 const BASE_FONT_SIZE = 14; // px
 const BASE_ICON_SIZE = 18;
+
+/** Selector for stroked SVG geometry used by icon draw-in (Lucide uses path, line, polyline, etc.). */
+const DRAW_SVG_SELECTOR =
+  "svg path, svg line, svg polyline, svg polygon, svg circle, svg ellipse, svg rect";
 
 export interface PrismButtonProps {
   /** Palette color name (100 fill, 800 border/text); ignored when monochrome */
@@ -101,6 +105,8 @@ export interface PrismButtonProps {
   animationNoGrow?: boolean;
   /** .animation-no-color-change — disable color change on hover */
   animationNoColorChange?: boolean;
+  /** .animation-icons-no — disable icon stroke draw-in (default is .animation-icons = draw-in on) */
+  animationIconsNo?: boolean;
   /** .inverted — swap background and foreground colors */
   inverted?: boolean;
   /** .disabled — 33% opacity, no animation/hover/click */
@@ -143,6 +149,7 @@ export function PrismButton({
   animationNo = false,
   animationNoGrow = false,
   animationNoColorChange = false,
+  animationIconsNo = false,
   inverted = false,
   disabled = false,
   toggled = false,
@@ -153,6 +160,7 @@ export function PrismButton({
   (React.ComponentProps<"button"> | React.ComponentProps<"span">)) {
   const [hovered, setHovered] = React.useState(false);
   const rootRef = React.useRef<HTMLButtonElement | HTMLSpanElement>(null);
+  const iconDrawDoneRef = React.useRef(false);
 
   // Determine effective hover state: toggled locks hover state, disabled disables it
   const effectiveHovered = disabled ? false : toggled ? true : hovered;
@@ -250,6 +258,38 @@ export function PrismButton({
   const fgHoverVar = inverted && !isGradient ? baseHoverBg : baseHoverFg;
 
   const showIcon = (variant === "icon" && IconComponent) || iconOnly;
+
+  // Icon stroke draw-in (DrawSVG-style via strokeDashoffset), once per mount when icon is shown.
+  const shouldDrawIcon = showIcon && !animationNo && !animationIconsNo;
+  React.useEffect(() => {
+    if (!shouldDrawIcon || !rootRef.current || iconDrawDoneRef.current) return;
+    const el = rootRef.current;
+    const run = () => {
+      const elements =
+        el.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
+      if (elements.length === 0) return;
+      iconDrawDoneRef.current = true;
+      elements.forEach((node) => {
+        const len = node.getTotalLength();
+        node.style.strokeDasharray = String(len);
+        node.style.strokeDashoffset = String(len);
+      });
+      gsap.to(elements, {
+        strokeDashoffset: 0,
+        duration: 1,
+        stagger: 0.03,
+        ease: "power2.out",
+        overwrite: true,
+      });
+    };
+    const id = requestAnimationFrame(run);
+    return () => {
+      cancelAnimationFrame(id);
+      const elements =
+        el.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
+      gsap.killTweensOf(elements);
+    };
+  }, [shouldDrawIcon]);
 
   const scaleFactor = SIZE_SCALE[size];
   const tightMultiplier = tight ? 0.5 : 1;
@@ -491,6 +531,8 @@ export function PrismButton({
     "data-animation-no": animationNo || undefined,
     "data-animation-no-grow": animationNoGrow || undefined,
     "data-animation-no-color-change": animationNoColorChange || undefined,
+    "data-animation-icons": (showIcon && !animationIconsNo) || undefined,
+    "data-animation-icons-no": animationIconsNo || undefined,
     "data-inverted": inverted || undefined,
     "data-disabled": disabled || undefined,
     "data-toggled": toggled || undefined,
