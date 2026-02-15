@@ -442,12 +442,30 @@ Edit `packages/ui/styles/globals.css`:
 - Add new utility classes in `@layer utilities`
 - Modify base styles in `@layer base`
 
+## Naming conventions (option names)
+
+Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling.
+
+| Where | Form | Notes |
+|-------|------|--------|
+| **Code** (keys, state, props) | **camelCase** | `shapeGapNo`, `animationNoGrow`, `colorBackgroundLight`. This is the source of truth. |
+| **Display labels** (customizer, docs) | **.camelCase** | Same as the key with a dot prefix, e.g. `.shapeGapNo`, `.animationNoGrow`. No conversion. |
+| **DOM data attributes** | **data-kebab-case** | Derived from the camelCase name (e.g. `data-shape-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
+
+**Rules:**
+
+- **Canonical = camelCase.** All option keys, TypeScript types, and PrismButton props are camelCase. Use one name per concept (e.g. `shapeGapNo` not `gapNo`). Add new options in camelCase only.
+- **Labels = `.` + key.** In the system-sheet customizer and in docs, show option names as `.shapeGapNo`, not `.shape-gap-no`. The label is the key with a leading dot.
+- **Data attributes = derived.** PrismButton (and any component that exposes options to the DOM) builds `data-*` names from the prop name via `camelToKebab`, so the DOM keeps kebab-case (`data-shape-gap-no`) without maintaining a second list.
+
+This keeps one list of option names (camelCase) and avoids drift between labels, props, and data attributes.
+
 ## Best Practices
 
 1. **Import from `@ui` package** - Always use `import { Component } from "@ui"` not relative paths
 2. **CSS imports use package names** - Use `@import "ui/styles/globals.css"` not relative paths like `../../../packages/ui/styles/globals.css`
 3. **Use CSS variables** - Leverage theme variables for colors and spacing
-4. **Follow variant patterns** - Use CVA for component variants
+4. **Follow variant patterns** - Use class-variance-authority for component variants
 5. **Consistent styling** - Use Tailwind utilities and theme variables
 6. **Type safety** - All components are fully typed with TypeScript
 7. **Never hardcode package paths** - Apps should work identically in monorepo and standalone contexts

@@ -435,7 +435,7 @@ See [docs/LOGGER-Prism.md](./docs/LOGGER-Prism.md) for full logger documentation
 
 1. Make changes in the appropriate workspace
 2. Run `npm run quality` to ensure code quality
-3. Commit with descriptive messages (see `.cursor/commands/commitmessage.md`)
+3. Commit with descriptive messages (see `.cursor/commands/COMMITMESSAGE.md`)
 4. Pre-commit hooks will automatically format and lint your code
 
 ## License

@@ -217,7 +217,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Git Workflow
 
-- **Commits**: Use descriptive commit messages (see `.cursor/commands/commitmessage.md`)
+- **Commits**: Use descriptive commit messages (see `.cursor/commands/COMMITMESSAGE.md`)
 - **File Moves**: Use `git mv` to preserve file history
 - **Hooks**: Pre-commit hooks run format, lint, and typecheck
 - **CI**: GitHub Actions runs quality checks on every push
