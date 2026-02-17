@@ -183,9 +183,14 @@ export function PrismButton({
       ? true
       : hovered;
 
-  // GSAP hover scale when shouldGrow; otherwise CSS handles transform or none
+  // GSAP hover scale when shouldGrow; otherwise CSS handles transform or none.
+  // .shapeGapNo (merged pills) implies no grow.
   const shouldGrow =
-    !animationNo && !animationNoGrow && !shapeLineBottom && !stateToggled;
+    !animationNo &&
+    !animationNoGrow &&
+    !shapeLineBottom &&
+    !stateToggled &&
+    !shapeGapNo;
   React.useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
