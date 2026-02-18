@@ -1,6 +1,10 @@
 "use client";
 
-import { PrismButton } from "@ui";
+import {
+  colorSpectrum,
+  getDefaultPrismButtonPresetNames,
+  PrismButton,
+} from "@ui";
 import type { ColorName, PrismButtonSize } from "@ui";
 import {
   Calendar,
@@ -210,11 +214,36 @@ function Row({
   );
 }
 
+/** Random color per preset name, stable for the session (set on init). */
+function usePresetColors(): Record<string, ColorName> {
+  return useState(() => {
+    const names = getDefaultPrismButtonPresetNames();
+    return Object.fromEntries(
+      names.map((name) => [
+        name,
+        colorSpectrum[Math.floor(Math.random() * colorSpectrum.length)],
+      ])
+    ) as Record<string, ColorName>;
+  })[0];
+}
+
 export function Button() {
   const [selected, setSelected] = useState<Set<AppearanceKey>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const presetColors = usePresetColors();
 
   const replayAnimations = () => setAnimationKey((k) => k + 1);
+
+  const copyOptions = async () => {
+    const labels = APPEARANCE_KEYS.filter((key) => selected.has(key)).map(
+      (key) => OPTION_LABEL[key]
+    );
+    const text = labels.length > 0 ? labels.join(" ") : "(no options selected)";
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const toggle = (key: AppearanceKey) => {
     setSelected((prev) => {
@@ -313,6 +342,8 @@ export function Button() {
     };
   }, [selected]);
 
+  const presetNames = getDefaultPrismButtonPresetNames();
+
   return (
     <div className="mb-8">
       <h3 className="mb-2">Buttons</h3>
@@ -326,6 +357,14 @@ export function Button() {
           Replay animations
         </button>
         {" · "}
+        <button
+          type="button"
+          onClick={copyOptions}
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline font-medium"
+        >
+          {copied ? "Copied!" : "Copy options"}
+        </button>
+        {" · "}
         <a
           href="../sheets/buttons"
           className="text-sm text-muted-foreground hover:text-foreground hover:underline"
@@ -335,6 +374,18 @@ export function Button() {
       </p>
       <div className="space-y-6">
         <div>
+          <Row title="Presets (preset=…)">
+            {presetNames.map((presetName) => (
+              <PrismButton
+                key={presetName}
+                color={presetColors[presetName] ?? "blueGrey"}
+                preset={presetName}
+                label={presetName === "icon-only" ? "Icon" : presetName}
+                icon={presetName === "icon-only" ? Star : undefined}
+                asSpan
+              />
+            ))}
+          </Row>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
@@ -393,8 +444,23 @@ export function ButtonVariantsList({
 }: {
   className?: string;
 } = {}) {
+  const presetNames = getDefaultPrismButtonPresetNames();
+  const presetColors = usePresetColors();
+
   return (
     <div className={className ?? "space-y-6"}>
+      <Row title="Presets (preset=…)">
+        {presetNames.map((presetName) => (
+          <PrismButton
+            key={presetName}
+            color={presetColors[presetName] ?? "blueGrey"}
+            preset={presetName}
+            label={presetName === "icon-only" ? "Icon" : presetName}
+            icon={presetName === "icon-only" ? Star : undefined}
+            asSpan
+          />
+        ))}
+      </Row>
       <Row title=".plain">
         {ACTION_BUTTONS.map(({ color, label }) => (
           <PrismButton

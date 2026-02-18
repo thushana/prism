@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { satoshi, sentient, zodiak } from "@ui";
 import "../ui/styles/globals.css";
+import "../config/button-presets";
 
 export const metadata: Metadata = {
   title: "web",
