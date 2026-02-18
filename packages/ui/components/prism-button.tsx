@@ -16,6 +16,7 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { gsap } from "gsap";
 import { colorSpectrum, type ColorName } from "../styles/color-spectrum";
+import { resolvePrismButtonPreset } from "../source/prism-button-presets";
 
 function colorToKebab(color: ColorName): string {
   return color.replace(/([A-Z])/g, "-$1").toLowerCase();
@@ -131,6 +132,8 @@ export interface PrismButtonProps {
   /** Render as span for display-only (e.g. in style guide) */
   asSpan?: boolean;
   className?: string;
+  /** Preset name: applies a shortcut style (submit, action, ghost, danger, hero, etc.). Apps can register more via registerPrismButtonPresets(). */
+  preset?: string;
 }
 
 /** CSS transition for color/border (GSAP owns scale) */
@@ -139,39 +142,49 @@ const COLOR_TRANSITION =
 
 /**
  * Prism button: chainable appearances with animation controls and state modifiers.
+ * Use the `preset` prop for shortcut styles (submit, action, ghost, danger, hero, etc.).
  */
-export function PrismButton({
-  color,
-  label,
-  variant = "icon",
-  icon: IconComponent,
-  iconPosition = "left",
-  iconOnly = false,
-  typeUppercase = false,
-  typeLowercase = false,
-  shapeRectangle = false,
-  shapeRectangleRounded = false,
-  shapeLineBottom = false,
-  shapeLineNo = false,
-  colorVariant,
-  colorSecondary,
-  shapeTight = false,
-  shapeGapNo = false,
-  segmentPosition,
-  size = "normal",
-  font = "sans",
-  animationNo = false,
-  animationNoGrow = false,
-  animationNoColorChange = false,
-  animationIconsNo = false,
-  stateInverted = false,
-  stateDisabled = false,
-  stateToggled = false,
-  asSpan = false,
-  className = "",
-  ...rest
-}: PrismButtonProps &
-  (React.ComponentProps<"button"> | React.ComponentProps<"span">)) {
+export function PrismButton(
+  props: PrismButtonProps &
+    (React.ComponentProps<"button"> | React.ComponentProps<"span">)
+) {
+  const { preset, ...propsMinusPreset } = props;
+  const resolved = preset
+    ? resolvePrismButtonPreset(preset, propsMinusPreset)
+    : (propsMinusPreset as PrismButtonProps &
+        (React.ComponentProps<"button"> | React.ComponentProps<"span">));
+
+  const {
+    color,
+    label,
+    variant = "icon",
+    icon: IconComponent,
+    iconPosition = "left",
+    iconOnly = false,
+    typeUppercase = false,
+    typeLowercase = false,
+    shapeRectangle = false,
+    shapeRectangleRounded = false,
+    shapeLineBottom = false,
+    shapeLineNo = false,
+    colorVariant,
+    colorSecondary,
+    shapeTight = false,
+    shapeGapNo = false,
+    segmentPosition,
+    size = "normal",
+    font = "sans",
+    animationNo = false,
+    animationNoGrow = false,
+    animationNoColorChange = false,
+    animationIconsNo = false,
+    stateInverted = false,
+    stateDisabled = false,
+    stateToggled = false,
+    asSpan = false,
+    className = "",
+    ...rest
+  } = resolved;
   const [hovered, setHovered] = React.useState(false);
   const rootRef = React.useRef<HTMLButtonElement | HTMLSpanElement>(null);
   const iconDrawDoneRef = React.useRef(false);
