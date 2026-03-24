@@ -389,7 +389,7 @@ export function Button() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
-                <p className="typography-label">{heading}</p>
+                <p className="typography-overline">{heading}</p>
                 {keys.map((key) => (
                   <label
                     key={key}
