@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "flags": "^4.0.0",
-    "@types/node": "^24.12.0",
+    "@types/node": "^25.0.0",
     "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   },
