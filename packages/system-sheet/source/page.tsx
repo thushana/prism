@@ -9,7 +9,9 @@ import {
   ContentBreakout,
   ContentText,
   LayoutWrappersReference,
+  Typography,
 } from "@ui";
+import type { TypographyVariant } from "@ui";
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
@@ -65,9 +67,9 @@ function renderComponentExample(componentName: string) {
             <CardTitle>Card Example</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <Typography variant="body2" className="text-muted-foreground">
               This is a card component example.
-            </p>
+            </Typography>
           </CardContent>
         </Card>
       );
@@ -82,9 +84,9 @@ function renderComponentExample(componentName: string) {
       );
     default:
       return (
-        <p className="text-sm text-muted-foreground italic">
+        <Typography variant="body2" className="text-muted-foreground italic">
           No preview available
-        </p>
+        </Typography>
       );
   }
 }
@@ -140,17 +142,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
   if (!data) {
     return (
       <div className="container mx-auto p-8 space-y-8 font-sans">
-        <h1 className="mb-2">System Sheet</h1>
-        <p className="text-muted-foreground">
+        <Typography variant="h1" className="mb-2">
+          System Sheet
+        </Typography>
+        <Typography variant="body1" className="text-muted-foreground">
           Unable to load system data. Please try again in a moment.
-        </p>
-        <p className="text-sm text-muted-foreground">
+        </Typography>
+        <Typography variant="body2" className="text-muted-foreground">
           Make sure your app has an{" "}
           <code className="bg-muted px-1 py-0.5 rounded">
             /api/system-sheet
           </code>{" "}
           endpoint that returns system data.
-        </p>
+        </Typography>
       </div>
     );
   }
@@ -160,10 +164,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
       className={`container mx-auto p-8 space-y-8 font-sans ${geistMono.variable}`}
     >
       <div>
-        <h1 className="mb-2">System Sheet</h1>
-        <p className="text-muted-foreground">
+        <Typography variant="h1" className="mb-2">
+          System Sheet
+        </Typography>
+        <Typography variant="body1" className="text-muted-foreground">
           Overview of installed components, styles, and dependencies
-        </p>
+        </Typography>
       </div>
 
       <div className="space-y-8">
@@ -182,7 +188,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     }`}
                     title={app.isRunning ? "Running" : "Not running"}
                   />
-                  <span className="font-medium">{app.name}</span>
+                  <Typography variant="subtitle1" className="inline">
+                    {app.name}
+                  </Typography>
                   <a
                     href={app.url}
                     target="_blank"
@@ -218,7 +226,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="grid grid-cols-3 gap-4">
                 {Object.entries(data.techStack).map(([key, value]) => (
                   <div key={key} className="space-y-1">
-                    <p className="typography-overline">{key}</p>
+                    <Typography variant="overline" className="block">{key}</Typography>
                     <Badge variant="outline">{value}</Badge>
                   </div>
                 ))}
@@ -246,15 +254,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
               {data.git.commitMessage && (
                 <div className="space-y-1 md:col-span-4">
-                  <p className="typography-overline">Commit Message</p>
-                  <p className="text-sm text-muted-foreground">
+                  <Typography variant="overline" className="block">Commit Message</Typography>
+                  <Typography variant="body2" className="text-muted-foreground">
                     {data.git.commitMessage}
-                  </p>
+                  </Typography>
                 </div>
               )}
               {data.git.commitAuthor && (
                 <div className="space-y-1 md:col-span-2">
-                  <p className="typography-overline">Commit Author</p>
+                  <Typography variant="overline" className="block">Commit Author</Typography>
                   <Badge variant="outline">{data.git.commitAuthor}</Badge>
                 </div>
               )}
@@ -263,7 +271,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               {data.git.commitSha && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Commit SHA</p>
+                  <Typography variant="overline" className="block">Commit SHA</Typography>
                   {data.git.commitUrl ? (
                     <a
                       href={data.git.commitUrl}
@@ -287,7 +295,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.git.repositoryUrl && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Repository</p>
+                  <Typography variant="overline" className="block">Repository</Typography>
                   <a
                     href={data.git.repositoryUrl}
                     target="_blank"
@@ -304,20 +312,20 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 </div>
               )}
               <div className="space-y-1">
-                <p className="typography-overline">Status</p>
+                <Typography variant="overline" className="block">Status</Typography>
                 <Badge variant="outline">
                   {data.git.status === "clean" ? "clean" : "dirty"}
                 </Badge>
               </div>
               {data.git.branch && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Branch</p>
+                  <Typography variant="overline" className="block">Branch</Typography>
                   <Badge variant="outline">{data.git.branch}</Badge>
                 </div>
               )}
               {data.git.commitDate && (
                 <div className="space-y-1 md:col-span-2">
-                  <p className="typography-overline">Commit Date</p>
+                  <Typography variant="overline" className="block">Commit Date</Typography>
                   <Badge variant="outline">
                     {formatDateTimeWithRelative(data.git.commitDate)}
                   </Badge>
@@ -333,17 +341,17 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">Vercel Deployment</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <p className="typography-overline">Environment</p>
+                <Typography variant="overline" className="block">Environment</Typography>
                 <Badge variant="outline">{data.vercel.env}</Badge>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Region</p>
+                  <Typography variant="overline" className="block">Region</Typography>
                   <Badge variant="outline">{data.vercel.region}</Badge>
                 </div>
               )}
               <div className="space-y-1">
-                <p className="typography-overline">Build Time</p>
+                <Typography variant="overline" className="block">Build Time</Typography>
                 <Badge variant="outline">
                   {formatDateTimeWithRelative(data.vercel.buildTime)}
                 </Badge>
@@ -352,7 +360,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="mt-4 space-y-3">
               {data.vercel.url && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Deployment URL</p>
+                  <Typography variant="overline" className="block">Deployment URL</Typography>
                   <a
                     href={data.vercel.url}
                     target="_blank"
@@ -378,7 +386,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.branchUrl && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Branch URL</p>
+                  <Typography variant="overline" className="block">Branch URL</Typography>
                   <a
                     href={data.vercel.branchUrl}
                     target="_blank"
@@ -404,7 +412,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.productionUrl && (
                 <div className="space-y-1">
-                  <p className="typography-overline">Production URL</p>
+                  <Typography variant="overline" className="block">Production URL</Typography>
                   <a
                     href={data.vercel.productionUrl}
                     target="_blank"
@@ -438,15 +446,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">UI Configuration</h2>
             <div className="grid grid-cols-6 gap-4">
               <div className="space-y-1">
-                <p className="typography-overline">Style</p>
+                <Typography variant="overline" className="block">Style</Typography>
                 <Badge variant="outline">{data.shadcn.style}</Badge>
               </div>
               <div className="space-y-1">
-                <p className="typography-overline">Icon Library</p>
+                <Typography variant="overline" className="block">Icon Library</Typography>
                 <Badge variant="outline">{data.shadcn.iconLibrary}</Badge>
               </div>
               <div className="space-y-1">
-                <p className="typography-overline">Base Color</p>
+                <Typography variant="overline" className="block">Base Color</Typography>
                 <Badge variant="outline">{data.shadcn.baseColor}</Badge>
               </div>
             </div>
@@ -488,7 +496,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               {data.components.shadcn.length === 0 &&
                 data.components.custom.length === 0 &&
                 data.components.app.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No components</p>
+                  <Typography variant="body2" className="text-muted-foreground">
+                    No components
+                  </Typography>
                 )}
             </div>
           </div>
@@ -505,31 +515,31 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="grid grid-cols-4 gap-4 border-b pb-2">
                 <div>
                   <h2 className={`font-sans ${satoshi.variable}`}>Satoshi</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <Typography variant="body2" className="text-muted-foreground">
                     Variable (300-900)
-                  </p>
+                  </Typography>
                 </div>
                 <div>
                   <h2 className={`font-serif ${sentient.variable}`}>
                     Sentient
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <Typography variant="body2" className="text-muted-foreground">
                     Variable (200-800)
-                  </p>
+                  </Typography>
                 </div>
                 <div>
                   <h2 className={`font-serif ${zodiak.variable}`}>Zodiak</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <Typography variant="body2" className="text-muted-foreground">
                     Variable (100-900)
-                  </p>
+                  </Typography>
                 </div>
                 <div>
                   <h2 className={`font-mono ${geistMono.variable}`}>
                     Geist Mono
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <Typography variant="body2" className="text-muted-foreground">
                     Variable (100-900)
-                  </p>
+                  </Typography>
                 </div>
               </div>
 
@@ -540,11 +550,16 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Satoshi (300-900) */}
                     {weight >= 300 && weight <= 900 && (
                       <div className="min-h-14">
-                        <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                        <Typography
+                          variant="caption"
+                          font="mono"
+                          className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                        >
                           {weight}
-                        </p>
-                        <p
-                          className={`text-base ${satoshi.variable}`}
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          className={satoshi.variable}
                           style={{
                             fontFamily: "var(--font-satoshi)",
                             fontWeight: weight,
@@ -553,7 +568,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                           }}
                         >
                           The quick brown fox jumps over the lazy dog
-                        </p>
+                        </Typography>
                       </div>
                     )}
                     {weight < 300 && <div className="min-h-14" />}
@@ -561,11 +576,16 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Sentient (200-800) */}
                     {weight >= 200 && weight <= 800 && (
                       <div className="min-h-14">
-                        <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                        <Typography
+                          variant="caption"
+                          font="mono"
+                          className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                        >
                           {weight}
-                        </p>
-                        <p
-                          className={`text-base ${sentient.variable}`}
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          className={sentient.variable}
                           style={{
                             fontFamily: "var(--font-sentient)",
                             fontWeight: weight,
@@ -574,7 +594,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                           }}
                         >
                           The quick brown fox jumps over the lazy dog
-                        </p>
+                        </Typography>
                       </div>
                     )}
                     {(weight < 200 || weight > 800) && (
@@ -583,11 +603,16 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
 
                     {/* Zodiak (100-900) */}
                     <div className="min-h-14">
-                      <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                      <Typography
+                        variant="caption"
+                        font="mono"
+                        className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      >
                         {weight}
-                      </p>
-                      <p
-                        className={`text-base ${zodiak.variable}`}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        className={zodiak.variable}
                         style={{
                           fontFamily: "var(--font-zodiak)",
                           fontWeight: weight,
@@ -596,16 +621,21 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                         }}
                       >
                         The quick brown fox jumps over the lazy dog
-                      </p>
+                      </Typography>
                     </div>
 
                     {/* Geist Mono (100-900) */}
                     <div className="min-h-14">
-                      <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                      <Typography
+                        variant="caption"
+                        font="mono"
+                        className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      >
                         {weight}
-                      </p>
-                      <p
-                        className={`text-base ${geistMono.variable}`}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        className={geistMono.variable}
                         style={{
                           fontFamily: "var(--font-geist-mono)",
                           fontWeight: weight,
@@ -614,7 +644,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                         }}
                       >
                         The quick brown fox jumps over the lazy dog
-                      </p>
+                      </Typography>
                     </div>
                   </div>
                 ))}
@@ -622,11 +652,16 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 {/* Italic row */}
                 <div className="grid grid-cols-4 gap-4">
                   <div className="min-h-14">
-                    <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                    <Typography
+                      variant="caption"
+                      font="mono"
+                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                    >
                       400 – ITALIC
-                    </p>
-                    <p
-                      className={`text-base italic ${satoshi.variable}`}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      className={`italic ${satoshi.variable}`}
                       style={{
                         fontFamily: "var(--font-satoshi)",
                         fontWeight: 400,
@@ -635,14 +670,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </p>
+                    </Typography>
                   </div>
                   <div className="min-h-14">
-                    <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                    <Typography
+                      variant="caption"
+                      font="mono"
+                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                    >
                       400 – ITALIC
-                    </p>
-                    <p
-                      className={`text-base italic ${sentient.variable}`}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      className={`italic ${sentient.variable}`}
                       style={{
                         fontFamily: "var(--font-sentient)",
                         fontWeight: 400,
@@ -651,14 +691,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </p>
+                    </Typography>
                   </div>
                   <div className="min-h-14">
-                    <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                    <Typography
+                      variant="caption"
+                      font="mono"
+                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                    >
                       400 – ITALIC
-                    </p>
-                    <p
-                      className={`text-base italic ${zodiak.variable}`}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      className={`italic ${zodiak.variable}`}
                       style={{
                         fontFamily: "var(--font-zodiak)",
                         fontWeight: 400,
@@ -667,14 +712,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </p>
+                    </Typography>
                   </div>
                   <div className="min-h-14">
-                    <p className="text-[0.6rem] text-muted-foreground mb-1 font-mono uppercase">
+                    <Typography
+                      variant="caption"
+                      font="mono"
+                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                    >
                       400 – ITALIC
-                    </p>
-                    <p
-                      className={`text-base italic ${geistMono.variable}`}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      className={`italic ${geistMono.variable}`}
                       style={{
                         fontFamily: "var(--font-geist-mono)",
                         fontWeight: 400,
@@ -683,7 +733,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </p>
+                    </Typography>
                   </div>
                 </div>
               </div>
@@ -710,70 +760,81 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 </div>
               </div>
               <div className="space-y-3">
-                {[
-                  { class: "typography-h1", label: "h1. Heading" },
-                  { class: "typography-h2", label: "h2. Heading" },
-                  { class: "typography-h3", label: "h3. Heading" },
-                  { class: "typography-h4", label: "h4. Heading" },
-                  { class: "typography-h5", label: "h5. Heading" },
-                  { class: "typography-h6", label: "h6. Heading" },
-                  {
-                    class: "typography-subtitle1",
-                    label:
-                      "subtitle1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
-                  },
-                  {
-                    class: "typography-subtitle2",
-                    label:
-                      "subtitle2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
-                  },
-                  {
-                    class: "typography-body1",
-                    label:
-                      "body1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
-                  },
-                  {
-                    class: "typography-body2",
-                    label:
-                      "body2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
-                  },
-                  { class: "typography-button", label: "button text" },
-                  { class: "typography-caption", label: "caption text" },
-                  { class: "typography-overline", label: "overline text" },
-                ].map((variant) => (
-                  <div key={variant.class} className="grid grid-cols-3 gap-8">
+                {(
+                  [
+                    { variant: "h1" as const, label: "h1. Heading" },
+                    { variant: "h2" as const, label: "h2. Heading" },
+                    { variant: "h3" as const, label: "h3. Heading" },
+                    { variant: "h4" as const, label: "h4. Heading" },
+                    { variant: "h5" as const, label: "h5. Heading" },
+                    { variant: "h6" as const, label: "h6. Heading" },
+                    {
+                      variant: "subtitle1" as const,
+                      label:
+                        "subtitle1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
+                    },
+                    {
+                      variant: "subtitle2" as const,
+                      label:
+                        "subtitle2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
+                    },
+                    {
+                      variant: "body1" as const,
+                      label:
+                        "body1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
+                    },
+                    {
+                      variant: "body2" as const,
+                      label:
+                        "body2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
+                    },
+                    { variant: "button" as const, label: "button text" },
+                    { variant: "caption" as const, label: "caption text" },
+                    { variant: "overline" as const, label: "overline text" },
+                  ] satisfies ReadonlyArray<{
+                    variant: TypographyVariant;
+                    label: string;
+                  }>
+                ).map((item) => (
+                  <div
+                    key={item.variant}
+                    className="grid grid-cols-3 gap-8"
+                  >
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {variant.class}
+                        {`typography-${item.variant}`}
                       </code>
-                      <p
-                        className={`${variant.class} mt-1 ${satoshi.variable}`}
+                      <Typography
+                        variant={item.variant}
+                        className={`mt-1 block ${satoshi.variable}`}
                         style={{ fontFamily: "var(--font-satoshi)" }}
                       >
-                        {variant.label}
-                      </p>
+                        {item.label}
+                      </Typography>
                     </div>
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {variant.class}
+                        {`typography-${item.variant}`}
                       </code>
-                      <p
-                        className={`${variant.class} mt-1 ${sentient.variable}`}
+                      <Typography
+                        variant={item.variant}
+                        className={`mt-1 block ${sentient.variable}`}
                         style={{ fontFamily: "var(--font-sentient)" }}
                       >
-                        {variant.label}
-                      </p>
+                        {item.label}
+                      </Typography>
                     </div>
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {variant.class}
+                        {`typography-${item.variant}`}
                       </code>
-                      <p
-                        className={`${variant.class} mt-1 ${geistMono.variable}`}
+                      <Typography
+                        variant={item.variant}
+                        className={`mt-1 block ${geistMono.variable}`}
                         style={{ fontFamily: "var(--font-geist-mono)" }}
                       >
-                        {variant.label}
-                      </p>
+                        {item.label}
+                      </Typography>
                     </div>
                   </div>
                 ))}
@@ -788,37 +849,49 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   <code className="text-xs text-muted-foreground">
                     {"<h1>"}
                   </code>
-                  <h1 className="mt-1">Heading 1</h1>
+                  <Typography variant="h1" className="mt-1">
+                    Heading 1
+                  </Typography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h2>"}
                   </code>
-                  <h2 className="mt-1">Heading 2</h2>
+                  <Typography variant="h2" className="mt-1">
+                    Heading 2
+                  </Typography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h3>"}
                   </code>
-                  <h3 className="mt-1">Heading 3</h3>
+                  <Typography variant="h3" className="mt-1">
+                    Heading 3
+                  </Typography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h4>"}
                   </code>
-                  <h4 className="mt-1">Heading 4</h4>
+                  <Typography variant="h4" className="mt-1">
+                    Heading 4
+                  </Typography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h5>"}
                   </code>
-                  <h5 className="mt-1">Heading 5</h5>
+                  <Typography variant="h5" className="mt-1">
+                    Heading 5
+                  </Typography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h6>"}
                   </code>
-                  <h6 className="mt-1">Heading 6</h6>
+                  <Typography variant="h6" className="mt-1">
+                    Heading 6
+                  </Typography>
                 </div>
               </div>
             </div>
@@ -838,7 +911,13 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   "text-4xl",
                 ].map((size) => (
                   <div key={size} className="space-y-1">
-                    <p className="text-xs text-muted-foreground">{size}</p>
+                    <Typography
+                      variant="caption"
+                      className="block text-muted-foreground"
+                    >
+                      {size}
+                    </Typography>
+                    {/* Intentional Tailwind scale demo (not design tokens) */}
                     <p className={size}>Sample Text</p>
                   </div>
                 ))}
@@ -859,27 +938,27 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <ContentText
               className={`space-y-4 font-serif ${sentient.variable}`}
             >
-              <h3 className="typography-h3 font-sans">What is Prism?</h3>
-              <p className="typography-body1 text-muted-foreground">
+              <Typography variant="h3">What is Prism?</Typography>
+              <Typography variant="body1" className="text-muted-foreground">
                 Prism is a full-stack app framework that gets you from zero to a
                 running Next.js app with a consistent stack: UI components,
                 database access, logging, feature flags, and deployment wiring.
                 It’s built for small teams and solo developers who want
                 structure without heavy boilerplate.
-              </p>
-              <p className="typography-body1 text-muted-foreground">
+              </Typography>
+              <Typography variant="body1" className="text-muted-foreground">
                 Out of the box you get a design system (Satoshi, Sentient,
                 Zodiak), layout wrappers for content and graphics, and a system
                 sheet for environment and dependency overview. The CLI can
                 scaffold new apps and packages, and the generator keeps your
                 config in sync across the monorepo.
-              </p>
-              <p className="typography-body1 text-muted-foreground">
+              </Typography>
+              <Typography variant="body1" className="text-muted-foreground">
                 Feature flags, authentication, and cost tracking plug in via
                 Prism packages so you can turn capabilities on when you need
                 them. If you want a single stack that stays consistent as the
                 product grows, Prism is built for that.
-              </p>
+              </Typography>
             </ContentText>
           </div>
         </ContentBreakout>

@@ -4,3 +4,4 @@ export * from "./card";
 export * from "./content";
 export * from "./icon";
 export * from "./prism-button";
+export * from "./typography";

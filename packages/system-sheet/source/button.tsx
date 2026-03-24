@@ -4,6 +4,7 @@ import {
   colorSpectrum,
   getDefaultPrismButtonPresetNames,
   PrismButton,
+  Typography,
 } from "@ui";
 import type { ColorName, PrismButtonSize } from "@ui";
 import {
@@ -347,7 +348,7 @@ export function Button() {
   return (
     <div className="mb-8">
       <h3 className="mb-2">Buttons</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <Typography variant="body2" className="text-muted-foreground mb-4">
         Toggle options to view appearances in the buttons below.{" "}
         <button
           type="button"
@@ -371,7 +372,7 @@ export function Button() {
         >
           View all variants here.
         </a>
-      </p>
+      </Typography>
       <div className="space-y-6">
         <div>
           <Row title="Presets (preset=…)">
@@ -389,7 +390,9 @@ export function Button() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
-                <p className="typography-overline">{heading}</p>
+                <Typography variant="overline" className="block">
+                  {heading}
+                </Typography>
                 {keys.map((key) => (
                   <label
                     key={key}
@@ -401,7 +404,7 @@ export function Button() {
                       onChange={() => toggle(key)}
                       className="rounded border-input"
                     />
-                    <span className="text-sm font-mono">
+                    <span className="typography-body2 font-mono">
                       {OPTION_LABEL[key]}
                     </span>
                   </label>

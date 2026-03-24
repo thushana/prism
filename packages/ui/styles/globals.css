@@ -227,6 +227,11 @@
     font-family: var(--font-mono), ui-monospace, monospace !important;
   }
 
+  /*
+   * typography-* classes implement the Typography component from @prism/ui.
+   * In app code use <Typography variant="…"> instead of these classes directly,
+   * except special cases (e.g. semantic <code className="typography-caption">).
+   */
   .typography-h1 {
     font-family: var(--font-headline);
     font-size: 2.25rem;
