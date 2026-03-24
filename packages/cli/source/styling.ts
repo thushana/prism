@@ -4,7 +4,7 @@
  * Provides chalk-based styling for CLI output using Material UI color palette
  */
 
-import chalk from "chalk";
+import chalk, { type ChalkInstance } from "chalk";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -38,9 +38,9 @@ const materialColors = Object.keys(materialUIColors)
 type ColorName = keyof typeof materialColors;
 
 interface ColorVariant {
-  light: chalk.Chalk;
-  default: chalk.Chalk;
-  dark: chalk.Chalk;
+  light: ChalkInstance;
+  default: ChalkInstance;
+  dark: ChalkInstance;
 }
 
 const createColorVariant = (name: ColorName): ColorVariant => {
@@ -133,7 +133,7 @@ export { materialColors };
  */
 let bannerConfig: {
   lines: string[];
-  colorSequence: Array<chalk.Chalk>;
+  colorSequence: ChalkInstance[];
 } | null = null;
 
 /**
@@ -141,7 +141,7 @@ let bannerConfig: {
  */
 export function setBannerConfig(config: {
   lines: string[];
-  colorSequence: Array<chalk.Chalk>;
+  colorSequence: ChalkInstance[];
 }): void {
   bannerConfig = config;
 }
@@ -190,7 +190,7 @@ export function loadCLIConfig(
 export function generateColorGradient(
   secondRowColorName: string,
   count: number
-): Array<chalk.Chalk> {
+): ChalkInstance[] {
   // Use colorNames array to ensure consistent order
   const colorOrder: ColorName[] = colorNames;
 
@@ -223,7 +223,7 @@ export function generateColorGradient(
     secondRowIndex === 0 ? colorOrder.length - 1 : secondRowIndex - 1;
 
   // Generate gradient by cycling through colors from start position
-  const gradient: Array<chalk.Chalk> = [];
+  const gradient: ChalkInstance[] = [];
   for (let i = 0; i < count; i++) {
     const colorIndex = (startIndex + i) % colorOrder.length;
     const colorName = colorOrder[colorIndex];
