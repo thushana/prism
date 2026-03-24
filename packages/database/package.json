@@ -16,7 +16,7 @@
   "devDependencies": {
     "drizzle-kit": "beta",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.1"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

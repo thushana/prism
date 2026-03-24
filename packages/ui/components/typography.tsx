@@ -83,6 +83,6 @@ export function Typography({
       style: mergedStyle,
       ...rest,
     },
-    children,
+    children
   );
 }
