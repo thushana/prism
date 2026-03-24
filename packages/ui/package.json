@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/react": "^19.2.6",
     "material-ui-colors": "^1.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   }
 }
