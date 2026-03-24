@@ -14,7 +14,7 @@
     "dotenv": "^17.2.3"
   },
   "peerDependencies": {
-    "drizzle-orm": "beta"
+    "drizzle-orm": "*"
   },
   "devDependencies": {
     "drizzle-kit": "beta",

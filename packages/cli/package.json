@@ -21,6 +21,7 @@
     "logger": "*"
   },
   "devDependencies": {
+    "logger": "file:../logger",
     "@types/node": "^25.0.0",
     "@vitest/ui": "^4.1.1",
     "typescript": "^6.0.0",

@@ -19,19 +19,19 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
-    "database": "*",
+    "database": "workspace:*",
     "dotenv": "^17.2.3",
-    "feature-flags": "*",
+    "feature-flags": "workspace:*",
     "flags": "^4.0.0",
-    "system-sheet": "*",
+    "system-sheet": "workspace:*",
     "drizzle-orm": "beta",
-    "intelligence": "*",
-    "logger": "*",
+    "intelligence": "workspace:*",
+    "logger": "workspace:*",
     "next": "16.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "ui": "*",
-    "@prism/utilities": "*"
+    "ui": "workspace:*",
+    "@prism/utilities": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",

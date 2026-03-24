@@ -2,7 +2,7 @@
 
 **@prism/core** - Foundational infrastructure for Next.js applications built with TypeScript, Tailwind CSS, Drizzle ORM, and AI capabilities.
 
-A [Next.js](https://nextjs.org) monorepo that can be used as a standalone package by apps in separate repositories. Uses npm workspaces to manage multiple applications and shared packages.
+A [Next.js](https://nextjs.org) monorepo that can be used as a standalone package by apps in separate repositories. Uses **pnpm** workspaces (`pnpm-workspace.yaml`) to manage multiple applications and shared packages.
 
 ## Project Structure
 
@@ -24,8 +24,8 @@ prism/
 
 ## Prerequisites
 
-- Node.js >= 22.0.0 (as specified in `package.json`)
-- npm (comes with Node.js)
+- Node.js >= 25.0.0 (see `engines` in `package.json` and `.nvmrc`)
+- [pnpm](https://pnpm.io) 10.x (`corepack enable` then `corepack prepare pnpm@10.28.0 --activate`, or install globally)
 
 ## Getting Started
 
@@ -34,7 +34,7 @@ prism/
 Install all dependencies for the monorepo:
 
 ```bash
-npm install
+pnpm install
 ```
 
 This will install dependencies for all workspaces (apps and packages).
@@ -44,7 +44,7 @@ This will install dependencies for all workspaces (apps and packages).
 Run the web app in development mode:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 This will:
@@ -57,57 +57,57 @@ Or run the web app:
 
 ```bash
 # Web app (http://localhost:3000)
-npm run dev:web
+pnpm run dev:web
 ```
 
-**Note:** The `apps/web` directory is kept as a sample. You can generate new apps using `prism generate <app-name>` (after `npm run setup`) or `npm run prism generate <app-name>`, which will create them in the `apps/` directory.
+**Note:** The `apps/web` directory is kept as a sample. You can generate new apps using `prism generate <app-name>` (after `pnpm run setup`) or `pnpm run prism generate <app-name>`, which will create them in the `apps/` directory.
 
 ## Available Scripts
 
 ### Development
 
-- `npm run dev` - Run web app in development mode (kills existing servers first)
-- `npm run dev:web` - Run web app only (port 3000)
-- `npm run dev:kill` - Kill all development servers on port 3000
+- `pnpm run dev` - Run web app in development mode (kills existing servers first)
+- `pnpm run dev:web` - Run web app only (port 3000)
+- `pnpm run dev:kill` - Kill all development servers on port 3000
 
 ### Building
 
-- `npm run build` - Build all apps
-- `npm run build:web` - Build web app only
+- `pnpm run build` - Build all apps
+- `pnpm run build:web` - Build web app only
 
 ### Production
 
-- `npm run start` - Start all production servers
-- `npm run start:web` - Start web app (port 3000)
+- `pnpm run start` - Start all production servers
+- `pnpm run start:web` - Start web app (port 3000)
 
 ### Code Quality
 
-- `npm run typecheck` - Run TypeScript type checking across all workspaces
-- `npm run lint` - Run ESLint across all workspaces
-- `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
-- `npm run quality` - Run typecheck, lint, format, and tests
-- `npm run quality:quick` - Run typecheck, lint, and format (no tests)
+- `pnpm run typecheck` - Run TypeScript type checking across all workspaces
+- `pnpm run lint` - Run ESLint across all workspaces
+- `pnpm run lint:fix` - Run ESLint with auto-fix
+- `pnpm run format` - Format code with Prettier
+- `pnpm run format:check` - Check code formatting
+- `pnpm run quality` - Run typecheck, lint, format, and tests
+- `pnpm run quality:quick` - Run typecheck, lint, and format (no tests)
 
 ### Testing
 
-- `npm run test` - Run all tests
-- `npm run test:run` - Run all tests once
-- `npm run test:ui` - Run tests with Vitest UI (web app)
-- `npm run test:coverage` - Generate coverage report (web app)
+- `pnpm run test` - Run all tests
+- `pnpm run test:run` - Run all tests once
+- `pnpm run test:ui` - Run tests with Vitest UI (web app)
+- `pnpm run test:coverage` - Generate coverage report (web app)
 
 ### Database
 
-- `npm run database:generate` - Generate database migrations
-- `npm run database:migrate` - Run database migrations
-- `npm run database:push` - Push schema changes to database
-- `npm run database:studio` - Open Drizzle Studio (database GUI)
+- `pnpm run database:generate` - Generate database migrations
+- `pnpm run database:migrate` - Run database migrations
+- `pnpm run database:push` - Push schema changes to database
+- `pnpm run database:studio` - Open Drizzle Studio (database GUI)
 
 ### Utilities
 
-- `npm run clean` - Clean build artifacts
-- `npm run watch` - Watch TypeScript files
+- `pnpm run clean` - Clean build artifacts
+- `pnpm run watch` - Watch TypeScript files
 
 ## Tech Stack
 
@@ -116,12 +116,12 @@ npm run dev:web
 - **Framework**: Next.js 16.0.3 (App Router)
 - **Language**: TypeScript 5.9.3 (target: ES2022)
 - **Styling**: Tailwind CSS 4.1.17
-- **Monorepo**: npm workspaces
+- **Monorepo**: pnpm workspaces
 
 ### Apps
 
 - **apps/web**: Sample Next.js application (reference implementation)
-- **apps/\***: Generated apps (created via `prism generate <name>` or `npm run prism generate <name>`)
+- **apps/\***: Generated apps (created via `prism generate <name>` or `pnpm run prism generate <name>`)
 
 ### Packages
 
@@ -149,13 +149,13 @@ This project uses [Vitest](https://vitest.dev/) for testing. Tests should be pla
 
 ```bash
 # Run tests
-npm run test
+pnpm run test
 
 # Run tests with UI
-npm run test:ui
+pnpm run test:ui
 
 # Run tests with coverage
-npm run test:coverage
+pnpm run test:coverage
 ```
 
 ## Database
@@ -175,16 +175,16 @@ const data = await db.query.users.findMany();
 
 ```bash
 # Generate migrations from schema changes
-npm run database:generate
+pnpm run database:generate
 
 # Apply migrations
-npm run database:migrate
+pnpm run database:migrate
 
 # Push schema changes directly (development)
-npm run database:push
+pnpm run database:push
 
 # Open Drizzle Studio GUI
-npm run database:studio
+pnpm run database:studio
 ```
 
 ## Using Prism Core
@@ -196,11 +196,11 @@ Apps in separate repositories can import Prism Core as a dependency. The generat
 **Option 1: Git Submodule (Recommended - One Deployable Repo)**
 
 ```bash
-# Direct mode (recommended after npm run setup)
+# Direct mode (recommended after pnpm run setup)
 prism generate my-app --path ../my-app
 
-# Or via npm script
-npm run prism generate my-app --path ../my-app
+# Or via package.json script
+pnpm run prism generate my-app --path ../my-app
 ```
 
 This automatically:
@@ -210,16 +210,16 @@ This automatically:
 - Creates a single deployable repo (your app + Prism submodule)
 - Allows committing Prism changes from within your app
 
-After updating the submodule, run `npm run prism:sync` from your app root to align scripts, Cursor commands, and shared dependency ranges. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
+After updating the submodule, run `pnpm run prism:sync` from your app root to align scripts, Cursor commands, and shared dependency ranges. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
 
 **Option 2: Git Dependency (Alternative for Deployment)**
 
 ```bash
-# Direct mode (recommended after npm run setup)
+# Direct mode (recommended after pnpm run setup)
 prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 
-# Or via npm script
-npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+# Or via package.json script
+pnpm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 
 This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process. Note: You won't be able to commit Prism changes from within your app with this approach.
@@ -425,7 +425,7 @@ See [docs/LOGGER-Prism.md](./docs/LOGGER-Prism.md) for full logger documentation
 
 ### Monorepos
 
-- [npm workspaces](https://docs.npmjs.com/cli/v10/using-npm/workspaces)
+- [pnpm workspaces](https://pnpm.io/workspaces)
 - [Turborepo](https://turbo.build/) - Consider for larger monorepos
 
 ### Drizzle ORM
@@ -436,7 +436,7 @@ See [docs/LOGGER-Prism.md](./docs/LOGGER-Prism.md) for full logger documentation
 ## Contributing
 
 1. Make changes in the appropriate workspace
-2. Run `npm run quality` to ensure code quality
+2. Run `pnpm run quality` to ensure code quality
 3. Commit with descriptive messages (see `.cursor/commands/COMMITMESSAGE.md`)
 4. Pre-commit hooks will automatically format and lint your code
 

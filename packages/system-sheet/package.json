@@ -8,8 +8,8 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "ui": "*",
-    "@prism/utilities": "*"
+    "ui": "file:../ui",
+    "@prism/utilities": "file:../utilities"
   },
   "peerDependencies": {
     "next": "^16.0.0",

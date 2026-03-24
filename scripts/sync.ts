@@ -2,10 +2,10 @@
 /**
  * Orchestrates the full Prism sync pipeline for a child application:
  * 1. Submodule (sync-git)
- * 2. npm scripts from Prism workspace into parent (sync-scripts)
+ * 2. Package scripts from Prism workspace into parent (sync-scripts)
  * 3. Cursor commands (sync-commands)
  * 4. Parent package.json dependency ranges vs apps/web (sync-dependencies --update)
- * 5. npm install in parent, then in prism/
+ * 5. pnpm install in parent, then in prism/
  *
  * See docs/SYNC-Prism.md for overview; this file is the source of truth for step order.
  */
@@ -72,9 +72,9 @@ function sync(): void {
     // Install dependencies in app root
     console.log("Step 5: Installing dependencies in app...\n");
     if (fs.existsSync(path.join(APP_ROOT, "package.json"))) {
-      execSync("npm install", { 
-        cwd: APP_ROOT, 
-        stdio: "inherit" 
+      execSync("pnpm install", {
+        cwd: APP_ROOT,
+        stdio: "inherit",
       });
     } else {
       console.log("   ⚠️  No package.json found in app root, skipping...");
@@ -85,9 +85,9 @@ function sync(): void {
     // Install dependencies in prism root
     console.log("Step 6: Installing dependencies in prism...\n");
     if (fs.existsSync(path.join(PRISM_ROOT, "package.json"))) {
-      execSync("npm install", { 
-        cwd: PRISM_ROOT, 
-        stdio: "inherit" 
+      execSync("pnpm install", {
+        cwd: PRISM_ROOT,
+        stdio: "inherit",
       });
     } else {
       console.log("   ⚠️  No package.json found in prism root, skipping...");
