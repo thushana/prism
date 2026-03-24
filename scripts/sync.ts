@@ -51,8 +51,15 @@ function sync(): void {
 
     console.log("\n");
 
+    // Align root dependency ranges with prism/apps/web
+    console.log("Step 4: Syncing dependency versions to app root...\n");
+    const syncDepsPath = path.join(scriptDir, "sync-deps.ts");
+    execSync(`tsx ${syncDepsPath} --update`, { stdio: "inherit" });
+
+    console.log("\n");
+
     // Install dependencies in app root
-    console.log("Step 4: Installing dependencies in app...\n");
+    console.log("Step 5: Installing dependencies in app...\n");
     if (fs.existsSync(path.join(APP_ROOT, "package.json"))) {
       execSync("npm install", { 
         cwd: APP_ROOT, 
@@ -65,7 +72,7 @@ function sync(): void {
     console.log("\n");
 
     // Install dependencies in prism root
-    console.log("Step 5: Installing dependencies in prism...\n");
+    console.log("Step 6: Installing dependencies in prism...\n");
     if (fs.existsSync(path.join(PRISM_ROOT, "package.json"))) {
       execSync("npm install", { 
         cwd: PRISM_ROOT, 
