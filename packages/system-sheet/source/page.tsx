@@ -218,7 +218,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="grid grid-cols-3 gap-4">
                 {Object.entries(data.techStack).map(([key, value]) => (
                   <div key={key} className="space-y-1">
-                    <p className="typography-label capitalize">{key}</p>
+                    <p className="typography-overline">{key}</p>
                     <Badge variant="outline">{value}</Badge>
                   </div>
                 ))}
@@ -246,7 +246,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
               {data.git.commitMessage && (
                 <div className="space-y-1 md:col-span-4">
-                  <p className="typography-label">Commit Message</p>
+                  <p className="typography-overline">Commit Message</p>
                   <p className="text-sm text-muted-foreground">
                     {data.git.commitMessage}
                   </p>
@@ -254,7 +254,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.git.commitAuthor && (
                 <div className="space-y-1 md:col-span-2">
-                  <p className="typography-label">Commit Author</p>
+                  <p className="typography-overline">Commit Author</p>
                   <Badge variant="outline">{data.git.commitAuthor}</Badge>
                 </div>
               )}
@@ -263,7 +263,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               {data.git.commitSha && (
                 <div className="space-y-1">
-                  <p className="typography-label">Commit SHA</p>
+                  <p className="typography-overline">Commit SHA</p>
                   {data.git.commitUrl ? (
                     <a
                       href={data.git.commitUrl}
@@ -287,7 +287,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.git.repositoryUrl && (
                 <div className="space-y-1">
-                  <p className="typography-label">Repository</p>
+                  <p className="typography-overline">Repository</p>
                   <a
                     href={data.git.repositoryUrl}
                     target="_blank"
@@ -304,20 +304,20 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 </div>
               )}
               <div className="space-y-1">
-                <p className="typography-label">Status</p>
+                <p className="typography-overline">Status</p>
                 <Badge variant="outline">
                   {data.git.status === "clean" ? "clean" : "dirty"}
                 </Badge>
               </div>
               {data.git.branch && (
                 <div className="space-y-1">
-                  <p className="typography-label">Branch</p>
+                  <p className="typography-overline">Branch</p>
                   <Badge variant="outline">{data.git.branch}</Badge>
                 </div>
               )}
               {data.git.commitDate && (
                 <div className="space-y-1 md:col-span-2">
-                  <p className="typography-label">Commit Date</p>
+                  <p className="typography-overline">Commit Date</p>
                   <Badge variant="outline">
                     {formatDateTimeWithRelative(data.git.commitDate)}
                   </Badge>
@@ -333,17 +333,17 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">Vercel Deployment</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <p className="typography-label">Environment</p>
+                <p className="typography-overline">Environment</p>
                 <Badge variant="outline">{data.vercel.env}</Badge>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
-                  <p className="typography-label">Region</p>
+                  <p className="typography-overline">Region</p>
                   <Badge variant="outline">{data.vercel.region}</Badge>
                 </div>
               )}
               <div className="space-y-1">
-                <p className="typography-label">Build Time</p>
+                <p className="typography-overline">Build Time</p>
                 <Badge variant="outline">
                   {formatDateTimeWithRelative(data.vercel.buildTime)}
                 </Badge>
@@ -352,7 +352,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="mt-4 space-y-3">
               {data.vercel.url && (
                 <div className="space-y-1">
-                  <p className="typography-label">Deployment URL</p>
+                  <p className="typography-overline">Deployment URL</p>
                   <a
                     href={data.vercel.url}
                     target="_blank"
@@ -378,7 +378,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.branchUrl && (
                 <div className="space-y-1">
-                  <p className="typography-label">Branch URL</p>
+                  <p className="typography-overline">Branch URL</p>
                   <a
                     href={data.vercel.branchUrl}
                     target="_blank"
@@ -404,7 +404,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.productionUrl && (
                 <div className="space-y-1">
-                  <p className="typography-label">Production URL</p>
+                  <p className="typography-overline">Production URL</p>
                   <a
                     href={data.vercel.productionUrl}
                     target="_blank"
@@ -438,15 +438,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">UI Configuration</h2>
             <div className="grid grid-cols-6 gap-4">
               <div className="space-y-1">
-                <p className="typography-label">Style</p>
+                <p className="typography-overline">Style</p>
                 <Badge variant="outline">{data.shadcn.style}</Badge>
               </div>
               <div className="space-y-1">
-                <p className="typography-label">Icon Library</p>
+                <p className="typography-overline">Icon Library</p>
                 <Badge variant="outline">{data.shadcn.iconLibrary}</Badge>
               </div>
               <div className="space-y-1">
-                <p className="typography-label">Base Color</p>
+                <p className="typography-overline">Base Color</p>
                 <Badge variant="outline">{data.shadcn.baseColor}</Badge>
               </div>
             </div>
@@ -740,7 +740,6 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   { class: "typography-button", label: "button text" },
                   { class: "typography-caption", label: "caption text" },
                   { class: "typography-overline", label: "overline text" },
-                  { class: "typography-label", label: "label text" },
                 ].map((variant) => (
                   <div key={variant.class} className="grid grid-cols-3 gap-8">
                     <div>

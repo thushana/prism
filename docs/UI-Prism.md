@@ -262,8 +262,7 @@ Use on any element to set `font-family` to the bound Prism variable.
 - `.typography-body1` / `.typography-body2` - Body text styles
 - `.typography-button` - Button text style
 - `.typography-caption` - Caption text style
-- `.typography-overline` - Overline text style
-- `.typography-label` - Label text style
+- `.typography-overline` - Overline and small field-label text (uppercase, tracked)
 
 **Example:**
 
