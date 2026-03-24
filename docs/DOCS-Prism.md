@@ -37,6 +37,7 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 └── docs/
     ├── ARCHITECTURE-{Project}.md          # Mental model (~200 lines)
     ├── GLOSSARY-{Project}.md              # Domain terms
+    ├── SYNC-{Project}.md                  # Submodule sync (child apps)
     ├── CONVENTIONS-{Project}.md           # Code conventions
     └── decisions/
         └── 001-DECISION-{short-description}.md

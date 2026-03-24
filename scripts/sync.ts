@@ -1,7 +1,13 @@
 #!/usr/bin/env tsx
 /**
- * Sync both git and scripts from prism
- * Runs prism:sync:git and prism:sync:scripts
+ * Orchestrates the full Prism sync pipeline for a child application:
+ * 1. Submodule (sync-git)
+ * 2. npm scripts from Prism workspace into parent (sync-scripts)
+ * 3. Cursor commands (sync-commands)
+ * 4. Parent package.json dependency ranges vs apps/web (sync-dependencies --update)
+ * 5. npm install in parent, then in prism/
+ *
+ * See docs/SYNC-Prism.md for overview; this file is the source of truth for step order.
  */
 
 import { execSync } from "child_process";
@@ -53,8 +59,13 @@ function sync(): void {
 
     // Align root dependency ranges with prism/apps/web
     console.log("Step 4: Syncing dependency versions to app root...\n");
-    const syncDepsPath = path.join(scriptDir, "sync-deps.ts");
-    execSync(`tsx ${syncDepsPath} --update`, { stdio: "inherit" });
+    const synchronizeDependenciesScriptPath = path.join(
+      scriptDir,
+      "sync-dependencies.ts",
+    );
+    execSync(`tsx ${synchronizeDependenciesScriptPath} --update`, {
+      stdio: "inherit",
+    });
 
     console.log("\n");
 
