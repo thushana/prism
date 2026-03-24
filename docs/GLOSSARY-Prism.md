@@ -108,9 +108,9 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 ## Sync
 
-**Definition**: The process of copying files, scripts, or commands from Prism to a child app to keep them in sync.
+**Definition**: The process of updating the Prism submodule and aligning the child app with Prism’s scripts, Cursor commands, and selected dependency ranges from the reference app (`apps/web`).
 
-**Context**: Run via `npm run prism:sync` commands. Ensures child apps have the latest Prism tooling, scripts, or configuration without manual copying.
+**Context**: Run from the child app root via `npm run prism:sync` (full pipeline) or the narrower `prism:sync:*` scripts. See [SYNC-Prism.md](./SYNC-Prism.md) for intent, commands, and submodule commit order.
 
 **Related**: CLI Tool, Child App
 

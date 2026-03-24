@@ -210,6 +210,8 @@ This automatically:
 - Creates a single deployable repo (your app + Prism submodule)
 - Allows committing Prism changes from within your app
 
+After updating the submodule, run `npm run prism:sync` from your app root to align scripts, Cursor commands, and shared dependency ranges. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
+
 **Option 2: Git Dependency (Alternative for Deployment)**
 
 ```bash
