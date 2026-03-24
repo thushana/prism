@@ -19,7 +19,7 @@
     "clsx": "^2.1.1",
     "gsap": "^3.12.5",
     "lucide-react": "^0.562.0",
-    "tailwind-merge": "^3.4.0",
+    "tailwind-merge": "^3.5.0",
     "@prism/utilities": "*"
   },
   "peerDependencies": {
@@ -30,6 +30,6 @@
     "@types/react": "^19.2.6",
     "material-ui-colors": "^1.0.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.1"
   }
 }

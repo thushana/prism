@@ -84,16 +84,16 @@
     ]
   },
   "dependencies": {
-    "lightningcss": "^1.30.2",
-    "swr": "^2.2.5"
+    "lightningcss": "^1.32.0",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "eslint": "^9.39.1",
-    "eslint-config-next": "16.1.6",
-    "@eslint/compat": "^1.2.4",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.1",
+    "@eslint/compat": "^2.0.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
@@ -115,6 +115,6 @@
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.0"
+    "zod": "^4.0.0"
   }
 }
