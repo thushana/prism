@@ -8,7 +8,7 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^1.0.0",
     "ui": "*",
     "@prism/utilities": "*"
   },
