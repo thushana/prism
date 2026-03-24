@@ -255,7 +255,7 @@ All color variables have dark mode variants defined in `.dark` class.
 
 Use on any element to set `font-family` to the bound Prism variable.
 
-**MUI-style typography classes:**
+**MUI-style typography classes** (implementation layer — prefer the component below in app code):
 
 - `.typography-h1` through `.typography-h6` - Heading styles
 - `.typography-subtitle1` / `.typography-subtitle2` - Subtitle styles
@@ -264,13 +264,33 @@ Use on any element to set `font-family` to the bound Prism variable.
 - `.typography-caption` - Caption text style
 - `.typography-overline` - Overline and small field-label text (uppercase, tracked)
 
+### Typography component
+
+Use `<Typography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for type scale. Add colour and spacing with `className` (e.g. `text-muted-foreground`, `mb-4`).
+
+**Props:**
+
+- `variant` (required): `h1` | `h2` | `h3` | `h4` | `h5` | `h6` | `subtitle1` | `subtitle2` | `body1` | `body2` | `button` | `caption` | `overline`
+- `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
+- `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
+
+**Default element per variant:** `h1`–`h6` → matching heading; `subtitle1` / `subtitle2` / `body1` / `body2` → `p`; `button` / `caption` / `overline` → `span` (use `className="block"` on `overline` when it should behave as a block label).
+
 **Example:**
 
 ```tsx
-<h1 className="typography-h1">Heading 1</h1>
-<p className="typography-body1">Body text</p>
-<span className="typography-caption">Caption</span>
+import { Typography } from "@ui";
+
+<Typography variant="h1">Heading 1</Typography>
+<Typography variant="body1" className="text-muted-foreground">
+  Body text
+</Typography>
+<Typography variant="overline" className="block text-muted-foreground">
+  Section label
+</Typography>
 ```
+
+**Exception:** semantic `<code className="typography-caption">` is fine where the element must stay `code`.
 
 ### Layout Wrappers
 
