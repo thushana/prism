@@ -9,10 +9,10 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
+import { readWorkspaceGlobs } from "./read-workspace-globs";
+
 const rootDir = path.join(__dirname, "..");
-const packageJsonPath = path.join(rootDir, "package.json");
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
-const workspaces: string[] = packageJson.workspaces ?? [];
+const workspaces: string[] = readWorkspaceGlobs(rootDir);
 
 const expanded: string[] = [];
 for (const w of workspaces) {
@@ -40,7 +40,7 @@ for (const workspace of expanded) {
 
   const name = path.basename(dir);
   try {
-    execSync("npx tsc --noEmit", { cwd: dir, stdio: "inherit" });
+    execSync("pnpm exec tsc --noEmit", { cwd: dir, stdio: "inherit" });
   } catch {
     failed = true;
   }

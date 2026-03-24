@@ -29,7 +29,8 @@ if (isInPrism) {
   PRISM_DIR = path.join(PARENT_OR_APP_DIR, "prism");
 }
 
-const QUALITY_CMD = "npm run format && npm run lint && npm run typecheck && npm run test:run";
+const QUALITY_CMD =
+  "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run test:run";
 
 function runQualityChecks(cwd: string, _projectName: string): void {
   try {

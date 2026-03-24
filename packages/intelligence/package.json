@@ -22,7 +22,7 @@
     "@ai-sdk/gateway": "^3.0.80",
     "zod": "^4.3.6",
     "server-only": "^0.0.1",
-    "logger": "*"
+    "logger": "file:../logger"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",

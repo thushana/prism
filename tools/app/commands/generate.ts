@@ -40,7 +40,10 @@ function detectPackageManager(): string {
   if (fs.existsSync(path.join(process.cwd(), "pnpm-lock.yaml"))) {
     return "pnpm";
   }
-  return "npm";
+  if (fs.existsSync(path.join(process.cwd(), "package-lock.json"))) {
+    return "npm";
+  }
+  return "pnpm";
 }
 
 /**
@@ -747,7 +750,9 @@ export async function runGenerateCommand(
         log.info("✅ Dependencies installed successfully");
       } catch {
         log.warn("Failed to install dependencies automatically");
-        log.warn("Please run 'npm install' manually in the generated app");
+        log.warn(
+          "Please run 'pnpm install' (or your package manager's install) manually in the generated app",
+        );
       }
     }
 
@@ -808,7 +813,7 @@ export async function runGenerateCommand(
     log.info(`\nNext steps:`);
     const relativePath = path.relative(process.cwd(), targetDir);
     log.info(`  cd ${relativePath}`);
-    log.info(`  npm run dev`);
+    log.info(`  ${pm} run dev`);
   } catch (error) {
     log.error(`Failed to generate app: ${error}`);
     process.exitCode = 1;

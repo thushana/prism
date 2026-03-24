@@ -164,7 +164,7 @@ function syncScripts(): void {
         adaptedValue = "tsx prism/scripts/quality.ts";
       }
       if (key === "quality:quick") {
-        adaptedValue = "npm run format && npm run lint && npm run typecheck";
+        adaptedValue = "pnpm run format && pnpm run lint && pnpm run typecheck";
       }
 
       // quality script is smart and handles both app and prism automatically
@@ -181,7 +181,7 @@ function syncScripts(): void {
 
       // Adapt generate:colors to use correct path
       if (key === "generate:colors") {
-        adaptedValue = "cd prism/packages/ui && npm run generate:colors";
+        adaptedValue = "cd prism/packages/ui && pnpm run generate:colors";
       }
 
       // Adapt vercel:build to work in main project
@@ -198,7 +198,8 @@ function syncScripts(): void {
   const isTargetingApp = path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
   if (isTargetingApp && mergedScripts) {
     mergedScripts.quality = "tsx prism/scripts/quality.ts";
-    mergedScripts["quality:quick"] = "npm run format && npm run lint && npm run typecheck";
+    mergedScripts["quality:quick"] =
+      "pnpm run format && pnpm run lint && pnpm run typecheck";
   }
 
   // Sort scripts alphabetically
