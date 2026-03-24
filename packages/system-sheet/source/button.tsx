@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  colorSpectrum,
+  getColorForIndex,
   getDefaultPrismButtonPresetNames,
   PrismButton,
   Typography,
@@ -215,15 +215,12 @@ function Row({
   );
 }
 
-/** Random color per preset name, stable for the session (set on init). */
+/** Deterministic color per preset (by index) so SSR and client markup match. */
 function usePresetColors(): Record<string, ColorName> {
   return useState(() => {
     const names = getDefaultPrismButtonPresetNames();
     return Object.fromEntries(
-      names.map((name) => [
-        name,
-        colorSpectrum[Math.floor(Math.random() * colorSpectrum.length)],
-      ])
+      names.map((name, i) => [name, getColorForIndex(i)])
     ) as Record<string, ColorName>;
   })[0];
 }
