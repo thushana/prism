@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
-    "drizzle-orm": "beta",
+    "drizzle-orm": "^0.45.1",
     "dotenv": "^17.2.3"
   },
   "peerDependencies": {
     "drizzle-orm": "*"
   },
   "devDependencies": {
-    "drizzle-kit": "beta",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   },
