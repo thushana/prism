@@ -5,7 +5,7 @@
 - **Framework**: Next.js 16.1.1 (App Router)
 - **Language**: TypeScript 5.9.3 (target: ES2022)
 - **Styling**: Tailwind CSS 4.1.17
-- **Database**: Drizzle ORM (beta) with Neon PostgreSQL
+- **Database**: Drizzle ORM with Neon PostgreSQL
 - **Testing**: Vitest 4.0.10 with React Testing Library
 - **Linting**: ESLint 9.39.1
 - **Formatting**: Prettier 3.6.2
