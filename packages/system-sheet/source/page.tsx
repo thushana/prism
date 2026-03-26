@@ -252,20 +252,25 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
         {showGit && data.git && (
           <div className="border-t pt-8">
             <h2 className="mb-4">Git</h2>
-            {/* First row: Commit Message (4 cols) and Commit Author (2 cols) */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+            {/* First row: Full-width blocks */}
+            <div className="mb-4 space-y-4">
               {data.git.commitMessage && (
-                <div className="space-y-1 md:col-span-4">
+                <div className="space-y-1 w-full">
                   <PrismTypography role="overline" size="small">
                     Commit Message
                   </PrismTypography>
-                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
+                  <PrismTypography
+                    role="body"
+                    size="medium"
+                    font="mono"
+                    className="block w-full text-muted-foreground wrap-break-word"
+                  >
                     {data.git.commitMessage}
                   </PrismTypography>
                 </div>
               )}
               {data.git.commitAuthor && (
-                <div className="space-y-1 md:col-span-2">
+                <div className="space-y-1">
                   <PrismTypography role="overline" size="small">
                     Commit Author
                   </PrismTypography>
@@ -585,9 +590,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {weight >= 300 && weight <= 900 && (
                       <div className="min-h-14">
                         <PrismTypography
-                          role="label" size="small"
+                          role="overline" size="small"
                           font="mono"
-                          className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                          className="mb-1 text-muted-foreground"
                         >
                           {weight}
                         </PrismTypography>
@@ -611,9 +616,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {weight >= 200 && weight <= 800 && (
                       <div className="min-h-14">
                         <PrismTypography
-                          role="label" size="small"
+                          role="overline" size="small"
                           font="mono"
-                          className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                          className="mb-1 text-muted-foreground"
                         >
                           {weight}
                         </PrismTypography>
@@ -638,9 +643,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Zodiak (100-900) */}
                     <div className="min-h-14">
                       <PrismTypography
-                        role="label" size="small"
+                        role="overline" size="small"
                         font="mono"
-                        className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                        className="mb-1 text-muted-foreground"
                       >
                         {weight}
                       </PrismTypography>
@@ -661,9 +666,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Geist Mono (100-900) */}
                     <div className="min-h-14">
                       <PrismTypography
-                        role="label" size="small"
+                        role="overline" size="small"
                         font="mono"
-                        className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                        className="mb-1 text-muted-foreground"
                       >
                         {weight}
                       </PrismTypography>
@@ -687,9 +692,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <div className="grid grid-cols-4 gap-4">
                   <div className="min-h-14">
                     <PrismTypography
-                      role="label" size="small"
+                      role="overline" size="small"
                       font="mono"
-                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      className="mb-1 text-muted-foreground"
                     >
                       400 – ITALIC
                     </PrismTypography>
@@ -708,9 +713,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   </div>
                   <div className="min-h-14">
                     <PrismTypography
-                      role="label" size="small"
+                      role="overline" size="small"
                       font="mono"
-                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      className="mb-1 text-muted-foreground"
                     >
                       400 – ITALIC
                     </PrismTypography>
@@ -729,9 +734,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   </div>
                   <div className="min-h-14">
                     <PrismTypography
-                      role="label" size="small"
+                      role="overline" size="small"
                       font="mono"
-                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      className="mb-1 text-muted-foreground"
                     >
                       400 – ITALIC
                     </PrismTypography>
@@ -750,9 +755,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   </div>
                   <div className="min-h-14">
                     <PrismTypography
-                      role="label" size="small"
+                      role="overline" size="small"
                       font="mono"
-                      className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
+                      className="mb-1 text-muted-foreground"
                     >
                       400 – ITALIC
                     </PrismTypography>
