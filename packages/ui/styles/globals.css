@@ -234,20 +234,21 @@
    */
   .typography-display-large {
     font-family: var(--font-headline);
-    font-size: 4rem;
-    line-height: 1;
+    font-size: 6rem;
+    line-height: 1.08;
     font-weight: 500;
     letter-spacing: -0.015625rem;
   }
   .typography-display-medium {
     font-family: var(--font-headline);
-    font-size: 3rem;
-    line-height: 1.05;
+    font-size: 5rem;
+    line-height: 1.08;
     font-weight: 500;
+    letter-spacing: -0.015625rem;
   }
   .typography-display-small {
     font-family: var(--font-headline);
-    font-size: 2.25rem;
+    font-size: 4rem;
     line-height: 1.1;
     font-weight: 500;
   }
@@ -257,6 +258,7 @@
     line-height: 1.125;
     font-weight: 500;
   }
+  /* medium/small use 400 vs large 500 — lighter subheads under the primary headline. */
   .typography-headline-medium {
     font-family: var(--font-headline);
     font-size: 1.625rem;
@@ -349,6 +351,20 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+  }
+
+  /* System sheet type scale preview: extra descender room so tight rows don’t clip; not on base tokens. */
+  .typography-preview .typography-display-large,
+  .typography-preview .typography-display-medium {
+    padding-bottom: 0.12em;
+  }
+  .typography-preview .typography-display-small {
+    padding-bottom: 0.1em;
+  }
+  .typography-preview .typography-headline-large,
+  .typography-preview .typography-headline-medium,
+  .typography-preview .typography-headline-small {
+    padding-bottom: 0.08em;
   }
 }
 

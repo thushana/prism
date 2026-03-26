@@ -403,9 +403,14 @@ export function Button() {
                       onChange={() => toggle(key)}
                       className="rounded border-input"
                     />
-                    <span className="typography-body-medium font-mono">
+                    <PrismTypography
+                      role="label"
+                      size="medium"
+                      color="muted"
+                      font="mono"
+                    >
                       {OPTION_LABEL[key]}
-                    </span>
+                    </PrismTypography>
                   </label>
                 ))}
               </div>
