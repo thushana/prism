@@ -57,7 +57,8 @@ const DEFAULT_ELEMENT: Record<
   Record<PrismTypographySize, PrismTypographyElement>
 > = {
   display: { large: "h1", medium: "h2", small: "h3" },
-  headline: { large: "h1", medium: "h2", small: "h3" },
+  /* large is h2 so a page can use display-large as the single top-level h1 without duplicate h1s. */
+  headline: { large: "h2", medium: "h3", small: "h4" },
   title: { large: "h4", medium: "h5", small: "h6" },
   body: { large: "p", medium: "p", small: "p" },
   label: { large: "span", medium: "span", small: "span" },
@@ -71,7 +72,11 @@ export type PrismTypographyProps = {
   color?: PrismTypographyColor;
   font?: PrismTypographyFont;
   fontFamily?: string;
-  /** Override rendered element (a11y / SEO). */
+  /**
+   * Override the rendered element for correct document outline (a11y / SEO). Defaults follow
+   * `role` × `size`; use e.g. `as="h1"` for the lone page title or `as="h3"` when nesting under a
+   * section heading so you do not duplicate or skip levels.
+   */
   as?: React.ElementType;
   className?: string;
   style?: React.CSSProperties;
@@ -106,10 +111,11 @@ export function PrismTypography({
           ? "font-mono"
           : undefined;
 
+  const balanceWrap = { textWrap: "balance" } as React.CSSProperties;
   const mergedStyle =
     fontFamily !== undefined && fontFamily !== ""
-      ? { ...style, fontFamily }
-      : style;
+      ? { ...balanceWrap, ...style, fontFamily }
+      : { ...balanceWrap, ...style };
 
   const typographyClass = `typography-${role}-${size}`;
 

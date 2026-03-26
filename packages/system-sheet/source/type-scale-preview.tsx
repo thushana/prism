@@ -19,6 +19,26 @@ interface TypeScalePreviewProps {
   geistMonoVariableClass: string;
 }
 
+type TypographyOptionKey =
+  | "styleThin"
+  | "styleBold"
+  | "styleBlack"
+  | "styleItalic"
+  | "styleCaseCaps"
+  | "styleCaseTitle"
+  | "styleCaseLower"
+  | "colorForeground"
+  | "colorMuted"
+  | "colorMonochrome"
+  | "colorGradientSideways"
+  | "colorGradientUp"
+  | "colorGradientAngle"
+  | "alignLeft"
+  | "alignCenter"
+  | "alignRight"
+  | "alignJustified"
+  | "wrapBalance";
+
 const TYPE_SCALE_ITEMS: ReadonlyArray<{
   role: PrismTypographyRole;
   size: PrismTypographySize;
@@ -78,6 +98,14 @@ const HEADLINE_POOL: ReadonlyArray<string> = [
   "Banks tighten lending as creative tech costs climb",
   "CEO says color systems revenue beat forecasts by $180M",
   '"No quick fix," analysts warn, as supply chains strain for rare glass',
+  "After a year of redesign work and 47 prototype rounds, the transit authority finally approved the wayfinding system that color-codes every station, platform, and transfer corridor across the network",
+  "As rain moved offshore and sunlight returned in narrow bands, thousands gathered on the riverfront to watch a full double rainbow arc over the skyline while drone crews broadcast the event live",
+  "Engineers say the latest rendering pipeline cuts first-paint time by 38% on mid-range devices, but caution that long-form typography still needs tuning to avoid awkward one-word final lines",
+  "What started as a small neighborhood lighting test became a citywide rollout after residents reported fewer navigation errors, faster response times, and significantly better readability at night",
+  "Curators reopened the gallery's longest corridor with suspended glass panels that refract daylight from noon to sunset, creating shifting color fields that change perception of scale and distance",
+  "Despite budget pressure and shipping delays, the studio committed to preserving editorial typography standards, arguing that consistent rhythm and balanced wrapping materially improve comprehension",
+  "In a rare joint statement, design and engineering leaders agreed to prioritize text quality metrics this quarter, including rag smoothness, balanced wraps, and reduction of high-variance line lengths",
+  "The new content system now flags headlines likely to produce typographic widows, then suggests alternative phrasings that preserve meaning while producing stronger multiline composition",
 ];
 
 const TITLE_POOL: ReadonlyArray<string> = [
@@ -220,22 +248,78 @@ const SAMPLE_INDEX_RANGE = Math.max(
   BODY_POOL.length
 );
 
+const TYPOGRAPHY_OPTION_COLUMNS: {
+  heading: string;
+  keys: TypographyOptionKey[];
+}[] = [
+  {
+    heading: "STYLE",
+    keys: [
+      "styleThin",
+      "styleBold",
+      "styleBlack",
+      "styleItalic",
+      "styleCaseCaps",
+      "styleCaseTitle",
+      "styleCaseLower",
+    ],
+  },
+  {
+    heading: "COLOR",
+    keys: [
+      "colorForeground",
+      "colorMuted",
+      "colorMonochrome",
+      "colorGradientSideways",
+      "colorGradientUp",
+      "colorGradientAngle",
+    ],
+  },
+  {
+    heading: "ALIGN",
+    keys: ["alignLeft", "alignCenter", "alignRight", "alignJustified"],
+  },
+  {
+    heading: "WRAP",
+    keys: ["wrapBalance"],
+  },
+];
+
+const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
+  styleThin: ".styleThin",
+  styleBold: ".styleBold",
+  styleBlack: ".styleBlack",
+  styleItalic: ".styleItalic",
+  styleCaseCaps: ".styleCaseCaps",
+  styleCaseTitle: ".styleCaseTitle",
+  styleCaseLower: ".styleCaseLower",
+  colorForeground: ".colorForeground",
+  colorMuted: ".colorMuted",
+  colorMonochrome: ".colorMonochrome",
+  colorGradientSideways: ".colorGradientSideways",
+  colorGradientUp: ".colorGradientUp",
+  colorGradientAngle: ".colorGradientAngle",
+  alignLeft: ".alignLeft",
+  alignCenter: ".alignCenter",
+  alignRight: ".alignRight",
+  alignJustified: ".alignJustified",
+  wrapBalance: ".wrapBalance",
+};
+
+const GRADIENT_COLOR_PAIRS: ReadonlyArray<[string, string]> = [
+  ["var(--color-indigo-500)", "var(--color-cyan-500)"],
+  ["var(--color-purple-500)", "var(--color-pink-500)"],
+  ["var(--color-blue-500)", "var(--color-teal-500)"],
+  ["var(--color-deep-purple-500)", "var(--color-light-blue-500)"],
+  ["var(--color-green-500)", "var(--color-lime-500)"],
+  ["var(--color-amber-500)", "var(--color-deep-orange-500)"],
+];
+
 function getSampleLabel(
   item: { role: PrismTypographyRole; size: PrismTypographySize; label: string },
   headlineStartIndex: number,
   pools: SamplePools
 ): string {
-  if (
-    item.role !== "display" &&
-    item.role !== "headline" &&
-    item.role !== "title" &&
-    item.role !== "body" &&
-    item.role !== "label" &&
-    item.role !== "overline"
-  ) {
-    return item.label;
-  }
-
   const headlineSlotIndex =
     item.role === "display"
       ? item.size === "large"
@@ -328,10 +412,12 @@ export function TypeScalePreview({
   const [selectedTypefaceId, setSelectedTypefaceId] =
     useState<TypefaceOption["id"]>("satoshi");
   const [headlineStartIndex, setHeadlineStartIndex] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState<Set<TypographyOptionKey>>(
+    new Set()
+  );
 
-  const activeTypefaceId = selectedTypefaceId;
   const activeTypeface =
-    typefaces.find((typeface) => typeface.id === activeTypefaceId) ?? typefaces[0];
+    typefaces.find((typeface) => typeface.id === selectedTypefaceId) ?? typefaces[0];
   const reshuffleSamples = () =>
     setHeadlineStartIndex((prev) => {
       let next = prev;
@@ -340,9 +426,77 @@ export function TypeScalePreview({
       }
       return next;
     });
+  const toggleOption = (key: TypographyOptionKey) => {
+    setSelectedOptions((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const customFontWeight = selectedOptions.has("styleBlack")
+    ? 900
+    : selectedOptions.has("styleBold")
+      ? 700
+      : selectedOptions.has("styleThin")
+        ? 200
+      : undefined;
+  const customFontStyle = selectedOptions.has("styleItalic") ? "italic" : undefined;
+  const customTextTransform = selectedOptions.has("styleCaseCaps")
+    ? "uppercase"
+    : selectedOptions.has("styleCaseTitle")
+      ? "capitalize"
+    : selectedOptions.has("styleCaseLower")
+      ? "lowercase"
+      : undefined;
+  const customTextAlign = selectedOptions.has("alignJustified")
+    ? "justify"
+    : selectedOptions.has("alignRight")
+      ? "right"
+      : selectedOptions.has("alignCenter")
+        ? "center"
+        : selectedOptions.has("alignLeft")
+          ? "left"
+          : undefined;
+  const customTextWrap = selectedOptions.has("wrapBalance")
+    ? ("balance" as const)
+    : undefined;
+  const hasGradientColor =
+    selectedOptions.has("colorGradientSideways") ||
+    selectedOptions.has("colorGradientUp") ||
+    selectedOptions.has("colorGradientAngle");
+  const customColorClass = hasGradientColor
+    ? undefined
+    : selectedOptions.has("colorMonochrome")
+      ? "text-black dark:text-white"
+      : selectedOptions.has("colorMuted")
+        ? "text-muted-foreground"
+        : selectedOptions.has("colorForeground")
+          ? "text-foreground"
+          : undefined;
+  const customGradientDirection = selectedOptions.has("colorGradientAngle")
+    ? "135deg"
+    : selectedOptions.has("colorGradientUp")
+      ? "to top"
+      : selectedOptions.has("colorGradientSideways")
+        ? "to right"
+        : undefined;
+  const [gradientStart, gradientEnd] =
+    GRADIENT_COLOR_PAIRS[headlineStartIndex % GRADIENT_COLOR_PAIRS.length];
+  const customColorStyle =
+    customGradientDirection !== undefined
+      ? {
+          backgroundImage: `linear-gradient(${customGradientDirection}, ${gradientStart}, ${gradientEnd})`,
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          color: "transparent",
+          WebkitTextFillColor: "transparent",
+        }
+      : undefined;
 
   return (
-    <div className="mb-8">
+    <div className="typography-preview mb-8">
       <h3 className="mb-4">Type scale (role × size)</h3>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {typefaces.map((typeface) => (
@@ -353,9 +507,9 @@ export function TypeScalePreview({
             colorVariant="monochrome"
             shapeRectangle
             shapeLineBottom
-            stateToggled={activeTypefaceId === typeface.id}
-            animationNoColorChange={activeTypefaceId !== typeface.id}
-            animationNoGrow={activeTypefaceId !== typeface.id}
+            stateToggled={selectedTypefaceId === typeface.id}
+            animationNoColorChange={selectedTypefaceId !== typeface.id}
+            animationNoGrow={selectedTypefaceId !== typeface.id}
             onClick={() => setSelectedTypefaceId(typeface.id)}
           />
         ))}
@@ -370,6 +524,33 @@ export function TypeScalePreview({
           onClick={reshuffleSamples}
         />
       </div>
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {TYPOGRAPHY_OPTION_COLUMNS.map(({ heading, keys }) => (
+          <div key={heading} className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              {heading}
+            </PrismTypography>
+            {keys.map((key) => (
+              <label key={key} className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedOptions.has(key)}
+                  onChange={() => toggleOption(key)}
+                  className="rounded border-input"
+                />
+                <PrismTypography
+                  role="label"
+                  size="medium"
+                  color="muted"
+                  font="mono"
+                >
+                  {TYPOGRAPHY_OPTION_LABEL[key]}
+                </PrismTypography>
+              </label>
+            ))}
+          </div>
+        ))}
+      </div>
       <div className="border-b pb-4">
         {typeScaleItemsByRole.map(({ role, items }, roleIndex) => (
           <div
@@ -377,8 +558,8 @@ export function TypeScalePreview({
             className={roleIndex === 0 ? "space-y-3" : "mt-8 space-y-3"}
           >
             {items.map((item) => (
-              <div key={`${item.role}-${item.size}`}>
-                <code className="text-xs text-muted-foreground">
+              <div key={`${item.role}-${item.size}`} className="space-y-1">
+                <code className="block text-xs text-muted-foreground">
                   {`typography-${item.role}-${item.size}`}
                 </code>
                 {item.role === "body" ? (
@@ -386,8 +567,18 @@ export function TypeScalePreview({
                     as="div"
                     role={item.role}
                     size={item.size}
-                    className={`mt-1 block content-text mx-0 text-left ${activeTypeface.className}`}
-                    style={{ fontFamily: activeTypeface.cssVariable }}
+                    className={`block content-text mx-0 ${activeTypeface.className} ${customColorClass ?? ""}`}
+                    style={{
+                      fontFamily: activeTypeface.cssVariable,
+                      fontWeight: customFontWeight,
+                      fontStyle: customFontStyle,
+                      textTransform: customTextTransform,
+                      ...(customTextAlign !== undefined
+                        ? { textAlign: customTextAlign }
+                        : {}),
+                      textWrap: customTextWrap,
+                      ...customColorStyle,
+                    }}
                   >
                     <div
                       className={
@@ -411,8 +602,16 @@ export function TypeScalePreview({
                 <PrismTypography
                   role={item.role}
                   size={item.size}
-                  className={`mt-1 block ${activeTypeface.className}`}
-                  style={{ fontFamily: activeTypeface.cssVariable }}
+                  className={`block ${activeTypeface.className} ${customColorClass ?? ""}`}
+                  style={{
+                    fontFamily: activeTypeface.cssVariable,
+                    fontWeight: customFontWeight,
+                    fontStyle: customFontStyle,
+                    textTransform: customTextTransform,
+                    ...(customTextAlign !== undefined ? { textAlign: customTextAlign } : {}),
+                    textWrap: customTextWrap,
+                    ...customColorStyle,
+                  }}
                 >
                   {getSampleLabel(item, headlineStartIndex, shuffledPools)}
                 </PrismTypography>
