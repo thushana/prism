@@ -9,9 +9,8 @@ import {
   ContentBreakout,
   ContentText,
   LayoutWrappersReference,
-  Typography,
+  PrismTypography,
 } from "@ui";
-import type { TypographyVariant } from "@ui";
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
@@ -67,9 +66,9 @@ function renderComponentExample(componentName: string) {
             <CardTitle>Card Example</CardTitle>
           </CardHeader>
           <CardContent>
-            <Typography variant="body2" className="text-muted-foreground">
+            <PrismTypography role="body" size="medium" className="text-muted-foreground">
               This is a card component example.
-            </Typography>
+            </PrismTypography>
           </CardContent>
         </Card>
       );
@@ -84,9 +83,9 @@ function renderComponentExample(componentName: string) {
       );
     default:
       return (
-        <Typography variant="body2" className="text-muted-foreground italic">
+        <PrismTypography role="body" size="medium" className="text-muted-foreground italic">
           No preview available
-        </Typography>
+        </PrismTypography>
       );
   }
 }
@@ -136,25 +135,25 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
     showVercel = true,
     showApps = true,
     showComponents = true,
-    showTypography = true,
+    showPrismTypography = true,
   } = config;
 
   if (!data) {
     return (
       <div className="container mx-auto p-8 space-y-8 font-sans">
-        <Typography variant="h1" className="mb-2">
+        <PrismTypography role="headline" size="large" className="mb-2">
           System Sheet
-        </Typography>
-        <Typography variant="body1" className="text-muted-foreground">
+        </PrismTypography>
+        <PrismTypography role="body" size="large" className="text-muted-foreground">
           Unable to load system data. Please try again in a moment.
-        </Typography>
-        <Typography variant="body2" className="text-muted-foreground">
+        </PrismTypography>
+        <PrismTypography role="body" size="medium" className="text-muted-foreground">
           Make sure your app has an{" "}
           <code className="bg-muted px-1 py-0.5 rounded">
             /api/system-sheet
           </code>{" "}
           endpoint that returns system data.
-        </Typography>
+        </PrismTypography>
       </div>
     );
   }
@@ -164,12 +163,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
       className={`container mx-auto p-8 space-y-8 font-sans ${geistMono.variable}`}
     >
       <div>
-        <Typography variant="h1" className="mb-2">
+        <PrismTypography role="headline" size="large" className="mb-2">
           System Sheet
-        </Typography>
-        <Typography variant="body1" className="text-muted-foreground">
+        </PrismTypography>
+        <PrismTypography role="body" size="large" className="text-muted-foreground">
           Overview of installed components, styles, and dependencies
-        </Typography>
+        </PrismTypography>
       </div>
 
       <div className="space-y-8">
@@ -188,9 +187,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     }`}
                     title={app.isRunning ? "Running" : "Not running"}
                   />
-                  <Typography variant="subtitle1" className="inline">
+                  <PrismTypography role="title" size="medium" as="p" className="inline">
                     {app.name}
-                  </Typography>
+                  </PrismTypography>
                   <a
                     href={app.url}
                     target="_blank"
@@ -226,9 +225,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="grid grid-cols-3 gap-4">
                 {Object.entries(data.techStack).map(([key, value]) => (
                   <div key={key} className="space-y-1">
-                    <Typography variant="overline" className="block">
+                    <PrismTypography role="overline" size="small">
                       {key}
-                    </Typography>
+                    </PrismTypography>
                     <Badge variant="outline">{value}</Badge>
                   </div>
                 ))}
@@ -256,19 +255,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
               {data.git.commitMessage && (
                 <div className="space-y-1 md:col-span-4">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Commit Message
-                  </Typography>
-                  <Typography variant="body2" className="text-muted-foreground">
+                  </PrismTypography>
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     {data.git.commitMessage}
-                  </Typography>
+                  </PrismTypography>
                 </div>
               )}
               {data.git.commitAuthor && (
                 <div className="space-y-1 md:col-span-2">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Commit Author
-                  </Typography>
+                  </PrismTypography>
                   <Badge variant="outline">{data.git.commitAuthor}</Badge>
                 </div>
               )}
@@ -277,9 +276,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               {data.git.commitSha && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Commit SHA
-                  </Typography>
+                  </PrismTypography>
                   {data.git.commitUrl ? (
                     <a
                       href={data.git.commitUrl}
@@ -303,9 +302,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.git.repositoryUrl && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Repository
-                  </Typography>
+                  </PrismTypography>
                   <a
                     href={data.git.repositoryUrl}
                     target="_blank"
@@ -322,26 +321,26 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 </div>
               )}
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Status
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">
                   {data.git.status === "clean" ? "clean" : "dirty"}
                 </Badge>
               </div>
               {data.git.branch && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Branch
-                  </Typography>
+                  </PrismTypography>
                   <Badge variant="outline">{data.git.branch}</Badge>
                 </div>
               )}
               {data.git.commitDate && (
                 <div className="space-y-1 md:col-span-2">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Commit Date
-                  </Typography>
+                  </PrismTypography>
                   <Badge variant="outline">
                     {formatDateTimeWithRelative(data.git.commitDate)}
                   </Badge>
@@ -357,23 +356,23 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">Vercel Deployment</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Environment
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">{data.vercel.env}</Badge>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Region
-                  </Typography>
+                  </PrismTypography>
                   <Badge variant="outline">{data.vercel.region}</Badge>
                 </div>
               )}
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Build Time
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">
                   {formatDateTimeWithRelative(data.vercel.buildTime)}
                 </Badge>
@@ -382,9 +381,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <div className="mt-4 space-y-3">
               {data.vercel.url && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Deployment URL
-                  </Typography>
+                  </PrismTypography>
                   <a
                     href={data.vercel.url}
                     target="_blank"
@@ -410,9 +409,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.branchUrl && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Branch URL
-                  </Typography>
+                  </PrismTypography>
                   <a
                     href={data.vercel.branchUrl}
                     target="_blank"
@@ -438,9 +437,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               )}
               {data.vercel.productionUrl && (
                 <div className="space-y-1">
-                  <Typography variant="overline" className="block">
+                  <PrismTypography role="overline" size="small">
                     Production URL
-                  </Typography>
+                  </PrismTypography>
                   <a
                     href={data.vercel.productionUrl}
                     target="_blank"
@@ -474,21 +473,21 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <h2 className="mb-4">UI Configuration</h2>
             <div className="grid grid-cols-6 gap-4">
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Style
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">{data.shadcn.style}</Badge>
               </div>
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Icon Library
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">{data.shadcn.iconLibrary}</Badge>
               </div>
               <div className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   Base Color
-                </Typography>
+                </PrismTypography>
                 <Badge variant="outline">{data.shadcn.baseColor}</Badge>
               </div>
             </div>
@@ -530,18 +529,18 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               {data.components.shadcn.length === 0 &&
                 data.components.custom.length === 0 &&
                 data.components.app.length === 0 && (
-                  <Typography variant="body2" className="text-muted-foreground">
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     No components
-                  </Typography>
+                  </PrismTypography>
                 )}
             </div>
           </div>
         )}
 
-        {/* Typography Section */}
-        {showTypography && (
+        {/* PrismTypography Section */}
+        {showPrismTypography && (
           <div className="border-t pt-8">
-            <h2 className="mb-4">Typography</h2>
+            <h2 className="mb-4">PrismTypography</h2>
 
             {/* Font Families - Dynamic Columns */}
             <div className="mb-8 space-y-4">
@@ -549,31 +548,31 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="grid grid-cols-4 gap-4 border-b pb-2">
                 <div>
                   <h2 className={`font-sans ${satoshi.variable}`}>Satoshi</h2>
-                  <Typography variant="body2" className="text-muted-foreground">
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     Variable (300-900)
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <h2 className={`font-serif ${sentient.variable}`}>
                     Sentient
                   </h2>
-                  <Typography variant="body2" className="text-muted-foreground">
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     Variable (200-800)
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <h2 className={`font-serif ${zodiak.variable}`}>Zodiak</h2>
-                  <Typography variant="body2" className="text-muted-foreground">
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     Variable (100-900)
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <h2 className={`font-mono ${geistMono.variable}`}>
                     Geist Mono
                   </h2>
-                  <Typography variant="body2" className="text-muted-foreground">
+                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
                     Variable (100-900)
-                  </Typography>
+                  </PrismTypography>
                 </div>
               </div>
 
@@ -584,15 +583,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Satoshi (300-900) */}
                     {weight >= 300 && weight <= 900 && (
                       <div className="min-h-14">
-                        <Typography
-                          variant="caption"
+                        <PrismTypography
+                          role="label" size="small"
                           font="mono"
                           className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                         >
                           {weight}
-                        </Typography>
-                        <Typography
-                          variant="body1"
+                        </PrismTypography>
+                        <PrismTypography
+                          role="body" size="large"
                           className={satoshi.variable}
                           style={{
                             fontFamily: "var(--font-satoshi)",
@@ -602,7 +601,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                           }}
                         >
                           The quick brown fox jumps over the lazy dog
-                        </Typography>
+                        </PrismTypography>
                       </div>
                     )}
                     {weight < 300 && <div className="min-h-14" />}
@@ -610,15 +609,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     {/* Sentient (200-800) */}
                     {weight >= 200 && weight <= 800 && (
                       <div className="min-h-14">
-                        <Typography
-                          variant="caption"
+                        <PrismTypography
+                          role="label" size="small"
                           font="mono"
                           className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                         >
                           {weight}
-                        </Typography>
-                        <Typography
-                          variant="body1"
+                        </PrismTypography>
+                        <PrismTypography
+                          role="body" size="large"
                           className={sentient.variable}
                           style={{
                             fontFamily: "var(--font-sentient)",
@@ -628,7 +627,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                           }}
                         >
                           The quick brown fox jumps over the lazy dog
-                        </Typography>
+                        </PrismTypography>
                       </div>
                     )}
                     {(weight < 200 || weight > 800) && (
@@ -637,15 +636,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
 
                     {/* Zodiak (100-900) */}
                     <div className="min-h-14">
-                      <Typography
-                        variant="caption"
+                      <PrismTypography
+                        role="label" size="small"
                         font="mono"
                         className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                       >
                         {weight}
-                      </Typography>
-                      <Typography
-                        variant="body1"
+                      </PrismTypography>
+                      <PrismTypography
+                        role="body" size="large"
                         className={zodiak.variable}
                         style={{
                           fontFamily: "var(--font-zodiak)",
@@ -655,20 +654,20 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                         }}
                       >
                         The quick brown fox jumps over the lazy dog
-                      </Typography>
+                      </PrismTypography>
                     </div>
 
                     {/* Geist Mono (100-900) */}
                     <div className="min-h-14">
-                      <Typography
-                        variant="caption"
+                      <PrismTypography
+                        role="label" size="small"
                         font="mono"
                         className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                       >
                         {weight}
-                      </Typography>
-                      <Typography
-                        variant="body1"
+                      </PrismTypography>
+                      <PrismTypography
+                        role="body" size="large"
                         className={geistMono.variable}
                         style={{
                           fontFamily: "var(--font-geist-mono)",
@@ -678,7 +677,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                         }}
                       >
                         The quick brown fox jumps over the lazy dog
-                      </Typography>
+                      </PrismTypography>
                     </div>
                   </div>
                 ))}
@@ -686,15 +685,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 {/* Italic row */}
                 <div className="grid grid-cols-4 gap-4">
                   <div className="min-h-14">
-                    <Typography
-                      variant="caption"
+                    <PrismTypography
+                      role="label" size="small"
                       font="mono"
                       className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                     >
                       400 – ITALIC
-                    </Typography>
-                    <Typography
-                      variant="body1"
+                    </PrismTypography>
+                    <PrismTypography
+                      role="body" size="large"
                       className={`italic ${satoshi.variable}`}
                       style={{
                         fontFamily: "var(--font-satoshi)",
@@ -704,18 +703,18 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </Typography>
+                    </PrismTypography>
                   </div>
                   <div className="min-h-14">
-                    <Typography
-                      variant="caption"
+                    <PrismTypography
+                      role="label" size="small"
                       font="mono"
                       className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                     >
                       400 – ITALIC
-                    </Typography>
-                    <Typography
-                      variant="body1"
+                    </PrismTypography>
+                    <PrismTypography
+                      role="body" size="large"
                       className={`italic ${sentient.variable}`}
                       style={{
                         fontFamily: "var(--font-sentient)",
@@ -725,18 +724,18 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </Typography>
+                    </PrismTypography>
                   </div>
                   <div className="min-h-14">
-                    <Typography
-                      variant="caption"
+                    <PrismTypography
+                      role="label" size="small"
                       font="mono"
                       className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                     >
                       400 – ITALIC
-                    </Typography>
-                    <Typography
-                      variant="body1"
+                    </PrismTypography>
+                    <PrismTypography
+                      role="body" size="large"
                       className={`italic ${zodiak.variable}`}
                       style={{
                         fontFamily: "var(--font-zodiak)",
@@ -746,18 +745,18 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </Typography>
+                    </PrismTypography>
                   </div>
                   <div className="min-h-14">
-                    <Typography
-                      variant="caption"
+                    <PrismTypography
+                      role="label" size="small"
                       font="mono"
                       className="mb-1 block text-muted-foreground uppercase text-[0.6rem]"
                     >
                       400 – ITALIC
-                    </Typography>
-                    <Typography
-                      variant="body1"
+                    </PrismTypography>
+                    <PrismTypography
+                      role="body" size="large"
                       className={`italic ${geistMono.variable}`}
                       style={{
                         fontFamily: "var(--font-geist-mono)",
@@ -767,15 +766,15 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       }}
                     >
                       The quick brown fox jumps over the lazy dog
-                    </Typography>
+                    </PrismTypography>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Typography Variants */}
+            {/* Type scale (role × size) */}
             <div className="mb-8">
-              <h3 className="mb-4">Typography Variants</h3>
+              <h3 className="mb-4">Type scale (role × size)</h3>
               <div className="grid grid-cols-3 gap-8 border-b pb-2 mb-4">
                 <div>
                   <h4 className={`font-sans ${satoshi.variable}`}>
@@ -796,76 +795,68 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <div className="space-y-3">
                 {(
                   [
-                    { variant: "h1" as const, label: "h1. Heading" },
-                    { variant: "h2" as const, label: "h2. Heading" },
-                    { variant: "h3" as const, label: "h3. Heading" },
-                    { variant: "h4" as const, label: "h4. Heading" },
-                    { variant: "h5" as const, label: "h5. Heading" },
-                    { variant: "h6" as const, label: "h6. Heading" },
-                    {
-                      variant: "subtitle1" as const,
-                      label:
-                        "subtitle1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
-                    },
-                    {
-                      variant: "subtitle2" as const,
-                      label:
-                        "subtitle2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur",
-                    },
-                    {
-                      variant: "body1" as const,
-                      label:
-                        "body1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
-                    },
-                    {
-                      variant: "body2" as const,
-                      label:
-                        "body2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur, neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.",
-                    },
-                    { variant: "button" as const, label: "button text" },
-                    { variant: "caption" as const, label: "caption text" },
-                    { variant: "overline" as const, label: "overline text" },
-                  ] satisfies ReadonlyArray<{
-                    variant: TypographyVariant;
-                    label: string;
-                  }>
+                    { role: "display" as const, size: "large" as const, label: "display · large" },
+                    { role: "display" as const, size: "medium" as const, label: "display · medium" },
+                    { role: "display" as const, size: "small" as const, label: "display · small" },
+                    { role: "headline" as const, size: "large" as const, label: "headline · large" },
+                    { role: "headline" as const, size: "medium" as const, label: "headline · medium" },
+                    { role: "headline" as const, size: "small" as const, label: "headline · small" },
+                    { role: "title" as const, size: "large" as const, label: "title · large" },
+                    { role: "title" as const, size: "medium" as const, label: "title · medium" },
+                    { role: "title" as const, size: "small" as const, label: "title · small" },
+                    { role: "body" as const, size: "large" as const, label: "body · large" },
+                    { role: "body" as const, size: "medium" as const, label: "body · medium" },
+                    { role: "body" as const, size: "small" as const, label: "body · small" },
+                    { role: "label" as const, size: "large" as const, label: "label · large" },
+                    { role: "label" as const, size: "medium" as const, label: "label · medium" },
+                    { role: "label" as const, size: "small" as const, label: "label · small" },
+                    { role: "overline" as const, size: "large" as const, label: "overline · large" },
+                    { role: "overline" as const, size: "medium" as const, label: "overline · medium" },
+                    { role: "overline" as const, size: "small" as const, label: "overline · small" },
+                  ] as const
                 ).map((item) => (
-                  <div key={item.variant} className="grid grid-cols-3 gap-8">
+                  <div
+                    key={`${item.role}-${item.size}`}
+                    className="grid grid-cols-3 gap-8"
+                  >
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {`typography-${item.variant}`}
+                        {`typography-${item.role}-${item.size}`}
                       </code>
-                      <Typography
-                        variant={item.variant}
+                      <PrismTypography
+                        role={item.role}
+                        size={item.size}
                         className={`mt-1 block ${satoshi.variable}`}
                         style={{ fontFamily: "var(--font-satoshi)" }}
                       >
                         {item.label}
-                      </Typography>
+                      </PrismTypography>
                     </div>
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {`typography-${item.variant}`}
+                        {`typography-${item.role}-${item.size}`}
                       </code>
-                      <Typography
-                        variant={item.variant}
+                      <PrismTypography
+                        role={item.role}
+                        size={item.size}
                         className={`mt-1 block ${sentient.variable}`}
                         style={{ fontFamily: "var(--font-sentient)" }}
                       >
                         {item.label}
-                      </Typography>
+                      </PrismTypography>
                     </div>
                     <div>
                       <code className="text-xs text-muted-foreground">
-                        {`typography-${item.variant}`}
+                        {`typography-${item.role}-${item.size}`}
                       </code>
-                      <Typography
-                        variant={item.variant}
+                      <PrismTypography
+                        role={item.role}
+                        size={item.size}
                         className={`mt-1 block ${geistMono.variable}`}
                         style={{ fontFamily: "var(--font-geist-mono)" }}
                       >
                         {item.label}
-                      </Typography>
+                      </PrismTypography>
                     </div>
                   </div>
                 ))}
@@ -880,49 +871,49 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   <code className="text-xs text-muted-foreground">
                     {"<h1>"}
                   </code>
-                  <Typography variant="h1" className="mt-1">
+                  <PrismTypography role="headline" size="large" className="mt-1">
                     Heading 1
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h2>"}
                   </code>
-                  <Typography variant="h2" className="mt-1">
+                  <PrismTypography role="headline" size="medium" className="mt-1">
                     Heading 2
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h3>"}
                   </code>
-                  <Typography variant="h3" className="mt-1">
+                  <PrismTypography role="headline" size="small" className="mt-1">
                     Heading 3
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h4>"}
                   </code>
-                  <Typography variant="h4" className="mt-1">
+                  <PrismTypography role="title" size="large" className="mt-1">
                     Heading 4
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h5>"}
                   </code>
-                  <Typography variant="h5" className="mt-1">
+                  <PrismTypography role="title" size="medium" className="mt-1">
                     Heading 5
-                  </Typography>
+                  </PrismTypography>
                 </div>
                 <div>
                   <code className="text-xs text-muted-foreground">
                     {"<h6>"}
                   </code>
-                  <Typography variant="h6" className="mt-1">
+                  <PrismTypography role="title" size="small" className="mt-1">
                     Heading 6
-                  </Typography>
+                  </PrismTypography>
                 </div>
               </div>
             </div>
@@ -942,12 +933,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   "text-4xl",
                 ].map((size) => (
                   <div key={size} className="space-y-1">
-                    <Typography
-                      variant="caption"
+                    <PrismTypography
+                      role="label" size="small"
                       className="block text-muted-foreground"
                     >
                       {size}
-                    </Typography>
+                    </PrismTypography>
                     {/* Intentional Tailwind scale demo (not design tokens) */}
                     <p className={size}>Sample Text</p>
                   </div>
@@ -969,27 +960,27 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             <ContentText
               className={`space-y-4 font-serif ${sentient.variable}`}
             >
-              <Typography variant="h3">What is Prism?</Typography>
-              <Typography variant="body1" className="text-muted-foreground">
+              <PrismTypography role="headline" size="small">What is Prism?</PrismTypography>
+              <PrismTypography role="body" size="large" className="text-muted-foreground">
                 Prism is a full-stack app framework that gets you from zero to a
                 running Next.js app with a consistent stack: UI components,
                 database access, logging, feature flags, and deployment wiring.
                 It’s built for small teams and solo developers who want
                 structure without heavy boilerplate.
-              </Typography>
-              <Typography variant="body1" className="text-muted-foreground">
+              </PrismTypography>
+              <PrismTypography role="body" size="large" className="text-muted-foreground">
                 Out of the box you get a design system (Satoshi, Sentient,
                 Zodiak), layout wrappers for content and graphics, and a system
                 sheet for environment and dependency overview. The CLI can
                 scaffold new apps and packages, and the generator keeps your
                 config in sync across the monorepo.
-              </Typography>
-              <Typography variant="body1" className="text-muted-foreground">
+              </PrismTypography>
+              <PrismTypography role="body" size="large" className="text-muted-foreground">
                 Feature flags, authentication, and cost tracking plug in via
                 Prism packages so you can turn capabilities on when you need
                 them. If you want a single stack that stays consistent as the
                 product grows, Prism is built for that.
-              </Typography>
+              </PrismTypography>
             </ContentText>
           </div>
         </ContentBreakout>

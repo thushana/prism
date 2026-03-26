@@ -214,12 +214,12 @@
   .font-sans,
   button.font-sans,
   span.font-sans {
-    font-family: var(--font-sans), system-ui, sans-serif !important;
+    font-family: var(--font-satoshi), system-ui, sans-serif !important;
   }
   .font-serif,
   button.font-serif,
   span.font-serif {
-    font-family: var(--font-serif), Georgia, serif !important;
+    font-family: var(--font-sentient), Georgia, serif !important;
   }
   .font-mono,
   button.font-mono,
@@ -228,89 +228,127 @@
   }
 
   /*
-   * typography-* classes implement the Typography component from @prism/ui.
-   * In app code use <Typography variant="…"> instead of these classes directly,
-   * except special cases (e.g. semantic <code className="typography-caption">).
+   * typography-{role}-{size} classes implement <PrismTypography role size> from @prism/ui.
+   * Prefer the component in app code; use classes only for exceptions (e.g. <code>).
+   * Scale: display / headline / title / body / label / overline × large / medium / small.
    */
-  .typography-h1 {
+  .typography-display-large {
+    font-family: var(--font-headline);
+    font-size: 4rem;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.015625rem;
+  }
+  .typography-display-medium {
+    font-family: var(--font-headline);
+    font-size: 3rem;
+    line-height: 1.05;
+    font-weight: 500;
+  }
+  .typography-display-small {
     font-family: var(--font-headline);
     font-size: 2.25rem;
-    line-height: 2.5rem;
-    font-weight: 700;
+    line-height: 1.1;
+    font-weight: 500;
   }
-  .typography-h2 {
+  .typography-headline-large {
     font-family: var(--font-headline);
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-    font-weight: 600;
+    font-size: 2rem;
+    line-height: 1.125;
+    font-weight: 500;
   }
-  .typography-h3 {
+  .typography-headline-medium {
     font-family: var(--font-headline);
-    font-size: 1.5rem;
-    line-height: 2rem;
-    font-weight: 600;
+    font-size: 1.625rem;
+    line-height: 1.2;
+    font-weight: 400;
   }
-  .typography-h4 {
+  .typography-headline-small {
     font-family: var(--font-headline);
+    font-size: 1.375rem;
+    line-height: 1.2;
+    font-weight: 400;
+  }
+  .typography-title-large {
+    font-family: var(--font-body);
     font-size: 1.25rem;
-    line-height: 1.75rem;
+    line-height: 1.3;
     font-weight: 500;
   }
-  .typography-h5 {
-    font-family: var(--font-headline);
+  .typography-title-medium {
+    font-family: var(--font-body);
     font-size: 1.125rem;
-    line-height: 1.75rem;
+    line-height: 1.3;
     font-weight: 500;
   }
-  .typography-h6 {
-    font-family: var(--font-headline);
+  .typography-title-small {
+    font-family: var(--font-body);
     font-size: 1rem;
-    line-height: 1.5rem;
+    line-height: 1.35;
     font-weight: 500;
   }
-  .typography-subtitle1 {
+  .typography-body-large {
     font-family: var(--font-body);
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 600;
-  }
-  .typography-subtitle2 {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    line-height: 1.4rem;
-    font-weight: 500;
-  }
-  .typography-body1 {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    line-height: 1.5rem;
+    font-size: 1.375rem;
+    line-height: 1.5;
     font-weight: 400;
   }
-  .typography-body2 {
+  .typography-body-medium {
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .typography-body-small {
     font-family: var(--font-body);
     font-size: 0.875rem;
-    line-height: 1.25rem;
+    line-height: 1.5;
     font-weight: 400;
   }
-  .typography-button {
+  .typography-label-large {
     font-family: var(--font-body);
     font-size: 0.875rem;
-    line-height: 1.25rem;
+    line-height: 1.3;
     font-weight: 600;
   }
-  .typography-caption {
+  .typography-label-medium {
     font-family: var(--font-body);
     font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 400;
-  }
-  .typography-overline {
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    line-height: 1rem;
+    line-height: 1.3;
     font-weight: 600;
-    letter-spacing: 0.08em;
+  }
+  .typography-label-small {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+  .typography-overline-large {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    line-height: 1.3;
+    font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .typography-overline-medium {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .typography-overline-small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 }
 
