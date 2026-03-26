@@ -15,6 +15,7 @@ import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
 import { Button } from "./button";
+import { TypeScalePreview } from "./type-scale-preview";
 import type { SystemSheetConfig, SystemSheetData } from "./types";
 
 // Initialize Geist Mono font
@@ -772,179 +773,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               </div>
             </div>
 
-            {/* Type scale (role × size) */}
-            <div className="mb-8">
-              <h3 className="mb-4">Type scale (role × size)</h3>
-              <div className="grid grid-cols-3 gap-8 border-b pb-2 mb-4">
-                <div>
-                  <h4 className={`font-sans ${satoshi.variable}`}>
-                    Satoshi (Sans)
-                  </h4>
-                </div>
-                <div>
-                  <h4 className={`font-serif ${sentient.variable}`}>
-                    Sentient (Serif)
-                  </h4>
-                </div>
-                <div>
-                  <h4 className={`font-mono ${geistMono.variable}`}>
-                    Geist Mono
-                  </h4>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {(
-                  [
-                    { role: "display" as const, size: "large" as const, label: "display · large" },
-                    { role: "display" as const, size: "medium" as const, label: "display · medium" },
-                    { role: "display" as const, size: "small" as const, label: "display · small" },
-                    { role: "headline" as const, size: "large" as const, label: "headline · large" },
-                    { role: "headline" as const, size: "medium" as const, label: "headline · medium" },
-                    { role: "headline" as const, size: "small" as const, label: "headline · small" },
-                    { role: "title" as const, size: "large" as const, label: "title · large" },
-                    { role: "title" as const, size: "medium" as const, label: "title · medium" },
-                    { role: "title" as const, size: "small" as const, label: "title · small" },
-                    { role: "body" as const, size: "large" as const, label: "body · large" },
-                    { role: "body" as const, size: "medium" as const, label: "body · medium" },
-                    { role: "body" as const, size: "small" as const, label: "body · small" },
-                    { role: "label" as const, size: "large" as const, label: "label · large" },
-                    { role: "label" as const, size: "medium" as const, label: "label · medium" },
-                    { role: "label" as const, size: "small" as const, label: "label · small" },
-                    { role: "overline" as const, size: "large" as const, label: "overline · large" },
-                    { role: "overline" as const, size: "medium" as const, label: "overline · medium" },
-                    { role: "overline" as const, size: "small" as const, label: "overline · small" },
-                  ] as const
-                ).map((item) => (
-                  <div
-                    key={`${item.role}-${item.size}`}
-                    className="grid grid-cols-3 gap-8"
-                  >
-                    <div>
-                      <code className="text-xs text-muted-foreground">
-                        {`typography-${item.role}-${item.size}`}
-                      </code>
-                      <PrismTypography
-                        role={item.role}
-                        size={item.size}
-                        className={`mt-1 block ${satoshi.variable}`}
-                        style={{ fontFamily: "var(--font-satoshi)" }}
-                      >
-                        {item.label}
-                      </PrismTypography>
-                    </div>
-                    <div>
-                      <code className="text-xs text-muted-foreground">
-                        {`typography-${item.role}-${item.size}`}
-                      </code>
-                      <PrismTypography
-                        role={item.role}
-                        size={item.size}
-                        className={`mt-1 block ${sentient.variable}`}
-                        style={{ fontFamily: "var(--font-sentient)" }}
-                      >
-                        {item.label}
-                      </PrismTypography>
-                    </div>
-                    <div>
-                      <code className="text-xs text-muted-foreground">
-                        {`typography-${item.role}-${item.size}`}
-                      </code>
-                      <PrismTypography
-                        role={item.role}
-                        size={item.size}
-                        className={`mt-1 block ${geistMono.variable}`}
-                        style={{ fontFamily: "var(--font-geist-mono)" }}
-                      >
-                        {item.label}
-                      </PrismTypography>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Headings Examples */}
-            <div className="mb-8">
-              <h3 className="mb-4">Headings</h3>
-              <div className="space-y-2 border rounded-lg p-6 bg-muted/30">
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h1>"}
-                  </code>
-                  <PrismTypography role="headline" size="large" className="mt-1">
-                    Heading 1
-                  </PrismTypography>
-                </div>
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h2>"}
-                  </code>
-                  <PrismTypography role="headline" size="medium" className="mt-1">
-                    Heading 2
-                  </PrismTypography>
-                </div>
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h3>"}
-                  </code>
-                  <PrismTypography role="headline" size="small" className="mt-1">
-                    Heading 3
-                  </PrismTypography>
-                </div>
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h4>"}
-                  </code>
-                  <PrismTypography role="title" size="large" className="mt-1">
-                    Heading 4
-                  </PrismTypography>
-                </div>
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h5>"}
-                  </code>
-                  <PrismTypography role="title" size="medium" className="mt-1">
-                    Heading 5
-                  </PrismTypography>
-                </div>
-                <div>
-                  <code className="text-xs text-muted-foreground">
-                    {"<h6>"}
-                  </code>
-                  <PrismTypography role="title" size="small" className="mt-1">
-                    Heading 6
-                  </PrismTypography>
-                </div>
-              </div>
-            </div>
-
-            {/* Type Sizes List */}
-            <div className="mb-8">
-              <h3 className="mb-4">Type Sizes</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  "text-xs",
-                  "text-sm",
-                  "text-base",
-                  "text-lg",
-                  "text-xl",
-                  "text-2xl",
-                  "text-3xl",
-                  "text-4xl",
-                ].map((size) => (
-                  <div key={size} className="space-y-1">
-                    <PrismTypography
-                      role="label" size="small"
-                      className="block text-muted-foreground"
-                    >
-                      {size}
-                    </PrismTypography>
-                    {/* Intentional Tailwind scale demo (not design tokens) */}
-                    <p className={size}>Sample Text</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <TypeScalePreview
+              satoshiVariableClass={satoshi.variable}
+              sentientVariableClass={sentient.variable}
+              zodiakVariableClass={zodiak.variable}
+              geistMonoVariableClass={geistMono.variable}
+            />
 
             {/* Buttons — pill style; variants .plain, .icon, .uppercase + .icon */}
             <Button />
