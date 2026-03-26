@@ -4,7 +4,7 @@ import {
   getColorForIndex,
   getDefaultPrismButtonPresetNames,
   PrismButton,
-  Typography,
+  PrismTypography,
 } from "@ui";
 import type { ColorName, PrismButtonSize } from "@ui";
 import {
@@ -205,7 +205,9 @@ function Row({
 }) {
   return (
     <div className="pb-12">
-      <code className="typography-caption mb-2 block">{title}</code>
+      <PrismTypography role="label" size="small" as="code" className="mb-2 block">
+        {title}
+      </PrismTypography>
       <div
         className={`flex flex-wrap items-center ${noGap ? "gap-0" : "gap-3"}`}
       >
@@ -345,7 +347,7 @@ export function Button() {
   return (
     <div className="mb-8">
       <h3 className="mb-2">Buttons</h3>
-      <Typography variant="body2" className="text-muted-foreground mb-4">
+      <PrismTypography role="body" size="medium" className="text-muted-foreground mb-4">
         Toggle options to view appearances in the buttons below.{" "}
         <button
           type="button"
@@ -369,7 +371,7 @@ export function Button() {
         >
           View all variants here.
         </a>
-      </Typography>
+      </PrismTypography>
       <div className="space-y-6">
         <div>
           <Row title="Presets (preset=…)">
@@ -387,9 +389,9 @@ export function Button() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
-                <Typography variant="overline" className="block">
+                <PrismTypography role="overline" size="small">
                   {heading}
-                </Typography>
+                </PrismTypography>
                 {keys.map((key) => (
                   <label
                     key={key}
@@ -401,7 +403,7 @@ export function Button() {
                       onChange={() => toggle(key)}
                       className="rounded border-input"
                     />
-                    <span className="typography-body2 font-mono">
+                    <span className="typography-body-medium font-mono">
                       {OPTION_LABEL[key]}
                     </span>
                   </label>

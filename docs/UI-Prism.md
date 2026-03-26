@@ -255,42 +255,42 @@ All color variables have dark mode variants defined in `.dark` class.
 
 Use on any element to set `font-family` to the bound Prism variable.
 
-**MUI-style typography classes** (implementation layer — prefer the component below in app code):
+**Type scale classes** (implementation layer — prefer the component below in app code):
 
-- `.typography-h1` through `.typography-h6` - Heading styles
-- `.typography-subtitle1` / `.typography-subtitle2` - Subtitle styles
-- `.typography-body1` / `.typography-body2` - Body text styles
-- `.typography-button` - Button text style
-- `.typography-caption` - Caption text style
-- `.typography-overline` - Overline and small field-label text (uppercase, tracked)
+- `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `large` | `medium` | `small` (18 rules total).
 
-### Typography component
+### PrismTypography component
 
-Use `<Typography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for type scale. Add colour and spacing with `className` (e.g. `text-muted-foreground`, `mb-4`).
+Use `<PrismTypography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the `color` prop or `className` for semantic colour (e.g. `color="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
 
-**Props:**
+**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyColor`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
 
-- `variant` (required): `h1` | `h2` | `h3` | `h4` | `h5` | `h6` | `subtitle1` | `subtitle2` | `body1` | `body2` | `button` | `caption` | `overline`
+**Props (`PrismTypographyProps`):**
+
+- `role` (required): `display` | `headline` | `title` | `body` | `label` | `overline`
+- `size` (optional): `large` | `medium` | `small` — defaults to `medium`
+- `color` (optional): maps to shadcn-style `text-*` tokens (`foreground`, `muted`, `primary`, …); default `inherit`
 - `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
 - `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
+- `as` (optional): override the rendered element for semantics or layout
 
-**Default element per variant:** `h1`–`h6` → matching heading; `subtitle1` / `subtitle2` / `body1` / `body2` → `p`; `button` / `caption` / `overline` → `span` (use `className="block"` on `overline` when it should behave as a block label).
+**Default element per role × size:** `display` / `headline` → `h1`–`h3` by size; `title` → `h4`–`h6` by size; `body` → `p`; `label` / `overline` → `span`. **Overline** styles (uppercase, semibold, letter-spacing, block) live in `.typography-overline-*`. Use `className` (e.g. `inline`) if you need non-block overlines.
 
 **Example:**
 
 ```tsx
-import { Typography } from "@ui";
+import { PrismTypography } from "@ui";
 
-<Typography variant="h1">Heading 1</Typography>
-<Typography variant="body1" className="text-muted-foreground">
+<PrismTypography role="headline" size="large">Heading 1</PrismTypography>
+<PrismTypography role="body" size="medium" color="muted">
   Body text
-</Typography>
-<Typography variant="overline" className="block text-muted-foreground">
+</PrismTypography>
+<PrismTypography role="overline" size="small" color="muted">
   Section label
-</Typography>
+</PrismTypography>
 ```
 
-**Exception:** semantic `<code className="typography-caption">` is fine where the element must stay `code`.
+**Exception:** when semantic `code` is needed with scale styling, use `<PrismTypography as="code" ...>`.
 
 ### Layout Wrappers
 

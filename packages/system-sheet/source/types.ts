@@ -59,5 +59,5 @@ export interface SystemSheetConfig {
   showVercel?: boolean;
   showApps?: boolean;
   showComponents?: boolean;
-  showTypography?: boolean;
+  showPrismTypography?: boolean;
 }
