@@ -37,7 +37,13 @@ type TypographyOptionKey =
   | "alignCenter"
   | "alignRight"
   | "alignJustified"
-  | "wrapBalance";
+  | "wrapBalance"
+  | "animationWhole"
+  | "animationLine"
+  | "animationWord"
+  | "animationCharacter"
+  | "animationFadeIn"
+  | "animationMoveIn";
 
 const TYPE_SCALE_ITEMS: ReadonlyArray<{
   role: PrismTypographyRole;
@@ -283,6 +289,19 @@ const TYPOGRAPHY_OPTION_COLUMNS: {
     heading: "WRAP",
     keys: ["wrapBalance"],
   },
+  {
+    heading: "ZONE",
+    keys: [
+      "animationWhole",
+      "animationLine",
+      "animationWord",
+      "animationCharacter",
+    ],
+  },
+  {
+    heading: "TYPE",
+    keys: ["animationFadeIn", "animationMoveIn"],
+  },
 ];
 
 const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
@@ -304,7 +323,25 @@ const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
   alignRight: ".alignRight",
   alignJustified: ".alignJustified",
   wrapBalance: ".wrapBalance",
+  animationWhole: ".animationWhole",
+  animationLine: ".animationLine",
+  animationWord: ".animationWord",
+  animationCharacter: ".animationCharacter",
+  animationFadeIn: ".animationFadeIn",
+  animationMoveIn: ".animationMoveIn",
 };
+
+const ANIMATION_ZONE_KEYS = [
+  "animationWhole",
+  "animationLine",
+  "animationWord",
+  "animationCharacter",
+] as const satisfies readonly TypographyOptionKey[];
+
+const ANIMATION_TYPE_KEYS = [
+  "animationFadeIn",
+  "animationMoveIn",
+] as const satisfies readonly TypographyOptionKey[];
 
 const GRADIENT_COLOR_PAIRS: ReadonlyArray<[string, string]> = [
   ["var(--color-indigo-500)", "var(--color-cyan-500)"],
@@ -429,6 +466,22 @@ export function TypeScalePreview({
   const toggleOption = (key: TypographyOptionKey) => {
     setSelectedOptions((prev) => {
       const next = new Set(prev);
+      if (ANIMATION_ZONE_KEYS.includes(key as (typeof ANIMATION_ZONE_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of ANIMATION_ZONE_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
+      if (ANIMATION_TYPE_KEYS.includes(key as (typeof ANIMATION_TYPE_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of ANIMATION_TYPE_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
       if (next.has(key)) next.delete(key);
       else next.add(key);
       return next;
@@ -495,6 +548,40 @@ export function TypeScalePreview({
         }
       : undefined;
 
+  const animationWhole = selectedOptions.has("animationWhole");
+  const animationLine = selectedOptions.has("animationLine");
+  const animationWord = selectedOptions.has("animationWord");
+  const animationCharacter = selectedOptions.has("animationCharacter");
+  const animationFadeIn = selectedOptions.has("animationFadeIn");
+  const animationMoveIn = selectedOptions.has("animationMoveIn");
+  const animationZoneKey = animationCharacter
+    ? "character"
+    : animationWord
+      ? "word"
+      : animationLine
+        ? "line"
+        : animationWhole
+          ? "whole"
+          : "none";
+  const animationTypeKey = animationMoveIn
+    ? "moveIn"
+    : animationFadeIn
+      ? "fadeIn"
+      : "default";
+  const animationEnabled = animationZoneKey !== "none";
+  const animationRemountKey = `${animationZoneKey}-${animationTypeKey}`;
+  const typographyAnimationProps = {
+    animationWhole,
+    animationLine,
+    animationWord,
+    animationCharacter,
+    animationFadeIn,
+    animationMoveIn,
+  };
+  /** Line/word/char splits need a string child; body samples otherwise use `<p>` and fall back to whole. */
+  const needsPlainTextForAnimation =
+    animationLine || animationWord || animationCharacter;
+
   return (
     <div className="typography-preview mb-8">
       <h3 className="mb-4">Type scale (role × size)</h3>
@@ -524,7 +611,7 @@ export function TypeScalePreview({
           onClick={reshuffleSamples}
         />
       </div>
-      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {TYPOGRAPHY_OPTION_COLUMNS.map(({ heading, keys }) => (
           <div key={heading} className="space-y-1">
             <PrismTypography role="overline" size="small">
@@ -558,7 +645,12 @@ export function TypeScalePreview({
             className={roleIndex === 0 ? "space-y-3" : "mt-8 space-y-3"}
           >
             {items.map((item) => (
-              <div key={`${item.role}-${item.size}`} className="space-y-1">
+              <div
+                key={`${item.role}-${item.size}-${animationRemountKey}${
+                  animationEnabled ? `-${headlineStartIndex}` : ""
+                }`}
+                className="space-y-1"
+              >
                 <code className="block text-xs text-muted-foreground">
                   {`typography-${item.role}-${item.size}`}
                 </code>
@@ -567,6 +659,7 @@ export function TypeScalePreview({
                     as="div"
                     role={item.role}
                     size={item.size}
+                    {...typographyAnimationProps}
                     className={`block content-text mx-0 ${activeTypeface.className} ${customColorClass ?? ""}`}
                     style={{
                       fontFamily: activeTypeface.cssVariable,
@@ -580,41 +673,49 @@ export function TypeScalePreview({
                       ...customColorStyle,
                     }}
                   >
-                    <div
-                      className={
-                        item.size === "large"
-                          ? "space-y-8"
-                          : item.size === "medium"
-                            ? "space-y-4"
-                            : "space-y-3"
-                      }
-                    >
-                      {getSampleLabel(item, headlineStartIndex, shuffledPools)
-                        .split("\n\n")
-                        .map((paragraph, index) => (
-                          <p key={`${item.role}-${item.size}-paragraph-${index}`}>
-                            {paragraph}
-                          </p>
-                        ))}
-                    </div>
+                    {/* Plain string (no <p> blocks): SplitText needs a single text host for line/word/char zones. */}
+                    {needsPlainTextForAnimation ? (
+                      getSampleLabel(item, headlineStartIndex, shuffledPools)
+                    ) : (
+                      <div
+                        className={
+                          item.size === "large"
+                            ? "space-y-8"
+                            : item.size === "medium"
+                              ? "space-y-4"
+                              : "space-y-3"
+                        }
+                      >
+                        {getSampleLabel(item, headlineStartIndex, shuffledPools)
+                          .split("\n\n")
+                          .map((paragraph, index) => (
+                            <p key={`${item.role}-${item.size}-paragraph-${index}`}>
+                              {paragraph}
+                            </p>
+                          ))}
+                      </div>
+                    )}
                   </PrismTypography>
                 ) : (
-                <PrismTypography
-                  role={item.role}
-                  size={item.size}
-                  className={`block ${activeTypeface.className} ${customColorClass ?? ""}`}
-                  style={{
-                    fontFamily: activeTypeface.cssVariable,
-                    fontWeight: customFontWeight,
-                    fontStyle: customFontStyle,
-                    textTransform: customTextTransform,
-                    ...(customTextAlign !== undefined ? { textAlign: customTextAlign } : {}),
-                    textWrap: customTextWrap,
-                    ...customColorStyle,
-                  }}
-                >
-                  {getSampleLabel(item, headlineStartIndex, shuffledPools)}
-                </PrismTypography>
+                  <PrismTypography
+                    role={item.role}
+                    size={item.size}
+                    {...typographyAnimationProps}
+                    className={`block ${activeTypeface.className} ${customColorClass ?? ""}`}
+                    style={{
+                      fontFamily: activeTypeface.cssVariable,
+                      fontWeight: customFontWeight,
+                      fontStyle: customFontStyle,
+                      textTransform: customTextTransform,
+                      ...(customTextAlign !== undefined
+                        ? { textAlign: customTextAlign }
+                        : {}),
+                      textWrap: customTextWrap,
+                      ...customColorStyle,
+                    }}
+                  >
+                    {getSampleLabel(item, headlineStartIndex, shuffledPools)}
+                  </PrismTypography>
                 )}
               </div>
             ))}

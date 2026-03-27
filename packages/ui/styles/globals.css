@@ -231,6 +231,9 @@
    * typography-{role}-{size} classes implement <PrismTypography role size> from @prism/ui.
    * Prefer the component in app code; use classes only for exceptions (e.g. <code>).
    * Scale: display / headline / title / body / label / overline × large / medium / small.
+   *
+   * Scroll reveal (GSAP): zone .animationWhole | .animationLine | .animationWord | .animationCharacter
+   * + type .animationFadeIn | .animationMoveIn
    */
   .typography-display-large {
     font-family: var(--font-headline);
