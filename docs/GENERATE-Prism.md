@@ -37,7 +37,7 @@ prism --help
 - Works from any directory
 - No need to prefix with `npm run` or `npx`
 
-### 2. Via npx (No Setup Required)
+### 2. Via Npx (No Setup Required)
 
 Use `npx` to run without setup:
 
@@ -198,7 +198,7 @@ npm run db:studio
 npm run db:seed
 ```
 
-### Database (Neon PostgreSQL)
+### Database (Neon Postgresql)
 
 - Uses Neon PostgreSQL with `@neondatabase/serverless`
 - Configure `DATABASE_URL` in `.env` with your Neon connection string
@@ -304,7 +304,7 @@ npm run db:generate
 npm run db:migrate
 ```
 
-### Adding AI Tasks
+### Adding Ai Tasks
 
 1. Create a new task in `intelligence/tasks/`:
 

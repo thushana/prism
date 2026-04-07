@@ -163,13 +163,13 @@ await db.delete(users).where(eq(users.id, 1));
 
 ### Best Practices
 
-#### ✅ DO: Use Migrations for Schema Changes
+#### ✅ Do: Use Migrations for Schema Changes
 
 - Always use `database:generate` → `database:migrate` workflow for schema changes
 - Migrations are version-controlled and reproducible
 - Safe for production deployments
 
-#### ❌ DON'T: Mix `database:push` and `database:migrate`
+#### ❌ Don't: Mix `database:push` and `database:migrate`
 
 **Problem**: If you initially created your database with `database:push`, then try to use `database:migrate`, the migration system will attempt to apply ALL migrations from scratch, including ones that create tables that already exist.
 
@@ -283,7 +283,7 @@ If you see connection errors:
 - Ensure the connection string includes `?sslmode=require` for SSL
 - For migrations, ensure `DATABASE_URL_UNPOOLED` is set (or `DATABASE_URL` will be used)
 
-### Migration Fails: "Table already exists"
+### Migration Fails: "Table Already Exists"
 
 **Cause**: Database was created with `database:push`, then migrations are being applied.
 

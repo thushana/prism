@@ -2,6 +2,8 @@
 
 The `packages/charts` package provides thin wrapper components around [Nivo](https://nivo.rocks/) charts with automatic theme integration, sensible defaults, and data transformation utilities.
 
+Aligned with [DOCS-Prism.md](./DOCS-Prism.md): **prop surfaces and defaults** are defined in **`packages/charts/source/`** (especially `chart-bar.tsx`, `chart-line.tsx`, `defaults.ts`, `types.ts`). This doc explains **why** the package exists and **where** to look; it does not duplicate every Nivo option (see [Nivo docs](https://nivo.rocks/) for the full API).
+
 ## Mental Model
 
 The charts package exists to eliminate boilerplate when using Nivo charts in Prism apps. Instead of configuring themes, margins, and axis settings for every chart, components automatically:

@@ -1,5 +1,7 @@
 # Commit Message Style
 
+Human-facing **convention** for `git log`, not implementation. Fits [DOCS-Prism.md](./DOCS-Prism.md): short **what** changed; the diff is **how**.
+
 ## Format
 
 ```

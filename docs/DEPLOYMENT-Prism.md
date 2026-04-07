@@ -4,7 +4,7 @@ This monorepo contains sample and generated Next.js applications that can be dep
 
 ## Setup
 
-### Sample App: Web App (apps/web)
+### Sample App: Web App (Apps/web)
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
 2. Click "Add New" → "Project"
@@ -194,7 +194,7 @@ vercel
 
 ## Troubleshooting
 
-### Build fails with "Couldn't find any `pages` or `app` directory"
+### Build Fails With "Couldn't Find Any `pages` or `app` Directory"
 
 **This error means the Root Directory is not set correctly in Vercel project settings.**
 
@@ -205,7 +205,7 @@ vercel
    - `apps/<app-name>` for generated apps
 4. Save and redeploy
 
-### Build fails with "husky: command not found"
+### Build Fails With "Husky: Command Not Found"
 
 **This error occurs when the `prepare` script tries to run husky during `npm install`.**
 
@@ -217,7 +217,7 @@ The `prepare` script is configured to skip husky in CI/Vercel environments. If y
    ```
 2. This script only runs husky in local development, not in Vercel builds
 
-### Build fails with "Cannot find module"
+### Build Fails With "Cannot Find Module"
 
 - Ensure root `package.json` has `"workspaces": ["apps/*", "packages/*"]`
 - Verify install command is `cd ../.. && npm install` to install from monorepo root
@@ -232,7 +232,7 @@ If you see errors about missing packages (`ui`, `database`, `utilities`):
 npm install
 ```
 
-### TypeScript Errors
+### Typescript Errors
 
 Fix TypeScript errors before deploying:
 
@@ -251,13 +251,13 @@ If your build requires environment variables:
    vercel env pull .env.local
    ```
 
-### Changes not deploying
+### Changes Not Deploying
 
 - Check Vercel build logs
 - Verify the correct root directory is set
 - Ensure Git push includes all changed files
 
-## CI/CD Integration
+## Ci/cd Integration
 
 Test builds in CI before deploying:
 

@@ -1,4 +1,4 @@
-# AI Task System
+# Ai Task System
 
 Comprehensive guide to the AI-powered task system built on Vercel AI SDK.
 
@@ -267,7 +267,7 @@ if (supportsCapability("openai/gpt-4o-mini", "vision")) {
 const streamingModels = getModelsByCapability("streaming");
 ```
 
-### 2. AI Client (`client.ts`)
+### 2. Ai Client (`client.ts`)
 
 Centralized AI client configuration using Vercel AI Gateway via `@ai-sdk/gateway`.
 
@@ -1188,7 +1188,7 @@ export function getUserPrompt(input: Input, version: string = PROMPTS.current) {
 }
 ```
 
-### A/B Testing
+### A/b Testing
 
 ```typescript
 // Test v1 vs v2
@@ -1200,7 +1200,7 @@ const resultV2 = await task.execute(input, { promptVersion: "v2" });
 
 ## Task Types
 
-### TaskResult
+### Taskresult
 
 Standard result type for all tasks:
 
@@ -1220,7 +1220,7 @@ export interface TaskResult<T> {
 }
 ```
 
-### TaskConfig
+### Taskconfig
 
 Configuration options for task execution:
 
@@ -1252,7 +1252,7 @@ export interface Task<TInput, TOutput> {
 
 ## Adding New Tasks
 
-### Step-by-Step Guide
+### Step-By-Step Guide
 
 **1. Create Task Directory**
 
@@ -1435,7 +1435,7 @@ export async function generateItem(itemId: number) {
 }
 ```
 
-### Bulk Operations with Rate Limiting
+### Bulk Operations With Rate Limiting
 
 ```typescript
 export async function generateAllMissing() {
@@ -2025,7 +2025,7 @@ export function getAIModel(modelId: string) {
 }
 ```
 
-## Vercel AI Gateway Features
+## Vercel Ai Gateway Features
 
 ### Unified API
 
@@ -2088,7 +2088,7 @@ Distribute requests across multiple providers for better reliability and perform
 
 Tokens cost exactly the same as direct from providers (0% markup). You only pay provider costs.
 
-### BYOK Support
+### Byok Support
 
 Bring Your Own Key for direct billing from providers, or use Vercel's managed keys for simplicity.
 

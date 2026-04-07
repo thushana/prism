@@ -170,7 +170,7 @@ The logger will:
 
 ## Output Format
 
-### Default Mode (Server/API Routes)
+### Default Mode (Server/api Routes)
 
 Log messages follow this format:
 
@@ -384,7 +384,7 @@ export const serverLogger = winston.createLogger({
 });
 ```
 
-## Migration from console.log
+## Migration from Console.log
 
 When migrating existing code, choose the appropriate logger:
 

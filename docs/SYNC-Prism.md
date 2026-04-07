@@ -1,12 +1,12 @@
-# Prism sync (child applications)
+# Prism Sync (Child Applications)
 
-## Why this exists
+## Why This Exists
 
 When Prism lives inside your application as a **Git submodule**, you have two trees with their own `package.json` files and tooling. **Sync** is the supported way to pull Prism’s submodule forward and keep the parent app aligned—without hand-copying scripts, Cursor command files, or shared dependency ranges.
 
 The exact step order is implemented in [`scripts/sync.ts`](../scripts/sync.ts); this document describes **what** the pipeline does and **where** to look when behavior changes.
 
-## Commands (parent application)
+## Commands (Parent Application)
 
 From the **root of your application** (the directory that contains the `prism/` submodule), package scripts typically include:
 
@@ -22,7 +22,7 @@ Dependency alignment during `prism:sync` runs the same logic as `sync-dependenci
 
 **Allowlisted package names** live in [`scripts/sync-dependencies.ts`](../scripts/sync-dependencies.ts); that file is the source of truth for *which* dependencies are mirrored.
 
-## Git workflow
+## Git Workflow
 
 Changes that touch Prism should usually be **committed in the `prism` repository first**, then the parent repository should record the new submodule commit. Otherwise clones of the parent can point at a submodule SHA that does not exist on the remote.
 

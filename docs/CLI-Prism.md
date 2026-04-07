@@ -1,6 +1,8 @@
-# CLI Tool Documentation
+# CLI Tool
 
-The CLI tool (`npm run tools`) provides a unified command-line interface for common development and maintenance tasks. It uses **Commander.js** for argument parsing and command registration, with a clean separation between generic CLI utilities (`packages/cli`) and specific commands (`tools`).
+Prism’s CLI is invoked from the repo root with **`pnpm run tools`** or **`pnpm run prism`** (see root `package.json`—both delegate to the `tools` workspace). It uses **Commander.js** for argument parsing, with shared patterns in **`packages/cli`** and concrete commands under **`tools/app`**.
+
+This document mixes **philosophy** and **patterns** with illustrative snippets. Per [DOCS-Prism.md](./DOCS-Prism.md), authoritative **command names and flags** live in `tools/app/commands/*.ts` and the Commander setup in `tools/app/tools.ts`; prefer reading those when adding or changing behavior.
 
 ## Architecture
 
@@ -32,13 +34,13 @@ The CLI is split into two parts following monorepo best practices:
 
 ```bash
 # Show help
-npm run tools --help
+pnpm run tools --help
 
 # Show version
-npm run tools --version
+pnpm run tools --version
 
 # Run a command
-npm run tools <command> [options]
+pnpm run tools <command> [options]
 ```
 
 ### Available Commands
@@ -49,10 +51,10 @@ Seed the database with sample data.
 
 ```bash
 # Seed database
-npm run tools seed
+pnpm run tools seed
 
 # Seed with specific count
-npm run tools seed --count 100
+pnpm run tools seed --count 100
 ```
 
 #### `generate`
@@ -61,10 +63,10 @@ Scaffold a new Prism-powered Next.js app.
 
 ```bash
 # Generate a new app
-npm run tools generate my-app
+pnpm run tools generate my-app
 
 # Overwrite existing directory if needed
-npm run tools generate my-app --force
+pnpm run tools generate my-app --force
 ```
 
 #### `migrate`
@@ -73,10 +75,10 @@ Run database migrations manually.
 
 ```bash
 # Run all pending migrations
-npm run tools migrate
+pnpm run tools migrate
 
 # Rollback last migration
-npm run tools migrate --rollback
+pnpm run tools migrate --rollback
 ```
 
 #### `export`
@@ -85,10 +87,10 @@ Export data from the database.
 
 ```bash
 # Export users to CSV
-npm run tools export users --format csv
+pnpm run tools export users --format csv
 
 # Export to JSON
-npm run tools export users --format json
+pnpm run tools export users --format json
 ```
 
 #### `run`
@@ -97,13 +99,13 @@ Kill existing servers, start development environment, and open browser tabs. Thi
 
 ```bash
 # Start dev environment (kills existing servers, starts dev server and Drizzle Studio, opens browser tabs)
-npm run tools run dev
+pnpm run tools run dev
 
 # With custom ports
-npm run tools run dev --port 3001 --drizzle-port 4984
+pnpm run tools run dev --port 3001 --drizzle-port 4984
 
 # Enable verbose logging
-npm run tools run dev --verbose
+pnpm run tools run dev --verbose
 ```
 
 **What it does:**
@@ -312,13 +314,13 @@ registerMyCommand(program);
 ### Step 3: Test
 
 ```bash
-npm run tools my-command --help
-npm run tools my-command --input file.txt --verbose
+pnpm run tools my-command --help
+pnpm run tools my-command --input file.txt --verbose
 ```
 
 ## Best Practices
 
-### 1. Use TypeScript Interfaces for Options
+### 1. Use Typescript Interfaces for Options
 
 ```typescript
 // ✅ Good
@@ -359,7 +361,7 @@ logger.info("Processing...");
 console.log("Processing...");
 ```
 
-### 4. Use Logger with Styling for Formatted Output
+### 4. Use Logger With Styling for Formatted Output
 
 Use the Winston logger for all output. Apply styling to logger messages for visual feedback:
 
@@ -369,21 +371,21 @@ import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
 import { styles, statusMessage } from "@cli";
 
 // Structured logging with styled messages
-logger.info(styles.success("Route created"));
+logger.info(styles.success("Record created"));
 logger.error(styles.errorBold("Failed to import"));
 logger.info(statusMessage("success", "Import completed"));
 
 // Use logStart/logSuccess for command lifecycle
-logStart("Starting route import");
+logStart("Starting import");
 logSuccess("Import completed successfully");
 
 // For formatted output (progress bars, summaries), use logger with styled strings
-logger.info(`${styles.checkmark} Route imported`);
+logger.info(`${styles.checkmark} Record imported`);
 logger.warn(`${styles.warningSymbol} Quota approaching`);
 
 // ❌ Bad
-console.log("Route created"); // Use logger instead
-logger.info("Route created"); // No styling for visual feedback
+console.log("Record created"); // Use logger instead
+logger.info("Record created"); // No styling for visual feedback
 ```
 
 ### 5. Provide Helpful Descriptions
@@ -596,7 +598,7 @@ logger.error(chalk.red.bold("Error!"));
 logger.info(chalk.cyan.underline("Info"));
 ```
 
-### Pre-configured Styles
+### Pre-Configured Styles
 
 Use the `styles` object for common patterns with logger:
 
@@ -605,10 +607,10 @@ import { styles } from "@cli";
 import { serverLogger as logger } from "@logger/server";
 
 // Status colors
-logger.info(styles.success("Route created"));
+logger.info(styles.success("Record created"));
 logger.error(styles.error("Import failed"));
 logger.warn(styles.warning("Quota approaching"));
-logger.info(styles.info("Processing routes"));
+logger.info(styles.info("Processing…"));
 
 // Text styles
 logger.info(styles.bold("Important message"));
@@ -619,8 +621,8 @@ logger.info(styles.successBold("Success!"));
 logger.error(styles.errorBold("Critical error!"));
 
 // Pre-styled symbols
-logger.info(`${styles.checkmark} Route imported`);
-logger.error(`${styles.cross} Route failed`);
+logger.info(`${styles.checkmark} Record imported`);
+logger.error(`${styles.cross} Operation failed`);
 logger.warn(`${styles.warningSymbol} Quota exceeded`);
 logger.info(`${styles.infoSymbol} Processing...`);
 logger.info(`${styles.arrow} Next step`);
@@ -637,7 +639,7 @@ import { serverLogger as logger } from "@logger/server";
 logger.info(statusMessage("success", "Import completed"));
 logger.error(statusMessage("error", "Import failed"));
 logger.warn(statusMessage("warning", "Quota approaching"));
-logger.info(statusMessage("info", "Processing routes"));
+logger.info(statusMessage("info", "Processing…"));
 ```
 
 Output (when logger outputs to console):
@@ -646,7 +648,7 @@ Output (when logger outputs to console):
 ✓ Import completed
 ✗ Import failed
 ⚠ Quota approaching
-ℹ Processing routes
+ℹ Processing…
 ```
 
 ### Best Practices
@@ -664,13 +666,13 @@ import { serverLogger as logger, logStart, logSuccess } from "@logger/server";
 import { styles, statusMessage } from "@cli";
 
 export async function runImportCommand() {
-  logStart("Starting route import");
-  logger.info(styles.infoBold("Processing routes..."));
+  logStart("Starting import");
+  logger.info(styles.infoBold("Processing…"));
 
   try {
-    await processRoutes();
+    await processItems();
     logSuccess("Import completed");
-    logger.info(styles.success(`Created ${count} routes`));
+    logger.info(styles.success(`Created ${count} records`));
   } catch (error) {
     logger.error(statusMessage("error", "Import failed"));
     logger.error(styles.errorBold(error.message));
@@ -678,13 +680,7 @@ export async function runImportCommand() {
 }
 ```
 
-// ❌ Bad
-.command('crawl')
-.description('Crawl')
-
-````
-
-### 5. Use Package-Style Imports
+### 6. Use Package-Style Imports
 
 ```typescript
 // ✅ Good - Package-style imports (configured via tsconfig.json paths)
@@ -697,11 +693,11 @@ import { serverLogger as logger } from "../../../packages/logger/source/server";
 
 // ❌ Bad - Path aliases don't work in CLI context
 import { serverLogger as logger } from "@/library/logger/server";
-````
+```
 
 **Note**: Package-style imports are enabled via `tsconfig.json` path mappings. Never use relative imports (`../../../packages/...`) for shared packages - always use the package name directly.
 
-### 6. Validate Required Arguments
+### 7. Validate Required Arguments
 
 ```typescript
 export async function runMyCommand(options: MyCommandOptions) {
@@ -713,7 +709,7 @@ export async function runMyCommand(options: MyCommandOptions) {
 }
 ```
 
-### 7. Support Debug Mode
+### 8. Support Debug Mode
 
 ```typescript
 export async function runMyCommand(options: MyCommandOptions) {
@@ -746,11 +742,11 @@ if (!apiKey) {
 
 ```bash
 # Test with help
-npm run tools my-command --help
+pnpm run tools my-command --help
 
 # Test with various options
-npm run tools my-command --input test.txt
-npm run tools my-command --input test.txt --verbose
+pnpm run tools my-command --input test.txt
+pnpm run tools my-command --input test.txt --verbose
 ```
 
 ### Unit Testing

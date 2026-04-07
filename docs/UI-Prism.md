@@ -259,7 +259,7 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 - `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `large` | `medium` | `small` (18 rules total).
 
-### PrismTypography component
+### Prismtypography Component
 
 Use `<PrismTypography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the `color` prop or `className` for semantic colour (e.g. `color="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
 
@@ -461,7 +461,7 @@ Edit `packages/ui/styles/globals.css`:
 - Add new utility classes in `@layer utilities`
 - Modify base styles in `@layer base`
 
-## Naming conventions (option names)
+## Naming Conventions (Option Names)
 
 Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling.
 
