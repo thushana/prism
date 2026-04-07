@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import { PrismButton, PrismTypography } from "@ui";
 import type { PrismTypographyRole, PrismTypographySize } from "@ui";
 import { RefreshCw } from "lucide-react";
@@ -343,6 +344,39 @@ const ANIMATION_TYPE_KEYS = [
   "animationMoveIn",
 ] as const satisfies readonly TypographyOptionKey[];
 
+/** At most one flat text color; clears gradients when chosen. */
+const COLOR_FLAT_KEYS = [
+  "colorForeground",
+  "colorMuted",
+  "colorMonochrome",
+] as const satisfies readonly TypographyOptionKey[];
+
+/** At most one gradient direction; clears flat colors when chosen. */
+const COLOR_GRADIENT_KEYS = [
+  "colorGradientSideways",
+  "colorGradientUp",
+  "colorGradientAngle",
+] as const satisfies readonly TypographyOptionKey[];
+
+const ALIGN_KEYS = [
+  "alignLeft",
+  "alignCenter",
+  "alignRight",
+  "alignJustified",
+] as const satisfies readonly TypographyOptionKey[];
+
+const CASE_STYLE_KEYS = [
+  "styleCaseCaps",
+  "styleCaseTitle",
+  "styleCaseLower",
+] as const satisfies readonly TypographyOptionKey[];
+
+const WEIGHT_STYLE_KEYS = [
+  "styleThin",
+  "styleBold",
+  "styleBlack",
+] as const satisfies readonly TypographyOptionKey[];
+
 const GRADIENT_COLOR_PAIRS: ReadonlyArray<[string, string]> = [
   ["var(--color-indigo-500)", "var(--color-cyan-500)"],
   ["var(--color-purple-500)", "var(--color-pink-500)"],
@@ -482,6 +516,48 @@ export function TypeScalePreview({
         }
         return next;
       }
+      if (COLOR_FLAT_KEYS.includes(key as (typeof COLOR_FLAT_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of COLOR_FLAT_KEYS) next.delete(k);
+          for (const k of COLOR_GRADIENT_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
+      if (COLOR_GRADIENT_KEYS.includes(key as (typeof COLOR_GRADIENT_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of COLOR_GRADIENT_KEYS) next.delete(k);
+          for (const k of COLOR_FLAT_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
+      if (ALIGN_KEYS.includes(key as (typeof ALIGN_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of ALIGN_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
+      if (CASE_STYLE_KEYS.includes(key as (typeof CASE_STYLE_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of CASE_STYLE_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
+      if (WEIGHT_STYLE_KEYS.includes(key as (typeof WEIGHT_STYLE_KEYS)[number])) {
+        if (next.has(key)) next.delete(key);
+        else {
+          for (const k of WEIGHT_STYLE_KEYS) next.delete(k);
+          next.add(key);
+        }
+        return next;
+      }
       if (next.has(key)) next.delete(key);
       else next.add(key);
       return next;
@@ -548,6 +624,18 @@ export function TypeScalePreview({
         }
       : undefined;
 
+  const previewTextStyle: CSSProperties = {
+    fontFamily: activeTypeface.cssVariable,
+    fontWeight: customFontWeight,
+    fontStyle: customFontStyle,
+    textTransform: customTextTransform,
+    ...(customTextAlign !== undefined ? { textAlign: customTextAlign } : {}),
+    ...(customTextWrap !== undefined
+      ? { textWrap: customTextWrap as CSSProperties["textWrap"] }
+      : {}),
+    ...(customColorStyle ?? {}),
+  };
+
   const animationWhole = selectedOptions.has("animationWhole");
   const animationLine = selectedOptions.has("animationLine");
   const animationWord = selectedOptions.has("animationWord");
@@ -585,7 +673,42 @@ export function TypeScalePreview({
   return (
     <div className="typography-preview mb-8">
       <h3 className="mb-4">Type scale (role × size)</h3>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-4 space-y-1 md:hidden">
+        <PrismTypography
+          role="overline"
+          size="small"
+          id="type-scale-typeface-label"
+        >
+          Typeface
+        </PrismTypography>
+        <div className="flex items-center gap-2">
+          <select
+            aria-labelledby="type-scale-typeface-label"
+            className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            value={selectedTypefaceId}
+            onChange={(e) =>
+              setSelectedTypefaceId(e.target.value as TypefaceOption["id"])
+            }
+          >
+            {typefaces.map((typeface) => (
+              <option key={typeface.id} value={typeface.id}>
+                {typeface.label}
+              </option>
+            ))}
+          </select>
+          <PrismButton
+            label="Change headlines"
+            color="grey"
+            colorVariant="monochrome"
+            variant="icon"
+            icon={RefreshCw}
+            iconOnly
+            shapeLineNo
+            onClick={reshuffleSamples}
+          />
+        </div>
+      </div>
+      <div className="mb-4 hidden flex-wrap items-center gap-2 md:flex">
         {typefaces.map((typeface) => (
           <PrismButton
             key={typeface.id}
@@ -611,7 +734,7 @@ export function TypeScalePreview({
           onClick={reshuffleSamples}
         />
       </div>
-      <div className="mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {TYPOGRAPHY_OPTION_COLUMNS.map(({ heading, keys }) => (
           <div key={heading} className="space-y-1">
             <PrismTypography role="overline" size="small">
@@ -661,17 +784,7 @@ export function TypeScalePreview({
                     size={item.size}
                     {...typographyAnimationProps}
                     className={`block content-text mx-0 ${activeTypeface.className} ${customColorClass ?? ""}`}
-                    style={{
-                      fontFamily: activeTypeface.cssVariable,
-                      fontWeight: customFontWeight,
-                      fontStyle: customFontStyle,
-                      textTransform: customTextTransform,
-                      ...(customTextAlign !== undefined
-                        ? { textAlign: customTextAlign }
-                        : {}),
-                      textWrap: customTextWrap,
-                      ...customColorStyle,
-                    }}
+                    style={previewTextStyle}
                   >
                     {/* Plain string (no <p> blocks): SplitText needs a single text host for line/word/char zones. */}
                     {needsPlainTextForAnimation ? (
@@ -702,17 +815,7 @@ export function TypeScalePreview({
                     size={item.size}
                     {...typographyAnimationProps}
                     className={`block ${activeTypeface.className} ${customColorClass ?? ""}`}
-                    style={{
-                      fontFamily: activeTypeface.cssVariable,
-                      fontWeight: customFontWeight,
-                      fontStyle: customFontStyle,
-                      textTransform: customTextTransform,
-                      ...(customTextAlign !== undefined
-                        ? { textAlign: customTextAlign }
-                        : {}),
-                      textWrap: customTextWrap,
-                      ...customColorStyle,
-                    }}
+                    style={previewTextStyle}
                   >
                     {getSampleLabel(item, headlineStartIndex, shuffledPools)}
                   </PrismTypography>
