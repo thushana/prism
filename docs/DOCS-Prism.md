@@ -14,7 +14,7 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 | ARCHITECTURE | "What's the mental model?" | 2-3 pages   |
 | DECISIONS    | "Why did we choose X?"     | 1 page each |
 
-## Remove From Docs
+## Remove from Docs
 
 - Version numbers → `package.json`
 - Code examples → link to source
@@ -22,7 +22,7 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 - Config values → config files
 - Step-by-step guides → the code itself
 
-## Keep In Docs
+## Keep in Docs
 
 - **Why** decisions were made
 - **What** the system does (mental model)
@@ -35,10 +35,11 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 {project-root}/
 ├── README.md                              # Quick start (~50 lines)
 └── docs/
-    ├── ARCHITECTURE-{Project}.md          # Mental model (~200 lines)
-    ├── GLOSSARY-{Project}.md              # Domain terms
+    ├── ARCHITECTURE-{Project}.md          # Mental model (keep lean; link to code)
+    ├── DOCS-Prism.md                      # This file (Prism submodule / template)
+    ├── CONVENTIONS-{Project}.md           # Naming, URLs, quality commands
+    ├── GLOSSARY-{Project}.md              # Domain terms (optional)
     ├── SYNC-{Project}.md                  # Submodule sync (child apps)
-    ├── CONVENTIONS-{Project}.md           # Code conventions
     └── decisions/
         └── 001-DECISION-{short-description}.md
 ```
@@ -50,21 +51,21 @@ Document decisions, not implementation.
 **Example:**
 
 ```markdown
-# 001-DECISION-npm-workspaces-over-pnpm
+# 001-DECISION-pnpm-workspaces
 
 ## Context
 
-We need a monorepo solution that works with Vercel and supports local file references.
+We need a monorepo solution that works with Vercel, supports local `file:` references, and keeps installs reproducible.
 
 ## Decision
 
-Use npm workspaces with local file references (`file:./packages/package-name`).
+Use **pnpm** workspaces with local file references (`file:./packages/package-name`).
 
 ## Consequences
 
-- ✅ Native npm support, no extra tooling
-- ✅ Works out-of-the-box with Vercel
-- ⚠️ Slower installs than pnpm (acceptable trade-off)
+- ✅ Fast, content-addressable store; strict dependency layout
+- ✅ `packageManager` field pins the pnpm version
+- ⚠️ Contributors must use pnpm (document in README)
 ```
 
 ## Anti-Patterns

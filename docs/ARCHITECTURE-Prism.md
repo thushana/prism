@@ -1,20 +1,26 @@
-# Architecture Decisions
+# Prism Architecture
+
+This document is the **mental model** for the Prism monorepo: **what** lives where and **why** the layout looks this way. It follows [DOCS-Prism.md](./DOCS-Prism.md): **how** (exact versions, scripts, props) belongs in **`package.json`**, route handlers, and TypeScript source—link there instead of duplicating.
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.1.1 (App Router)
-- **Language**: TypeScript 5.9.3 (target: ES2022)
-- **Styling**: Tailwind CSS 4.1.17
-- **Database**: Drizzle ORM with Neon PostgreSQL
-- **Testing**: Vitest 4.0.10 with React Testing Library
-- **Linting**: ESLint 9.39.1
-- **Formatting**: Prettier 3.6.2
-- **Runtime**: Node.js 22.x (LTS)
-- **Monorepo**: npm workspaces
+**Versions, ranges, and scripts** live in the repo root **`package.json`** (`packageManager`, `engines`, `dependencies`, `devDependencies`, `scripts`). The list below is the **high-level stack** (names and concepts) so you can see what Prism is built on without copying numbers that drift.
+
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **UI**: React
+- **Styling**: Tailwind CSS
+- **Database**: Drizzle ORM, PostgreSQL (Neon in sample / typical deployment)
+- **Testing**: Vitest; component tests may use React Testing Library where a package opts in (see that package’s `package.json`)
+- **Linting**: ESLint (Next-oriented config at repo root)
+- **Formatting**: Prettier
+- **Runtime**: Node.js (`engines` in `package.json`)
+- **Monorepo**: **pnpm** workspaces (`packageManager` in `package.json`; packages under `apps/` and `packages/`)
+- **Quality automation**: Husky, lint-staged (see root `package.json`); CI runs the same ideas as `pnpm run quality` / `pnpm run lint` (see workflow files)
 
 ## Monorepo Structure
 
-This project uses a monorepo architecture to organize multiple applications and shared packages:
+pnpm workspace monorepo for sample apps and shared packages:
 
 ```
 prism/
@@ -22,12 +28,14 @@ prism/
 │   └── web/              # Sample application (generated apps go here)
 ├── packages/
 │   ├── ui/               # Shared UI components
-│   ├── database/         # Database layer
+│   ├── database/         # Database layer (sample schema; apps may own their own)
 │   ├── utilities/        # Shared utilities
 │   ├── logger/           # Centralized logging
 │   ├── intelligence/     # AI helpers and task registry
 │   ├── system-sheet/     # System information page primitives
 │   ├── authentication/   # Authentication utilities (API and web)
+│   ├── charts/           # Nivo wrappers + theme (see CHARTS-Prism.md)
+│   ├── feature-flags/    # Feature flag helpers
 │   └── cli/              # Shared CLI utilities
 ├── tools/                 # CLI entrypoint and generator
 └── package.json          # Root workspace configuration
@@ -45,7 +53,7 @@ prism/
 
 ### Apps
 
-#### apps/web
+#### Apps/web
 
 Main customer-facing Next.js application:
 
@@ -58,7 +66,7 @@ Main customer-facing Next.js application:
 
 #### Generated Apps
 
-Apps generated via `npm run prism generate <app-name>` follow the same structure as `apps/web`:
+Apps generated via **`pnpm run prism generate <app-name>`** (see root `package.json` scripts `prism` / `tools`) follow the same structure as `apps/web`:
 
 - `app/` - Next.js App Router pages and layouts
 - `public/` - Static assets
@@ -71,7 +79,7 @@ Apps generated via `npm run prism generate <app-name>` follow the same structure
 
 ### Packages
 
-#### packages/ui
+#### Packages/ui
 
 Shared UI component library:
 
@@ -84,7 +92,7 @@ Shared UI component library:
 - Includes fonts: Satoshi, Sentient, Zodiak, Gambarino
 - Exports font configurations for Next.js `localFont`
 
-#### packages/database
+#### Packages/database
 
 Shared database layer:
 
@@ -93,7 +101,7 @@ Shared database layer:
 - Neon PostgreSQL for both development and production
 - Type-safe queries with Drizzle ORM
 
-#### packages/utilities
+#### Packages/utilities
 
 Shared utility functions:
 
@@ -101,7 +109,7 @@ Shared utility functions:
 - `source/classnames.ts` - Tailwind class name merger (`cn`)
 - Includes tests for utilities
 
-#### packages/logger
+#### Packages/logger
 
 Centralized logging used across server and client:
 
@@ -110,7 +118,7 @@ Centralized logging used across server and client:
 - `source/client.ts` - Client logger with browser-safe outputs
 - Tests cover client/server usage
 
-#### packages/intelligence
+#### Packages/intelligence
 
 AI task registry and helpers:
 
@@ -118,7 +126,7 @@ AI task registry and helpers:
 - `source/utilities/` - Cost tracking, retry logic, model helpers
 - `models.config.json` - Model configuration defaults
 
-#### packages/system-sheet
+#### Packages/system-Sheet
 
 Shared primitives for the system information page:
 
@@ -126,7 +134,7 @@ Shared primitives for the system information page:
 - `source/data.ts` - Reference data exposed to apps
 - `source/types.ts` - Types for system sheet entries
 
-#### packages/authentication
+#### Packages/authentication
 
 Shared authentication utilities for API and web authentication:
 
@@ -136,7 +144,15 @@ Shared authentication utilities for API and web authentication:
 - `source/password-form.tsx` - Password form component
 - `source/authentication_route.ts` - Authentication endpoint factory
 
-#### packages/cli
+#### Packages/charts
+
+Nivo-based chart wrappers and theme mapping from CSS variables. See [CHARTS-Prism.md](./CHARTS-Prism.md).
+
+#### Packages/feature-Flags
+
+Shared feature-flag discovery and standard environment flags for apps embedding Prism.
+
+#### Packages/cli
 
 Shared CLI utilities used by generator/ops commands:
 
@@ -147,8 +163,8 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Monorepo Architecture
 
-- **Workspace Management**: Using npm workspaces (native npm feature)
-- **Package Names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `system-sheet`, `authentication`, `cli`)
+- **Workspace management**: **pnpm** workspaces (`packageManager` in root `package.json`)
+- **Package names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `system-sheet`, `authentication`, `charts`, `feature-flags`, `cli`)
 - **Directory Convention**: `source/` instead of `src/` for packages
 - **Versioning**: All packages use `*` for workspace dependencies
 - **Import Style**: @ prefixed imports from package names (`import { Button } from "@ui"`)
@@ -170,7 +186,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Styling
 
-- **Framework**: Tailwind CSS 4.1.17 (CSS-first configuration)
+- **Framework**: Tailwind CSS (version in root `package.json`; CSS-first configuration)
 - **Centralized Scanning**: The `packages/ui/styles/globals.css` file contains all `@source` directives for scanning Prism packages
 - **Path Resolution**: Uses relative paths (`../../utilities`, `../../system-sheet`) that work in both:
   - **Monorepo**: From `packages/ui/styles/` → `packages/utilities/`
@@ -185,8 +201,8 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Testing
 
-- **Framework**: Vitest for fast unit/integration tests
-- **React Testing**: React Testing Library for component tests
+- **Framework**: Vitest for fast unit/integration tests (see workspace `vitest.config` files)
+- **Component tests**: Where used, colocated with packages (see each package’s devDependencies)
 - **Location**: Tests colocated with source files (`*.test.ts`, `*.test.tsx`)
 - **Coverage**: V8 coverage provider
 - **CI**: Tests run in GitHub Actions on pull requests
@@ -197,7 +213,7 @@ Shared CLI utilities used by generator/ops commands:
 - **Linting**: ESLint with Next.js config
 - **Formatting**: Prettier with automatic formatting on save
 - **Pre-commit Hooks**: Husky + lint-staged for automated formatting and linting
-- **Quality Scripts**: `npm run quality` runs full quality checks
+- **Quality scripts**: `pnpm run quality` at Prism root (see `scripts/quality.ts`)
 
 ### Naming Conventions
 
@@ -217,7 +233,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Git Workflow
 
-- **Commits**: Use descriptive commit messages (see `.cursor/commands/COMMITMESSAGE.md`)
+- **Commits**: Use descriptive commit messages (see [COMMIT-Prism.md](./COMMIT-Prism.md) and `.cursor/commands/COMMITMESSAGE.md` in consuming repos)
 - **File Moves**: Use `git mv` to preserve file history
 - **Hooks**: Pre-commit hooks run format, lint, and typecheck
 - **CI**: GitHub Actions runs quality checks on every push
@@ -235,12 +251,14 @@ Each app declares dependencies on shared packages:
     "logger": "*",
     "intelligence": "*",
     "system-sheet": "*",
-    "authentication": "*"
+    "authentication": "*",
+    "charts": "*",
+    "feature-flags": "*"
   }
 }
 ```
 
-The `*` version means "use the local workspace version" during development.
+The `*` version means "use the local workspace version" during development. Each app declares only what it needs; see generated `package.json` files under `apps/`.
 
 ### Using Prism as a Package
 
@@ -252,7 +270,7 @@ Prism is intended to be consumed as a dependency when building new apps:
 
    ```bash
    # Generate app (automatically adds Prism as submodule at ./prism)
-   npm run prism generate my-app --path ../my-app
+   pnpm run prism generate my-app --path ../my-app
    ```
 
    - Prism is added as a git submodule inside your app at `./prism`
@@ -265,7 +283,7 @@ Prism is intended to be consumed as a dependency when building new apps:
 
    ```bash
    # Generate app with git dependency
-   npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+   pnpm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
    ```
 
    - Vercel will clone Prism from GitHub during build
@@ -279,7 +297,7 @@ Prism is intended to be consumed as a dependency when building new apps:
 - Inside this monorepo we use path aliases like `@ui` and `@logger`; external apps can import the same modules via the `@prism/core/*` subpaths without custom path mapping.
 - Generated apps scaffolded by the CLI are already wired to use these imports (with path aliases like `@ui` that work in both modes).
 
-## TypeScript Configuration
+## Typescript Configuration
 
 Each workspace has its own `tsconfig.json`:
 
@@ -301,10 +319,10 @@ import { requireApiAuthentication } from "@authentication"; // packages/authenti
 
 ## Build Process
 
-1. **Install**: `npm install` installs all workspace dependencies
-2. **Development**: Each app runs independently with hot reload
-3. **Build**: Each app builds independently, including workspace packages
-4. **Deploy**: Each app deploys to separate Vercel projects
+1. **Install**: `pnpm install` at repo root (see `packageManager` in `package.json`)
+2. **Development**: Per-app dev scripts (e.g. `pnpm run dev`, `pnpm run dev:web`)
+3. **Build**: `pnpm run build` / filtered builds (see scripts)
+4. **Deploy**: Typically Vercel per app; paths in `vercel.json` per app
 
 ## Future Considerations
 
@@ -335,15 +353,15 @@ For larger monorepos, consider:
 
 ## Development Workflow
 
-1. **Local Development**:
+1. **Local development** (exact names in root `package.json`):
 
    ```bash
-   npm run dev        # Kill stale servers, then run the web app on :3000
-   npm run dev:web    # Run web only (alias)
-   npm run dev:setup  # Set up subdomain routing (one-time setup)
+   pnpm run dev        # Kill stale servers, then run the web app on :3000
+   pnpm run dev:web    # Run web only
+   pnpm run dev:setup  # Subdomain routing (one-time)
    ```
 
-   **Subdomain Routing**: After running `npm run dev:setup`, you can access:
+   **Subdomain routing**: After `pnpm run dev:setup`, you can access:
    - Web: `http://www.localhost:3000` or `http://web.localhost:3000`
 
 2. **Making Changes**:
@@ -351,11 +369,11 @@ For larger monorepos, consider:
    - Hot reload works automatically
    - Shared packages update all dependent apps
 
-3. **Testing**:
+3. **Testing / quality**:
 
    ```bash
-   npm run test       # Test all workspaces
-   npm run quality    # Full quality check
+   pnpm run test       # Vitest across workspaces (see script)
+   pnpm run quality    # Full quality check
    ```
 
 4. **Deployment**:
@@ -365,8 +383,10 @@ For larger monorepos, consider:
 
 ## References
 
+- [DOCS-Prism.md](./DOCS-Prism.md) — documentation philosophy
+- [CONVENTIONS-Prism.md](./CONVENTIONS-Prism.md) — code conventions
 - [Next.js App Router](https://nextjs.org/docs/app)
-- [npm Workspaces](https://docs.npmjs.com/cli/v10/using-npm/workspaces)
+- [pnpm workspaces](https://pnpm.io/workspaces)
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [Vitest](https://vitest.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)

@@ -4,14 +4,16 @@ Style and naming conventions for this codebase.
 
 **See also**: [DOCS-Prism.md](./DOCS-Prism.md) for documentation philosophy.
 
-## Quality checks (prism-wide)
+## Quality Checks (Prism-Wide)
 
 Lint, format, and tests are run **from the Prism root** so one config applies to all workspaces. New packages are included automatically.
 
-- **`npm run quality`** – Runs **format → lint → typecheck → test:run** (for Prism and, when present, the parent app). Apps using Prism run `tsx prism/scripts/quality.ts` so this is defined once in Prism.
-- **`npm run lint`** – Single ESLint run over `packages/*/source`, `packages/*/styles`, `apps/*/app`, `tools/app` using root `eslint.config.mjs`.
-- **`npm run typecheck`** – Runs `tsc --noEmit` in every workspace that has a `tsconfig.json` (see `scripts/typecheck-workspaces.ts`).
-- **`npm run test:run`** – Runs `vitest run` in every workspace that has a Vitest config or `test:run` script (see `scripts/test-workspaces.ts`).
+- **`pnpm run quality`** – Runs **format → lint → typecheck → test:run** (for Prism and, when present, the parent app). Apps using Prism run `tsx prism/scripts/quality.ts` so this is defined once in Prism.
+- **`pnpm run lint`** – Single ESLint run over `packages/*/source`, `packages/*/styles`, `apps/*/app`, `tools/app` using root `eslint.config.mjs`.
+- **`pnpm run typecheck`** – Runs `tsc --noEmit` in every workspace that has a `tsconfig.json` (see `scripts/typecheck-workspaces.ts`).
+- **`pnpm run test:run`** – Runs `vitest run` in every workspace that has a Vitest config or `test:run` script (see `scripts/test-workspaces.ts`).
+
+Exact script names and ordering live in root **`package.json`**; this list is the intent, not a duplicate spec.
 
 Workspaces can still define their own `lint` / `typecheck` / `test:run` scripts for local use; root commands do not require them.
 
@@ -30,6 +32,8 @@ Workspaces can still define their own `lint` / `typecheck` / `test:run` scripts 
   - `/admin/settings` - nested routes
 
 ## API Endpoints
+
+Patterns for apps using Prism—not an auto-generated inventory. **Concrete routes and bodies** live next to code (`app/api/**/route.ts` and types). See [DOCS-Prism.md](./DOCS-Prism.md).
 
 - Follow **REST conventions** with standard HTTP methods
 - Use **kebab-case** resource names matching database table names
@@ -99,7 +103,7 @@ Workspaces can still define their own `lint` / `typecheck` / `test:run` scripts 
 - Example tables: `users`, `posts`, `comments`.
 - Common columns: `id`, `created_at`, `updated_at`.
 
-### TypeScript Properties
+### Typescript Properties
 
 - Use **camelCase** for TypeScript/JavaScript properties.
 - Map snake_case → camelCase in application code:
@@ -204,6 +208,10 @@ packages/
 │       ├── web.ts
 │       ├── password-form.tsx
 │       └── index.ts
+├── charts/                 # Nivo chart wrappers (see CHARTS-Prism.md)
+│   └── source/
+├── feature-flags/          # Feature flag helpers
+│   └── source/
 └── cli/                    # Shared CLI utilities
     └── source/
         ├── command.ts
@@ -220,6 +228,8 @@ packages/
 - **`packages/intelligence/source/`** - AI helpers, tasks, and utilities
 - **`packages/system-sheet/source/`** - System information page primitives
 - **`packages/authentication/source/`** - Authentication utilities
+- **`packages/charts/source/`** - Chart wrappers and helpers ([CHARTS-Prism.md](./CHARTS-Prism.md))
+- **`packages/feature-flags/source/`** - Feature flag discovery and standard flags
 - **`packages/cli/source/`** - Shared CLI helpers used by tools
 - **`apps/*/app/`** - Next.js App Router pages and layouts
 - **`apps/*/app/components/`** - App-specific React components
@@ -263,7 +273,7 @@ packages/
 
 > The CLI tool is implemented. See [docs/CLI-Prism.md](./CLI-Prism.md) for usage and patterns.
 
-- CLI tool entry point: `npm run tools`
+- CLI tool entry point: **`pnpm run tools`** or **`pnpm run prism`** (aliases; see root `package.json`)
 - Commands are defined under `tools/app/commands`
 - Each command has:
   - A `run*` function with the implementation
@@ -305,7 +315,7 @@ The `@` prefix requirement is automatically enforced:
    - Automatically fixes violations when possible
    - Blocks commits if violations cannot be auto-fixed
 
-3. **CI/CD**: GitHub Actions runs `npm run lint` on every push/PR
+3. **CI/CD**: GitHub Actions runs the same checks as local quality (see workflow files; typically `pnpm run lint` or `pnpm run quality`)
    - Ensures all code conforms before merging
    - Part of the quality checks workflow
 
