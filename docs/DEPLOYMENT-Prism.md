@@ -1,271 +1,72 @@
 # Vercel Deployment Guide
 
-This monorepo contains sample and generated Next.js applications that can be deployed independently to Vercel.
+How sample and generated **Next.js** apps in this monorepo map to **Vercel** projects. Per [DOCS-Prism.md](./DOCS-Prism.md), exact **build/install** script names live in **`package.json`**; this file stays oriented around **what** to configure and **why**.
+
+## Monorepo Layout (pnpm)
+
+Workspaces are declared in [`pnpm-workspace.yaml`](../pnpm-workspace.yaml) (`apps/*`, `packages/*`, `tools`). The repo root is **`@prism/core`** and uses **pnpm** (`packageManager` in root [`package.json`](../package.json)). Vercel must install from the **repo root** so `workspace:*` dependencies resolve.
 
 ## Setup
 
-### Sample App: Web App (Apps/web)
+### Sample app: `apps/web`
 
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "Add New" → "Project"
-3. Import your Git repository
-4. Configure:
-   - **Project Name**: `prism-web` (or your preferred name)
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `apps/web` ⚠️ **IMPORTANT**: This must be set!
-   - **Build Command**: `npm run build` (or leave default - Vercel will run from apps/web)
-   - **Output Directory**: `.next` (leave default - relative to root directory)
-   - **Install Command**: `cd ../.. && npm install` (install from monorepo root for workspace dependencies)
+1. Vercel → Add Project → import this Git repository.
+2. **Root Directory**: `apps/web` (required so Next finds `app/`).
+3. **Install Command** (example): `cd ../.. && pnpm install` — runs from `apps/web`, goes to monorepo root, installs all workspaces.
+4. **Build Command**: `pnpm run build` (default for the app) or equivalent; root also exposes `pnpm run build:web` from the monorepo root if you ever build from `/`.
+5. **Output**: Next default `.next` relative to the app root.
 
-5. Add custom domain (optional):
-   - Go to Project Settings → Domains
-   - Add: `yourdomain.com` or `www.yourdomain.com`
+Framework preset: **Next.js**.
 
-### Generated Apps
+### Generated apps under `apps/<name>`
 
-Apps generated via `npm run prism generate <app-name>` can be deployed the same way:
+Same pattern: **Root Directory** `apps/<name>`, **Install Command** `cd ../.. && pnpm install`, then the app’s **`pnpm run build`**.
 
-1. In Vercel Dashboard, click "Add New" → "Project"
-2. Import the **same** Git repository
-3. Configure:
-   - **Project Name**: `your-app-name` (or your preferred name)
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `apps/<app-name>` ⚠️ **IMPORTANT**: This must be set!
-   - **Build Command**: `npm run build` (or leave default)
-   - **Output Directory**: `.next` (leave default - relative to root directory)
-   - **Install Command**: `cd ../.. && npm install` (install from monorepo root for workspace dependencies)
+Generate apps from the repo root with **`pnpm run tools generate <name>`** or **`pnpm run prism generate <name>`** (see root scripts).
 
-4. Add custom domain (optional):
-   - Go to Project Settings → Domains
-   - Add your custom domain
+### Standalone repo (app generated outside Prism)
 
-**Note:** The `apps/web` directory is kept as a sample reference. Generated apps are created in `apps/` and can be deployed independently.
-
-### Standalone Apps (Outside Monorepo)
-
-Apps generated outside the Prism monorepo can also be deployed to Vercel:
-
-1. **Generate with git dependency** (recommended for deployment):
-
-   ```bash
-   npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-   ```
-
-2. **In Vercel Dashboard**, click "Add New" → "Project"
-3. **Import your app's Git repository** (separate from Prism repo)
-4. **Configure**:
-   - **Project Name**: `my-app` (or your preferred name)
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `.` (root of the app repo)
-   - **Build Command**: `npm run build` (default)
-   - **Output Directory**: `.next` (default)
-   - **Install Command**: `npm install` (default)
-
-5. **Vercel will automatically**:
-   - Clone Prism from GitHub during build (via git dependency)
-   - Install all dependencies
-   - Build and deploy your app
-
-**For local iteration** (developing both Prism and your app):
-
-- Use git submodule: `git submodule add https://github.com/thushana/prism.git ../prism`
-- Generate without `--prism-repo` flag - generator will auto-detect local Prism
-- This uses `file:` dependencies for instant updates
+The generator can target a path with a **git** (or `file:`) dependency on Prism; install/build are then **from that app’s root** (`pnpm install` / `pnpm run build`). Clone Prism as a submodule and use `file:` deps when you iterate on Prism and the app together—see [GENERATE-Prism.md](./GENERATE-Prism.md) and [SYNC-Prism.md](./SYNC-Prism.md).
 
 ## Deployment Behavior
 
-- **Automatic Deployments**: All projects will deploy automatically on push to main
-- **Smart Builds**: Vercel detects changes and only builds affected apps
-- **Independent Scaling**: Each app can be scaled independently
-- **Separate URLs**: Each app gets its own Vercel URL and can have custom domains
+- Each Vercel **project** deploys on git pushes that affect it (per Vercel’s ignore/build settings).
+- Multiple projects can point at the **same** repository with different **root directories** for separate URLs and env vars.
 
-## Database Configuration
+## Database and Environment Variables
 
-The Neon PostgreSQL database is configured via environment variables. For production:
+Neon (or any Postgres) URLs are set in Vercel **Project → Settings → Environment Variables**. Typical pair: **`DATABASE_URL`** (pooled) and **`DATABASE_URL_UNPOOLED`** (for migrations / drizzle-kit). Details: [DATABASE-Prism.md](./DATABASE-Prism.md).
 
-1. Get your connection strings from [Neon Console](https://console.neon.tech)
-2. Update environment variables in Vercel:
-   - Go to Project Settings → Environment Variables
-   - Add `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` for each project
+## Local Build Checks
 
-## Environment Variables
+From the Prism root, **`pnpm run vercel:test:web`** runs the sample web production build (`pnpm --filter web run build`)—fast parity with what Vercel runs for `apps/web` after install.
 
-If you need environment variables:
-
-1. Go to Project Settings → Environment Variables
-2. Add variables for each environment (Production, Preview, Development)
-3. Variables can be different per project (web vs admin)
-
-## Cost
-
-All apps can run on Vercel's **Free (Hobby) tier**:
-
-- Unlimited deployments
-- 100 GB bandwidth/month (shared)
-- 6,000 build minutes/month (shared)
-- Smart builds only rebuild changed apps
-
-## Testing Builds Locally
-
-Test builds locally before deploying to catch potential issues early.
-
-### Quick Test (Recommended)
-
-Run Next.js production builds directly:
-
-```bash
-# Test web app build
-npm run vercel:test:web
-
-# Test all apps
-npm run build
-```
-
-This runs the same `next build` command that Vercel uses and catches:
-
-- TypeScript errors
-- Build-time errors
-- Missing dependencies
-- Import resolution issues
-- Environment variable issues (if set)
-
-### Full Vercel Build Simulation
-
-For a more accurate simulation including environment variables and build settings:
-
-1. **Link your project** (one-time setup):
-
-   ```bash
-   # For web app
-   cd apps/web
-   vercel link
-
-   # For generated apps
-   cd apps/<app-name>
-   vercel link
-   ```
-
-2. **Run Vercel build**:
-
-   ```bash
-   # Test web app with Vercel CLI
-   npm run vercel:build:web
-
-   # Test generated apps (from app directory)
-   cd apps/<app-name>
-   vercel build
-   ```
-
-This simulates Vercel's exact build process, including environment variables, build commands, and output structure.
-
-### Build Verification Checklist
-
-After running a build, verify:
-
-1. **Build succeeds** - No errors during build
-2. **Output directory** - `.next` folder is created correctly
-3. **Static files** - Public assets are copied
-4. **Type checking** - No TypeScript errors
-5. **Dependencies** - All workspace packages resolve correctly
-6. **Environment variables** - Required env vars are available
-
-### Build Testing Methods
-
-| Method                  | Speed  | Accuracy  | Setup Required |
-| ----------------------- | ------ | --------- | -------------- |
-| `npm run vercel:test:*` | Fast   | High      | None           |
-| `vercel build`          | Slower | Very High | Vercel link    |
-
-**Recommendation**: Use `npm run vercel:test:*` for quick checks during development, and `vercel build` before important deployments.
-
-## Manual Deployment
-
-Deploy manually using Vercel CLI:
-
-```bash
-# Deploy web app
-cd apps/web
-vercel
-
-# Deploy generated apps
-cd apps/<app-name>
-vercel
-```
+For a full Vercel-local simulation, use **Vercel CLI** (`vercel link`, `vercel build`) from the app directory; see Vercel’s docs.
 
 ## Troubleshooting
 
-### Build Fails With "Couldn't Find Any `pages` or `app` Directory"
+### No `app` or `pages` directory
 
-**This error means the Root Directory is not set correctly in Vercel project settings.**
+**Root Directory** is wrong. Set it to `apps/web` or `apps/<your-app>`.
 
-1. Go to your Vercel project → Settings → General
-2. Scroll to "Root Directory"
-3. Set it to:
-   - `apps/web` for the sample web app
-   - `apps/<app-name>` for generated apps
-4. Save and redeploy
+### Husky during install
 
-### Build Fails With "Husky: Command Not Found"
+Root **`prepare`** skips Husky when **`CI`** or **`VERCEL`** is set ([`package.json`](../package.json)). If a custom environment still fails, mirror that guard or omit `prepare` in the install path you control.
 
-**This error occurs when the `prepare` script tries to run husky during `npm install`.**
+### Workspace packages not found (`database`, `ui`, …)
 
-The `prepare` script is configured to skip husky in CI/Vercel environments. If you still see this error:
+Install must run from the **monorepo root** (e.g. `cd ../.. && pnpm install` with root directory `apps/web`). Submodule consumers must have **`prism/`** (or paths in `file:` deps) present on the build machine.
 
-1. Ensure your `package.json` has the conditional prepare script:
-   ```json
-   "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\""
-   ```
-2. This script only runs husky in local development, not in Vercel builds
+### TypeScript errors
 
-### Build Fails With "Cannot Find Module"
+**`pnpm run typecheck`** from the Prism root (see [`package.json`](../package.json)).
 
-- Ensure root `package.json` has `"workspaces": ["apps/*", "packages/*"]`
-- Verify install command is `cd ../.. && npm install` to install from monorepo root
-- Run `npm install` to ensure all workspace dependencies are linked
+## CI Example (Conceptual)
 
-### Workspace Dependencies Not Found
+Use the same commands your team runs locally, for example root **`pnpm install`** and **`pnpm run vercel:test:web`**. Pin **pnpm** via **`packageManager`** and **Corepack** if your CI supports it.
 
-If you see errors about missing packages (`ui`, `database`, `utilities`):
+## Related Docs
 
-```bash
-# Ensure dependencies are installed
-npm install
-```
-
-### Typescript Errors
-
-Fix TypeScript errors before deploying:
-
-```bash
-npm run typecheck
-```
-
-### Missing Environment Variables
-
-If your build requires environment variables:
-
-1. Create `.env.local` in the app directory
-2. Or use Vercel CLI to pull them:
-   ```bash
-   cd apps/web
-   vercel env pull .env.local
-   ```
-
-### Changes Not Deploying
-
-- Check Vercel build logs
-- Verify the correct root directory is set
-- Ensure Git push includes all changed files
-
-## Ci/cd Integration
-
-Test builds in CI before deploying:
-
-```yaml
-# .github/workflows/test-build.yml
-- name: Test Vercel Build
-  run: |
-    npm install
-    npm run vercel:test:web
-    # Add tests for generated apps as needed
-```
+- [DOCS-Prism.md](./DOCS-Prism.md)
+- [DATABASE-Prism.md](./DATABASE-Prism.md)
+- [ARCHITECTURE-Prism.md](./ARCHITECTURE-Prism.md)

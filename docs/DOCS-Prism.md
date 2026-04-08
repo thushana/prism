@@ -38,6 +38,9 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
     ├── ARCHITECTURE-{Project}.md          # Mental model (keep lean; link to code)
     ├── DOCS-Prism.md                      # This file (Prism submodule / template)
     ├── CONVENTIONS-{Project}.md           # Naming, URLs, quality commands
+    ├── DATABASE-{Project}.md              # Drizzle / DB mental model (Prism)
+    ├── DEPLOYMENT-{Project}.md            # Vercel / env (Prism)
+    ├── FEATUREFLAGS-{Project}.md          # Feature flags package (Prism)
     ├── GLOSSARY-{Project}.md              # Domain terms (optional)
     ├── SYNC-{Project}.md                  # Submodule sync (child apps)
     └── decisions/
