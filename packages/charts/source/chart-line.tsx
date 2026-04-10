@@ -4,10 +4,16 @@ import * as React from "react";
 import { ResponsiveLine, type LineSvgProps, type LineSeries } from "@nivo/line";
 import { getNivoTheme } from "./theme";
 import { getDefaultLineChartProps } from "./defaults";
-export interface LineChartProps extends Omit<
-  LineSvgProps<LineSeries>,
-  "theme" | "height" | "width"
-> {
+
+/** Props ResponsiveLine adds on top of Line (initial size, resize debounce, etc.). */
+type ResponsiveLineOnlyProps = Omit<
+  React.ComponentProps<typeof ResponsiveLine<LineSeries>>,
+  keyof LineSvgProps<LineSeries>
+>;
+
+export interface LineChartProps
+  extends Omit<LineSvgProps<LineSeries>, "theme" | "height" | "width">,
+    ResponsiveLineOnlyProps {
   /**
    * Optional theme override. If not provided, uses theme from CSS variables.
    */

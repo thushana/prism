@@ -10,13 +10,14 @@ Use this when naming variables, props, types, files, or identifiers. Apply consi
 - **Case conventions:** Use camelCase for variables, props, and functions; PascalCase for types, interfaces, and components; kebab-case for file and folder names; SCREAMING_SNAKE_CASE for constants.
 - **Idiomatic:** Follow conventions of TypeScript, Next.js, React, and Tailwind. Use standard terms (e.g. `className`, `children`, `onClick`) and common patterns.
 - **No abbreviations:** Avoid acronyms and shortened forms unless in this allowlist: `id`, `ids`, `url`, `html`, `css`, `api`, `ui`, and framework-defined names such as `config` in `next.config.js`. Outside these cases, prefer full words: `background` not `bg`, `database` not `db`, `configuration` not `config` in your own code.
+- **Sizing — never shorten:** In Prism and app-owned APIs (props, union types, config keys, literals), size steps must use full words — `small`, `medium`, `large` (and `extraLarge` if you need a fourth step), not Tailwind-style shorthands like `sm`, `md`, `lg`, `xl`. Framework or third-party props that only accept shortened tokens are the exception; wrap or map at the boundary if you expose your own API.
 - **Clear over short:** Prefer longer, explicit names over terse ones. e.g. `shapeRectangleRounded` over `rectRnd`, `stateDisabled` over `dis`.
 - **Self-documenting:** The name alone should convey purpose. Avoid generic names like `data`, `value`, `item` when something more specific is possible (e.g. `selectedAppearanceKeys`, `currentView`).
 - **Consistent everywhere:** Use the same name for the same concept in props, types, data attributes, class names, file names, and UI labels. Derive kebab-case or other formats from that single canonical name (e.g. `shapeTight` → `data-shape-tight`, `.shapeTight`).
 
 ## Examples
 
-- **Props / options:** `shapeRectangle`, `shapeLineNo`, `stateToggled`, `colorVariant`, `segmentPosition` (not `rectangle`, `lineNo`, `toggled` in isolation when you have a naming scheme).
+- **Props / options:** `shapeRectangle`, `shapeLineNo`, `stateToggled`, `colorVariant`, `segmentPosition` (not `rectangle`, `lineNo`, `toggled` in isolation when you have a naming scheme). Size props: `size="small"` not `size="sm"`.
 - **Booleans / flags:** Use `is`/`has`/`should` for general state (`isLoading`, `hasError`, `shouldRetry`). Use domain prefixes when part of a naming scheme (`animationNoGrow`, `stateDisabled`, `shapeLineNo`).
 - **Event handlers:** Props use `on` prefix (`onClick`, `onSubmit`); internal handler functions use `handle` prefix (`handleClick`, `handleSubmit`).
 - **Files / modules:** `selector-time.tsx`, `journeys-map.tsx` (kebab-case, descriptive).
@@ -31,5 +32,6 @@ Use this when naming variables, props, types, files, or identifiers. Apply consi
 - `btn` → `button`
 - `opt` → `option`
 - Mismatched names for the same thing (e.g. prop `stateToggled` vs. data attribute `data-toggled`).
+- Shortened size literals in your own types or props: `sm` / `md` / `lg` / `xl` → use `small` / `medium` / `large` (and `extraLarge` if needed).
 
 Apply these rules when creating or renaming identifiers and when reviewing renames.

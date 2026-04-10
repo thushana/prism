@@ -187,6 +187,7 @@
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
+    font-feature-settings: "liga" 1;
     -webkit-font-feature-settings: "liga";
     -webkit-font-smoothing: antialiased;
   }
@@ -354,6 +355,14 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+  }
+
+  /*
+   * Optical weight modifiers (system sheet option keys; stack on typography-* classes).
+   * Matches type-scale-preview: styleBlack → font-weight 900.
+   */
+  .styleBlack {
+    font-weight: 900;
   }
 
   /* System sheet type scale preview: extra descender room so tight rows don’t clip; not on base tokens. */
