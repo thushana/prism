@@ -17,12 +17,15 @@ export function Icon({
   weight = 400,
   grade = 0,
 }: IconProps) {
+  // Google Fonts Material Symbols Rounded axis opsz is 20–48; out-of-range values break rendering (ligatures show as text).
+  const opsz = Math.min(48, Math.max(20, size));
   return (
     <span
       className={cn("material-symbols-rounded", className)}
       style={{
         fontSize: `${size}px`,
-        fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${size}`,
+        fontFeatureSettings: '"liga" 1',
+        fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opsz}`,
       }}
     >
       {name}
