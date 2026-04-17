@@ -1,27 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { Hand } from "lucide-react";
 import { PrismButton } from "@ui";
 
 /**
  * Form that POSTs to /api/admin/signout to clear the authentication cookie.
- * Renders as a text-style admin action (no fill) with a hand icon.
+ * Renders as a text-style admin action (no fill).
  */
 export function SignOutForm(): React.JSX.Element {
   return (
     <form action="/api/admin/signout" method="POST" className="inline">
       <PrismButton
         type="submit"
-        variant="icon"
-        icon={Hand}
-        iconPosition="left"
+        variant="plain"
         label="Sign out"
+        typeUppercase
         color="grey"
         colorVariant="background-no"
-        typeUppercase
+        animationNoColorChange
         shapeLineNo
         size="small"
+        className="py-0! px-1! text-muted-foreground! hover:text-foreground!"
       />
     </form>
   );
