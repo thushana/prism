@@ -123,7 +123,7 @@ export function AdminPageShell({
         .join(" ")}
     >
       {hasHeader && (
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-baseline justify-between gap-4">
           <div className="flex flex-col gap-4">
             {showPathBarExplicit ? (
               <PrismPathBar
