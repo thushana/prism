@@ -1,6 +1,6 @@
 /**
  * App-specific PrismButton presets. Register once at app load (see layout.tsx import).
- * Default presets (e.g. gradientIcon, boxButtons) live in @prism/ui.
+ * Default presets (e.g. pillGradient, pillMonochrome, boxButtons) live in @prism/ui.
  */
 import { registerPrismButtonPresets } from "ui";
 

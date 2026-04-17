@@ -17,6 +17,7 @@ Use this when naming variables, props, types, files, or identifiers. Apply consi
 
 ## Examples
 
+- **PrismPathBar / admin shell:** `PrismPathBarTitleEntry`, `PrismPathBarSegment`, `explicitModeSegmentList`, `titleByPathPrefix`, `pageTitle`, `prismPathBarTitleByPathPrefix`, `explicitPrismPathBarSegmentList`, `prismPathBarIcon`; app map constant `ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX` in `admin-path-bar-title-by-path-prefix.ts` (not `titlesByPath`, `breadcrumb`, or `adminPathBarTitles`).
 - **Props / options:** `shapeRectangle`, `shapeLineNo`, `stateToggled`, `colorVariant`, `segmentPosition` (not `rectangle`, `lineNo`, `toggled` in isolation when you have a naming scheme). Size props: `size="small"` not `size="sm"`.
 - **Booleans / flags:** Use `is`/`has`/`should` for general state (`isLoading`, `hasError`, `shouldRetry`). Use domain prefixes when part of a naming scheme (`animationNoGrow`, `stateDisabled`, `shapeLineNo`).
 - **Event handlers:** Props use `on` prefix (`onClick`, `onSubmit`); internal handler functions use `handle` prefix (`handleClick`, `handleSubmit`).

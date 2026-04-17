@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
+    "authentication": "workspace:*",
     "database": "workspace:*",
     "dotenv": "^17.2.3",
     "feature-flags": "workspace:*",

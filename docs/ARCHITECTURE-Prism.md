@@ -314,7 +314,7 @@ import { cn } from "@utilities"; // packages/utilities
 import { serverLogger } from "@logger/server"; // packages/logger
 import { getDefaultModel } from "@intelligence"; // packages/intelligence
 import { SystemSheetPage } from "@system-sheet"; // packages/system-sheet
-import { requireApiAuthentication } from "@authentication"; // packages/authentication
+import { requireApiAuthentication } from "@authentication/api"; // packages/authentication
 ```
 
 ## Build Process

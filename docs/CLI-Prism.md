@@ -118,7 +118,7 @@ pnpm run tools run dev --verbose
    - Host project dashboard (if `HOST_PROJECT_DASHBOARD` env var is set)
    - Host project deployments page
    - Drizzle Studio (`https://local.drizzle.studio`)
-   - System sheet page (`/admin/system-sheet`)
+   - System sheet page (`/admin/app/system`)
    - Main application (`http://localhost:3000`)
 
 **Options:**

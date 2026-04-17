@@ -30,7 +30,8 @@
       "@ui": ["../../packages/ui/source"],
       "@utilities": ["../../packages/utilities/source"],
       "@system-sheet": ["../../packages/system-sheet/source"],
-      "@authentication": ["../../packages/authentication/source"]
+      "@authentication": ["../../packages/authentication/source"],
+      "@authentication/*": ["../../packages/authentication/source/*"]
     }
   },
   "include": [

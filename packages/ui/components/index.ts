@@ -4,4 +4,6 @@ export * from "./card";
 export * from "./content";
 export * from "./icon";
 export * from "./prism-button";
+export * from "./prism-color-picker";
 export * from "./prism-typography";
+export * from "./prism-path-bar";

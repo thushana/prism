@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/admin/system-sheet",
+        destination: "/admin/app/system",
+        permanent: false,
+      },
+    ];
+  },
   // Empty turbopack config to silence Next.js 16 warning about webpack config
   // We use webpack for watchOptions configuration
   turbopack: {},

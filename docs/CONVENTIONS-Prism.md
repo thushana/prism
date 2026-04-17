@@ -241,6 +241,24 @@ packages/
 3. **Keep exports in index files** - Each package has an `index.ts` that re-exports public API
 4. **Consistent casing** - kebab-case for directories, camelCase for exports
 
+## Component Hierarchy
+
+**Prefer Prism components over lower-level primitives.** When building UI, always reach for the highest-level Prism component that fits before dropping down to a more primitive one.
+
+| Need | Reach for first | Fall back to |
+|---|---|---|
+| Text / headings / labels | `PrismTypography` (`@ui`) | raw HTML elements |
+| Buttons with palette / animation | `PrismButton` (`@ui`) | `Button` (`@ui`) |
+| Charts | `LineChart` / `BarChart` (`@charts`) | Nivo directly |
+| Admin page shell | `AdminPageShell` (`@authentication`) | custom `<main>` |
+| Admin back-navigation | `AdminBackLink` (`@authentication`) | raw `<Link>` |
+| Sign-out action | `SignOutForm` (`@authentication`) | custom form |
+| Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check |
+
+`PrismButton` requires `color` and `label` props — it is the full design-system component with palette, animations, and shapes. For functional form buttons where no palette context exists (e.g., a submit button inside a utility form), use the base `Button` from `@ui`.
+
+**Why:** Prism components carry Tailwind class names and conventions that are guaranteed to stay in sync with the design system. Raw HTML or third-party primitives drift silently.
+
 ### Import Path Conventions
 
 - Use @ prefixed package names for shared packages: `import { Button } from "@ui"`

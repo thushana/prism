@@ -227,11 +227,14 @@ function usePresetColors(): Record<string, ColorName> {
   })[0];
 }
 
-export function Button() {
+/**
+ * Multi-select appearance toggles + live action strip (used on /admin/prism/components/prism-button).
+ * Preset shortcuts and static variant rows live in {@link ButtonVariantsList}.
+ */
+export function ButtonCustomizerPlayground() {
   const [selected, setSelected] = useState<Set<AppearanceKey>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
   const [copied, setCopied] = useState(false);
-  const presetColors = usePresetColors();
 
   const replayAnimations = () => setAnimationKey((k) => k + 1);
 
@@ -342,13 +345,11 @@ export function Button() {
     };
   }, [selected]);
 
-  const presetNames = getDefaultPrismButtonPresetNames();
-
   return (
     <div className="mb-8">
-      <h3 className="mb-2">Buttons</h3>
+      <h3 className="mb-2">Customize</h3>
       <PrismTypography role="body" size="medium" className="text-muted-foreground mb-4">
-        Toggle options to view appearances in the buttons below.{" "}
+        Toggle options to preview them on the action strip below.{" "}
         <button
           type="button"
           onClick={replayAnimations}
@@ -364,28 +365,9 @@ export function Button() {
         >
           {copied ? "Copied!" : "Copy options"}
         </button>
-        {" · "}
-        <a
-          href="../sheets/buttons"
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          View all variants here.
-        </a>
       </PrismTypography>
       <div className="space-y-6">
         <div>
-          <Row title="Presets (preset=…)">
-            {presetNames.map((presetName) => (
-              <PrismButton
-                key={presetName}
-                color={presetColors[presetName] ?? "blueGrey"}
-                preset={presetName}
-                label={presetName === "icon-only" ? "Icon" : presetName}
-                icon={presetName === "icon-only" ? Star : undefined}
-                asSpan
-              />
-            ))}
-          </Row>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
             {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
               <div key={heading} className="space-y-1">
@@ -445,7 +427,7 @@ export function Button() {
   );
 }
 
-/** List of all PrismButton variant rows for use on /admin/sheets/buttons */
+/** List of all PrismButton variant rows for use on /admin/prism/components/prism-button */
 export function ButtonVariantsList({
   className,
 }: {
@@ -462,8 +444,8 @@ export function ButtonVariantsList({
             key={presetName}
             color={presetColors[presetName] ?? "blueGrey"}
             preset={presetName}
-            label={presetName === "icon-only" ? "Icon" : presetName}
-            icon={presetName === "icon-only" ? Star : undefined}
+            label={presetName}
+            iconOnly={false}
             asSpan
           />
         ))}

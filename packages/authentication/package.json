@@ -6,7 +6,9 @@
   "types": "./source/index.ts",
   "exports": {
     ".": "./source/index.ts",
+    "./admin-page": "./source/admin-page.tsx",
     "./api": "./source/api.ts",
+    "./authentication_route": "./source/authentication_route.ts",
     "./web": "./source/web.ts"
   },
   "dependencies": {

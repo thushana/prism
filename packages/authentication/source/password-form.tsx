@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@ui";
+import { PrismButton, PrismTypography } from "@ui";
 import { cn } from "@utilities";
 
 interface PasswordFormProps {
@@ -50,19 +50,20 @@ export function PasswordForm({ error }: PasswordFormProps) {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">Authentication Required</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <PrismTypography role="headline" size="medium" as="h1">
+            Authentication Required
+          </PrismTypography>
+          <PrismTypography role="body" size="medium" color="muted" className="mt-2">
             Please enter the password to access this page
-          </p>
+          </PrismTypography>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-2"
-            >
-              Password
+            <label htmlFor="password" className="mb-2 block cursor-pointer">
+              <PrismTypography role="label" size="medium" as="span">
+                Password
+              </PrismTypography>
             </label>
             <input
               id="password"
@@ -83,15 +84,27 @@ export function PasswordForm({ error }: PasswordFormProps) {
               autoFocus
             />
             {(submitError || error) && (
-              <p className="mt-2 text-sm text-destructive">
+              <PrismTypography
+                role="body"
+                size="small"
+                color="destructive"
+                className="mt-2"
+              >
                 {submitError || error}
-              </p>
+              </PrismTypography>
             )}
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Authenticating..." : "Authenticate"}
-          </Button>
+          <PrismButton
+            type="submit"
+            variant="plain"
+            color="blue"
+            shapeRectangleRounded
+            label={isSubmitting ? "Authenticating…" : "Authenticate"}
+            stateDisabled={isSubmitting}
+            animationNoGrow
+            className="w-full"
+          />
         </form>
       </div>
     </div>
