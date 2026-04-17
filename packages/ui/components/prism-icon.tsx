@@ -1,6 +1,6 @@
 import { cn } from "@utilities";
 
-interface IconProps {
+export interface PrismIconProps {
   name: string;
   className?: string;
   size?: number;
@@ -9,14 +9,14 @@ interface IconProps {
   grade?: number;
 }
 
-export function Icon({
+export function PrismIcon({
   name,
   className,
   size = 24,
   fill = false,
   weight = 400,
   grade = 0,
-}: IconProps) {
+}: PrismIconProps) {
   // Google Fonts Material Symbols Rounded axis opsz is 20–48; out-of-range values break rendering (ligatures show as text).
   const opsz = Math.min(48, Math.max(20, size));
   return (

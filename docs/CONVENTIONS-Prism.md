@@ -174,9 +174,8 @@ Shared packages are organized under `packages/`:
 ```
 packages/
 ├── ui/                     # Shared UI components
+│   ├── components/         # React components (see package exports)
 │   └── source/
-│       ├── button.tsx
-│       ├── card.tsx
 │       └── index.ts
 ├── database/               # Database layer
 │   └── source/
@@ -221,7 +220,7 @@ packages/
 
 ### File Organization Rules
 
-- **`packages/ui/source/`** - Shared UI components (Button, Card, Badge, Icon)
+- **`packages/ui/components/`** - Shared UI components (`PrismButton`, `PrismCard`, `PrismBadge`, `PrismIcon`, `PrismLayout*`, …); **`packages/ui/source/`** holds presets and package glue
 - **`packages/database/source/`** - Database schema and queries
 - **`packages/utilities/source/`** - Utility functions (classnames, etc.)
 - **`packages/logger/source/`** - Centralized logging for client/server
@@ -248,27 +247,27 @@ packages/
 | Need | Reach for first | Fall back to |
 |---|---|---|
 | Text / headings / labels | `PrismTypography` (`@ui`) | raw HTML elements |
-| Buttons with palette / animation | `PrismButton` (`@ui`) | `Button` (`@ui`) |
+| Buttons (Prism design) | `PrismButton` (`@ui`) | native `<button>` + Tailwind, or a local app primitive |
 | Charts | `LineChart` / `BarChart` (`@charts`) | Nivo directly |
 | Admin page shell | `AdminPageShell` (`@authentication`) | custom `<main>` |
 | Admin back-navigation | `AdminBackLink` (`@authentication`) | raw `<Link>` |
 | Sign-out action | `SignOutForm` (`@authentication`) | custom form |
 | Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check |
 
-`PrismButton` requires `color` and `label` props — it is the full design-system component with palette, animations, and shapes. For functional form buttons where no palette context exists (e.g., a submit button inside a utility form), use the base `Button` from `@ui`.
+`PrismButton` requires `color` and `label` — it is the design-system button (palette, animations, shapes). For minimal chrome (e.g. unstyled submit), use a native `<button>` with theme classes, or add a tiny wrapper in the app.
 
 **Why:** Prism components carry Tailwind class names and conventions that are guaranteed to stay in sync with the design system. Raw HTML or third-party primitives drift silently.
 
 ### Import Path Conventions
 
-- Use @ prefixed package names for shared packages: `import { Button } from "@ui"`
+- Use @ prefixed package names for shared packages: `import { PrismButton } from "@ui"`
 - Use `@/*` path alias for app-specific imports (points to app root)
 - Use relative imports for local files
 - Examples:
 
   ```typescript
   // Workspace packages (shared)
-  import { Button, Card } from "@ui";
+  import { PrismButton, PrismCard } from "@ui";
   import { db } from "@database";
   import { cn } from "@utilities";
 
@@ -316,7 +315,7 @@ import { serverLogger } from "../../../packages/logger/source/server";
 import { parseNumber } from "../../../packages/cli/source/index";
 
 // ❌ Bad - Non-prefixed package imports (will fail ESLint)
-import { Button } from "ui";
+import { PrismButton } from "ui";
 import { db } from "database";
 ```
 

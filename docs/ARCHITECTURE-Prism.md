@@ -83,10 +83,10 @@ Apps generated via **`pnpm run prism generate <app-name>`** (see root `package.j
 
 Shared UI component library:
 
-- `source/` - Component source files (Button, Card, Badge, Icon)
+- `components/` - React components (`PrismButton`, `PrismCard`, `PrismBadge`, `PrismIcon`, `PrismLayout*`, …)
+- `source/` - Presets and secondary modules (e.g. `prism-button-presets.ts`; package entry re-exports from `components/` + styles)
 - `styles/` - Font configurations and global CSS
 - `fonts/` - Font files (.woff2)
-- `source/index.ts` - Main export file (exports components and styles)
 - Built with Radix UI primitives
 - Uses Class Variance Authority for variants
 - Includes fonts: Satoshi, Sentient, Zodiak, Gambarino
@@ -167,7 +167,7 @@ Shared CLI utilities used by generator/ops commands:
 - **Package names**: Simple names without scope (`ui`, `database`, `utilities`, `logger`, `intelligence`, `system-sheet`, `authentication`, `charts`, `feature-flags`, `cli`)
 - **Directory Convention**: `source/` instead of `src/` for packages
 - **Versioning**: All packages use `*` for workspace dependencies
-- **Import Style**: @ prefixed imports from package names (`import { Button } from "@ui"`)
+- **Import Style**: @ prefixed imports from package names (`import { PrismButton } from "@ui"`)
 
 ### Application Architecture
 
@@ -308,7 +308,7 @@ Each workspace has its own `tsconfig.json`:
 TypeScript path mapping allows imports like:
 
 ```typescript
-import { Button } from "@ui"; // packages/ui
+import { PrismButton } from "@ui"; // packages/ui
 import { db } from "@database"; // packages/database
 import { cn } from "@utilities"; // packages/utilities
 import { serverLogger } from "@logger/server"; // packages/logger

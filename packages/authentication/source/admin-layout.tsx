@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  PrismLayoutMain,
   PrismPathBar,
   PrismTypography,
   type PrismPathBarIcon,
@@ -70,7 +71,7 @@ export type AdminPageShellProps = {
   backLabel?: string;
   /** Whether to show the Sign out button. Defaults to true. */
   showSignOut?: boolean;
-  /** Additional className for the outer <main> element. */
+  /** Additional className for the {@link PrismLayoutMain} content column (`.content-main`, max-width xl). */
   className?: string;
 };
 
@@ -78,7 +79,7 @@ export type AdminPageShellProps = {
  * Consistent outer shell for all admin pages.
  *
  * Provides:
- *  - A centred <main> with standard Prism admin padding and max-width
+ *  - Full-viewport padding and a centred {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
  *  - An optional back link (pass backHref when not using {@link PrismPathBar})
  *  - Optional {@link PrismPathBar} (`explicitPrismPathBarSegmentList` or `prismPathBarTitleByPathPrefix` + `title`)
  *  - An optional page title + description header
@@ -114,56 +115,55 @@ export function AdminPageShell({
     Boolean(backHref) && !showPathBarExplicit && !showPathBarAuto;
 
   return (
-    <main
-      className={[
-        "mx-auto flex min-h-screen max-w-3xl flex-col gap-8 p-6",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {hasHeader && (
-        <div className="flex items-baseline justify-between gap-4">
-          <div className="flex flex-col gap-4">
-            {showPathBarExplicit ? (
-              <PrismPathBar
-                explicitModeSegmentList={explicitPrismPathBarSegmentList!}
-                icon={prismPathBarIcon}
-              />
-            ) : null}
-            {showPathBarAuto ? (
-              <PrismPathBar
-                mode="auto"
-                pathname={pathname}
-                titleByPathPrefix={prismPathBarTitleByPathPrefix!}
-                pageTitle={title!}
-                icon={prismPathBarIcon}
-              />
-            ) : null}
-            {showBackLink ? (
-              <AdminBackLink href={backHref!} label={backLabel} />
-            ) : null}
-            {title && (
-              <div className="space-y-1">
-                <PrismTypography role="headline" size="large" as="h1">
-                  {title}
-                </PrismTypography>
-                {description && (
-                  <PrismTypography role="body" size="medium" color="muted">
-                    {description}
+    <main className="min-h-screen w-full p-6">
+      <PrismLayoutMain
+        className={["flex w-full flex-col gap-8", className]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {hasHeader && (
+          <div className="flex items-baseline justify-between gap-4">
+            <div className="flex flex-col gap-4">
+              {showPathBarExplicit ? (
+                <PrismPathBar
+                  explicitModeSegmentList={explicitPrismPathBarSegmentList!}
+                  icon={prismPathBarIcon}
+                />
+              ) : null}
+              {showPathBarAuto ? (
+                <PrismPathBar
+                  mode="auto"
+                  pathname={pathname}
+                  titleByPathPrefix={prismPathBarTitleByPathPrefix!}
+                  pageTitle={title!}
+                  icon={prismPathBarIcon}
+                />
+              ) : null}
+              {showBackLink ? (
+                <AdminBackLink href={backHref!} label={backLabel} />
+              ) : null}
+              {title && (
+                <div className="space-y-1">
+                  <PrismTypography role="headline" size="large" as="h1">
+                    {title}
                   </PrismTypography>
-                )}
+                  {description && (
+                    <PrismTypography role="body" size="medium" color="muted">
+                      {description}
+                    </PrismTypography>
+                  )}
+                </div>
+              )}
+            </div>
+            {showSignOut && (
+              <div className="shrink-0">
+                <SignOutForm />
               </div>
             )}
           </div>
-          {showSignOut && (
-            <div className="shrink-0">
-              <SignOutForm />
-            </div>
-          )}
-        </div>
-      )}
-      {children}
+        )}
+        {children}
+      </PrismLayoutMain>
     </main>
   );
 }

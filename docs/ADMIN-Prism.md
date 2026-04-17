@@ -86,6 +86,8 @@ return (
 );
 ```
 
+**Layout width:** `AdminPageShell` wraps the header and `{children}` in **`PrismLayoutMain`** from `@ui` (`.content-main`, centered, **1280px** max). Prefer this over ad hoc `max-w-*` on the shell. The optional **`className`** prop on `AdminPageShell` is merged onto that **`PrismLayoutMain`** column. For **`SystemSheetPage`** inside admin, pass **`nestedUnderAdminPageShell: true`** so the sheet skips its own Tailwind **`container`** wrapper and aligns with the shell.
+
 ### Path bar (`PrismPathBar`)
 
 `AdminPageShell` can render a **`PrismPathBar`** (from `@ui`) instead of a single `AdminBackLink`:

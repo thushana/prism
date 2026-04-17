@@ -8,12 +8,16 @@ This file is the **canonical usage reference** for the UI package (import paths,
 
 ```
 packages/ui/
-├── source/              # React components
-│   ├── badge.tsx
-│   ├── button.tsx
-│   ├── card.tsx
-│   ├── icon.tsx
-│   └── index.ts        # Main exports (components + styles)
+├── components/          # React components (main exports)
+│   ├── prism-badge.tsx
+│   ├── prism-card.tsx
+│   ├── prism-icon.tsx
+│   ├── prism-layout.tsx
+│   ├── prism-button.tsx
+│   └── index.ts
+├── source/              # Presets and secondary modules
+│   ├── prism-button-presets.ts
+│   └── index.ts
 ├── styles/             # Font configurations and global CSS
 │   ├── fonts.ts        # Next.js font configurations
 │   ├── globals.css     # Global styles and theme
@@ -33,7 +37,14 @@ packages/ui/
 The UI package is automatically available in all apps via npm workspaces. No installation needed - just import:
 
 ```typescript
-import { Button, Card, Badge, Icon } from "@ui";
+import {
+  PrismButton,
+  PrismCard,
+  PrismBadge,
+  PrismIcon,
+  PrismLayoutText,
+  PrismLayoutBreakout,
+} from "@ui";
 import { satoshi, sentient, zodiak, gambarino } from "@ui";
 ```
 
@@ -56,117 +67,85 @@ import { PrismPathBar } from "@ui";
 />;
 ```
 
-### Button
+### PrismButton
 
-A versatile button component with multiple variants and sizes. Variant and size strings (`default`, `sm`, `lg`, …) follow **shadcn / CVA** conventions consumed by this component—they are framework-shaped API surface, not Prism-owned option keys. For props and unions you define in app or package code, prefer full words per [NAMING.md](../.cursor/commands/NAMING.md) (`small`, `medium`, `large`).
+The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: palette colors, Lucide icons, optional GSAP motion, and layout props (`shapeGapNo`, `segmentPosition`, …). It requires **`color`** and **`label`** (see types in source). Size props use Prism words (`small`, `normal`, `large`, `large2x`) per [NAMING.md](../.cursor/commands/NAMING.md). For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally in an app—there is no separate generic `Button` export.
 
-**Import:**
+Admin and system-sheet previews: `/admin/prism/components/prism-button`, `ButtonCustomizerPlayground` / `ButtonVariantsList` from `@system-sheet`.
 
-```typescript
-import { Button } from "@ui";
-```
+### PrismCard
 
-**Variants:**
-
-- `default` - Primary button style
-- `secondary` - Secondary button style
-- `outline` - Outlined button
-- `ghost` - Minimal button with hover effect
-- `destructive` - Destructive action button
-- `link` - Link-style button
-
-**Sizes:**
-
-- `default` - Standard size
-- `sm` - Small
-- `lg` - Large
-- `icon` - Square icon button
-
-**Example:**
-
-```tsx
-<Button variant="default" size="default">Click me</Button>
-<Button variant="outline" size="sm">Small</Button>
-<Button variant="ghost" size="icon">
-  <Icon name="settings" />
-</Button>
-```
-
-### Card
-
-A container component for grouping related content.
+Container for grouped content (shadcn-style slots). Subcomponents: **`PrismCardHeader`**, **`PrismCardTitle`**, **`PrismCardDescription`**, **`PrismCardAction`**, **`PrismCardContent`**, **`PrismCardFooter`**.
 
 **Import:**
 
 ```typescript
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@ui";
+import {
+  PrismCard,
+  PrismCardHeader,
+  PrismCardTitle,
+  PrismCardContent,
+  PrismCardFooter,
+} from "@ui";
 ```
 
 **Example:**
 
 ```tsx
-<Card>
-  <CardHeader>
-    <CardTitle>Card Title</CardTitle>
-  </CardHeader>
-  <CardContent>
+<PrismCard>
+  <PrismCardHeader>
+    <PrismCardTitle>Card Title</PrismCardTitle>
+  </PrismCardHeader>
+  <PrismCardContent>
     <p>Card content goes here</p>
-  </CardContent>
-  <CardFooter>
-    <Button>Action</Button>
-  </CardFooter>
-</Card>
+  </PrismCardContent>
+  <PrismCardFooter>
+    <PrismButton color="blue" label="Action" variant="plain" />
+  </PrismCardFooter>
+</PrismCard>
 ```
 
-### Badge
+### PrismBadge
 
-A small status indicator or label component.
+Small status label (CVA variants: `default`, `secondary`, `outline`, `destructive`). Style helpers also export **`prismBadgeVariants`** if you need raw classes.
 
 **Import:**
 
 ```typescript
-import { Badge } from "@ui";
+import { PrismBadge } from "@ui";
 ```
-
-**Variants:**
-
-- `default` - Primary badge
-- `secondary` - Secondary badge
-- `outline` - Outlined badge
-- `destructive` - Destructive badge
 
 **Example:**
 
 ```tsx
-<Badge variant="default">New</Badge>
-<Badge variant="secondary">Draft</Badge>
-<Badge variant="outline">Published</Badge>
+<PrismBadge variant="default">New</PrismBadge>
+<PrismBadge variant="secondary">Draft</PrismBadge>
+<PrismBadge variant="outline">Published</PrismBadge>
 ```
 
-### Icon
+### PrismIcon
 
-A wrapper component for Material Symbols Rounded icons.
+Material Symbols Rounded glyph wrapper (`name` is the symbol ligature name).
 
 **Import:**
 
 ```typescript
-import { Icon } from "@ui";
+import { PrismIcon } from "@ui";
 ```
 
-**Props:**
-
-- `name` - Icon name (Material Symbols name)
-- `size` - Icon size in pixels (default: 24)
-- `fill` - Whether icon should be filled (default: false)
-- `weight` - Icon weight (100-700, default: 400)
+**Props (`PrismIconProps`):** `name`, `size`, `fill`, `weight`, `grade`, `className`.
 
 **Example:**
 
 ```tsx
-<Icon name="home" size={24} />
-<Icon name="settings" size={32} fill />
-<Icon name="favorite" weight={600} />
+<PrismIcon name="home" size={24} />
+<PrismIcon name="settings" size={32} fill />
+<PrismIcon name="favorite" weight={600} />
 ```
+
+### Layout wrappers (`prism-layout.tsx`)
+
+Width bands and breakout sections (see `styles/layout-wrappers.css`): **`PrismLayoutText`**, **`PrismLayoutMain`**, **`PrismGraphicsMain`**, **`PrismGraphicsLarge`**, **`PrismGraphicsFull`**, **`PrismLayoutBreakout`**, **`PrismLayoutWrapperBar`**, **`PrismLayoutWrappersReference`**. Type **`PrismLayoutWrapperBarVariant`** for reference-bar variants.
 
 ## Fonts
 
@@ -361,18 +340,24 @@ export default function RootLayout({ children }) {
 Simply import and use:
 
 ```tsx
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@ui";
+import {
+  PrismButton,
+  PrismCard,
+  PrismCardContent,
+  PrismCardHeader,
+  PrismCardTitle,
+} from "@ui";
 
 export default function MyPage() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Welcome</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button>Get Started</Button>
-      </CardContent>
-    </Card>
+    <PrismCard>
+      <PrismCardHeader>
+        <PrismCardTitle>Welcome</PrismCardTitle>
+      </PrismCardHeader>
+      <PrismCardContent>
+        <PrismButton color="blue" label="Get Started" variant="plain" />
+      </PrismCardContent>
+    </PrismCard>
   );
 }
 ```
@@ -420,8 +405,8 @@ The UI package depends on:
 
 ### Adding New Components
 
-1. Create component file in `packages/ui/source/`
-2. Export from `packages/ui/source/index.ts`
+1. Create component file in `packages/ui/components/`
+2. Export from `packages/ui/components/index.ts` (re-exported by `packages/ui/source/index.ts` for the package)
 3. Follow existing component patterns
 4. Use `cn` utility from `utilities` package for class merging
 
@@ -452,7 +437,8 @@ packages/
 1. `packages/ui/styles/globals.css` contains all `@source` directives:
 
    ```css
-   @source "../source/**/*.{ts,tsx}"; /* UI package */
+   @source "../components/**/*.{ts,tsx}"; /* UI package */
+   @source "../source/**/*.{ts,tsx}"; /* UI package (presets) */
    @source "../../utilities/source/**/*.{ts,tsx}"; /* Utilities package */
    @source "../../system-sheet/source/**/*.{ts,tsx}"; /* System-sheet package */
    ```
