@@ -37,6 +37,23 @@ import { satoshi, sentient, zodiak, gambarino } from "@ui";
 
 ## Components
 
+### PrismPathBar
+
+Path row for admin-style navigation: **explicit** `explicitModeSegmentList`, or **auto** mode from `pathname` + authoritative **`titleByPathPrefix`** (see `buildPrismPathBarAutoSegmentList` in `prism-path-segments.ts`). Prop names follow [NAMING.md](../.cursor/commands/NAMING.md) (camelCase, no abbreviations such as `titles` for `title`, `prefix` spelled out in `titleByPathPrefix`). Crumbs use **Next `Link`** and **`PrismTypography`** (not `PrismButton`). The UI package lists **Next** as a `peerDependency`; `PrismPathBar` imports `next/link` accordingly.
+
+Types: **`PrismPathBarSegment`**, **`PrismPathBarTitleEntry`**, **`PrismPathBarIcon`**.
+
+```tsx
+import { PrismPathBar } from "@ui";
+
+<PrismPathBar
+  mode="auto"
+  pathname="/admin/prism/components/prism-button"
+  titleByPathPrefix={ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX}
+  pageTitle="PrismButton"
+/>;
+```
+
 ### Button
 
 A versatile button component with multiple variants and sizes.

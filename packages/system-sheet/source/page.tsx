@@ -14,7 +14,6 @@ import {
 import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
-import { Button } from "./button";
 import { FontWeightPreview } from "./font-weight-preview";
 import { TypeScalePreview } from "./type-scale-preview";
 import type { SystemSheetConfig, SystemSheetData } from "./types";
@@ -138,17 +137,25 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
     showApps = true,
     showComponents = true,
     showPrismTypography = true,
+    nestedUnderAdminPageShell = false,
   } = config;
+  const sheetHeadlineElement = nestedUnderAdminPageShell ? "h2" : "h1";
 
   if (!data) {
     return (
-      <div className="container mx-auto p-8 space-y-8 font-sans">
-        <PrismTypography role="headline" size="large" className="mb-2">
-          System Sheet
-        </PrismTypography>
-        <PrismTypography role="body" size="large" className="text-muted-foreground">
-          Unable to load system data. Please try again in a moment.
-        </PrismTypography>
+      <div className="container mx-auto space-y-8 p-8 font-sans">
+        <div className="space-y-2">
+          <PrismTypography
+            role="headline"
+            size="large"
+            as={sheetHeadlineElement}
+          >
+            System Sheet
+          </PrismTypography>
+          <PrismTypography role="body" size="large" className="text-muted-foreground">
+            Unable to load system data. Please try again in a moment.
+          </PrismTypography>
+        </div>
         <PrismTypography role="body" size="medium" className="text-muted-foreground">
           Make sure your app has an{" "}
           <code className="bg-muted px-1 py-0.5 rounded">
@@ -164,8 +171,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
     <div
       className={`container mx-auto p-8 space-y-8 font-sans ${geistMono.variable}`}
     >
-      <div>
-        <PrismTypography role="headline" size="large" className="mb-2">
+      <div className="space-y-2">
+        <PrismTypography
+          role="headline"
+          size="large"
+          as={sheetHeadlineElement}
+        >
           System Sheet
         </PrismTypography>
         <PrismTypography role="body" size="large" className="text-muted-foreground">
@@ -563,8 +574,6 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               geistMonoVariableClass={geistMono.variable}
             />
 
-            {/* Buttons — pill style; variants .plain, .icon, .uppercase + .icon */}
-            <Button />
           </div>
         )}
 

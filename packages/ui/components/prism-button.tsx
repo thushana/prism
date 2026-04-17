@@ -132,7 +132,10 @@ export interface PrismButtonProps {
   /** Render as span for display-only (e.g. in style guide) */
   asSpan?: boolean;
   className?: string;
-  /** Preset name: applies a shortcut style (submit, action, ghost, danger, hero, etc.). Apps can register more via registerPrismButtonPresets(). */
+  /**
+   * Preset name: merges bundled props from `registerPrismButtonPresets` / defaults
+   * (e.g. `pillGradient`, `pillMonochrome`, `boxButtons`, `boxButtonsUnderlined`).
+   */
   preset?: string;
 }
 
@@ -142,7 +145,7 @@ const COLOR_TRANSITION =
 
 /**
  * Prism button: chainable appearances with animation controls and state modifiers.
- * Use the `preset` prop for shortcut styles (submit, action, ghost, danger, hero, etc.).
+ * Use the `preset` prop for bundled defaults (e.g. `pillGradient`, `pillMonochrome`) or app-registered names.
  */
 export function PrismButton(
   props: PrismButtonProps &

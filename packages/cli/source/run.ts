@@ -357,7 +357,7 @@ async function openBrowserTabs(
   if (serverReady) {
     log.info(`     ${chalk.bold("✅ READY")} - Dev server is running`);
     // Open system-sheet page before the main app
-    openBrowser(`http://localhost:${port}/admin/system-sheet`);
+    openBrowser(`http://localhost:${port}/admin/app/system`);
 
     setTimeout(() => {
       // Open localhost last (the actual app)
@@ -365,7 +365,7 @@ async function openBrowserTabs(
     }, 500);
   } else {
     log.warn("Dev server did not become ready, opening anyway...");
-    openBrowser(`http://localhost:${port}/admin/system-sheet`);
+    openBrowser(`http://localhost:${port}/admin/app/system`);
     setTimeout(() => {
       openBrowser(`http://localhost:${port}`);
     }, 500);

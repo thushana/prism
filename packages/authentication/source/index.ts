@@ -1,10 +1,10 @@
 /**
- * Authentication package exports
- * Provides API and web authentication utilities
+ * Authentication package — client-safe entry.
+ * Import server-only helpers from subpaths (e.g. `@authentication/web`, `@authentication/api`)
+ * so `"use client"` modules can import UI from `@authentication` without pulling `server-only`.
  */
 
 export * from "./core";
-export * from "./api";
-export * from "./web";
 export * from "./password-form";
-export * from "./authentication_route";
+export * from "./admin-layout";
+export * from "./sign-out-form";

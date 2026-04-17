@@ -18,7 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${satoshi.variable} ${sentient.variable} ${zodiak.variable}`}
+    >
       <head>
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
@@ -26,9 +29,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className={`${satoshi.variable} ${sentient.variable} ${zodiak.variable} antialiased`}
-      >
+      <body className="antialiased">
         {children}
       </body>
     </html>

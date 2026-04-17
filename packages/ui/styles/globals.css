@@ -15,6 +15,7 @@
  */
 @source "../../utilities/source/**/*.{ts,tsx}";
 @source "../../system-sheet/source/**/*.{ts,tsx}";
+@source "../../authentication/source/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -135,9 +136,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * Next/font variable classes must live on <html> (:root) so @theme tokens like
+   * --font-body: var(--font-satoshi) resolve. Otherwise typography-* / var(--font-body)
+   * can fall through to Tailwind preflight’s ui-sans-serif on html.
+   */
+  html {
+    font-family: var(--font-body), var(--font-satoshi), system-ui, sans-serif;
+  }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-body);
+    font-family: var(--font-body), var(--font-satoshi), system-ui, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-headline);

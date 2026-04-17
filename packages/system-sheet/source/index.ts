@@ -6,7 +6,7 @@
  *
  * @example
  * ```tsx
- * // In your app's app/admin/system-sheet/page.tsx
+ * // In your app's app/admin/app/system/page.tsx
  * import { SystemSheetPage } from "@prism/core/system-sheet";
  * import type { SystemSheetData } from "@prism/core/system-sheet";
  * import { headers } from "next/headers";
@@ -44,6 +44,11 @@
  */
 
 export { SystemSheetPage, default as default } from "./page";
-export { ButtonVariantsList } from "./button";
+export {
+  ButtonCustomizerPlayground,
+  ButtonVariantsList,
+} from "./button";
+export { FontWeightPreview } from "./font-weight-preview";
+export { TypeScalePreview } from "./type-scale-preview";
 export { getRelativeTime, formatDateTimeWithRelative } from "./data";
 export type { SystemSheetData, SystemSheetConfig, AppStatus } from "./types";

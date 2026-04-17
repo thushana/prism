@@ -273,7 +273,7 @@ import { serverLogger as logger, logStart } from "@logger/server";
 import { SystemSheetPage } from "@system-sheet";
 
 // Import authentication
-import { requireApiAuthentication } from "@authentication";
+import { requireApiAuthentication } from "@authentication/api";
 ```
 
 ### Dev-Sheet
