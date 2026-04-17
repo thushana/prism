@@ -15,8 +15,8 @@ export function SignOutForm(): React.JSX.Element {
         className="group inline text-left underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <PrismTypography
-          role="label"
-          size="large"
+          role="body"
+          size="small"
           as="span"
           color="muted"
           className="group-hover:text-foreground"
