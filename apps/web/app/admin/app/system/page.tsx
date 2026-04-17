@@ -64,7 +64,6 @@ export default async function AdminAppSystemPage(): Promise<React.JSX.Element> {
       backHref="/admin"
       title="System"
       description="Environment, deployment, and dependency overview."
-      className="max-w-6xl"
       showSignOut
     >
       <SystemSheetPage data={data} config={{ nestedUnderAdminPageShell: true }} />

@@ -215,7 +215,7 @@ The generated app uses `@prism/core` as a dependency:
 
 ```typescript
 // UI components
-import { Button, Card } from "@prism/core/ui";
+import { PrismButton, PrismCard } from "@prism/core/ui";
 
 // Database
 import { db } from "../database/db";
@@ -254,7 +254,7 @@ This automatically:
 cd my-app
 
 # Make changes to Prism
-vim prism/packages/ui/source/button.tsx
+vim prism/packages/ui/components/prism-button.tsx
 
 # Commit to Prism (pushes to github.com/thushana/prism)
 cd prism

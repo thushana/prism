@@ -125,7 +125,7 @@ pnpm run dev:web
 
 ### Packages
 
-- **packages/ui**: Shared UI components (Button, Card, Badge, Icon)
+- **packages/ui**: Shared UI components (PrismButton, PrismCard, PrismBadge, PrismIcon, layout wrappers, …)
   - Radix UI primitives
   - Class Variance Authority for variants
   - Material Symbols Rounded icons (via Google Fonts)
@@ -228,7 +228,7 @@ This creates a deployable app that Vercel can build. Prism will be cloned from G
 
 ```typescript
 // Import UI components
-import { Button, Card } from "@prism/core/ui";
+import { PrismButton, PrismCard } from "@prism/core/ui";
 
 // Import database
 import { db } from "@prism/core/database";
@@ -255,7 +255,7 @@ Apps within this monorepo can use direct package imports:
 
 ```typescript
 // Import UI components
-import { Button, Card } from "@ui";
+import { PrismButton, PrismCard } from "@ui";
 
 // Import database
 import { db } from "@database";

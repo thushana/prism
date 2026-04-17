@@ -2,9 +2,9 @@ import * as React from "react";
 
 import { cn } from "@utilities";
 
-/* Layout wrapper components — apply Tailwind breakpoint widths (see layout-wrappers.css) */
+/* Layout wrappers — Tailwind breakpoint widths (see layout-wrappers.css) */
 
-function ContentText({ className, ...props }: React.ComponentProps<"div">) {
+function PrismLayoutText({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="content-text"
@@ -14,7 +14,7 @@ function ContentText({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function ContentMain({ className, ...props }: React.ComponentProps<"div">) {
+function PrismLayoutMain({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="content-main"
@@ -24,7 +24,7 @@ function ContentMain({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function GraphicsMain({ className, ...props }: React.ComponentProps<"div">) {
+function PrismGraphicsMain({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="graphics-main"
@@ -34,7 +34,10 @@ function GraphicsMain({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function GraphicsLarge({ className, ...props }: React.ComponentProps<"div">) {
+function PrismGraphicsLarge({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="graphics-large"
@@ -44,7 +47,7 @@ function GraphicsLarge({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function GraphicsFull({ className, ...props }: React.ComponentProps<"div">) {
+function PrismGraphicsFull({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="graphics-full"
@@ -54,8 +57,11 @@ function GraphicsFull({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** Full-viewport breakout wrapper (use for bands that need to escape page container). */
-function ContentBreakout({ className, ...props }: React.ComponentProps<"div">) {
+/** Full-viewport breakout wrapper (bands that escape the page container). */
+function PrismLayoutBreakout({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="content-breakout"
@@ -76,46 +82,47 @@ function ContentBreakout({ className, ...props }: React.ComponentProps<"div">) {
 const LAYOUT_WRAPPER_BAR_VARIANTS = {
   contentText: {
     label: ".content-text — sm 640px",
-    wrapper: ContentText,
+    wrapper: PrismLayoutText,
     barClass:
       "layout-wrapper-bar layout-wrapper-bar-w-640 layout-wrapper-bar-red",
   },
   contentMain: {
     label: ".content-main — xl 1280px",
-    wrapper: ContentMain,
+    wrapper: PrismLayoutMain,
     barClass:
       "layout-wrapper-bar layout-wrapper-bar-w-1280 layout-wrapper-bar-pink",
   },
   graphicsMain: {
     label: ".graphics-main — xl 1280px",
-    wrapper: GraphicsMain,
+    wrapper: PrismGraphicsMain,
     barClass:
       "layout-wrapper-bar layout-wrapper-bar-w-1280 layout-wrapper-bar-purple",
   },
   graphicsLarge: {
     label: ".graphics-large — 2xl 1536px",
-    wrapper: GraphicsLarge,
+    wrapper: PrismGraphicsLarge,
     barClass:
       "layout-wrapper-bar layout-wrapper-bar-w-1536 layout-wrapper-bar-indigo",
   },
   graphicsFull: {
     label: ".graphics-full — edge to edge",
-    wrapper: GraphicsFull,
+    wrapper: PrismGraphicsFull,
     barClass:
       "layout-wrapper-bar layout-wrapper-bar-w-full layout-wrapper-bar-blue",
   },
 } as const;
 
-type LayoutWrapperBarVariant = keyof typeof LAYOUT_WRAPPER_BAR_VARIANTS;
+export type PrismLayoutWrapperBarVariant =
+  keyof typeof LAYOUT_WRAPPER_BAR_VARIANTS;
 
-/** Single layout wrapper reference bar (width + label); use inside Content* wrappers. */
-function LayoutWrapperBar({
+/** Single layout wrapper reference bar (width + label); use inside PrismLayout* wrappers. */
+function PrismLayoutWrapperBar({
   variant,
   label,
   className,
   ...props
 }: {
-  variant: LayoutWrapperBarVariant;
+  variant: PrismLayoutWrapperBarVariant;
   label?: string;
 } & React.ComponentProps<"div">) {
   const config = LAYOUT_WRAPPER_BAR_VARIANTS[variant];
@@ -129,13 +136,13 @@ function LayoutWrapperBar({
   );
 }
 
-/** Full reference section: breakout + heading + five colored bars (for system sheet / docs). */
-function LayoutWrappersReference({
+/** Reference section: breakout + heading + five colored bars (system sheet / docs). */
+function PrismLayoutWrappersReference({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   return (
-    <ContentBreakout className={cn("border-t pt-8", className)} {...props}>
+    <PrismLayoutBreakout className={cn("border-t pt-8", className)} {...props}>
       <div className="mb-8">
         <h2 className="mb-4">Layout Wrappers</h2>
         <p className="text-sm text-muted-foreground mb-6">
@@ -143,27 +150,25 @@ function LayoutWrappersReference({
           page container so bands can reach their full width (e.g.
           graphics-large 2xl 1536px).
         </p>
-        <div className="space-y-6 mt-8">
-          <LayoutWrapperBar variant="contentText" />
-          <LayoutWrapperBar variant="contentMain" />
-          <LayoutWrapperBar variant="graphicsMain" />
-          <LayoutWrapperBar variant="graphicsLarge" />
-          <LayoutWrapperBar variant="graphicsFull" />
+        <div className="mt-8 space-y-6">
+          <PrismLayoutWrapperBar variant="contentText" />
+          <PrismLayoutWrapperBar variant="contentMain" />
+          <PrismLayoutWrapperBar variant="graphicsMain" />
+          <PrismLayoutWrapperBar variant="graphicsLarge" />
+          <PrismLayoutWrapperBar variant="graphicsFull" />
         </div>
       </div>
-    </ContentBreakout>
+    </PrismLayoutBreakout>
   );
 }
 
 export {
-  ContentText,
-  ContentMain,
-  GraphicsMain,
-  GraphicsLarge,
-  GraphicsFull,
-  ContentBreakout,
-  LayoutWrapperBar,
-  LayoutWrappersReference,
+  PrismLayoutText,
+  PrismLayoutMain,
+  PrismGraphicsMain,
+  PrismGraphicsLarge,
+  PrismGraphicsFull,
+  PrismLayoutBreakout,
+  PrismLayoutWrapperBar,
+  PrismLayoutWrappersReference,
 };
-
-export type { LayoutWrapperBarVariant };

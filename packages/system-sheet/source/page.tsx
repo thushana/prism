@@ -1,22 +1,22 @@
 import { Geist_Mono } from "next/font/google";
 import {
-  Badge,
-  Button as UiButton,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  ContentBreakout,
-  ContentText,
-  LayoutWrappersReference,
+  PrismBadge,
+  PrismCard,
+  PrismCardContent,
+  PrismCardHeader,
+  PrismCardTitle,
+  PrismIcon,
+  PrismLayoutBreakout,
+  PrismLayoutText,
+  PrismLayoutWrappersReference,
   PrismTypography,
 } from "@ui";
-import { Icon } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
 import { FontWeightPreview } from "./font-weight-preview";
 import { TypeScalePreview } from "./type-scale-preview";
 import type { SystemSheetConfig, SystemSheetData } from "./types";
+import { SystemSheetButtonExamples } from "./system-sheet-button-examples";
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({
@@ -36,50 +36,36 @@ interface SystemSheetPageProps {
 function renderComponentExample(componentName: string) {
   switch (componentName) {
     case "button":
-      return (
-        <div className="flex flex-wrap gap-2 items-center">
-          <UiButton variant="default">Default</UiButton>
-          <UiButton variant="secondary">Secondary</UiButton>
-          <UiButton variant="outline">Outline</UiButton>
-          <UiButton variant="ghost">Ghost</UiButton>
-          <UiButton variant="destructive">Destructive</UiButton>
-          <UiButton variant="link">Link</UiButton>
-          <UiButton size="icon">
-            <Icon name="settings" />
-          </UiButton>
-          <UiButton size="sm">Small</UiButton>
-          <UiButton size="lg">Large</UiButton>
-        </div>
-      );
+      return <SystemSheetButtonExamples />;
     case "badge":
       return (
         <div className="flex flex-wrap gap-2 items-center">
-          <Badge variant="default">Default</Badge>
-          <Badge variant="secondary">Secondary</Badge>
-          <Badge variant="outline">Outline</Badge>
-          <Badge variant="destructive">Destructive</Badge>
+          <PrismBadge variant="default">Default</PrismBadge>
+          <PrismBadge variant="secondary">Secondary</PrismBadge>
+          <PrismBadge variant="outline">Outline</PrismBadge>
+          <PrismBadge variant="destructive">Destructive</PrismBadge>
         </div>
       );
     case "card":
       return (
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Card Example</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <PrismCard className="w-full max-w-sm">
+          <PrismCardHeader>
+            <PrismCardTitle>Card Example</PrismCardTitle>
+          </PrismCardHeader>
+          <PrismCardContent>
             <PrismTypography role="body" size="medium" className="text-muted-foreground">
               This is a card component example.
             </PrismTypography>
-          </CardContent>
-        </Card>
+          </PrismCardContent>
+        </PrismCard>
       );
     case "icon":
       return (
         <div className="flex flex-wrap gap-4 items-center">
-          <Icon name="home" size={24} />
-          <Icon name="settings" size={32} />
-          <Icon name="favorite" size={24} fill />
-          <Icon name="star" size={24} weight={600} />
+          <PrismIcon name="home" size={24} />
+          <PrismIcon name="settings" size={32} />
+          <PrismIcon name="favorite" size={24} fill />
+          <PrismIcon name="star" size={24} weight={600} />
         </div>
       );
     default:
@@ -141,9 +127,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
   } = config;
   const sheetHeadlineElement = nestedUnderAdminPageShell ? "h2" : "h1";
 
+  const sheetOuterClassName = nestedUnderAdminPageShell
+    ? `space-y-8 font-sans w-full ${geistMono.variable}`
+    : `container mx-auto space-y-8 p-8 font-sans ${geistMono.variable}`;
+
   if (!data) {
     return (
-      <div className="container mx-auto space-y-8 p-8 font-sans">
+      <div
+        className={
+          nestedUnderAdminPageShell
+            ? "space-y-8 font-sans w-full"
+            : "container mx-auto space-y-8 p-8 font-sans"
+        }
+      >
         <div className="space-y-2">
           <PrismTypography
             role="headline"
@@ -168,9 +164,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
   }
 
   return (
-    <div
-      className={`container mx-auto p-8 space-y-8 font-sans ${geistMono.variable}`}
-    >
+    <div className={sheetOuterClassName}>
       <div className="space-y-2">
         <PrismTypography
           role="headline"
@@ -241,7 +235,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     <PrismTypography role="overline" size="small">
                       {key}
                     </PrismTypography>
-                    <Badge variant="outline">{value}</Badge>
+                    <PrismBadge variant="outline">{value}</PrismBadge>
                   </div>
                 ))}
               </div>
@@ -251,9 +245,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
               <h2 className="mb-4">Key Dependencies</h2>
               <div className="flex flex-wrap gap-2">
                 {data.dependencies.key.map((dep) => (
-                  <Badge key={dep} variant="secondary">
+                  <PrismBadge key={dep} variant="secondary">
                     {dep}
-                  </Badge>
+                  </PrismBadge>
                 ))}
               </div>
             </div>
@@ -286,7 +280,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   <PrismTypography role="overline" size="small">
                     Commit Author
                   </PrismTypography>
-                  <Badge variant="outline">{data.git.commitAuthor}</Badge>
+                  <PrismBadge variant="outline">{data.git.commitAuthor}</PrismBadge>
                 </div>
               )}
             </div>
@@ -304,17 +298,17 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                       rel="noopener noreferrer"
                       className="inline-block"
                     >
-                      <Badge
+                      <PrismBadge
                         variant="outline"
                         className="cursor-pointer hover:bg-accent transition-colors"
                       >
                         {data.git.commitSha.slice(0, 7)}
-                      </Badge>
+                      </PrismBadge>
                     </a>
                   ) : (
-                    <Badge variant="outline">
+                    <PrismBadge variant="outline">
                       {data.git.commitSha.slice(0, 7)}
-                    </Badge>
+                    </PrismBadge>
                   )}
                 </div>
               )}
@@ -329,12 +323,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     rel="noopener noreferrer"
                     className="inline-block"
                   >
-                    <Badge
+                    <PrismBadge
                       variant="outline"
                       className="cursor-pointer hover:bg-accent transition-colors"
                     >
                       {data.git.repositoryName || "Repository"}
-                    </Badge>
+                    </PrismBadge>
                   </a>
                 </div>
               )}
@@ -342,16 +336,16 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Status
                 </PrismTypography>
-                <Badge variant="outline">
+                <PrismBadge variant="outline">
                   {data.git.status === "clean" ? "clean" : "dirty"}
-                </Badge>
+                </PrismBadge>
               </div>
               {data.git.branch && (
                 <div className="space-y-1">
                   <PrismTypography role="overline" size="small">
                     Branch
                   </PrismTypography>
-                  <Badge variant="outline">{data.git.branch}</Badge>
+                  <PrismBadge variant="outline">{data.git.branch}</PrismBadge>
                 </div>
               )}
               {data.git.commitDate && (
@@ -359,9 +353,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   <PrismTypography role="overline" size="small">
                     Commit Date
                   </PrismTypography>
-                  <Badge variant="outline">
+                  <PrismBadge variant="outline">
                     {formatDateTimeWithRelative(data.git.commitDate)}
-                  </Badge>
+                  </PrismBadge>
                 </div>
               )}
             </div>
@@ -377,23 +371,23 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Environment
                 </PrismTypography>
-                <Badge variant="outline">{data.vercel.env}</Badge>
+                <PrismBadge variant="outline">{data.vercel.env}</PrismBadge>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
                   <PrismTypography role="overline" size="small">
                     Region
                   </PrismTypography>
-                  <Badge variant="outline">{data.vercel.region}</Badge>
+                  <PrismBadge variant="outline">{data.vercel.region}</PrismBadge>
                 </div>
               )}
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Build Time
                 </PrismTypography>
-                <Badge variant="outline">
+                <PrismBadge variant="outline">
                   {formatDateTimeWithRelative(data.vercel.buildTime)}
-                </Badge>
+                </PrismBadge>
               </div>
             </div>
             <div className="mt-4 space-y-3">
@@ -494,19 +488,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Style
                 </PrismTypography>
-                <Badge variant="outline">{data.shadcn.style}</Badge>
+                <PrismBadge variant="outline">{data.shadcn.style}</PrismBadge>
               </div>
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Icon Library
                 </PrismTypography>
-                <Badge variant="outline">{data.shadcn.iconLibrary}</Badge>
+                <PrismBadge variant="outline">{data.shadcn.iconLibrary}</PrismBadge>
               </div>
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Base Color
                 </PrismTypography>
-                <Badge variant="outline">{data.shadcn.baseColor}</Badge>
+                <PrismBadge variant="outline">{data.shadcn.baseColor}</PrismBadge>
               </div>
             </div>
           </div>
@@ -521,7 +515,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 data.components.shadcn.map((component) => (
                   <div key={component} className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{component}</Badge>
+                      <PrismBadge variant="secondary">{component}</PrismBadge>
                     </div>
                     {renderComponentExample(component)}
                   </div>
@@ -530,7 +524,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 data.components.custom.map((component) => (
                   <div key={component} className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{component}</Badge>
+                      <PrismBadge variant="outline">{component}</PrismBadge>
                     </div>
                     {renderComponentExample(component)}
                   </div>
@@ -539,7 +533,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 data.components.app.map((component) => (
                   <div key={component} className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{component}</Badge>
+                      <PrismBadge variant="outline">{component}</PrismBadge>
                     </div>
                     {renderComponentExample(component)}
                   </div>
@@ -577,13 +571,13 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
           </div>
         )}
 
-        <LayoutWrappersReference />
+        <PrismLayoutWrappersReference />
 
         {/* Layout sample: content-text with Prism blog post */}
-        <ContentBreakout className="mt-8">
+        <PrismLayoutBreakout className="mt-8">
           <div>
             <h2 className="mb-4">Layout sample — content-text</h2>
-            <ContentText
+            <PrismLayoutText
               className={`space-y-4 font-serif ${sentient.variable}`}
             >
               <PrismTypography role="headline" size="small">What is Prism?</PrismTypography>
@@ -607,9 +601,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 them. If you want a single stack that stays consistent as the
                 product grows, Prism is built for that.
               </PrismTypography>
-            </ContentText>
+            </PrismLayoutText>
           </div>
-        </ContentBreakout>
+        </PrismLayoutBreakout>
       </div>
     </div>
   );
