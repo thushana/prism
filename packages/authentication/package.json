@@ -12,6 +12,7 @@
     "./web": "./source/web.ts"
   },
   "dependencies": {
+    "lucide-react": "^1.0.0",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
