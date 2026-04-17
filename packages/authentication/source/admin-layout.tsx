@@ -157,7 +157,7 @@ export function AdminPageShell({
             )}
           </div>
           {showSignOut && (
-            <div className="shrink-0 pt-1">
+            <div className="shrink-0">
               <SignOutForm />
             </div>
           )}
