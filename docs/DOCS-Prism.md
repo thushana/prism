@@ -17,7 +17,7 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 ## Remove from Docs
 
 - Version numbers → `package.json`
-- Code examples → link to source
+- Code examples → link to source (exception: **[UI-Prism.md](./UI-Prism.md)** is the deliberate usage reference for `@ui`; keep examples there or in component JSDoc, not scattered duplicates)
 - API details → route handlers + TypeScript types
 - Config values → config files
 - Step-by-step guides → the code itself
@@ -30,6 +30,8 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 - **Constraints** that shaped design
 
 ## Structure
+
+In this repository, Prism’s doc set lives under **`prism/docs/`**. In a consuming app that vendors Prism as a submodule, paths are usually `prism/docs/…` from the app root—same filenames, different prefix.
 
 ```
 {project-root}/

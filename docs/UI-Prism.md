@@ -2,6 +2,8 @@
 
 The `packages/ui` package provides a unified UI system including React components, fonts, and global styles. All UI-related assets are consolidated in this single package for easier management and consistency.
 
+This file is the **canonical usage reference** for the UI package (import paths, props, patterns). It includes examples by design; [DOCS-Prism.md](./DOCS-Prism.md) still applies: avoid duplicating version numbers and keep one home for each fact—link here for “how to use” UI, not as a second copy of `package.json`.
+
 ## Package Structure
 
 ```
@@ -56,7 +58,7 @@ import { PrismPathBar } from "@ui";
 
 ### Button
 
-A versatile button component with multiple variants and sizes.
+A versatile button component with multiple variants and sizes. Variant and size strings (`default`, `sm`, `lg`, …) follow **shadcn / CVA** conventions consumed by this component—they are framework-shaped API surface, not Prism-owned option keys. For props and unions you define in app or package code, prefer full words per [NAMING.md](../.cursor/commands/NAMING.md) (`small`, `medium`, `large`).
 
 **Import:**
 
@@ -276,7 +278,7 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 - `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `large` | `medium` | `small` (18 rules total).
 
-### Prismtypography Component
+### PrismTypography component
 
 Use `<PrismTypography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the `color` prop or `className` for semantic colour (e.g. `color="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
 

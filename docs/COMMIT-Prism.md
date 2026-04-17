@@ -13,7 +13,7 @@ Human-facing **convention** for `git log`, not implementation. Fits [DOCS-Prism.
 - **Emoji** (optional but recommended) - Visual indicator of change type
 - **ALL CAPS** slug (short, descriptive keyword)
 - Single dash separator
-- Brief explanation covering all unstaged changes in the commit
+- Brief explanation covering all changes in that commit (one logical change per commit)
 - One line only
 
 ## Examples
@@ -44,7 +44,7 @@ Human-facing **convention** for `git log`, not implementation. Fits [DOCS-Prism.
 
 ## Guidelines
 
-- Commit should include all related unstaged changes
+- Each commit should include all related changes for that change (avoid half-done commits)
 - Slug should be a single word or short phrase (e.g., `SETUP`, `DATABASE`, `UI`)
 - Description should be concise but descriptive enough to understand the change
 - Emoji is optional but helps categorize changes at a glance

@@ -97,7 +97,7 @@ Keep one shared constant in the app, e.g. `app/admin/admin-path-bar-title-by-pat
 
 The admin home route (`/admin`) typically omits the path bar so the headline is not duplicated as a single crumb.
 
-Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell` and use only `requireAdminPage()` + their own `<main>`; if you still need a path row, render `PrismPathBar` directly with the same prop names as in `@ui`.
+Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell` and use only `requireAdminPage()` + their own `<main>`; if you still need a path row, render `PrismPathBar` from `@ui` using its props (`explicitModeSegmentList`, `titleByPathPrefix`, `pageTitle`, …). `AdminPageShell` wraps the same component but uses longer names (`explicitPrismPathBarSegmentList`, `prismPathBarTitleByPathPrefix`) and passes them through—see [UI-Prism.md](./UI-Prism.md).
 
 ## `@authentication` Exports
 

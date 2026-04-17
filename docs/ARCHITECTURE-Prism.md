@@ -126,7 +126,7 @@ AI task registry and helpers:
 - `source/utilities/` - Cost tracking, retry logic, model helpers
 - `models.config.json` - Model configuration defaults
 
-#### Packages/system-Sheet
+#### Packages/system-sheet
 
 Shared primitives for the system information page:
 
@@ -148,7 +148,7 @@ Shared authentication utilities for API and web authentication:
 
 Nivo-based chart wrappers and theme mapping from CSS variables. See [CHARTS-Prism.md](./CHARTS-Prism.md).
 
-#### Packages/feature-Flags
+#### Packages/feature-flags
 
 Shared feature-flag discovery and standard environment flags for apps embedding Prism.
 
@@ -217,7 +217,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Naming Conventions
 
-- **No Acronyms**: Use full words (e.g., "database" not "db", "utilities" not "utils")
+- **No Acronyms**: Use full words for package and folder names (e.g., "database" not "db", "utilities" not "utils"). For identifiers (props, types, constants), follow [NAMING.md](../.cursor/commands/NAMING.md), including its small allowlist (`api`, `ui`, …) where appropriate.
 - **Kebab-case**: For file and directory names
 - **PascalCase**: For React components and TypeScript types
 - **camelCase**: For functions and variables
