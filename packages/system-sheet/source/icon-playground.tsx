@@ -22,9 +22,9 @@ import iconNames from "./material-icons-round-names.json";
 /** Checkbox keys for the icon admin playground (mutually exclusive within each group). */
 type IconPlaygroundAppearanceKey =
   | "sizeSmall"
-  | "sizeMedium"
+  | "sizeNormal"
   | "sizeLarge"
-  | "sizeExtraLarge"
+  | "sizeLarge2x"
   | "weightThin"
   | "weightMedium"
   | "weightThick"
@@ -33,7 +33,7 @@ type IconPlaygroundAppearanceKey =
   | "fillTrue";
 
 const ICON_PLAYGROUND_EXCLUSIVE_KEY_GROUPS: IconPlaygroundAppearanceKey[][] = [
-  ["sizeSmall", "sizeMedium", "sizeLarge", "sizeExtraLarge"],
+  ["sizeSmall", "sizeNormal", "sizeLarge", "sizeLarge2x"],
   ["weightThin", "weightMedium", "weightThick", "weightHeavy"],
   ["fillFalse", "fillTrue"],
 ];
@@ -44,9 +44,9 @@ const ICON_PLAYGROUND_DISPLAY_LABEL: Record<
   string
 > = {
   sizeSmall: "small",
-  sizeMedium: "medium",
+  sizeNormal: "normal",
   sizeLarge: "large",
-  sizeExtraLarge: "extra-large",
+  sizeLarge2x: "large2x",
   weightThin: "thin",
   weightMedium: "medium",
   weightThick: "thick",
@@ -61,7 +61,7 @@ const ICON_PLAYGROUND_CUSTOMIZER_COLUMNS: {
 }[] = [
   {
     heading: "Size",
-    keys: ["sizeSmall", "sizeMedium", "sizeLarge", "sizeExtraLarge"],
+    keys: ["sizeSmall", "sizeNormal", "sizeLarge", "sizeLarge2x"],
   },
   {
     heading: "Weight",
@@ -72,7 +72,7 @@ const ICON_PLAYGROUND_CUSTOMIZER_COLUMNS: {
 
 function initialIconPlaygroundSelection(): Set<IconPlaygroundAppearanceKey> {
   return new Set([
-    "sizeMedium",
+    "sizeNormal",
     "weightMedium",
     "fillFalse",
   ] as IconPlaygroundAppearanceKey[]);
@@ -81,13 +81,13 @@ function initialIconPlaygroundSelection(): Set<IconPlaygroundAppearanceKey> {
 function resolveIconPlaygroundProps(
   selected: Set<IconPlaygroundAppearanceKey>
 ): Pick<PrismIconProps, "size" | "weight" | "fill"> {
-  const size: PrismIconSizeName = selected.has("sizeExtraLarge")
-    ? "extraLarge"
+  const size: PrismIconSizeName = selected.has("sizeLarge2x")
+    ? "large2x"
     : selected.has("sizeLarge")
       ? "large"
       : selected.has("sizeSmall")
         ? "small"
-        : "medium";
+        : "normal";
   const weight: PrismIconWeightName = selected.has("weightHeavy")
     ? "heavy"
     : selected.has("weightThick")
@@ -111,7 +111,7 @@ function fillModeForSnippet(fill: PrismIconProps["fill"] | undefined): string {
 function formatSizeAttributeForSnippet(
   size: PrismIconProps["size"] | undefined
 ): string {
-  if (size === undefined) return 'size="medium"';
+  if (size === undefined) return 'size="normal"';
   if (typeof size === "number") return "size={" + size + "}";
   return 'size="' + size + '"';
 }

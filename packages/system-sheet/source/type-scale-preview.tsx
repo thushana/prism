@@ -703,7 +703,7 @@ export function TypeScalePreview({
             variant="icon"
             icon={RefreshCw}
             iconOnly
-            shapeLineNo
+            lineNo
             onClick={reshuffleSamples}
           />
         </div>
@@ -715,11 +715,11 @@ export function TypeScalePreview({
             label={typeface.label}
             color="grey"
             colorVariant="monochrome"
-            shapeRectangle
-            shapeLineBottom
-            stateToggled={selectedTypefaceId === typeface.id}
-            animationNoColorChange={selectedTypefaceId !== typeface.id}
-            animationNoGrow={selectedTypefaceId !== typeface.id}
+            rectangle
+            lineBottom
+            toggled={selectedTypefaceId === typeface.id}
+            noColorChange={selectedTypefaceId !== typeface.id}
+            noGrow={selectedTypefaceId !== typeface.id}
             onClick={() => setSelectedTypefaceId(typeface.id)}
           />
         ))}
@@ -730,7 +730,7 @@ export function TypeScalePreview({
           variant="icon"
           icon={RefreshCw}
           iconOnly
-          shapeLineNo
+          lineNo
           onClick={reshuffleSamples}
         />
       </div>
@@ -831,8 +831,8 @@ export function TypeScalePreview({
             colorVariant="monochrome"
             variant="icon"
             icon={RefreshCw}
-            shapeRectangle
-            shapeLineBottom
+            rectangle
+            lineBottom
             onClick={reshuffleSamples}
           />
         </div>

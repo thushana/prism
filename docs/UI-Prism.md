@@ -69,7 +69,7 @@ import { PrismPathBar } from "@ui";
 
 ### PrismButton
 
-The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: palette colors, Lucide icons, optional GSAP motion, and layout props (`shapeGapNo`, `segmentPosition`, …). It requires **`color`** and **`label`** (see types in source). Size props use Prism words (`small`, `normal`, `large`, `large2x`) per [NAMING.md](../.cursor/commands/NAMING.md). For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally in an app—there is no separate generic `Button` export.
+The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: palette colors, Lucide icons, optional GSAP motion, and layout props (`gapNo`, `segmentPosition`, `rectangle`, `lineNo`, …). It requires **`color`** and **`label`** (see types in source). Size props use Prism words (`small`, `normal`, `large`, `large2x`) per [NAMING.md](../.cursor/commands/NAMING.md). For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally in an app—there is no separate generic `Button` export.
 
 Admin and system-sheet previews: `/admin/prism/components/prism-button`, `ButtonCustomizerPlayground` / `ButtonVariantsList` from `@system-sheet`.
 
@@ -125,7 +125,7 @@ import { PrismBadge } from "@ui";
 
 ### PrismIcon
 
-Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** is `"small"` \| `"medium"` \| `"large"` \| `"extraLarge"` (maps to 20 / 24 / 28 / 48px, where **extraLarge** is 2× **medium**; **opsz** clamps to 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"thin"` \| `"medium"` \| `"thick"` \| `"heavy"` (maps to wght 300 / 400 / 600 / 700) or a raw **wght** value `100`–`700`. **`fill`** is `"on"` \| `"off"` (FILL axis) or legacy boolean. The **GRAD** axis is fixed at `0` in the component (no `grade` prop).
+Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same named steps as **PrismButton** `size`: `"small"` \| `"normal"` \| `"large"` \| `"large2x"` (maps to 20 / 24 / 28 / 48px, where **large2x** is 2× **normal**; **opsz** clamps to 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"thin"` \| `"medium"` \| `"thick"` \| `"heavy"` (maps to wght 300 / 400 / 600 / 700) or a raw **wght** value `100`–`700`. **`fill`** is `"on"` \| `"off"` (FILL axis) or legacy boolean. The **GRAD** axis is fixed at `0` in the component (no `grade` prop).
 
 **Import:**
 
@@ -138,11 +138,13 @@ import { PrismIcon } from "@ui";
 **Example:**
 
 ```tsx
-<PrismIcon name="home" size="medium" weight="medium" fill="off" />
+<PrismIcon name="home" size="normal" weight="medium" fill="off" />
 <PrismIcon name="settings" size="large" weight="medium" fill="off" />
-<PrismIcon name="favorite" size="medium" weight="medium" fill="on" />
+<PrismIcon name="favorite" size="normal" weight="medium" fill="on" />
 <PrismIcon name="star" size="large" weight="thin" fill="off" />
 ```
+
+**Migration (named `size`):** Older code used `size="medium"` and `size="extraLarge"` to match typography-ish names. Those map to **`"normal"`** and **`"large2x"`** respectively so **PrismIcon** and **PrismButton** share one size vocabulary (`small` \| `normal` \| `large` \| `large2x`).
 
 Admin and system-sheet preview: `/admin/prism/components/prism-icon`, `IconCustomizerPlayground` from `@system-sheet`. The playground exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
 
@@ -475,15 +477,15 @@ Prism UI and the system-sheet use a **single canonical form** for option names s
 
 | Where                                 | Form                | Notes                                                                                                            |
 | ------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Code** (keys, state, props)         | **camelCase**       | `shapeGapNo`, `animationNoGrow`, `colorBackgroundLight`. This is the source of truth.                            |
-| **Display labels** (customizer, docs) | **.camelCase**      | Same as the key with a dot prefix, e.g. `.shapeGapNo`, `.animationNoGrow`. No conversion.                        |
-| **DOM data attributes**               | **data-kebab-case** | Derived from the camelCase name (e.g. `data-shape-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
+| **Code** (keys, state, props)         | **camelCase**       | `gapNo`, `noGrow`, `colorBackgroundLight`. This is the source of truth.                                         |
+| **Display labels** (button customizer) | **bare tokens**    | Same pattern as PrismIcon playground: e.g. `gapNo`, `small`, `background-light` (see `OPTION_PROP_LABEL` in system-sheet). |
+| **DOM data attributes**               | **data-kebab-case** | Derived from the camelCase prop name (e.g. `data-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
 
 **Rules:**
 
-- **Canonical = camelCase.** All option keys, TypeScript types, and PrismButton props are camelCase. Use one name per concept (e.g. `shapeGapNo` not `gapNo`). Add new options in camelCase only.
-- **Labels = `.` + key.** In the system-sheet customizer and in docs, show option names as `.shapeGapNo`, not `.shape-gap-no`. The label is the key with a leading dot.
-- **Data attributes = derived.** PrismButton (and any component that exposes options to the DOM) builds `data-*` names from the prop name via `camelToKebab`, so the DOM keeps kebab-case (`data-shape-gap-no`) without maintaining a second list.
+- **Canonical = camelCase.** TypeScript types and PrismButton props are camelCase (`gapNo`, `rectangleRounded`, …).
+- **Customizer labels** match PrismIcon: short display strings in `OPTION_PROP_LABEL`, not `prop="…"` and not a `.` chain prefix.
+- **Data attributes = derived.** PrismButton builds `data-*` names from the prop name via `camelToKebab` (e.g. `gapNo` → `data-gap-no`).
 
 This keeps one list of option names (camelCase) and avoids drift between labels, props, and data attributes.
 

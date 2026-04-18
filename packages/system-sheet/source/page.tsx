@@ -59,10 +59,10 @@ function renderComponentExample(componentName: string) {
     case "icon":
       return (
         <div className="flex flex-wrap gap-4 items-center">
-          <PrismIcon name="home" size="medium" />
+          <PrismIcon name="home" size="normal" />
           <PrismIcon name="settings" size="large" />
-          <PrismIcon name="favorite" size="medium" fill="on" />
-          <PrismIcon name="star" size="medium" weight="thick" />
+          <PrismIcon name="favorite" size="normal" fill="on" />
+          <PrismIcon name="star" size="normal" weight="thick" />
         </div>
       );
     default:

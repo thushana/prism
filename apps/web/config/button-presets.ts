@@ -7,5 +7,5 @@ import { registerPrismButtonPresets } from "ui";
 registerPrismButtonPresets({
   // Example: override or add app-specific presets.
   // "cta-primary": { color: "blue", colorVariant: "background-dark", size: "large" },
-  // "nav-action": { shapeLineNo: true, colorVariant: "background-no", font: "serif" },
+  // "nav-action": { lineNo: true, colorVariant: "background-no", font: "serif" },
 });
