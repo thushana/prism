@@ -2,7 +2,9 @@ import * as React from "react";
 
 import { cn } from "@utilities";
 
-function PrismCard({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardProps = React.ComponentProps<"div">;
+
+function PrismCard({ className, ...props }: PrismCardProps) {
   return (
     <div
       data-slot="card"
@@ -15,7 +17,9 @@ function PrismCard({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function PrismCardHeader({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardHeaderProps = React.ComponentProps<"div">;
+
+function PrismCardHeader({ className, ...props }: PrismCardHeaderProps) {
   return (
     <div
       data-slot="card-header"
@@ -28,7 +32,9 @@ function PrismCardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function PrismCardTitle({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardTitleProps = React.ComponentProps<"div">;
+
+function PrismCardTitle({ className, ...props }: PrismCardTitleProps) {
   return (
     <div
       data-slot="card-title"
@@ -38,10 +44,12 @@ function PrismCardTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+export type PrismCardDescriptionProps = React.ComponentProps<"div">;
+
 function PrismCardDescription({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: PrismCardDescriptionProps) {
   return (
     <div
       data-slot="card-description"
@@ -51,7 +59,9 @@ function PrismCardDescription({
   );
 }
 
-function PrismCardAction({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardActionProps = React.ComponentProps<"div">;
+
+function PrismCardAction({ className, ...props }: PrismCardActionProps) {
   return (
     <div
       data-slot="card-action"
@@ -64,7 +74,9 @@ function PrismCardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function PrismCardContent({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardContentProps = React.ComponentProps<"div">;
+
+function PrismCardContent({ className, ...props }: PrismCardContentProps) {
   return (
     <div
       data-slot="card-content"
@@ -74,7 +86,9 @@ function PrismCardContent({ className, ...props }: React.ComponentProps<"div">) 
   );
 }
 
-function PrismCardFooter({ className, ...props }: React.ComponentProps<"div">) {
+export type PrismCardFooterProps = React.ComponentProps<"div">;
+
+function PrismCardFooter({ className, ...props }: PrismCardFooterProps) {
   return (
     <div
       data-slot="card-footer"

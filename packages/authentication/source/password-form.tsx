@@ -53,7 +53,7 @@ export function PasswordForm({ error }: PasswordFormProps) {
           <PrismTypography role="headline" size="medium" as="h1">
             Authentication Required
           </PrismTypography>
-          <PrismTypography role="body" size="medium" color="muted" className="mt-2">
+          <PrismTypography role="body" size="medium" tone="muted" className="mt-2">
             Please enter the password to access this page
           </PrismTypography>
         </div>
@@ -87,7 +87,7 @@ export function PasswordForm({ error }: PasswordFormProps) {
               <PrismTypography
                 role="body"
                 size="small"
-                color="destructive"
+                tone="destructive"
                 className="mt-2"
               >
                 {submitError || error}
@@ -99,10 +99,10 @@ export function PasswordForm({ error }: PasswordFormProps) {
             type="submit"
             variant="plain"
             color="blue"
-            rectangleRounded
+            shape="rectangleRounded"
             label={isSubmitting ? "Authenticating…" : "Authenticate"}
             disabled={isSubmitting}
-            noGrow
+            disableGrow
             className="w-full"
           />
         </form>

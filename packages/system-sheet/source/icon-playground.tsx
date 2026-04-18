@@ -22,19 +22,27 @@ import iconNames from "./material-icons-round-names.json";
 /** Checkbox keys for the icon admin playground (mutually exclusive within each group). */
 type IconPlaygroundAppearanceKey =
   | "sizeSmall"
-  | "sizeNormal"
+  | "sizeMedium"
   | "sizeLarge"
-  | "sizeLarge2x"
+  | "sizeHuge"
+  | "sizeGigantic"
+  | "weightLight"
   | "weightThin"
-  | "weightMedium"
-  | "weightThick"
+  | "weightRegular"
+  | "weightBold"
   | "weightHeavy"
   | "fillFalse"
   | "fillTrue";
 
 const ICON_PLAYGROUND_EXCLUSIVE_KEY_GROUPS: IconPlaygroundAppearanceKey[][] = [
-  ["sizeSmall", "sizeNormal", "sizeLarge", "sizeLarge2x"],
-  ["weightThin", "weightMedium", "weightThick", "weightHeavy"],
+  ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
+  [
+    "weightLight",
+    "weightThin",
+    "weightRegular",
+    "weightBold",
+    "weightHeavy",
+  ],
   ["fillFalse", "fillTrue"],
 ];
 
@@ -44,12 +52,14 @@ const ICON_PLAYGROUND_DISPLAY_LABEL: Record<
   string
 > = {
   sizeSmall: "small",
-  sizeNormal: "normal",
+  sizeMedium: "medium",
   sizeLarge: "large",
-  sizeLarge2x: "large2x",
+  sizeHuge: "huge",
+  sizeGigantic: "gigantic",
+  weightLight: "light",
   weightThin: "thin",
-  weightMedium: "medium",
-  weightThick: "thick",
+  weightRegular: "regular",
+  weightBold: "bold",
   weightHeavy: "heavy",
   fillFalse: "off",
   fillTrue: "on",
@@ -61,19 +71,25 @@ const ICON_PLAYGROUND_CUSTOMIZER_COLUMNS: {
 }[] = [
   {
     heading: "Size",
-    keys: ["sizeSmall", "sizeNormal", "sizeLarge", "sizeLarge2x"],
+    keys: ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
   },
   {
     heading: "Weight",
-    keys: ["weightThin", "weightMedium", "weightThick", "weightHeavy"],
+    keys: [
+      "weightLight",
+      "weightThin",
+      "weightRegular",
+      "weightBold",
+      "weightHeavy",
+    ],
   },
   { heading: "Fill", keys: ["fillFalse", "fillTrue"] },
 ];
 
 function initialIconPlaygroundSelection(): Set<IconPlaygroundAppearanceKey> {
   return new Set([
-    "sizeNormal",
-    "weightMedium",
+    "sizeMedium",
+    "weightRegular",
     "fillFalse",
   ] as IconPlaygroundAppearanceKey[]);
 }
@@ -81,20 +97,24 @@ function initialIconPlaygroundSelection(): Set<IconPlaygroundAppearanceKey> {
 function resolveIconPlaygroundProps(
   selected: Set<IconPlaygroundAppearanceKey>
 ): Pick<PrismIconProps, "size" | "weight" | "fill"> {
-  const size: PrismIconSizeName = selected.has("sizeLarge2x")
-    ? "large2x"
-    : selected.has("sizeLarge")
-      ? "large"
-      : selected.has("sizeSmall")
-        ? "small"
-        : "normal";
+  const size: PrismIconSizeName = selected.has("sizeGigantic")
+    ? "gigantic"
+    : selected.has("sizeHuge")
+      ? "huge"
+      : selected.has("sizeLarge")
+        ? "large"
+        : selected.has("sizeSmall")
+          ? "small"
+          : "medium";
   const weight: PrismIconWeightName = selected.has("weightHeavy")
     ? "heavy"
-    : selected.has("weightThick")
-      ? "thick"
+    : selected.has("weightBold")
+      ? "bold"
       : selected.has("weightThin")
         ? "thin"
-        : "medium";
+        : selected.has("weightLight")
+          ? "light"
+          : "regular";
   const fill: PrismIconFillMode = selected.has("fillTrue") ? "on" : "off";
   return { size, weight, fill };
 }
@@ -104,14 +124,13 @@ function escapeIconNameForJsxAttribute(iconName: string): string {
 }
 
 function fillModeForSnippet(fill: PrismIconProps["fill"] | undefined): string {
-  if (fill === true || fill === "on") return "on";
-  return "off";
+  return fill === "on" ? "on" : "off";
 }
 
 function formatSizeAttributeForSnippet(
   size: PrismIconProps["size"] | undefined
 ): string {
-  if (size === undefined) return 'size="normal"';
+  if (size === undefined) return 'size="medium"';
   if (typeof size === "number") return "size={" + size + "}";
   return 'size="' + size + '"';
 }
@@ -119,7 +138,7 @@ function formatSizeAttributeForSnippet(
 function formatWeightAttributeForSnippet(
   weight: PrismIconProps["weight"] | undefined
 ): string {
-  if (weight === undefined) return 'weight="medium"';
+  if (weight === undefined) return 'weight="regular"';
   if (typeof weight === "number") return "weight={" + weight + "}";
   return 'weight="' + weight + '"';
 }
@@ -361,7 +380,7 @@ export function IconCustomizerPlayground() {
               <PrismTypography
                 role="body"
                 size="small"
-                color="muted"
+                tone="muted"
                 font="mono"
                 className="mt-1 block break-all"
               >
@@ -381,7 +400,7 @@ export function IconCustomizerPlayground() {
         <PrismTypography
           role="body"
           size="medium"
-          color="muted"
+          tone="muted"
           className="mb-4"
         >
           Toggle props to preview them on the strip and in the icon grid. Click
@@ -406,7 +425,7 @@ export function IconCustomizerPlayground() {
                     onChange={() => handleToggleAppearanceKey(appearanceKey)}
                     className="rounded border-input"
                   />
-                  <PrismTypography role="label" size="medium" color="muted">
+                  <PrismTypography role="label" size="medium" tone="muted">
                     {ICON_PLAYGROUND_DISPLAY_LABEL[appearanceKey]}
                   </PrismTypography>
                 </label>
@@ -423,7 +442,7 @@ export function IconCustomizerPlayground() {
         </div>
 
         <div className="flex items-center gap-3">
-          <PrismTypography role="label" size="medium" font="mono" color="muted">
+          <PrismTypography role="label" size="medium" font="mono" tone="muted">
             {currentSampleSnippet}
           </PrismTypography>
           <button
@@ -453,7 +472,7 @@ export function IconCustomizerPlayground() {
         <PrismTypography
           role="label"
           size="medium"
-          color="muted"
+          tone="muted"
           className="mb-4 block uppercase"
         >
           Showing {filteredIconNames.length.toLocaleString()} of{" "}

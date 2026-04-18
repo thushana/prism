@@ -14,11 +14,11 @@ export function SignOutForm(): React.JSX.Element {
         type="submit"
         variant="plain"
         label="Sign out"
-        typeUppercase
+        textCase="uppercase"
         color="grey"
-        colorVariant="background-no"
-        noColorChange
-        lineNo
+        paint="backgroundNone"
+        disableColorChange
+        line="none"
         size="small"
         className="py-0! px-1! text-muted-foreground! hover:text-foreground!"
       />

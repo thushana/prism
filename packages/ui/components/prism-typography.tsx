@@ -3,13 +3,8 @@
 /**
  * PrismTypography: type scale + optional scroll-reveal (GSAP).
  *
- * **Zone** (what to split / animate): `.animationWhole` | `.animationLine` | `.animationWord` |
- * `.animationCharacter` — string/`number` children for line/word/character; other nodes fall back
- * to whole-block. Line/word/character splits use **GSAP SplitText** after mount (real wrapped lines,
- * words, and characters); whole-block uses the root element only.
- *
- * **Type** (how): `.animationFadeIn` (opacity) | `.animationMoveIn` (opacity + gentle shift up).
- * Pick one zone + one type; if a zone is set but neither type, fade-in is used.
+ * **Zone:** `animationZone` — `whole` | `line` | `word` | `character` | `none`.
+ * **Kind:** `animationKind` — `fadeIn` | `moveIn` | `none`. If zone is set and kind is `none`, fade-in is used (same as legacy “zone without type”).
  */
 
 import {
@@ -25,6 +20,7 @@ import {
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { cn } from "@utilities";
+import type { PrismSize } from "../source/prism-size";
 
 gsap.registerPlugin(SplitText);
 
@@ -37,15 +33,30 @@ export const PRISM_TYPOGRAPHY_ROLES = [
   "overline",
 ] as const;
 
-export const PRISM_TYPOGRAPHY_SIZES = ["large", "medium", "small"] as const;
+export const PRISM_TYPOGRAPHY_SIZES = [
+  "small",
+  "medium",
+  "large",
+  "huge",
+  "gigantic",
+] as const satisfies readonly PrismSize[];
 
 export type PrismTypographyRole = (typeof PRISM_TYPOGRAPHY_ROLES)[number];
-export type PrismTypographySize = (typeof PRISM_TYPOGRAPHY_SIZES)[number];
+export type PrismTypographySize = PrismSize;
 
 export type PrismTypographyFont = "sans" | "serif" | "mono";
 
-/** Semantic text color → `text-*` utilities (shadcn-style tokens in globals.css). Extend when new text tokens exist. */
-export type PrismTypographyColor =
+export type PrismTypographyAnimationZone =
+  | "whole"
+  | "line"
+  | "word"
+  | "character"
+  | "none";
+
+export type PrismTypographyAnimationKind = "fadeIn" | "moveIn" | "none";
+
+/** Semantic text color → `text-*` utilities (shadcn-style tokens). */
+export type PrismTypographyTone =
   | "inherit"
   | "foreground"
   | "muted"
@@ -56,7 +67,7 @@ export type PrismTypographyColor =
   | "accentForeground"
   | "cardForeground";
 
-const TEXT_COLOR_CLASS: Record<PrismTypographyColor, string | undefined> = {
+const TONE_CLASS: Record<PrismTypographyTone, string | undefined> = {
   inherit: undefined,
   foreground: "text-foreground",
   muted: "text-muted-foreground",
@@ -82,13 +93,48 @@ const DEFAULT_ELEMENT: Record<
   PrismTypographyRole,
   Record<PrismTypographySize, PrismTypographyElement>
 > = {
-  display: { large: "h1", medium: "h2", small: "h3" },
-  /* large is h2 so a page can use display-large as the single top-level h1 without duplicate h1s. */
-  headline: { large: "h2", medium: "h3", small: "h4" },
-  title: { large: "h4", medium: "h5", small: "h6" },
-  body: { large: "p", medium: "p", small: "p" },
-  label: { large: "span", medium: "span", small: "span" },
-  overline: { large: "span", medium: "span", small: "span" },
+  display: {
+    large: "h1",
+    medium: "h2",
+    small: "h3",
+    huge: "h1",
+    gigantic: "h1",
+  },
+  headline: {
+    large: "h2",
+    medium: "h3",
+    small: "h4",
+    huge: "h2",
+    gigantic: "h1",
+  },
+  title: {
+    large: "h4",
+    medium: "h5",
+    small: "h6",
+    huge: "h3",
+    gigantic: "h2",
+  },
+  body: {
+    large: "p",
+    medium: "p",
+    small: "p",
+    huge: "p",
+    gigantic: "p",
+  },
+  label: {
+    large: "span",
+    medium: "span",
+    small: "span",
+    huge: "span",
+    gigantic: "span",
+  },
+  overline: {
+    large: "span",
+    medium: "span",
+    small: "span",
+    huge: "span",
+    gigantic: "span",
+  },
 };
 
 const EASE_OUT = "power3.out";
@@ -114,14 +160,16 @@ const STAGGER_CHAR = {
 const IO_THRESHOLD = 0.12;
 const IO_ROOT_MARGIN = "0px 0px -8% 0px";
 
-type AnimationZone = "whole" | "line" | "word" | "character";
-type AnimationKind = "fadeIn" | "moveIn";
+type ResolvedAnimationZone = "whole" | "line" | "word" | "character";
+type ResolvedAnimationKind = "fadeIn" | "moveIn";
 
 function isPlainText(children: ReactNode): children is string | number {
   return typeof children === "string" || typeof children === "number";
 }
 
-function splitTextTypeForZone(zone: AnimationZone): "lines" | "words" | "chars" | null {
+function splitTextTypeForZone(
+  zone: ResolvedAnimationZone
+): "lines" | "words" | "chars" | null {
   if (zone === "line") return "lines";
   if (zone === "word") return "words";
   if (zone === "character") return "chars";
@@ -129,7 +177,7 @@ function splitTextTypeForZone(zone: AnimationZone): "lines" | "words" | "chars" 
 }
 
 function targetsForSplit(
-  zone: AnimationZone,
+  zone: ResolvedAnimationZone,
   split: SplitText
 ): Element[] {
   if (zone === "line") return split.lines;
@@ -145,66 +193,33 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-export type PrismTypographyProps = {
-  role: PrismTypographyRole;
-  /** Defaults to `"medium"`. */
-  size?: PrismTypographySize;
-  color?: PrismTypographyColor;
-  font?: PrismTypographyFont;
-  fontFamily?: string;
-  /**
-   * Override the rendered element for correct document outline (a11y / SEO). Defaults follow
-   * `role` × `size`; use e.g. `as="h1"` for the lone page title or `as="h3"` when nesting under a
-   * section heading so you do not duplicate or skip levels.
-   */
-  as?: ElementType;
-  className?: string;
-  style?: CSSProperties;
-  children?: ReactNode;
-  /** Animate the full block as one unit (viewport once). */
-  animationWhole?: boolean;
-  /**
-   * Split into lines and stagger (string/`number` children only; else whole). Uses GSAP SplitText
-   * so lines follow layout/wrapping; `autoSplit` re-splits on resize.
-   */
-  animationLine?: boolean;
-  /** Split into words and stagger (string/`number` children only; else whole). Uses GSAP SplitText. */
-  animationWord?: boolean;
-  /** Split into characters and stagger (string/`number` children only; else whole). Uses GSAP SplitText. */
-  animationCharacter?: boolean;
-  /** Opacity 0 → 1 only. */
-  animationFadeIn?: boolean;
-  /** Opacity + gentle upward shift. */
-  animationMoveIn?: boolean;
-} & Omit<HTMLAttributes<HTMLElement>, "className" | "style" | "color">;
-
 function resolveAnimationZone(
-  animationCharacter: boolean | undefined,
-  animationWord: boolean | undefined,
-  animationLine: boolean | undefined,
-  animationWhole: boolean | undefined,
+  zone: PrismTypographyAnimationZone | undefined,
   children: ReactNode
-): AnimationZone | null {
+): ResolvedAnimationZone | null {
+  if (!zone || zone === "none") return null;
   const plain = isPlainText(children);
-  if (animationCharacter) return plain ? "character" : "whole";
-  if (animationWord) return plain ? "word" : "whole";
-  if (animationLine) return plain ? "line" : "whole";
-  if (animationWhole) return "whole";
+  if (zone === "character") return plain ? "character" : "whole";
+  if (zone === "word") return plain ? "word" : "whole";
+  if (zone === "line") return plain ? "line" : "whole";
+  if (zone === "whole") return "whole";
   return null;
 }
 
 function resolveAnimationKind(
-  animationFadeIn: boolean | undefined,
-  animationMoveIn: boolean | undefined,
+  kind: PrismTypographyAnimationKind | undefined,
   hasZone: boolean
-): AnimationKind | null {
+): ResolvedAnimationKind | null {
   if (!hasZone) return null;
-  if (animationMoveIn) return "moveIn";
-  if (animationFadeIn) return "fadeIn";
+  if (kind === "moveIn") return "moveIn";
+  if (kind === "fadeIn") return "fadeIn";
+  if (kind === "none" || kind === undefined) return "fadeIn";
   return "fadeIn";
 }
 
-function zoneMarkerClass(zone: AnimationZone | null): string | undefined {
+function zoneMarkerClass(
+  zone: ResolvedAnimationZone | null
+): string | undefined {
   if (!zone) return undefined;
   if (zone === "character") return "animationCharacter";
   if (zone === "word") return "animationWord";
@@ -212,15 +227,14 @@ function zoneMarkerClass(zone: AnimationZone | null): string | undefined {
   return "animationWhole";
 }
 
-function kindMarkerClass(kind: AnimationKind | null): string | undefined {
+function kindMarkerClass(kind: ResolvedAnimationKind | null): string | undefined {
   if (!kind) return undefined;
   return kind === "moveIn" ? "animationMoveIn" : "animationFadeIn";
 }
 
-function yForZone(zone: AnimationZone, kind: AnimationKind): number {
+function yForZone(zone: ResolvedAnimationZone, kind: ResolvedAnimationKind): number {
   if (kind === "fadeIn") return 0;
   switch (zone) {
-    /* whole + line share the same nudge today; split cases so they can diverge later. */
     case "whole":
       return 10;
     case "line":
@@ -234,44 +248,51 @@ function yForZone(zone: AnimationZone, kind: AnimationKind): number {
   }
 }
 
+export type PrismTypographyProps = {
+  role: PrismTypographyRole;
+  size?: PrismTypographySize;
+  tone?: PrismTypographyTone;
+  font?: PrismTypographyFont;
+  fontFamily?: string;
+  animationZone?: PrismTypographyAnimationZone;
+  animationKind?: PrismTypographyAnimationKind;
+  as?: ElementType;
+  className?: string;
+  style?: CSSProperties;
+  children?: ReactNode;
+} & Omit<HTMLAttributes<HTMLElement>, "className" | "style" | "color">;
+
 export function PrismTypography({
   role,
   size: sizeProp,
-  color = "inherit",
+  tone = "inherit",
   font = "sans",
   fontFamily,
   as,
   className,
   style,
   children,
-  animationWhole,
-  animationLine,
-  animationWord,
-  animationCharacter,
-  animationFadeIn,
-  animationMoveIn,
+  animationZone: animationZoneProp,
+  animationKind: animationKindProp,
   ...rest
 }: PrismTypographyProps): ReactElement {
   const size = sizeProp ?? "medium";
   const Comp = (as ?? DEFAULT_ELEMENT[role][size]) as ElementType;
 
-  const animationZone = resolveAnimationZone(
-    animationCharacter,
-    animationWord,
-    animationLine,
-    animationWhole,
+  const animationZoneResolved = resolveAnimationZone(
+    animationZoneProp,
     children
   );
-  const animationKind = resolveAnimationKind(
-    animationFadeIn,
-    animationMoveIn,
-    animationZone !== null
+  const animationKindResolved = resolveAnimationKind(
+    animationKindProp,
+    animationZoneResolved !== null
   );
-  const animationActive = animationZone !== null && animationKind !== null;
+  const animationActive =
+    animationZoneResolved !== null && animationKindResolved !== null;
 
   const animationClass = cn(
-    zoneMarkerClass(animationZone),
-    kindMarkerClass(animationKind)
+    zoneMarkerClass(animationZoneResolved),
+    kindMarkerClass(animationKindResolved)
   );
 
   const innerRef = useRef<HTMLElement | null>(null);
@@ -281,7 +302,7 @@ export function PrismTypography({
 
   useEffect(() => {
     playedRef.current = false;
-  }, [animationZone, animationKind, children]);
+  }, [animationZoneResolved, animationKindResolved, children]);
 
   useLayoutEffect(() => {
     ctxRef.current?.revert();
@@ -289,14 +310,20 @@ export function PrismTypography({
     splitRef.current?.revert();
     splitRef.current = null;
 
-    if (!animationActive || !animationZone || !animationKind || prefersReducedMotion()) return;
+    if (
+      !animationActive ||
+      !animationZoneResolved ||
+      !animationKindResolved ||
+      prefersReducedMotion()
+    )
+      return;
 
     const el = innerRef.current;
     if (!el) return;
 
-    const y = yForZone(animationZone, animationKind);
+    const y = yForZone(animationZoneResolved, animationKindResolved);
 
-    if (animationZone === "whole") {
+    if (animationZoneResolved === "whole") {
       ctxRef.current = gsap.context(() => {
         gsap.set(el, y ? { opacity: 0, y } : { opacity: 0 });
       }, el);
@@ -308,26 +335,28 @@ export function PrismTypography({
 
     if (!isPlainText(children)) return;
 
-    const splitType = splitTextTypeForZone(animationZone);
+    const splitType = splitTextTypeForZone(animationZoneResolved);
     if (!splitType) return;
 
     const split = SplitText.create(el, {
       type: splitType,
       autoSplit: true,
       aria: "auto",
-      /* onSplit runs after autoSplit re-wraps; gsap.set stays here (not in gsap.context above) so new line/word/char nodes get the pre-reveal state without re-running the whole effect. */
       onSplit: (self) => {
         splitRef.current = self;
         if (playedRef.current) return;
-        const nextTargets = targetsForSplit(animationZone, self);
-        const yNext = yForZone(animationZone, animationKind);
+        const nextTargets = targetsForSplit(animationZoneResolved, self);
+        const yNext = yForZone(animationZoneResolved, animationKindResolved);
         if (nextTargets.length)
-          gsap.set(nextTargets, yNext ? { opacity: 0, y: yNext } : { opacity: 0 });
+          gsap.set(
+            nextTargets,
+            yNext ? { opacity: 0, y: yNext } : { opacity: 0 }
+          );
       },
     });
     splitRef.current = split;
 
-    const targets = targetsForSplit(animationZone, split);
+    const targets = targetsForSplit(animationZoneResolved, split);
     ctxRef.current = gsap.context(() => {
       if (targets.length) gsap.set(targets, y ? { opacity: 0, y } : { opacity: 0 });
     }, el);
@@ -338,10 +367,11 @@ export function PrismTypography({
       splitRef.current?.revert();
       splitRef.current = null;
     };
-  }, [animationActive, animationZone, animationKind, children]);
+  }, [animationActive, animationZoneResolved, animationKindResolved, children]);
 
   useEffect(() => {
-    if (!animationActive || !animationZone || !animationKind) return;
+    if (!animationActive || !animationZoneResolved || !animationKindResolved)
+      return;
 
     const el = innerRef.current;
     if (!el) return;
@@ -366,9 +396,9 @@ export function PrismTypography({
 
         ctxRef.current?.revert();
         ctxRef.current = gsap.context(() => {
-          const y = yForZone(animationZone, animationKind);
+          const y = yForZone(animationZoneResolved, animationKindResolved);
 
-          if (animationZone === "whole") {
+          if (animationZoneResolved === "whole") {
             gsap.fromTo(
               el,
               y ? { opacity: 0, y } : { opacity: 0 },
@@ -385,19 +415,19 @@ export function PrismTypography({
           const split = splitRef.current;
           if (!split) return;
 
-          const targets = targetsForSplit(animationZone, split);
+          const targets = targetsForSplit(animationZoneResolved, split);
           if (!targets.length) return;
 
           const stagger =
-            animationZone === "line"
+            animationZoneResolved === "line"
               ? STAGGER_LINE
-              : animationZone === "word"
+              : animationZoneResolved === "word"
                 ? STAGGER_WORD
                 : STAGGER_CHAR;
           const duration =
-            animationZone === "line"
+            animationZoneResolved === "line"
               ? DURATION_LINE
-              : animationZone === "word"
+              : animationZoneResolved === "word"
                 ? DURATION_WORD
                 : DURATION_CHAR;
 
@@ -423,7 +453,7 @@ export function PrismTypography({
       ctxRef.current?.revert();
       ctxRef.current = null;
     };
-  }, [animationActive, animationZone, animationKind, children]);
+  }, [animationActive, animationZoneResolved, animationKindResolved, children]);
 
   const fontClass =
     fontFamily !== undefined && fontFamily !== ""
@@ -448,7 +478,7 @@ export function PrismTypography({
       className={cn(
         typographyClass,
         fontClass,
-        TEXT_COLOR_CLASS[color],
+        TONE_CLASS[tone],
         animationClass,
         className
       )}

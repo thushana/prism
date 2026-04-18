@@ -1,10 +1,19 @@
 import { cn } from "@utilities";
+import type { PrismSize } from "../source/prism-size";
 
-/** Named size steps map to pixel `fontSize` / clamped `opsz` (20–48); tokens match PrismButton `size`. */
-export type PrismIconSizeName = "small" | "normal" | "large" | "large2x";
+/** Named size steps map to pixel `fontSize` / clamped `opsz` (20–48); aligns with `PrismButton` `size`. */
+export type PrismIconSizeName = PrismSize;
 
-/** Named weight steps map to the variable font **wght** axis. */
-export type PrismIconWeightName = "thin" | "medium" | "thick" | "heavy";
+/**
+ * Named weight steps map to the Material Symbols **wght** axis (100–700).
+ * These five names are a curated ladder; pass a number for any other axis value.
+ */
+export type PrismIconWeightName =
+  | "light"
+  | "thin"
+  | "regular"
+  | "bold"
+  | "heavy";
 
 /** Filled variant: **FILL** axis `1` when `"on"`. */
 export type PrismIconFillMode = "on" | "off";
@@ -13,33 +22,35 @@ export interface PrismIconProps {
   name: string;
   className?: string;
   /**
-   * Named step (`"small"` … `"large2x"`) or raw pixel size for layout-driven
-   * cases (still clamps **opsz** to 20–48 so ligatures resolve).
+   * Named step or raw pixel size for layout-driven cases (still clamps **opsz** to 20–48).
    */
   size?: PrismIconSizeName | number;
-  /** Named step or raw **wght** axis value (100–700). */
+  /**
+   * Named step (`light` … `heavy` → wght 100 / 200 / 400 / 600 / 700) or any **wght** integer **100–700**
+   * (use a number for steps between named values, e.g. **300**).
+   */
   weight?: PrismIconWeightName | number;
-  /** `"on"` / `"off"` or legacy boolean. */
-  fill?: PrismIconFillMode | boolean;
+  fill?: PrismIconFillMode;
 }
 
 const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
   small: 20,
-  normal: 24,
+  medium: 24,
   large: 28,
-  /** Twice the default (`normal`) pixel height for emphasis icons. */
-  large2x: 48,
+  huge: 48,
+  gigantic: 64,
 };
 
 const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<PrismIconWeightName, number> = {
-  thin: 300,
-  medium: 400,
-  thick: 600,
+  light: 100,
+  thin: 200,
+  regular: 400,
+  bold: 600,
   heavy: 700,
 };
 
 function resolvePrismIconSizePx(size: PrismIconProps["size"]): number {
-  if (size === undefined) return PRISM_ICON_SIZE_NAME_TO_PX.normal;
+  if (size === undefined) return PRISM_ICON_SIZE_NAME_TO_PX.medium;
   if (typeof size === "number") return size;
   return PRISM_ICON_SIZE_NAME_TO_PX[size];
 }
@@ -47,7 +58,7 @@ function resolvePrismIconSizePx(size: PrismIconProps["size"]): number {
 function resolvePrismIconWeightValue(
   weight: PrismIconProps["weight"]
 ): number {
-  if (weight === undefined) return PRISM_ICON_WEIGHT_NAME_TO_VALUE.medium;
+  if (weight === undefined) return PRISM_ICON_WEIGHT_NAME_TO_VALUE.regular;
   if (typeof weight === "number") {
     return Math.min(700, Math.max(100, Math.round(weight)));
   }
@@ -56,15 +67,14 @@ function resolvePrismIconWeightValue(
 
 function resolvePrismIconFill(fill: PrismIconProps["fill"]): boolean {
   if (fill === undefined) return false;
-  if (typeof fill === "boolean") return fill;
   return fill === "on";
 }
 
 export function PrismIcon({
   name,
   className,
-  size = "normal",
-  weight = "medium",
+  size = "medium",
+  weight = "regular",
   fill = "off",
 }: PrismIconProps) {
   const sizePx = resolvePrismIconSizePx(size);

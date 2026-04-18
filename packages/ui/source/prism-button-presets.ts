@@ -1,14 +1,10 @@
 /**
  * PrismButton presets: shortcut styles that bundle common prop combinations.
  *
- * **Naming:** `pill*` = default pill radius (full round); `box*` = rectangular / segmented rows.
+ * **Naming:** `pill*` = default pill radius; `box*` = rectangular / segmented rows.
  * Built-ins: `pillGradient`, `pillMonochrome`, `boxButtons`, `boxButtonsUnderlined`.
  *
- * **Icons:** Presets may set `icon` (Lucide). PrismButton renders it when `variant="icon"` and
- * `icon` is defined; with `iconOnly`, pass `icon` too so the control is not empty (label stays for a11y).
- *
- * - Apps can register more via registerPrismButtonPresets().
- * - Merge order: defaultPresets[preset] + appPresets[preset] + explicit props (explicit wins).
+ * Merge order: defaultPresets[preset] + appPresets[preset] + explicit props (explicit wins).
  */
 
 import {
@@ -23,49 +19,40 @@ import type { PrismButtonProps } from "../components/prism-button";
 export type PrismButtonPresetProps = Partial<Omit<PrismButtonProps, "label">>;
 
 const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
-  // .icon .colorGradientSideways .sizeNormal
   pillGradient: {
     variant: "icon",
     icon: Sparkles,
-    colorVariant: "gradient-sideways",
-    size: "normal",
+    paint: "gradientSideways",
+    size: "medium",
   },
-  // .iconOnly .colorMonochrome .gapNo .sizeNormal
   pillMonochrome: {
     variant: "icon",
     icon: Circle,
     iconOnly: true,
-    colorVariant: "monochrome",
-    gapNo: true,
-    size: "normal",
+    paint: "monochrome",
+    gap: "none",
+    size: "medium",
   },
-  // .iconLeft .rectangle .lineNo .sizeNormal (no border)
   boxButtons: {
     variant: "icon",
     icon: LayoutGrid,
     iconPosition: "left",
-    rectangle: true,
-    lineNo: true,
-    size: "normal",
+    shape: "rectangle",
+    line: "none",
+    size: "medium",
   },
-  // .iconLeft .rectangle .lineBottom .sizeNormal (underline only)
   boxButtonsUnderlined: {
     variant: "icon",
     icon: AlignJustify,
     iconPosition: "left",
-    rectangle: true,
-    lineBottom: true,
-    size: "normal",
+    shape: "rectangle",
+    line: "bottom",
+    size: "medium",
   },
 };
 
-/** App-specific presets; merged over defaults when resolving a preset. */
 const appPresets: Record<string, PrismButtonPresetProps> = {};
 
-/**
- * Register presets for this app. Merges with existing app presets; same key overwrites.
- * Call once at app startup (e.g. in root layout or a config module).
- */
 export function registerPrismButtonPresets(
   presets: Record<string, PrismButtonPresetProps>
 ): void {
@@ -76,10 +63,6 @@ export function registerPrismButtonPresets(
 
 const DEFAULT_COLOR: PrismButtonProps["color"] = "blueGrey";
 
-/**
- * Resolve preset + explicit props. Order: defaultPresets[preset] + appPresets[preset] + explicit.
- * Returns merged PrismButtonProps (color/label guaranteed); passes through any extra keys (e.g. DOM props).
- */
 export function resolvePrismButtonPreset<T extends Record<string, unknown>>(
   preset: string | undefined,
   explicit: (Partial<PrismButtonProps> & { label: string }) & T
@@ -108,7 +91,6 @@ export function resolvePrismButtonPreset<T extends Record<string, unknown>>(
   } as PrismButtonProps & T;
 }
 
-/** Get merged preset props only (for debugging or tooling). Does not include explicit props. */
 export function getPrismButtonPreset(
   preset: string
 ): PrismButtonPresetProps | undefined {
@@ -118,7 +100,6 @@ export function getPrismButtonPreset(
   return { ...defaultP, ...appP };
 }
 
-/** List default preset names. */
 export function getDefaultPrismButtonPresetNames(): string[] {
   return Object.keys(DEFAULT_PRISM_BUTTON_PRESETS);
 }

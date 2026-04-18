@@ -103,6 +103,50 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Prism UI: block legacy prop names and a few foot-guns after the Variant Axes cutover.
+  {
+    files: [
+      "packages/*/source/**/*.{ts,tsx}",
+      "packages/*/components/**/*.{ts,tsx}",
+      "apps/*/app/**/*.{ts,tsx}",
+      "apps/*/config/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXAttribute[name.name=/^(gapNo|lineNo|iconsNo|noGrow|noMotion|noColorChange|noIconMotion|colorVariant|asSpan|typeUppercase|typeLowercase|explicitModeSegmentList)$/]",
+          message:
+            "Removed Prism prop (Variant Axes cutover). Use gap/line/paint/textCase/disable* / asChild / segments — see prism/docs/UI-Prism.md → Prop Ergonomics & Variant Axes.",
+        },
+        {
+          selector:
+            "JSXOpeningElement[name.name='PrismTypography'] JSXAttribute[name.name='color']",
+          message:
+            "PrismTypography uses `tone`, not `color`. See prism/docs/UI-Prism.md.",
+        },
+        {
+          selector:
+            "JSXOpeningElement[name.name='PrismColorPicker'] JSXAttribute[name.name='isDisabled']",
+          message:
+            "PrismColorPicker uses `disabled`, not `isDisabled`.",
+        },
+        {
+          selector:
+            "JSXOpeningElement[name.name='PrismIcon'] JSXAttribute[name.name='weight'] Literal[value='medium']",
+          message:
+            "`medium` is reserved for size on PrismIcon; use weight=\"regular\" or a numeric wght (100–700).",
+        },
+        {
+          selector:
+            "JSXOpeningElement[name.name='PrismButton'] JSXAttribute[name.name='size'] Literal[value='normal']",
+          message:
+            "PrismButton size uses PrismSize; use size=\"medium\" instead of \"normal\".",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

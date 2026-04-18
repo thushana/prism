@@ -206,7 +206,7 @@ export type PrismColorPickerProps = {
   selectedColorHex: string;
   onSelectedColorChange: (selectedHexadecimalColor: string) => void;
   id?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 export function PrismColorPicker({
@@ -214,7 +214,7 @@ export function PrismColorPicker({
   selectedColorHex,
   onSelectedColorChange,
   id,
-  isDisabled = false,
+  disabled = false,
 }: PrismColorPickerProps) {
   const generatedId = React.useId();
   const triggerId = id ?? `${generatedId}-trigger`;
@@ -288,13 +288,13 @@ export function PrismColorPicker({
   );
 
   const handleCopyToClipboard = React.useCallback(async () => {
-    if (!clipboardColorText || isDisabled) return;
+    if (!clipboardColorText || disabled) return;
     try {
       await navigator.clipboard.writeText(clipboardColorText);
     } catch {
       /* ignore */
     }
-  }, [clipboardColorText, isDisabled]);
+  }, [clipboardColorText, disabled]);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -398,7 +398,7 @@ export function PrismColorPicker({
           ref={triggerRef}
           type="button"
           id={triggerId}
-          disabled={isDisabled}
+          disabled={disabled}
           aria-label={
             label ? undefined : PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL
           }
@@ -413,7 +413,7 @@ export function PrismColorPicker({
               ? "ring-1 ring-inset ring-white/20"
               : "ring-1 ring-inset ring-black/12",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            isDisabled && "pointer-events-none opacity-50"
+            disabled && "pointer-events-none opacity-50"
           )}
         >
           <span
@@ -462,7 +462,7 @@ export function PrismColorPicker({
         <button
           type="button"
           id={copyControlId}
-          disabled={isDisabled || !clipboardColorText}
+          disabled={disabled || !clipboardColorText}
           onClick={() => void handleCopyToClipboard()}
           title="Copy name / shade / hexadecimal"
           aria-label="Copy color name, shade level, and hexadecimal value"

@@ -56,7 +56,6 @@ export interface SystemSheetConfig {
   showVercel?: boolean;
   showApps?: boolean;
   showComponents?: boolean;
-  showPrismTypography?: boolean;
   /**
    * When true, the main sheet title renders as `h2` so an outer admin shell can own the page `h1`.
    */
