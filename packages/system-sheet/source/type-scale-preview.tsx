@@ -3,7 +3,12 @@
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { PrismButton, PrismTypography } from "@ui";
-import type { PrismTypographyRole, PrismTypographySize } from "@ui";
+import type {
+  PrismTypographyAnimationKind,
+  PrismTypographyAnimationZone,
+  PrismTypographyRole,
+  PrismTypographySize,
+} from "@ui";
 import { RefreshCw } from "lucide-react";
 
 interface TypefaceOption {
@@ -28,12 +33,12 @@ type TypographyOptionKey =
   | "styleCaseCaps"
   | "styleCaseTitle"
   | "styleCaseLower"
-  | "colorForeground"
-  | "colorMuted"
-  | "colorMonochrome"
-  | "colorGradientSideways"
-  | "colorGradientUp"
-  | "colorGradientAngle"
+  | "toneForeground"
+  | "toneMuted"
+  | "toneMonochrome"
+  | "gradientSideways"
+  | "gradientUp"
+  | "gradientAngle"
   | "alignLeft"
   | "alignCenter"
   | "alignRight"
@@ -272,14 +277,14 @@ const TYPOGRAPHY_OPTION_COLUMNS: {
     ],
   },
   {
-    heading: "COLOR",
+    heading: "TONE / GRADIENT",
     keys: [
-      "colorForeground",
-      "colorMuted",
-      "colorMonochrome",
-      "colorGradientSideways",
-      "colorGradientUp",
-      "colorGradientAngle",
+      "toneForeground",
+      "toneMuted",
+      "toneMonochrome",
+      "gradientSideways",
+      "gradientUp",
+      "gradientAngle",
     ],
   },
   {
@@ -313,12 +318,12 @@ const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
   styleCaseCaps: ".styleCaseCaps",
   styleCaseTitle: ".styleCaseTitle",
   styleCaseLower: ".styleCaseLower",
-  colorForeground: ".colorForeground",
-  colorMuted: ".colorMuted",
-  colorMonochrome: ".colorMonochrome",
-  colorGradientSideways: ".colorGradientSideways",
-  colorGradientUp: ".colorGradientUp",
-  colorGradientAngle: ".colorGradientAngle",
+  toneForeground: "foreground (text-foreground)",
+  toneMuted: "muted (text-muted-foreground)",
+  toneMonochrome: "monochrome (text-black / dark:text-white)",
+  gradientSideways: "gradient →",
+  gradientUp: "gradient ↑",
+  gradientAngle: "gradient 45°",
   alignLeft: ".alignLeft",
   alignCenter: ".alignCenter",
   alignRight: ".alignRight",
@@ -345,17 +350,17 @@ const ANIMATION_TYPE_KEYS = [
 ] as const satisfies readonly TypographyOptionKey[];
 
 /** At most one flat text color; clears gradients when chosen. */
-const COLOR_FLAT_KEYS = [
-  "colorForeground",
-  "colorMuted",
-  "colorMonochrome",
+const TONE_FLAT_KEYS = [
+  "toneForeground",
+  "toneMuted",
+  "toneMonochrome",
 ] as const satisfies readonly TypographyOptionKey[];
 
 /** At most one gradient direction; clears flat colors when chosen. */
-const COLOR_GRADIENT_KEYS = [
-  "colorGradientSideways",
-  "colorGradientUp",
-  "colorGradientAngle",
+const GRADIENT_KEYS = [
+  "gradientSideways",
+  "gradientUp",
+  "gradientAngle",
 ] as const satisfies readonly TypographyOptionKey[];
 
 const ALIGN_KEYS = [
@@ -516,20 +521,20 @@ export function TypeScalePreview({
         }
         return next;
       }
-      if (COLOR_FLAT_KEYS.includes(key as (typeof COLOR_FLAT_KEYS)[number])) {
+      if (TONE_FLAT_KEYS.includes(key as (typeof TONE_FLAT_KEYS)[number])) {
         if (next.has(key)) next.delete(key);
         else {
-          for (const k of COLOR_FLAT_KEYS) next.delete(k);
-          for (const k of COLOR_GRADIENT_KEYS) next.delete(k);
+          for (const k of TONE_FLAT_KEYS) next.delete(k);
+          for (const k of GRADIENT_KEYS) next.delete(k);
           next.add(key);
         }
         return next;
       }
-      if (COLOR_GRADIENT_KEYS.includes(key as (typeof COLOR_GRADIENT_KEYS)[number])) {
+      if (GRADIENT_KEYS.includes(key as (typeof GRADIENT_KEYS)[number])) {
         if (next.has(key)) next.delete(key);
         else {
-          for (const k of COLOR_GRADIENT_KEYS) next.delete(k);
-          for (const k of COLOR_FLAT_KEYS) next.delete(k);
+          for (const k of GRADIENT_KEYS) next.delete(k);
+          for (const k of TONE_FLAT_KEYS) next.delete(k);
           next.add(key);
         }
         return next;
@@ -592,23 +597,23 @@ export function TypeScalePreview({
     ? ("balance" as const)
     : undefined;
   const hasGradientColor =
-    selectedOptions.has("colorGradientSideways") ||
-    selectedOptions.has("colorGradientUp") ||
-    selectedOptions.has("colorGradientAngle");
+    selectedOptions.has("gradientSideways") ||
+    selectedOptions.has("gradientUp") ||
+    selectedOptions.has("gradientAngle");
   const customColorClass = hasGradientColor
     ? undefined
-    : selectedOptions.has("colorMonochrome")
+    : selectedOptions.has("toneMonochrome")
       ? "text-black dark:text-white"
-      : selectedOptions.has("colorMuted")
+      : selectedOptions.has("toneMuted")
         ? "text-muted-foreground"
-        : selectedOptions.has("colorForeground")
+        : selectedOptions.has("toneForeground")
           ? "text-foreground"
           : undefined;
-  const customGradientDirection = selectedOptions.has("colorGradientAngle")
+  const customGradientDirection = selectedOptions.has("gradientAngle")
     ? "135deg"
-    : selectedOptions.has("colorGradientUp")
+    : selectedOptions.has("gradientUp")
       ? "to top"
-      : selectedOptions.has("colorGradientSideways")
+      : selectedOptions.has("gradientSideways")
         ? "to right"
         : undefined;
   const [gradientStart, gradientEnd] =
@@ -642,7 +647,7 @@ export function TypeScalePreview({
   const animationCharacter = selectedOptions.has("animationCharacter");
   const animationFadeIn = selectedOptions.has("animationFadeIn");
   const animationMoveIn = selectedOptions.has("animationMoveIn");
-  const animationZoneKey = animationCharacter
+  const animationZoneKey: PrismTypographyAnimationZone = animationCharacter
     ? "character"
     : animationWord
       ? "word"
@@ -658,14 +663,16 @@ export function TypeScalePreview({
       : "default";
   const animationEnabled = animationZoneKey !== "none";
   const animationRemountKey = `${animationZoneKey}-${animationTypeKey}`;
-  const typographyAnimationProps = {
-    animationWhole,
-    animationLine,
-    animationWord,
-    animationCharacter,
-    animationFadeIn,
-    animationMoveIn,
-  };
+  const typographyAnimationProps: {
+    animationZone?: PrismTypographyAnimationZone;
+    animationKind?: PrismTypographyAnimationKind;
+  } =
+    animationZoneKey === "none"
+      ? {}
+      : {
+          animationZone: animationZoneKey,
+          animationKind: animationMoveIn ? "moveIn" : "fadeIn",
+        };
   /** Line/word/char splits need a string child; body samples otherwise use `<p>` and fall back to whole. */
   const needsPlainTextForAnimation =
     animationLine || animationWord || animationCharacter;
@@ -699,11 +706,11 @@ export function TypeScalePreview({
           <PrismButton
             label="Change headlines"
             color="grey"
-            colorVariant="monochrome"
+            paint="monochrome"
             variant="icon"
             icon={RefreshCw}
             iconOnly
-            lineNo
+            line="none"
             onClick={reshuffleSamples}
           />
         </div>
@@ -714,23 +721,23 @@ export function TypeScalePreview({
             key={typeface.id}
             label={typeface.label}
             color="grey"
-            colorVariant="monochrome"
-            rectangle
-            lineBottom
+            paint="monochrome"
+            shape="rectangle"
+            line="bottom"
             toggled={selectedTypefaceId === typeface.id}
-            noColorChange={selectedTypefaceId !== typeface.id}
-            noGrow={selectedTypefaceId !== typeface.id}
+            disableColorChange={selectedTypefaceId !== typeface.id}
+            disableGrow={selectedTypefaceId !== typeface.id}
             onClick={() => setSelectedTypefaceId(typeface.id)}
           />
         ))}
         <PrismButton
           label="Change headlines"
           color="grey"
-          colorVariant="monochrome"
+          paint="monochrome"
           variant="icon"
           icon={RefreshCw}
           iconOnly
-          lineNo
+          line="none"
           onClick={reshuffleSamples}
         />
       </div>
@@ -751,7 +758,7 @@ export function TypeScalePreview({
                 <PrismTypography
                   role="label"
                   size="medium"
-                  color="muted"
+                  tone="muted"
                   font="mono"
                 >
                   {TYPOGRAPHY_OPTION_LABEL[key]}
@@ -828,11 +835,11 @@ export function TypeScalePreview({
           <PrismButton
             label="Reshuffle samples"
             color="grey"
-            colorVariant="monochrome"
+            paint="monochrome"
             variant="icon"
             icon={RefreshCw}
-            rectangle
-            lineBottom
+            shape="rectangle"
+            line="bottom"
             onClick={reshuffleSamples}
           />
         </div>

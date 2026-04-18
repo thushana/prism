@@ -1,19 +1,7 @@
 import { Geist_Mono } from "next/font/google";
-import {
-  PrismBadge,
-  PrismCard,
-  PrismCardContent,
-  PrismCardHeader,
-  PrismCardTitle,
-  PrismIcon,
-  PrismTypography,
-} from "@ui";
-import { satoshi, sentient, zodiak } from "@ui";
+import { PrismBadge, PrismTypography } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
-import { FontWeightPreview } from "./font-weight-preview";
-import { TypeScalePreview } from "./type-scale-preview";
 import type { SystemSheetConfig, SystemSheetData } from "./types";
-import { SystemSheetButtonExamples } from "./system-sheet-button-examples";
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({
@@ -27,51 +15,6 @@ export const revalidate = 0;
 interface SystemSheetPageProps {
   data?: SystemSheetData | null;
   config?: SystemSheetConfig;
-}
-
-// Helper function to render component examples
-function renderComponentExample(componentName: string) {
-  switch (componentName) {
-    case "button":
-      return <SystemSheetButtonExamples />;
-    case "badge":
-      return (
-        <div className="flex flex-wrap gap-2 items-center">
-          <PrismBadge variant="default">Default</PrismBadge>
-          <PrismBadge variant="secondary">Secondary</PrismBadge>
-          <PrismBadge variant="outline">Outline</PrismBadge>
-          <PrismBadge variant="destructive">Destructive</PrismBadge>
-        </div>
-      );
-    case "card":
-      return (
-        <PrismCard className="w-full max-w-sm">
-          <PrismCardHeader>
-            <PrismCardTitle>Card Example</PrismCardTitle>
-          </PrismCardHeader>
-          <PrismCardContent>
-            <PrismTypography role="body" size="medium" className="text-muted-foreground">
-              This is a card component example.
-            </PrismTypography>
-          </PrismCardContent>
-        </PrismCard>
-      );
-    case "icon":
-      return (
-        <div className="flex flex-wrap gap-4 items-center">
-          <PrismIcon name="home" size="normal" />
-          <PrismIcon name="settings" size="large" />
-          <PrismIcon name="favorite" size="normal" fill="on" />
-          <PrismIcon name="star" size="normal" weight="thick" />
-        </div>
-      );
-    default:
-      return (
-        <PrismTypography role="body" size="medium" className="text-muted-foreground italic">
-          No preview available
-        </PrismTypography>
-      );
-  }
 }
 
 /**
@@ -119,10 +62,8 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
     showVercel = true,
     showApps = true,
     showComponents = true,
-    showPrismTypography = true,
     nestedUnderAdminPageShell = false,
   } = config;
-  const sheetHeadlineElement = nestedUnderAdminPageShell ? "h2" : "h1";
 
   const sheetOuterClassName = nestedUnderAdminPageShell
     ? `space-y-8 font-sans w-full ${geistMono.variable}`
@@ -137,18 +78,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             : "container mx-auto space-y-8 p-8 font-sans"
         }
       >
-        <div className="space-y-2">
-          <PrismTypography
-            role="headline"
-            size="large"
-            as={sheetHeadlineElement}
-          >
-            System Sheet
-          </PrismTypography>
-          <PrismTypography role="body" size="large" className="text-muted-foreground">
-            Unable to load system data. Please try again in a moment.
-          </PrismTypography>
-        </div>
+        <PrismTypography role="body" size="large" className="text-muted-foreground">
+          Unable to load system data. Please try again in a moment.
+        </PrismTypography>
         <PrismTypography role="body" size="medium" className="text-muted-foreground">
           Make sure your app has an{" "}
           <code className="bg-muted px-1 py-0.5 rounded">
@@ -162,19 +94,6 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
 
   return (
     <div className={sheetOuterClassName}>
-      <div className="space-y-2">
-        <PrismTypography
-          role="headline"
-          size="large"
-          as={sheetHeadlineElement}
-        >
-          System Sheet
-        </PrismTypography>
-        <PrismTypography role="body" size="large" className="text-muted-foreground">
-          Overview of installed components, styles, and dependencies
-        </PrismTypography>
-      </div>
-
       <div className="space-y-8">
         {/* Apps Status Row - Top Row */}
         {showApps && data.apps && data.apps.length > 0 && (
@@ -487,71 +406,6 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismBadge variant="outline">{data.shadcn.baseColor}</PrismBadge>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Components */}
-        {showComponents && data.components && (
-          <div className="border-t pt-8">
-            <h2 className="mb-4">Components</h2>
-            <div className="space-y-12">
-              {data.components.shadcn.length > 0 &&
-                data.components.shadcn.map((component) => (
-                  <div key={component} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <PrismBadge variant="secondary">{component}</PrismBadge>
-                    </div>
-                    {renderComponentExample(component)}
-                  </div>
-                ))}
-              {data.components.custom.length > 0 &&
-                data.components.custom.map((component) => (
-                  <div key={component} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <PrismBadge variant="outline">{component}</PrismBadge>
-                    </div>
-                    {renderComponentExample(component)}
-                  </div>
-                ))}
-              {data.components.app.length > 0 &&
-                data.components.app.map((component) => (
-                  <div key={component} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <PrismBadge variant="outline">{component}</PrismBadge>
-                    </div>
-                    {renderComponentExample(component)}
-                  </div>
-                ))}
-              {data.components.shadcn.length === 0 &&
-                data.components.custom.length === 0 &&
-                data.components.app.length === 0 && (
-                  <PrismTypography role="body" size="medium" className="text-muted-foreground">
-                    No components
-                  </PrismTypography>
-                )}
-            </div>
-          </div>
-        )}
-
-        {/* PrismTypography Section */}
-        {showPrismTypography && (
-          <div className="border-t pt-8">
-            <h2 className="mb-4">PrismTypography</h2>
-
-            <FontWeightPreview
-              satoshiVariableClass={satoshi.variable}
-              sentientVariableClass={sentient.variable}
-              zodiakVariableClass={zodiak.variable}
-              geistMonoVariableClass={geistMono.variable}
-            />
-
-            <TypeScalePreview
-              satoshiVariableClass={satoshi.variable}
-              sentientVariableClass={sentient.variable}
-              zodiakVariableClass={zodiak.variable}
-              geistMonoVariableClass={geistMono.variable}
-            />
-
           </div>
         )}
       </div>

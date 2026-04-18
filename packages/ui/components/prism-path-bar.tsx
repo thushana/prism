@@ -35,7 +35,7 @@ export type PrismPathBarProps = {
 } & (
   | {
       mode?: "explicit";
-      explicitModeSegmentList: PrismPathBarSegment[];
+      segments: PrismPathBarSegment[];
     }
   | {
       mode: "auto";
@@ -48,7 +48,7 @@ export type PrismPathBarProps = {
 );
 
 /**
- * Path row for admin (or similar): explicit `explicitModeSegmentList`, or auto mode from
+ * Path row for admin (or similar): explicit `segments`, or auto mode from
  * `pathname` + `titleByPathPrefix` + `pageTitle`. Uses Next `Link` + `PrismTypography` (not `PrismButton`).
  */
 export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
@@ -60,7 +60,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
           props.titleByPathPrefix,
           props.pageTitle
         )
-      : (props.explicitModeSegmentList ?? []);
+      : (props.segments ?? []);
   const lastIndex = segmentList.length - 1;
 
   if (segmentList.length === 0) return <></>;
@@ -85,7 +85,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                   role="body"
                   size="small"
                   as="span"
-                  color="muted"
+                  tone="muted"
                   aria-hidden
                   className="select-none px-2"
                 >
@@ -101,7 +101,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                     role="body"
                     size="small"
                     as="span"
-                    color="muted"
+                    tone="muted"
                     className="group-hover:text-foreground"
                   >
                     {segment.label}
@@ -112,7 +112,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                   role="body"
                   size="small"
                   as="span"
-                  color={isLast ? "foreground" : "muted"}
+                  tone={isLast ? "foreground" : "muted"}
                 >
                   {segment.label}
                 </PrismTypography>

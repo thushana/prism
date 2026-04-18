@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { AdminPageShell } from "authentication";
 import { requireAdminPage } from "authentication/admin-page";
-import { PrismTypography } from "ui";
+import { PrismTypography } from "@ui";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,7 +36,7 @@ export default async function AdminHomePage(): Promise<React.JSX.Element> {
               {section.title}
             </PrismTypography>
             <div className="mt-2">
-              <PrismTypography role="body" size="medium" color="muted">
+              <PrismTypography role="body" size="medium" tone="muted">
                 {section.description}
               </PrismTypography>
             </div>

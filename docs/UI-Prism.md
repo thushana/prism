@@ -52,7 +52,7 @@ import { satoshi, sentient, zodiak, gambarino } from "@ui";
 
 ### PrismPathBar
 
-Path row for admin-style navigation: **explicit** `explicitModeSegmentList`, or **auto** mode from `pathname` + authoritative **`titleByPathPrefix`** (see `buildPrismPathBarAutoSegmentList` in `prism-path-segments.ts`). Prop names follow [NAMING.md](../.cursor/commands/NAMING.md) (camelCase, no abbreviations such as `titles` for `title`, `prefix` spelled out in `titleByPathPrefix`). Crumbs use **Next `Link`** and **`PrismTypography`** (not `PrismButton`). The UI package lists **Next** as a `peerDependency`; `PrismPathBar` imports `next/link` accordingly.
+Path row for admin-style navigation: **explicit** `mode="explicit"` with **`segments`**, or **auto** mode from `pathname` + authoritative **`titleByPathPrefix`** and **`pageTitle`** (see `buildPrismPathBarAutoSegmentList` in `prism-path-segments.ts`). Prop names follow [NAMING.md](../.cursor/commands/NAMING.md). Crumbs use **Next `Link`** and **`PrismTypography`** (not `PrismButton`). The UI package lists **Next** as a `peerDependency`; `PrismPathBar` imports `next/link` accordingly.
 
 Types: **`PrismPathBarSegment`**, **`PrismPathBarTitleEntry`**, **`PrismPathBarIcon`**.
 
@@ -65,11 +65,19 @@ import { PrismPathBar } from "@ui";
   titleByPathPrefix={ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX}
   pageTitle="PrismButton"
 />;
+
+<PrismPathBar
+  mode="explicit"
+  segments={[
+    { label: "Docs", href: "/docs" },
+    { label: "Current page" },
+  ]}
+/>;
 ```
 
 ### PrismButton
 
-The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: palette colors, Lucide icons, optional GSAP motion, and layout props (`gapNo`, `segmentPosition`, `rectangle`, `lineNo`, …). It requires **`color`** and **`label`** (see types in source). Size props use Prism words (`small`, `normal`, `large`, `large2x`) per [NAMING.md](../.cursor/commands/NAMING.md). For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally in an app—there is no separate generic `Button` export.
+The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: Material **`color`** (`ColorName`), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`**, **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `medium` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
 
 Admin and system-sheet previews: `/admin/prism/components/prism-button`, `ButtonCustomizerPlayground` / `ButtonVariantsList` from `@system-sheet`.
 
@@ -125,7 +133,7 @@ import { PrismBadge } from "@ui";
 
 ### PrismIcon
 
-Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same named steps as **PrismButton** `size`: `"small"` \| `"normal"` \| `"large"` \| `"large2x"` (maps to 20 / 24 / 28 / 48px, where **large2x** is 2× **normal**; **opsz** clamps to 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"thin"` \| `"medium"` \| `"thick"` \| `"heavy"` (maps to wght 300 / 400 / 600 / 700) or a raw **wght** value `100`–`700`. **`fill`** is `"on"` \| `"off"` (FILL axis) or legacy boolean. The **GRAD** axis is fixed at `0` in the component (no `grade` prop).
+Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same **`PrismSize`** named steps as **PrismButton** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`; maps to pixel heights in the component, with **opsz** clamped 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"light"` \| `"thin"` \| `"regular"` \| `"bold"` \| `"heavy"` (named steps map to **wght** 100 / 200 / 400 / 600 / 700) or any raw **wght** integer **`100`–`700`** — use a number when you need a step not covered by the five names (for example **300** between thin and regular). **`fill`** is `"on"` \| `"off"` (FILL axis). The **GRAD** axis is fixed at `0` (no `grade` prop).
 
 **Import:**
 
@@ -138,13 +146,13 @@ import { PrismIcon } from "@ui";
 **Example:**
 
 ```tsx
-<PrismIcon name="home" size="normal" weight="medium" fill="off" />
-<PrismIcon name="settings" size="large" weight="medium" fill="off" />
-<PrismIcon name="favorite" size="normal" weight="medium" fill="on" />
-<PrismIcon name="star" size="large" weight="thin" fill="off" />
+<PrismIcon name="home" size="medium" weight="regular" fill="off" />
+<PrismIcon name="settings" size="large" weight="regular" fill="off" />
+<PrismIcon name="favorite" size="medium" weight="regular" fill="on" />
+<PrismIcon name="star" size="large" weight="light" fill="off" />
 ```
 
-**Migration (named `size`):** Older code used `size="medium"` and `size="extraLarge"` to match typography-ish names. Those map to **`"normal"`** and **`"large2x"`** respectively so **PrismIcon** and **PrismButton** share one size vocabulary (`small` \| `normal` \| `large` \| `large2x`).
+**Shared vocabulary:** **PrismIcon** and **PrismButton** use the same **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
 Admin and system-sheet preview: `/admin/prism/components/prism-icon`, `IconCustomizerPlayground` from `@system-sheet`. The playground exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
 
@@ -260,21 +268,22 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 **Type scale classes** (implementation layer — prefer the component below in app code):
 
-- `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `large` | `medium` | `small` (18 rules total).
+- `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `small` | `medium` | `large` | `huge` | `gigantic` (30 rules total).
 
 ### PrismTypography component
 
-Use `<PrismTypography>` from `@ui` / `ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the `color` prop or `className` for semantic colour (e.g. `color="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
+Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the **`tone`** prop or `className` for semantic colour (e.g. `tone="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
 
-**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyColor`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
+**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyTone`, `PrismTypographyAnimationZone`, `PrismTypographyAnimationKind`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
 
 **Props (`PrismTypographyProps`):**
 
 - `role` (required): `display` | `headline` | `title` | `body` | `label` | `overline`
-- `size` (optional): `large` | `medium` | `small` — defaults to `medium`
-- `color` (optional): maps to shadcn-style `text-*` tokens (`foreground`, `muted`, `primary`, …); default `inherit`
+- `size` (optional): `small` | `medium` | `large` | `huge` | `gigantic` — defaults to `medium`
+- `tone` (optional): maps to shadcn-style `text-*` tokens (`foreground`, `muted`, `primary`, …); default `inherit`
 - `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
 - `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
+- `animationZone` / `animationKind` (optional): scroll-reveal via GSAP (`SplitText`); see source for defaults when a zone is set without a kind
 - `as` (optional): override the rendered element for semantics or layout
 
 **Default element per role × size:** `display` / `headline` → `h1`–`h3` by size; `title` → `h4`–`h6` by size; `body` → `p`; `label` / `overline` → `span`. **Overline** styles (uppercase, semibold, letter-spacing, block) live in `.typography-overline-*`. Use `className` (e.g. `inline`) if you need non-block overlines.
@@ -285,10 +294,10 @@ Use `<PrismTypography>` from `@ui` / `ui` instead of applying `typography-*` or 
 import { PrismTypography } from "@ui";
 
 <PrismTypography role="headline" size="large">Heading 1</PrismTypography>
-<PrismTypography role="body" size="medium" color="muted">
+<PrismTypography role="body" size="medium" tone="muted">
   Body text
 </PrismTypography>
-<PrismTypography role="overline" size="small" color="muted">
+<PrismTypography role="overline" size="small" tone="muted">
   Section label
 </PrismTypography>
 ```
@@ -471,21 +480,106 @@ Edit `packages/ui/styles/globals.css`:
 - Add new utility classes in `@layer utilities`
 - Modify base styles in `@layer base`
 
+## Prop Ergonomics & Variant Axes
+
+Prism UI follows the industry pattern often called **variant axes** (discriminated variant props / cva-style recipes): each *orthogonal* visual concern is one **string-literal union prop**, not a pile of mutually exclusive booleans. That removes impossible states (for example `rectangle` and `rectangleRounded` both true) and keeps JSX self-explanatory.
+
+### Why (short audit)
+
+- **Boolean sprawl:** Mutually exclusive choices were modeled as parallel flags; callers could express invalid combinations.
+- **Inconsistent negation:** Mix of `noXxx`, `XxxNo`, and positive animation flags. Prism standardizes motion opt-outs on **`disableXxx`** (MUI-style).
+- **Name collisions:** `color` meant different things on `PrismButton` (palette) vs `PrismTypography` (semantic text) — typography now uses **`tone`**.
+- **Fragmented size vocabulary:** One shared **`PrismSize`** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`) applies to `PrismButton`, `PrismIcon` (named steps), and `PrismTypography` type scale. `normal` → `medium`; old `large2x` → `huge`. **`medium` stays size-only** — it does not appear on `PrismIcon` **`weight`** (avoids `size="medium" weight="medium"` confusion).
+
+### Nine rules (cheat sheet)
+
+1. **One concern → one union prop** when values are mutually exclusive.
+2. **Booleans only** for independent flags (`disabled`, `loading`, `iconOnly`, …).
+3. **Opt-outs:** `disableMotion`, `disableGrow`, … — not `noGrow` / `gapNo`.
+4. **camelCase** prop names; **lowercase or camelCase** literals per existing Prism tokens (`gap="none"`, `shape="rectangleRounded"`).
+5. **Shared `PrismSize`** everywhere Prism renders stepped scale (see `packages/ui/source/prism-size.ts`).
+6. **Palette vs semantic colour:** `PrismButton` **`color`** = `ColorName`; `PrismTypography` **`tone`** = semantic `text-*` role.
+7. **Prefer `asChild`** (Radix `Slot`) over ad-hoc span wrappers for composition.
+8. **Admin + `@system-sheet`** are the live JSX reference: `/admin/prism/components/*` (for example `ButtonCustomizerPlayground` / `ButtonVariantsList` in `packages/system-sheet/source/button.tsx`). Typography scale and weight previews use **`TypeScalePreview`** / **`FontWeightPreview`** on **`/admin/prism/components/prism-typography`** — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
+9. **Docs stay canonical:** this section + per-component headings below; do not duplicate long prose in side files.
+
+### Before → after (illustrative)
+
+```tsx
+// Before (booleans + legacy names)
+<PrismButton
+  rectangleRounded
+  lineNo
+  gapNo
+  colorVariant="monochrome"
+  noGrow
+  asSpan
+/>
+
+// After (axes + Radix composition)
+<PrismButton
+  shape="rectangleRounded"
+  line="none"
+  gap="none"
+  paint="monochrome"
+  disableGrow
+  asChild
+/>
+```
+
+```tsx
+// PrismTypography: semantic colour + animation axes
+<PrismTypography role="body" size="medium" tone="muted" />
+<PrismTypography
+  role="headline"
+  size="large"
+  animationZone="line"
+  animationKind="fadeIn"
+/>
+```
+
+### Migration cheatsheet
+
+| Old | New |
+| --- | --- |
+| `color` (on Typography) | `tone` |
+| `colorVariant`, kebab paint literals | `paint` (camelCase union) |
+| `lineNo` / `lineBottom` booleans | `line="none"` \| `"bottom"` \| `"full"` |
+| `gapNo` | `gap="none"` |
+| `rectangle` / `rectangleRounded` | `shape="rectangle"` \| `"rectangleRounded"` |
+| `typeUppercase` / `typeLowercase` | `textCase="uppercase"` \| `"lowercase"` |
+| `noGrow`, `noMotion`, … | `disableGrow`, `disableMotion`, … |
+| `asSpan` | `asChild` |
+| `size="normal"`, `large2x` | `size="medium"`, `size="huge"` |
+| `PrismIcon` `weight="medium"` | `weight="regular"` or numeric |
+| `explicitModeSegmentList` | `mode="explicit"` + `segments` |
+| `PrismColorPicker` `isDisabled` | `disabled` |
+
+### New component checklist
+
+- Prefer **union axes** over boolean pairs for exclusive visuals.
+- Reuse **`PrismSize`** if the component has a stepped scale aligned with buttons/icons/type.
+- Motion opt-outs: **`disable*`** only.
+- Export **`*Props`** types from the component module when consumers need them.
+- Update **this file** and, if applicable, **`prism/.cursor/commands/NAMING.md`** in the same change.
+
+---
+
 ## Naming Conventions (Option Names)
 
-Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling.
+Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling. For the rationale and rules that govern new props, read **[Prop Ergonomics & Variant Axes](#prop-ergonomics--variant-axes)** above.
 
 | Where                                 | Form                | Notes                                                                                                            |
 | ------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Code** (keys, state, props)         | **camelCase**       | `gapNo`, `noGrow`, `colorBackgroundLight`. This is the source of truth.                                         |
-| **Display labels** (button customizer) | **bare tokens**    | Same pattern as PrismIcon playground: e.g. `gapNo`, `small`, `background-light` (see `OPTION_PROP_LABEL` in system-sheet). |
-| **DOM data attributes**               | **data-kebab-case** | Derived from the camelCase prop name (e.g. `data-gap-no`, `data-animation-no-grow`) so HTML stays conventional. |
+| **Code** (keys, state, props)         | **camelCase**       | `gap="none"`, `disableGrow`, `paint="monochrome"`. This is the source of truth.                               |
+| **Display labels** (button customizer) | **bare tokens**    | Same pattern as PrismIcon playground (see system-sheet source).                                              |
+| **DOM data attributes**               | **data-kebab-case** | PrismButton exposes semantic values (e.g. `data-gap="none"`, `data-line="bottom"`) via `camelToKebab`.        |
 
 **Rules:**
 
-- **Canonical = camelCase.** TypeScript types and PrismButton props are camelCase (`gapNo`, `rectangleRounded`, …).
-- **Customizer labels** match PrismIcon: short display strings in `OPTION_PROP_LABEL`, not `prop="…"` and not a `.` chain prefix.
-- **Data attributes = derived.** PrismButton builds `data-*` names from the prop name via `camelToKebab` (e.g. `gapNo` → `data-gap-no`).
+- **Canonical = camelCase props** with explicit string unions where it helps (`line`, `gap`, `paint`, …).
+- **Customizer labels** are short display strings aligned with those unions.
+- **Data attributes = derived** from camelCase keys; values mirror the prop literals where applicable.
 
 This keeps one list of option names (camelCase) and avoids drift between labels, props, and data attributes.
 

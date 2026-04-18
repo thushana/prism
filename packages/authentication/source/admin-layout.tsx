@@ -35,7 +35,7 @@ export function AdminBackLink({
         role="body"
         size="small"
         as="span"
-        color="muted"
+        tone="muted"
         className="group-hover:text-foreground"
       >
         ← {label}
@@ -57,10 +57,10 @@ export type AdminPageShellProps = {
   /**
    * Explicit {@link PrismPathBar} segments. When non-empty, wins over `prismPathBarTitleByPathPrefix`.
    */
-  explicitPrismPathBarSegmentList?: PrismPathBarSegment[];
+  explicitPrismPathBarSegments?: PrismPathBarSegment[];
   /**
    * Auto {@link PrismPathBar} from `usePathname()` + map. Requires `title` (same string as `<h1>` / leaf).
-   * Ignored when `explicitPrismPathBarSegmentList` is non-empty.
+   * Ignored when `explicitPrismPathBarSegments` is non-empty.
    */
   prismPathBarTitleByPathPrefix?: Record<string, PrismPathBarTitleEntry>;
   /** Optional icon before path segments (e.g. a Lucide icon component). */
@@ -81,7 +81,7 @@ export type AdminPageShellProps = {
  * Provides:
  *  - Full-viewport padding and a centred {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
  *  - An optional back link (pass backHref when not using {@link PrismPathBar})
- *  - Optional {@link PrismPathBar} (`explicitPrismPathBarSegmentList` or `prismPathBarTitleByPathPrefix` + `title`)
+ *  - Optional {@link PrismPathBar} (`explicitPrismPathBarSegments` or `prismPathBarTitleByPathPrefix` + `title`)
  *  - An optional page title + description header
  *  - A Sign out link in the top-right corner (suppress with showSignOut={false})
  */
@@ -89,7 +89,7 @@ export function AdminPageShell({
   children,
   title,
   description,
-  explicitPrismPathBarSegmentList,
+  explicitPrismPathBarSegments,
   prismPathBarTitleByPathPrefix,
   prismPathBarIcon,
   backHref,
@@ -99,8 +99,8 @@ export function AdminPageShell({
 }: AdminPageShellProps): React.JSX.Element {
   const pathname = usePathname();
   const showPathBarExplicit = Boolean(
-    explicitPrismPathBarSegmentList &&
-      explicitPrismPathBarSegmentList.length > 0
+    explicitPrismPathBarSegments &&
+      explicitPrismPathBarSegments.length > 0
   );
   const showPathBarAuto = Boolean(
     prismPathBarTitleByPathPrefix && title && !showPathBarExplicit
@@ -126,7 +126,7 @@ export function AdminPageShell({
             <div className="flex flex-col gap-4">
               {showPathBarExplicit ? (
                 <PrismPathBar
-                  explicitModeSegmentList={explicitPrismPathBarSegmentList!}
+                  segments={explicitPrismPathBarSegments!}
                   icon={prismPathBarIcon}
                 />
               ) : null}
@@ -148,7 +148,7 @@ export function AdminPageShell({
                     {title}
                   </PrismTypography>
                   {description && (
-                    <PrismTypography role="body" size="medium" color="muted">
+                    <PrismTypography role="body" size="medium" tone="muted">
                       {description}
                     </PrismTypography>
                   )}

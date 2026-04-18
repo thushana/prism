@@ -25,13 +25,15 @@ const prismBadgeVariants = cva(
   }
 );
 
+export type PrismBadgeProps = React.ComponentProps<"span"> &
+  VariantProps<typeof prismBadgeVariants> & { asChild?: boolean };
+
 function PrismBadge({
   className,
   variant,
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof prismBadgeVariants> & { asChild?: boolean }) {
+}: PrismBadgeProps) {
   const Comp = asChild ? Slot : "span";
 
   return (

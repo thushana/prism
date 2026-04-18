@@ -92,14 +92,14 @@ return (
 
 `AdminPageShell` can render a **`PrismPathBar`** (from `@ui`) instead of a single `AdminBackLink`:
 
-1. **Explicit** — pass `explicitPrismPathBarSegmentList: PrismPathBarSegment[]` (from `@ui` / `@authentication` re-export). When non-empty, it takes precedence over auto mode. Use when you need non-URL segments or a custom order.
+1. **Explicit** — pass `explicitPrismPathBarSegments: PrismPathBarSegment[]` (from `@ui` / `@authentication` re-export). When non-empty, it takes precedence over auto mode. Use when you need non-URL segments or a custom order.
 2. **Auto** — pass `prismPathBarTitleByPathPrefix` (a `Record` of **normalized path prefix →** `PrismPathBarTitleEntry`) together with **`title`**. The shell uses `usePathname()` and builds ancestor links from the path; **`title` is the only leaf label** (same string as the `<h1>`), so display names are never inferred from URL slugs. Map values are either a **string** (label + default `href` = key) or **`{ label, href? }`** for sections with no route (omit `href` for plain text). Optional **`prismPathBarIcon`** renders a leading icon.
 
 Keep one shared constant in the app, e.g. `app/admin/admin-path-bar-title-by-path-prefix.ts` exporting **`ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX`**, aligned with real routes.
 
 The admin home route (`/admin`) typically omits the path bar so the headline is not duplicated as a single crumb.
 
-Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell` and use only `requireAdminPage()` + their own `<main>`; if you still need a path row, render `PrismPathBar` from `@ui` using its props (`explicitModeSegmentList`, `titleByPathPrefix`, `pageTitle`, …). `AdminPageShell` wraps the same component but uses longer names (`explicitPrismPathBarSegmentList`, `prismPathBarTitleByPathPrefix`) and passes them through—see [UI-Prism.md](./UI-Prism.md).
+Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell` and use only `requireAdminPage()` + their own `<main>`; if you still need a path row, render `PrismPathBar` from `@ui` using **`mode="explicit"`** and **`segments`**, or **`mode="auto"`** with `pathname`, `titleByPathPrefix`, and `pageTitle`. `AdminPageShell` uses **`explicitPrismPathBarSegments`** and **`prismPathBarTitleByPathPrefix`** and passes them through—see [UI-Prism.md](./UI-Prism.md).
 
 ## `@authentication` Exports
 
