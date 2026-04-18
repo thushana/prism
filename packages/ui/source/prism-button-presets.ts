@@ -30,31 +30,31 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
     colorVariant: "gradient-sideways",
     size: "normal",
   },
-  // .iconOnly .colorMonochrome .shapeGapNo .sizeNormal
+  // .iconOnly .colorMonochrome .gapNo .sizeNormal
   pillMonochrome: {
     variant: "icon",
     icon: Circle,
     iconOnly: true,
     colorVariant: "monochrome",
-    shapeGapNo: true,
+    gapNo: true,
     size: "normal",
   },
-  // .iconLeft .shapeRectangle .shapeLineNo .sizeNormal (no border)
+  // .iconLeft .rectangle .lineNo .sizeNormal (no border)
   boxButtons: {
     variant: "icon",
     icon: LayoutGrid,
     iconPosition: "left",
-    shapeRectangle: true,
-    shapeLineNo: true,
+    rectangle: true,
+    lineNo: true,
     size: "normal",
   },
-  // .iconLeft .shapeRectangle .shapeLineBottom .sizeNormal (underline only)
+  // .iconLeft .rectangle .lineBottom .sizeNormal (underline only)
   boxButtonsUnderlined: {
     variant: "icon",
     icon: AlignJustify,
     iconPosition: "left",
-    shapeRectangle: true,
-    shapeLineBottom: true,
+    rectangle: true,
+    lineBottom: true,
     size: "normal",
   },
 };

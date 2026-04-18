@@ -99,10 +99,10 @@ export function PasswordForm({ error }: PasswordFormProps) {
             type="submit"
             variant="plain"
             color="blue"
-            shapeRectangleRounded
+            rectangleRounded
             label={isSubmitting ? "Authenticating…" : "Authenticate"}
-            stateDisabled={isSubmitting}
-            animationNoGrow
+            disabled={isSubmitting}
+            noGrow
             className="w-full"
           />
         </form>

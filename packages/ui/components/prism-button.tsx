@@ -5,11 +5,11 @@
  *
  * Variants: .plain | .icon
  * Icon position: .iconLeft (default) | .iconRight
- * Appearances: .iconOnly, .typeUppercase, .typeLowercase, .shapeRectangle, .shapeRectangleRounded, .shapeLineBottom, .shapeLineNo, .colorBackgroundNo, .colorMonochrome, .shapeTight, .shapeGapNo
+ * Appearances: .iconOnly, .typeUppercase, .typeLowercase, .rectangle, .rectangleRounded, .lineBottom, .lineNo, .colorBackgroundNo, .colorMonochrome, .tight, .gapNo
  * Sizes: .sizeSmall (75%) | .sizeNormal (100%) | .sizeLarge (1.5x) | .sizeLarge2x (2x)
  * Fonts: .fontSans | .fontSerif | .fontMono
- * Animations: .animationNo | .animationNoGrow | .animationNoColorChange (hover scale via GSAP) | .animationIcons (default) | .animationIconsNo (no icon draw-in)
- * States: .stateInverted | .stateDisabled (33% opacity, no interaction) | .stateToggled (locks hover state)
+ * Motion: noMotion | noGrow | noColorChange (hover scale via GSAP) | icons (draw-in default) | iconsNo (no icon draw-in)
+ * States: inverted | disabled (33% opacity, no interaction) | toggled (locks hover state)
  */
 
 import * as React from "react";
@@ -84,14 +84,14 @@ export interface PrismButtonProps {
   typeUppercase?: boolean;
   /** .typeLowercase — render label in lowercase */
   typeLowercase?: boolean;
-  /** .shapeRectangle — 90° corners (border-radius 0) */
-  shapeRectangle?: boolean;
-  /** .shapeRectangleRounded — slight curve (border-radius 6px) */
-  shapeRectangleRounded?: boolean;
-  /** .shapeLineBottom — only bottom line (no full border) */
-  shapeLineBottom?: boolean;
-  /** .shapeLineNo — no border at all */
-  shapeLineNo?: boolean;
+  /** 90° corners (border-radius 0) */
+  rectangle?: boolean;
+  /** Slight curve (border-radius 6px) */
+  rectangleRounded?: boolean;
+  /** Only bottom line (no full border) */
+  lineBottom?: boolean;
+  /** No border at all */
+  lineNo?: boolean;
   /** .colorBackground (default) | .colorBackgroundLight | .colorBackgroundDark | .colorBackgroundSolid | .colorBackgroundNo | .colorMonochrome | .colorGradient* */
   colorVariant?:
     | "background"
@@ -105,30 +105,32 @@ export interface PrismButtonProps {
     | "gradient-angle";
   /** Second color for gradients; if omitted, uses next color in MUI palette */
   colorSecondary?: ColorName;
-  /** .shapeTight — cut internal padding by 50% */
-  shapeTight?: boolean;
-  /** .shapeGapNo — no exterior margin; use with segmentPosition so only first/last have left/right edges */
-  shapeGapNo?: boolean;
-  /** When shapeGapNo: "first" = radius on left only, "last" = right only, "middle" = no horizontal radius */
+  /** Cut internal padding by 50% */
+  tight?: boolean;
+  /** No exterior margin; use with segmentPosition so only first/last have left/right edges */
+  gapNo?: boolean;
+  /** When gapNo: "first" = radius on left only, "last" = right only, "middle" = no horizontal radius */
   segmentPosition?: "first" | "middle" | "last";
   /** Size: .sizeSmall (75%), .sizeNormal (100%), .sizeLarge (1.5x), .sizeLarge2x (2x) */
   size?: PrismButtonSize;
   /** Font: sans (Satoshi), serif (Sentient), mono (system mono) */
   font?: "sans" | "serif" | "mono";
-  /** .animationNo — disable all animations */
-  animationNo?: boolean;
-  /** .animationNoGrow — disable grow/scale animation only */
-  animationNoGrow?: boolean;
-  /** .animationNoColorChange — disable color change on hover */
-  animationNoColorChange?: boolean;
-  /** .animationIconsNo — disable icon stroke draw-in (default is .animationIcons = draw-in on) */
-  animationIconsNo?: boolean;
-  /** .stateInverted — swap background and foreground colors */
-  stateInverted?: boolean;
-  /** .stateDisabled — 33% opacity, no animation/hover/click */
-  stateDisabled?: boolean;
-  /** .stateToggled — locks the hover/clicked state permanently */
-  stateToggled?: boolean;
+  /** Disable all animations */
+  noMotion?: boolean;
+  /** Disable grow/scale animation only */
+  noGrow?: boolean;
+  /** Disable color change on hover */
+  noColorChange?: boolean;
+  /** Disable icon stroke draw-in (default is draw-in on when icon is shown) */
+  iconsNo?: boolean;
+  /** Swap background and foreground colors */
+  inverted?: boolean;
+  /**
+   * Non-interactive / muted (33% opacity, no hover). For `<button>`, also sets the native `disabled` attribute.
+   */
+  disabled?: boolean;
+  /** Locks the hover/clicked look (no scaling) */
+  toggled?: boolean;
   /** Render as span for display-only (e.g. in style guide) */
   asSpan?: boolean;
   className?: string;
@@ -166,24 +168,24 @@ export function PrismButton(
     iconOnly = false,
     typeUppercase = false,
     typeLowercase = false,
-    shapeRectangle = false,
-    shapeRectangleRounded = false,
-    shapeLineBottom = false,
-    shapeLineNo = false,
+    rectangle = false,
+    rectangleRounded = false,
+    lineBottom = false,
+    lineNo = false,
     colorVariant,
     colorSecondary,
-    shapeTight = false,
-    shapeGapNo = false,
+    tight = false,
+    gapNo = false,
     segmentPosition,
     size = "normal",
     font = "sans",
-    animationNo = false,
-    animationNoGrow = false,
-    animationNoColorChange = false,
-    animationIconsNo = false,
-    stateInverted = false,
-    stateDisabled = false,
-    stateToggled = false,
+    noMotion = false,
+    noGrow = false,
+    noColorChange = false,
+    iconsNo = false,
+    inverted = false,
+    disabled = false,
+    toggled = false,
     asSpan = false,
     className = "",
     ...rest
@@ -192,21 +194,21 @@ export function PrismButton(
   const rootRef = React.useRef<HTMLButtonElement | HTMLSpanElement>(null);
   const iconDrawDoneRef = React.useRef(false);
 
-  // Determine effective hover state: stateToggled locks hover state, stateDisabled disables it
-  const effectiveHovered = stateDisabled
+  // Determine effective hover state: toggled locks hover state, disabled disables it
+  const effectiveHovered = disabled
     ? false
-    : stateToggled
+    : toggled
       ? true
       : hovered;
 
   // GSAP hover scale when shouldGrow; otherwise CSS handles transform or none.
-  // .shapeGapNo (merged pills) implies no grow.
+  // gapNo (merged pills) implies no grow.
   const shouldGrow =
-    !animationNo &&
-    !animationNoGrow &&
-    !shapeLineBottom &&
-    !stateToggled &&
-    !shapeGapNo;
+    !noMotion &&
+    !noGrow &&
+    !lineBottom &&
+    !toggled &&
+    !gapNo;
   React.useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -295,18 +297,18 @@ export function PrismButton(
 
   // Apply inversion if requested (inversion applies to solid colors; gradients stay as-is for now)
   const backgroundValue =
-    stateInverted && !isGradient ? baseForeground : baseBackground;
+    inverted && !isGradient ? baseForeground : baseBackground;
   const foregroundValue =
-    stateInverted && !isGradient ? baseBackground : baseForeground;
+    inverted && !isGradient ? baseBackground : baseForeground;
   const hoverBackgroundValue =
-    stateInverted && !isGradient ? baseHoverForeground : baseHoverBackground;
+    inverted && !isGradient ? baseHoverForeground : baseHoverBackground;
   const hoverForegroundValue =
-    stateInverted && !isGradient ? baseHoverBackground : baseHoverForeground;
+    inverted && !isGradient ? baseHoverBackground : baseHoverForeground;
 
   const showIcon = (variant === "icon" && IconComponent) || iconOnly;
 
   // Icon stroke draw-in (DrawSVG-style via strokeDashoffset), once per mount when icon is shown.
-  const shouldDrawIcon = showIcon && !animationNo && !animationIconsNo;
+  const shouldDrawIcon = showIcon && !noMotion && !iconsNo;
   React.useEffect(() => {
     if (!shouldDrawIcon || !rootRef.current || iconDrawDoneRef.current) return;
     const el = rootRef.current;
@@ -338,7 +340,7 @@ export function PrismButton(
   }, [shouldDrawIcon]);
 
   const scaleFactor = SIZE_SCALE[size];
-  const tightMultiplier = shapeTight ? 0.5 : 1;
+  const tightMultiplier = tight ? 0.5 : 1;
   const paddingV = Math.round(
     BASE_PADDING_VERTICAL * scaleFactor * tightMultiplier
   );
@@ -350,26 +352,26 @@ export function PrismButton(
   const gap = Math.round(6 * scaleFactor);
   const BASE_BORDER = 3;
   const strokeWidth = Math.max(2, Math.round(BASE_BORDER * scaleFactor));
-  const hasFullBorder = !shapeLineNo && !shapeLineBottom;
+  const hasFullBorder = !lineNo && !lineBottom;
   const borderWidth = hasFullBorder ? strokeWidth : 0;
 
   let baseRadius: number = 9999;
-  if (shapeRectangleRounded) baseRadius = 6;
-  else if (shapeRectangle) baseRadius = 0;
-  // rounded = pill (default when no shapeRectangle/shapeRectangleRounded)
+  if (rectangleRounded) baseRadius = 6;
+  else if (rectangle) baseRadius = 0;
+  // rounded = pill (default when no rectangle / rectangleRounded)
 
-  // When shapeGapNo + segmentPosition: only first/last get left/right edges; middle gets 0
+  // When gapNo + segmentPosition: only first/last get left/right edges; middle gets 0
   const borderRadiusValue: number | string =
-    shapeGapNo && segmentPosition === "first"
+    gapNo && segmentPosition === "first"
       ? `${baseRadius}px 0 0 ${baseRadius}px`
-      : shapeGapNo && segmentPosition === "last"
+      : gapNo && segmentPosition === "last"
         ? `0 ${baseRadius}px ${baseRadius}px 0`
-        : shapeGapNo && segmentPosition === "middle"
+        : gapNo && segmentPosition === "middle"
           ? 0
           : baseRadius;
 
-  // Apply color changes only if not disabled by animationNoColorChange
-  const shouldChangeColor = !animationNo && !animationNoColorChange;
+  // Apply color changes only if not disabled by noColorChange
+  const shouldChangeColor = !noMotion && !noColorChange;
 
   // .colorBackgroundSolid: outline and background match (same solid or same gradient)
   const borderColorValue = isBackgroundSolid
@@ -380,12 +382,12 @@ export function PrismButton(
       ? hoverBackgroundValue
       : foregroundValue;
   const borderSolidColor =
-    isGradient && shapeLineBottom
+    isGradient && lineBottom
       ? `var(--color-${primaryColorKebab}-800)`
       : typeof borderColorValue === "string"
         ? borderColorValue
         : undefined;
-  const segmentBorders = shapeGapNo && segmentPosition && hasFullBorder;
+  const segmentBorders = gapNo && segmentPosition && hasFullBorder;
   const segmentBorderColor =
     segmentBorders &&
     typeof borderSolidColor === "string" &&
@@ -394,9 +396,9 @@ export function PrismButton(
       : segmentBorders
         ? `var(--color-${primaryColorKebab}-800)`
         : undefined;
-  const borderStyle: React.CSSProperties = shapeLineNo
+  const borderStyle: React.CSSProperties = lineNo
     ? { borderWidth: 0, borderStyle: "none" }
-    : shapeLineBottom
+    : lineBottom
       ? {
           borderLeftWidth: 0,
           borderTopWidth: 0,
@@ -464,7 +466,7 @@ export function PrismButton(
   const transformValue = undefined;
 
   // Transition: GSAP owns scale; CSS handles color/border only
-  const transitionValue = animationNo ? "none" : COLOR_TRANSITION;
+  const transitionValue = noMotion ? "none" : COLOR_TRANSITION;
 
   const resolvedBackground = isBackgroundNo
     ? "transparent"
@@ -525,7 +527,7 @@ export function PrismButton(
       shouldChangeColor && effectiveHovered
         ? hoverForegroundValue
         : foregroundValue,
-    cursor: asSpan || stateDisabled ? "default" : "pointer",
+    cursor: asSpan || disabled ? "default" : "pointer",
     textTransform: typeUppercase
       ? "uppercase"
       : typeLowercase
@@ -535,9 +537,9 @@ export function PrismButton(
     transformOrigin: "center",
     transform: transformValue,
     willChange: shouldGrow ? "transform" : "auto",
-    opacity: stateDisabled ? 0.33 : 1,
-    pointerEvents: stateDisabled ? "none" : undefined,
-    ...(shapeGapNo && {
+    opacity: disabled ? 0.33 : 1,
+    pointerEvents: disabled ? "none" : undefined,
+    ...(gapNo && {
       margin: 0,
       lineHeight: 1,
       // Overlap non-first segments by 1px to avoid sub-pixel gap from flex rounding
@@ -571,7 +573,7 @@ export function PrismButton(
   const restSpan = rest as React.ComponentProps<"span">;
   const restButton = rest as React.ComponentProps<"button">;
   const onEnter = (e: React.PointerEvent<HTMLElement>) => {
-    if (!stateDisabled && !stateToggled) {
+    if (!disabled && !toggled) {
       requestAnimationFrame(() => setHovered(true));
     }
     if (asSpan)
@@ -580,7 +582,7 @@ export function PrismButton(
       restButton.onPointerEnter?.(e as React.PointerEvent<HTMLButtonElement>);
   };
   const onLeave = (e: React.PointerEvent<HTMLElement>) => {
-    if (!stateDisabled && !stateToggled) {
+    if (!disabled && !toggled) {
       requestAnimationFrame(() => setHovered(false));
     }
     if (asSpan)
@@ -596,10 +598,10 @@ export function PrismButton(
     typeUppercase: typeUppercase || undefined,
     typeLowercase: typeLowercase || undefined,
     iconOnly: iconOnly || undefined,
-    shapeRectangle: shapeRectangle || undefined,
-    shapeRectangleRounded: shapeRectangleRounded || undefined,
-    shapeLineBottom: shapeLineBottom || undefined,
-    shapeLineNo: shapeLineNo || undefined,
+    rectangle: rectangle || undefined,
+    rectangleRounded: rectangleRounded || undefined,
+    lineBottom: lineBottom || undefined,
+    lineNo: lineNo || undefined,
     segmentPosition,
     colorBackground: colorVariant === "background" || undefined,
     colorBackgroundLight: colorVariant === "background-light" || undefined,
@@ -611,20 +613,20 @@ export function PrismButton(
     colorGradientUp: colorVariant === "gradient-up" || undefined,
     colorGradientAngle: colorVariant === "gradient-angle" || undefined,
     colorSecondary,
-    shapeTight: shapeTight || undefined,
-    shapeGapNo: shapeGapNo || undefined,
+    tight: tight || undefined,
+    gapNo: gapNo || undefined,
     sizeSmall: size === "small" || undefined,
     sizeNormal: size === "normal" || undefined,
     sizeLarge: size === "large" || undefined,
     sizeLarge2x: size === "large2x" || undefined,
-    animationNo: animationNo || undefined,
-    animationNoGrow: animationNoGrow || undefined,
-    animationNoColorChange: animationNoColorChange || undefined,
-    animationIcons: showIcon && !animationIconsNo ? true : undefined,
-    animationIconsNo: animationIconsNo || undefined,
-    stateInverted: stateInverted || undefined,
-    stateDisabled: stateDisabled || undefined,
-    stateToggled: stateToggled || undefined,
+    noMotion: noMotion || undefined,
+    noGrow: noGrow || undefined,
+    noColorChange: noColorChange || undefined,
+    icons: showIcon && !iconsNo ? true : undefined,
+    iconsNo: iconsNo || undefined,
+    inverted: inverted || undefined,
+    disabled: disabled || undefined,
+    toggled: toggled || undefined,
   });
 
   const { className: _omit, ...restSpanSafe } =
@@ -654,13 +656,13 @@ export function PrismButton(
     <button
       ref={rootRef as React.RefObject<HTMLButtonElement>}
       type="button"
-      disabled={stateDisabled}
       className={className}
       style={style}
       title={title}
       aria-label={ariaLabel}
       {...dataAttrs}
       {...restButtonSafe}
+      disabled={disabled}
       onPointerEnter={onEnter}
       onPointerLeave={onLeave}
     >

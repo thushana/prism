@@ -17,8 +17,8 @@ export function SignOutForm(): React.JSX.Element {
         typeUppercase
         color="grey"
         colorVariant="background-no"
-        animationNoColorChange
-        shapeLineNo
+        noColorChange
+        lineNo
         size="small"
         className="py-0! px-1! text-muted-foreground! hover:text-foreground!"
       />
