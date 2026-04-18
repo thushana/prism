@@ -93,7 +93,6 @@ export async function getSystemSheetData(): Promise<SystemSheetData> {
       environment: process.env.NODE_ENV || "development",
     },
     git,
-    dependencies: { key: [] },
     vercel,
     lastUpdated: new Date().toISOString(),
   };

@@ -48,6 +48,7 @@ export {
   ButtonCustomizerPlayground,
   ButtonVariantsList,
 } from "./button";
+export { IconCustomizerPlayground } from "./icon-playground";
 export { FontWeightPreview } from "./font-weight-preview";
 export { TypeScalePreview } from "./type-scale-preview";
 export { getRelativeTime, formatDateTimeWithRelative } from "./data";

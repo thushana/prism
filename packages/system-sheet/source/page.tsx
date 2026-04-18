@@ -6,9 +6,6 @@ import {
   PrismCardHeader,
   PrismCardTitle,
   PrismIcon,
-  PrismLayoutBreakout,
-  PrismLayoutText,
-  PrismLayoutWrappersReference,
   PrismTypography,
 } from "@ui";
 import { satoshi, sentient, zodiak } from "@ui";
@@ -62,10 +59,10 @@ function renderComponentExample(componentName: string) {
     case "icon":
       return (
         <div className="flex flex-wrap gap-4 items-center">
-          <PrismIcon name="home" size={24} />
-          <PrismIcon name="settings" size={32} />
-          <PrismIcon name="favorite" size={24} fill />
-          <PrismIcon name="star" size={24} weight={600} />
+          <PrismIcon name="home" size="medium" />
+          <PrismIcon name="settings" size="large" />
+          <PrismIcon name="favorite" size="medium" fill="on" />
+          <PrismIcon name="star" size="medium" weight="thick" />
         </div>
       );
     default:
@@ -224,32 +221,19 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
           </div>
         )}
 
-        {/* Row 1: Tech Stack | Key Dependencies */}
+        {/* Tech stack (environment summary) */}
         {showEnvironment && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h2 className="mb-4">Tech Stack</h2>
-              <div className="grid grid-cols-3 gap-4">
-                {Object.entries(data.techStack).map(([key, value]) => (
-                  <div key={key} className="space-y-1">
-                    <PrismTypography role="overline" size="small">
-                      {key}
-                    </PrismTypography>
-                    <PrismBadge variant="outline">{value}</PrismBadge>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="mb-4">Key Dependencies</h2>
-              <div className="flex flex-wrap gap-2">
-                {data.dependencies.key.map((dep) => (
-                  <PrismBadge key={dep} variant="secondary">
-                    {dep}
-                  </PrismBadge>
-                ))}
-              </div>
+          <div>
+            <h2 className="mb-4">Tech Stack</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {Object.entries(data.techStack).map(([key, value]) => (
+                <div key={key} className="space-y-1">
+                  <PrismTypography role="overline" size="small">
+                    {key}
+                  </PrismTypography>
+                  <PrismBadge variant="outline">{value}</PrismBadge>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -570,40 +554,6 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
 
           </div>
         )}
-
-        <PrismLayoutWrappersReference />
-
-        {/* Layout sample: content-text with Prism blog post */}
-        <PrismLayoutBreakout className="mt-8">
-          <div>
-            <h2 className="mb-4">Layout sample — content-text</h2>
-            <PrismLayoutText
-              className={`space-y-4 font-serif ${sentient.variable}`}
-            >
-              <PrismTypography role="headline" size="small">What is Prism?</PrismTypography>
-              <PrismTypography role="body" size="large" className="text-muted-foreground">
-                Prism is a full-stack app framework that gets you from zero to a
-                running Next.js app with a consistent stack: UI components,
-                database access, logging, feature flags, and deployment wiring.
-                It’s built for small teams and solo developers who want
-                structure without heavy boilerplate.
-              </PrismTypography>
-              <PrismTypography role="body" size="large" className="text-muted-foreground">
-                Out of the box you get a design system (Satoshi, Sentient,
-                Zodiak), layout wrappers for content and graphics, and a system
-                sheet for environment and dependency overview. The CLI can
-                scaffold new apps and packages, and the generator keeps your
-                config in sync across the monorepo.
-              </PrismTypography>
-              <PrismTypography role="body" size="large" className="text-muted-foreground">
-                Feature flags, authentication, and cost tracking plug in via
-                Prism packages so you can turn capabilities on when you need
-                them. If you want a single stack that stays consistent as the
-                product grows, Prism is built for that.
-              </PrismTypography>
-            </PrismLayoutText>
-          </div>
-        </PrismLayoutBreakout>
       </div>
     </div>
   );

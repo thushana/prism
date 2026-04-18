@@ -125,7 +125,7 @@ import { PrismBadge } from "@ui";
 
 ### PrismIcon
 
-Material Symbols Rounded glyph wrapper (`name` is the symbol ligature name).
+Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** is `"small"` \| `"medium"` \| `"large"` \| `"extraLarge"` (maps to 20 / 24 / 28 / 48px, where **extraLarge** is 2× **medium**; **opsz** clamps to 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"thin"` \| `"medium"` \| `"thick"` \| `"heavy"` (maps to wght 300 / 400 / 600 / 700) or a raw **wght** value `100`–`700`. **`fill`** is `"on"` \| `"off"` (FILL axis) or legacy boolean. The **GRAD** axis is fixed at `0` in the component (no `grade` prop).
 
 **Import:**
 
@@ -133,15 +133,18 @@ Material Symbols Rounded glyph wrapper (`name` is the symbol ligature name).
 import { PrismIcon } from "@ui";
 ```
 
-**Props (`PrismIconProps`):** `name`, `size`, `fill`, `weight`, `grade`, `className`.
+**Props (`PrismIconProps`):** `name`, `size`, `weight`, `fill`, `className`.
 
 **Example:**
 
 ```tsx
-<PrismIcon name="home" size={24} />
-<PrismIcon name="settings" size={32} fill />
-<PrismIcon name="favorite" weight={600} />
+<PrismIcon name="home" size="medium" weight="medium" fill="off" />
+<PrismIcon name="settings" size="large" weight="medium" fill="off" />
+<PrismIcon name="favorite" size="medium" weight="medium" fill="on" />
+<PrismIcon name="star" size="large" weight="thin" fill="off" />
 ```
+
+Admin and system-sheet preview: `/admin/prism/components/prism-icon`, `IconCustomizerPlayground` from `@system-sheet`. The playground exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
 
 ### Layout wrappers (`prism-layout.tsx`)
 
