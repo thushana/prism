@@ -39,9 +39,6 @@ export interface SystemSheetData {
     commitDate?: string;
     commitMessage?: string;
   };
-  dependencies: {
-    key: string[];
-  };
   vercel?: {
     env: string;
     url?: string;

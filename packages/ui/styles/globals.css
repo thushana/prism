@@ -185,7 +185,12 @@
     font-family: var(--font-mono);
   }
   .material-symbols-rounded {
-    font-family: "Material Symbols Rounded";
+    /* Sans fallbacks avoid body/serif inheritance when the icon font is slow or blocked. */
+    font-family:
+      "Material Symbols Rounded",
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
     font-weight: normal;
     font-style: normal;
     font-size: 24px;
