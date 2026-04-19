@@ -48,8 +48,15 @@ export {
   ButtonCustomizerPlayground,
   ButtonVariantsList,
 } from "./button";
+export { PrismDividerCustomizerPlayground } from "./divider-playground";
+export { PrismCodeBlockPlayground } from "./code-block-playground";
 export { IconCustomizerPlayground } from "./icon-playground";
 export { FontWeightPreview } from "./font-weight-preview";
 export { TypeScalePreview } from "./type-scale-preview";
 export { getRelativeTime, formatDateTimeWithRelative } from "./data";
-export type { SystemSheetData, SystemSheetConfig, AppStatus } from "./types";
+export type {
+  SystemSheetData,
+  SystemSheetConfig,
+  SystemSheetGitRepoInfo,
+  AppStatus,
+} from "./types";

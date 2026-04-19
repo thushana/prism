@@ -6,6 +6,21 @@ export interface AppStatus {
   isRunning: boolean;
 }
 
+/** Git metadata for one worktree (app root, nested package, etc.). */
+export interface SystemSheetGitRepoInfo {
+  repositoryUrl?: string;
+  repositoryName?: string;
+  status: string;
+  branch?: string;
+  commitSha?: string;
+  commitUrl?: string;
+  commitAuthor?: string;
+  commitDate?: string;
+  commitMessage?: string;
+  /** Local branch vs upstream (e.g. unpushed commits); undefined if not computed. */
+  pushStatus?: string;
+}
+
 export interface SystemSheetData {
   apps: AppStatus[];
   shadcn: {
@@ -28,17 +43,19 @@ export interface SystemSheetData {
     nodeVersion: string;
     environment: string;
   };
-  git: {
-    repositoryUrl?: string;
-    repositoryName?: string;
-    status: string;
-    branch?: string;
-    commitSha?: string;
-    commitUrl?: string;
-    commitAuthor?: string;
-    commitDate?: string;
-    commitMessage?: string;
-  };
+  /**
+   * Single-repo apps: populate this when you do not use `gitRepositories`.
+   * Ignored by the sheet UI when `gitRepositories` is non-empty.
+   */
+  git?: SystemSheetGitRepoInfo;
+  /**
+   * Multiple worktrees (e.g. monorepo root + `prism/`). When set and non-empty,
+   * the Git section renders one subsection per entry with `title` as the heading.
+   */
+  gitRepositories?: Array<{
+    title: string;
+    git: SystemSheetGitRepoInfo;
+  }>;
   vercel?: {
     env: string;
     url?: string;
