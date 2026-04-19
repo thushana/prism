@@ -1,7 +1,11 @@
 import { Geist_Mono } from "next/font/google";
-import { PrismBadge, PrismTypography } from "@ui";
+import { PrismBadge, PrismDivider, PrismTypography } from "@ui";
 import { formatDateTimeWithRelative } from "./data";
-import type { SystemSheetConfig, SystemSheetData } from "./types";
+import type {
+  SystemSheetConfig,
+  SystemSheetData,
+  SystemSheetGitRepoInfo,
+} from "./types";
 
 // Initialize Geist Mono font
 const geistMono = Geist_Mono({
@@ -15,6 +19,120 @@ export const revalidate = 0;
 interface SystemSheetPageProps {
   data?: SystemSheetData | null;
   config?: SystemSheetConfig;
+}
+
+function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
+  return (
+    <>
+      <div className="mb-4 space-y-4">
+        {git.commitMessage && (
+          <div className="space-y-1 w-full">
+            <PrismTypography role="overline" size="small">
+              Commit Message
+            </PrismTypography>
+            <PrismTypography
+              role="body"
+              size="medium"
+              font="mono"
+              className="block w-full text-muted-foreground wrap-break-word"
+            >
+              {git.commitMessage}
+            </PrismTypography>
+          </div>
+        )}
+        {git.commitAuthor && (
+          <div className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              Commit Author
+            </PrismTypography>
+            <PrismBadge variant="outline">{git.commitAuthor}</PrismBadge>
+          </div>
+        )}
+      </div>
+      <div className="grid min-w-0 w-full grid-cols-2 md:grid-cols-6 gap-4">
+        {git.commitSha && (
+          <div className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              Commit SHA
+            </PrismTypography>
+            {git.commitUrl ? (
+              <a
+                href={git.commitUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <PrismBadge
+                  variant="outline"
+                  className="cursor-pointer hover:bg-accent transition-colors"
+                >
+                  {git.commitSha.slice(0, 7)}
+                </PrismBadge>
+              </a>
+            ) : (
+              <PrismBadge variant="outline">{git.commitSha.slice(0, 7)}</PrismBadge>
+            )}
+          </div>
+        )}
+        {git.repositoryUrl && (
+          <div className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              Repository
+            </PrismTypography>
+            <a
+              href={git.repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <PrismBadge
+                variant="outline"
+                className="cursor-pointer hover:bg-accent transition-colors"
+              >
+                {git.repositoryName || "Repository"}
+              </PrismBadge>
+            </a>
+          </div>
+        )}
+        <div className="space-y-1">
+          <PrismTypography role="overline" size="small">
+            Status
+          </PrismTypography>
+          <PrismBadge variant="outline">
+            {git.status === "clean" ? "clean" : "dirty"}
+          </PrismBadge>
+        </div>
+        {git.branch && (
+          <div className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              Branch
+            </PrismTypography>
+            <PrismBadge variant="outline">{git.branch}</PrismBadge>
+          </div>
+        )}
+        {git.commitDate && (
+          <div className="space-y-1 md:col-span-2">
+            <PrismTypography role="overline" size="small">
+              Commit Date
+            </PrismTypography>
+            <PrismBadge variant="outline" className="max-w-full whitespace-normal text-left">
+              {formatDateTimeWithRelative(git.commitDate)}
+            </PrismBadge>
+          </div>
+        )}
+        {git.pushStatus && (
+          <div className="space-y-1 md:col-span-2">
+            <PrismTypography role="overline" size="small">
+              Push Status
+            </PrismTypography>
+            <PrismBadge variant="outline" className="max-w-full whitespace-normal text-left">
+              {git.pushStatus}
+            </PrismBadge>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 
 /**
@@ -158,112 +276,42 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
         )}
 
         {/* Git Section */}
-        {showGit && data.git && (
-          <div className="border-t pt-8">
-            <h2 className="mb-4">Git</h2>
-            {/* First row: Full-width blocks */}
-            <div className="mb-4 space-y-4">
-              {data.git.commitMessage && (
-                <div className="space-y-1 w-full">
-                  <PrismTypography role="overline" size="small">
-                    Commit Message
-                  </PrismTypography>
-                  <PrismTypography
-                    role="body"
-                    size="medium"
-                    font="mono"
-                    className="block w-full text-muted-foreground wrap-break-word"
-                  >
-                    {data.git.commitMessage}
-                  </PrismTypography>
-                </div>
-              )}
-              {data.git.commitAuthor && (
-                <div className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    Commit Author
-                  </PrismTypography>
-                  <PrismBadge variant="outline">{data.git.commitAuthor}</PrismBadge>
-                </div>
-              )}
-            </div>
-            {/* Second row: Commit Date (2 cols) and other fields */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-              {data.git.commitSha && (
-                <div className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    Commit SHA
-                  </PrismTypography>
-                  {data.git.commitUrl ? (
-                    <a
-                      href={data.git.commitUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block"
-                    >
-                      <PrismBadge
-                        variant="outline"
-                        className="cursor-pointer hover:bg-accent transition-colors"
+        {showGit &&
+          (data.gitRepositories && data.gitRepositories.length > 0 ? (
+            <div className="border-t pt-8">
+              <h2 className="mb-6">Git</h2>
+              <div className="w-full min-w-0 space-y-2">
+                {data.gitRepositories.map((entry, index) => (
+                  <div key={entry.title} className="w-full min-w-0">
+                    {index > 0 ? (
+                      <PrismDivider
+                        spacing="comfortable"
+                        lineWeight="thin"
+                        tone="default"
+                        className="mt-8"
+                      />
+                    ) : null}
+                    <div className="min-w-0 w-full space-y-4">
+                      <PrismTypography
+                        role="title"
+                        size="large"
+                        as="h3"
+                        tone="foreground"
                       >
-                        {data.git.commitSha.slice(0, 7)}
-                      </PrismBadge>
-                    </a>
-                  ) : (
-                    <PrismBadge variant="outline">
-                      {data.git.commitSha.slice(0, 7)}
-                    </PrismBadge>
-                  )}
-                </div>
-              )}
-              {data.git.repositoryUrl && (
-                <div className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    Repository
-                  </PrismTypography>
-                  <a
-                    href={data.git.repositoryUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block"
-                  >
-                    <PrismBadge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-accent transition-colors"
-                    >
-                      {data.git.repositoryName || "Repository"}
-                    </PrismBadge>
-                  </a>
-                </div>
-              )}
-              <div className="space-y-1">
-                <PrismTypography role="overline" size="small">
-                  Status
-                </PrismTypography>
-                <PrismBadge variant="outline">
-                  {data.git.status === "clean" ? "clean" : "dirty"}
-                </PrismBadge>
+                        {entry.title}
+                      </PrismTypography>
+                      <GitRepoDetail git={entry.git} />
+                    </div>
+                  </div>
+                ))}
               </div>
-              {data.git.branch && (
-                <div className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    Branch
-                  </PrismTypography>
-                  <PrismBadge variant="outline">{data.git.branch}</PrismBadge>
-                </div>
-              )}
-              {data.git.commitDate && (
-                <div className="space-y-1 md:col-span-2">
-                  <PrismTypography role="overline" size="small">
-                    Commit Date
-                  </PrismTypography>
-                  <PrismBadge variant="outline">
-                    {formatDateTimeWithRelative(data.git.commitDate)}
-                  </PrismBadge>
-                </div>
-              )}
             </div>
-          </div>
-        )}
+          ) : data.git ? (
+            <div className="border-t pt-8">
+              <h2 className="mb-4">Git</h2>
+              <GitRepoDetail git={data.git} />
+            </div>
+          ) : null)}
 
         {/* Vercel Deployment Info */}
         {showVercel && data.vercel && (
