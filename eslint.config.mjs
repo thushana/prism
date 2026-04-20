@@ -94,9 +94,9 @@ const eslintConfig = defineConfig([
                 "Package imports must use @ prefix. Use '@intelligence' instead of 'intelligence'.",
             },
             {
-              name: "system-sheet",
+              name: "admin",
               message:
-                "Package imports must use @ prefix. Use '@system-sheet' instead of 'system-sheet'.",
+                "Package imports must use @ prefix. Use '@admin' instead of 'admin'.",
             },
           ],
         },

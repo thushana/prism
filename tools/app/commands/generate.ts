@@ -138,7 +138,7 @@ function generatePackageJson(
         logger: "*",
         ui: "*",
         "@prism/utilities": "*",
-        "system-sheet": "*",
+        admin: "*",
         "feature-flags": "*",
         "flags": "^4.0.0",
       }
@@ -160,7 +160,7 @@ function generatePackageJson(
           logger: "file:./prism/packages/logger",
           ui: "file:./prism/packages/ui",
           "@prism/utilities": "file:./prism/packages/utilities",
-          "system-sheet": "file:./prism/packages/system-sheet",
+          admin: "file:./prism/packages/admin",
           "feature-flags": "file:./prism/packages/feature-flags",
           "flags": "^4.0.0",
         };
@@ -248,7 +248,7 @@ const nextConfig: NextConfig = {
       "@logger/server": path.resolve(__dirname, "./prism/packages/logger/source/server"),
       "@ui": path.resolve(__dirname, "./prism/packages/ui/source"),
       "@utilities": path.resolve(__dirname, "./prism/packages/utilities/source"),
-      "@system-sheet": path.resolve(__dirname, "./prism/packages/system-sheet/source"),
+      "@admin": path.resolve(__dirname, "./prism/packages/admin/source"),
       "feature-flags": path.resolve(__dirname, "./prism/packages/feature-flags/source"),
     };
     // Allow resolving symlinks (submodule creates symlinks in node_modules)
@@ -317,7 +317,7 @@ function generateTsConfig(
         "@logger/*": ["../../packages/logger/source/*"],
         "@ui": ["../../packages/ui/source"],
         "@utilities": ["../../packages/utilities/source"],
-        "@system-sheet": ["../../packages/system-sheet/source"],
+        "@admin": ["../../packages/admin/source"],
         "feature-flags": ["../../packages/feature-flags/source"],
       }
     : useGitDependency
@@ -333,7 +333,7 @@ function generateTsConfig(
           "@logger/*": ["node_modules/@prism/core/packages/logger/source/*"],
           "@ui": ["node_modules/@prism/core/packages/ui/source"],
           "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
-          "@system-sheet": ["node_modules/@prism/core/packages/system-sheet/source"],
+          "@admin": ["node_modules/@prism/core/packages/admin/source"],
           "feature-flags": ["node_modules/@prism/core/packages/feature-flags/source"],
         }
       : {
@@ -351,7 +351,7 @@ function generateTsConfig(
           ],
           "@ui": ["./prism/packages/ui/source"],
           "@utilities": ["./prism/packages/utilities/source"],
-          "@system-sheet": ["./prism/packages/system-sheet/source"],
+          "@admin": ["./prism/packages/admin/source"],
           "feature-flags": ["./prism/packages/feature-flags/source"],
         };
 
@@ -528,7 +528,7 @@ function generateTemplateFiles(targetDir: string, appName: string): void {
     DATABASE_IMPORT: "@database",
     INTELLIGENCE_IMPORT: "@intelligence",
     LOGGER_IMPORT: "@logger",
-    SYSTEM_SHEET_IMPORT: "@system-sheet",
+    ADMIN_IMPORT: "@admin",
   };
 
   const templateSourceDir = getTemplatesDir();

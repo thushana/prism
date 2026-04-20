@@ -195,7 +195,7 @@ packages/
 │       ├── tasks/
 │       ├── utilities/
 │       └── index.ts
-├── system-sheet/           # System information page primitives
+├── admin/                   # System sheet page + Prism admin demos
 │   └── source/
 │       ├── page.tsx
 │       ├── data.ts
@@ -225,7 +225,7 @@ packages/
 - **`packages/utilities/source/`** - Utility functions (classnames, etc.)
 - **`packages/logger/source/`** - Centralized logging for client/server
 - **`packages/intelligence/source/`** - AI helpers, tasks, and utilities
-- **`packages/system-sheet/source/`** - System information page primitives
+- **`packages/admin/source/`** - System sheet page (`system/`) and Prism component demos (`prism-*.tsx`, `registry.ts`)
 - **`packages/authentication/source/`** - Authentication utilities
 - **`packages/charts/source/`** - Chart wrappers and helpers ([CHARTS-Prism.md](./CHARTS-Prism.md))
 - **`packages/feature-flags/source/`** - Feature flag discovery and standard flags
@@ -325,8 +325,8 @@ The `@` prefix requirement is automatically enforced:
 
 1. **ESLint Rule**: The `no-restricted-imports` rule prevents non-prefixed package imports
    - Configured in `eslint.config.mjs`
-   - Blocks: `database`, `cli`, `logger`, `ui`, `utilities`, `intelligence`, `system-sheet`, `authentication`
-   - Requires: `@database`, `@cli`, `@logger`, `@ui`, `@utilities`, `@intelligence`, `@system-sheet`, `@authentication`
+   - Blocks: `database`, `cli`, `logger`, `ui`, `utilities`, `intelligence`, `admin`, `authentication`
+   - Requires: `@database`, `@cli`, `@logger`, `@ui`, `@utilities`, `@intelligence`, `@admin`, `@authentication`
 
 2. **Pre-commit Hook**: Runs `lint-staged` which executes ESLint with `--fix` on staged files
    - Automatically fixes violations when possible
