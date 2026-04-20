@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { SystemSheetData } from "@system-sheet";
+import type { SystemSheetData } from "@admin";
 import { serverLogger as logger } from "@logger/server";
 
 export const dynamic = "force-dynamic";

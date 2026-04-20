@@ -14,7 +14,7 @@
  * - Standalone: ../../utilities from node_modules/ui/styles/ → node_modules/utilities/
  */
 @source "../../utilities/source/**/*.{ts,tsx}";
-@source "../../system-sheet/source/**/*.{ts,tsx}";
+@source "../../admin/source/**/*.{ts,tsx}";
 @source "../../authentication/source/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));

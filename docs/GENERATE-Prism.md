@@ -227,7 +227,7 @@ import { BaseTask } from "@prism/core/intelligence/tasks/base";
 import { logger } from "@prism/core/logger";
 
 // System sheet
-import { SystemSheetPage } from "@prism/core/system-sheet";
+import { SystemSheetPage } from "@prism/core/admin";
 ```
 
 ## Standalone App Deployment

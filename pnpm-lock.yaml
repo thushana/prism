@@ -66,6 +66,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      admin:
+        specifier: workspace:*
+        version: link:../../packages/admin
       authentication:
         specifier: workspace:*
         version: link:../../packages/authentication
@@ -99,9 +102,6 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
-      system-sheet:
-        specifier: workspace:*
-        version: link:../../packages/system-sheet
       ui:
         specifier: workspace:*
         version: link:../../packages/ui
@@ -151,6 +151,37 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      typescript:
+        specifier: ^6.0.0
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.1
+        version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(@vitest/ui@4.1.1)(jsdom@29.0.1)(vite@8.0.2(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/admin:
+    dependencies:
+      '@prism/utilities':
+        specifier: file:../utilities
+        version: link:../utilities
+      lucide-react:
+        specifier: ^1.0.0
+        version: 1.6.0(react@19.2.4)
+      next:
+        specifier: ^16.0.0
+        version: 16.2.1(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      ui:
+        specifier: file:../ui
+        version: link:../ui
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.0
+        version: 25.5.0
+      '@types/react':
+        specifier: ^19.2.6
+        version: 19.2.14
       typescript:
         specifier: ^6.0.0
         version: 6.0.2
@@ -363,37 +394,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@8.0.2(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
-      typescript:
-        specifier: ^6.0.0
-        version: 6.0.2
-      vitest:
-        specifier: ^4.1.1
-        version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(@vitest/ui@4.1.1)(jsdom@29.0.1)(vite@8.0.2(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
-
-  packages/system-sheet:
-    dependencies:
-      '@prism/utilities':
-        specifier: file:../utilities
-        version: link:../utilities
-      lucide-react:
-        specifier: ^1.0.0
-        version: 1.6.0(react@19.2.4)
-      next:
-        specifier: ^16.0.0
-        version: 16.2.1(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.4
-      ui:
-        specifier: file:../ui
-        version: link:../ui
-    devDependencies:
-      '@types/node':
-        specifier: ^25.0.0
-        version: 25.5.0
-      '@types/react':
-        specifier: ^19.2.6
-        version: 19.2.14
       typescript:
         specifier: ^6.0.0
         version: 6.0.2

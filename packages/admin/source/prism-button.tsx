@@ -281,7 +281,7 @@ function escapeJsxDoubleQuotedString(value: string): string {
 }
 
 /** Spread props for `PrismButton` from customize checkboxes (single source for preview + JSX snippet). */
-function buildButtonCustomizerSpreadProps(selected: Set<AppearanceKey>): {
+function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   variant: "plain" | "icon";
   iconOnly?: boolean;
   iconPosition: "left" | "right";
@@ -394,7 +394,7 @@ function buildButtonCustomizerSpreadProps(selected: Set<AppearanceKey>): {
 }
 
 /** Single-line JSX for the customize strip (sample row + current toggles). */
-function formatPrismButtonCustomizerSnippet(
+function formatPrismButtonDemoSnippet(
   sample: (typeof ACTION_BUTTONS)[number],
   p: {
     variant: "plain" | "icon";
@@ -454,9 +454,9 @@ function formatPrismButtonCustomizerSnippet(
 
 /**
  * Multi-select appearance toggles + live action strip (used on /admin/prism/components/prism-button).
- * Preset shortcuts and static variant rows live in {@link ButtonVariantsList}.
+ * Preset shortcuts and static variant rows live in {@link ButtonVariantsMatrix}.
  */
-export function ButtonCustomizerPlayground() {
+function ButtonCustomizerSection() {
   const [selected, setSelected] = useState<Set<AppearanceKey>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
   const [copyToast, setCopyToast] = useState<{
@@ -520,10 +520,10 @@ export function ButtonCustomizerPlayground() {
   };
 
   const { spreadProps, currentSampleSnippet } = useMemo(() => {
-    const spreadProps = buildButtonCustomizerSpreadProps(selected);
+    const spreadProps = buildButtonDemoSpreadProps(selected);
     const segmentPosition =
       spreadProps.gap === "none" ? ("first" as const) : undefined;
-    const currentSampleSnippet = formatPrismButtonCustomizerSnippet(
+    const currentSampleSnippet = formatPrismButtonDemoSnippet(
       SNIPPET_SAMPLE_ACTION,
       { ...spreadProps, segmentPosition }
     );
@@ -675,8 +675,8 @@ export function ButtonCustomizerPlayground() {
   );
 }
 
-/** List of all PrismButton variant rows for use on /admin/prism/components/prism-button */
-export function ButtonVariantsList({
+/** List of all PrismButton variant rows for the PrismButton demo. */
+function ButtonVariantsMatrix({
   className,
 }: {
   className?: string;
@@ -1120,5 +1120,15 @@ export function ButtonVariantsList({
         ))}
       </Row>
     </div>
+  );
+}
+
+/** Preset controls plus full variant matrix for PrismButton (admin + `/sheets/buttons`). */
+export function PrismButtonDemo() {
+  return (
+    <>
+      <ButtonCustomizerSection />
+      <ButtonVariantsMatrix />
+    </>
   );
 }

@@ -168,7 +168,7 @@ const DEFAULT_SELECTED = new Set<DividerOptionKey>([
 /**
  * Live controls for {@link PrismDivider} — layout matches {@link ButtonCustomizerPlayground}.
  */
-export function PrismDividerCustomizerPlayground(): React.JSX.Element {
+export function PrismDividerDemo(): React.JSX.Element {
   const [selected, setSelected] = useState<Set<DividerOptionKey>>(
     () => new Set(DEFAULT_SELECTED)
   );

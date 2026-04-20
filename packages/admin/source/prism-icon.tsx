@@ -19,8 +19,8 @@ import { createPortal } from "react-dom";
 import { Copy } from "lucide-react";
 import iconNames from "./material-icons-round-names.json";
 
-/** Checkbox keys for the icon admin playground (mutually exclusive within each group). */
-type IconPlaygroundAppearanceKey =
+/** Checkbox keys for the icon admin demo (mutually exclusive within each group). */
+type IconDemoAppearanceKey =
   | "sizeSmall"
   | "sizeMedium"
   | "sizeLarge"
@@ -34,7 +34,7 @@ type IconPlaygroundAppearanceKey =
   | "fillFalse"
   | "fillTrue";
 
-const ICON_PLAYGROUND_EXCLUSIVE_KEY_GROUPS: IconPlaygroundAppearanceKey[][] = [
+const ICON_DEMO_EXCLUSIVE_KEY_GROUPS: IconDemoAppearanceKey[][] = [
   ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
   [
     "weightLight",
@@ -47,8 +47,8 @@ const ICON_PLAYGROUND_EXCLUSIVE_KEY_GROUPS: IconPlaygroundAppearanceKey[][] = [
 ];
 
 /** Checkbox labels next to each option (matches string tokens in `PrismIcon` props). */
-const ICON_PLAYGROUND_DISPLAY_LABEL: Record<
-  IconPlaygroundAppearanceKey,
+const ICON_DEMO_DISPLAY_LABEL: Record<
+  IconDemoAppearanceKey,
   string
 > = {
   sizeSmall: "small",
@@ -65,9 +65,9 @@ const ICON_PLAYGROUND_DISPLAY_LABEL: Record<
   fillTrue: "on",
 };
 
-const ICON_PLAYGROUND_CUSTOMIZER_COLUMNS: {
+const ICON_DEMO_OPTION_COLUMNS: {
   heading: string;
-  keys: IconPlaygroundAppearanceKey[];
+  keys: IconDemoAppearanceKey[];
 }[] = [
   {
     heading: "Size",
@@ -86,16 +86,16 @@ const ICON_PLAYGROUND_CUSTOMIZER_COLUMNS: {
   { heading: "Fill", keys: ["fillFalse", "fillTrue"] },
 ];
 
-function initialIconPlaygroundSelection(): Set<IconPlaygroundAppearanceKey> {
+function initialIconDemoSelection(): Set<IconDemoAppearanceKey> {
   return new Set([
     "sizeMedium",
     "weightRegular",
     "fillFalse",
-  ] as IconPlaygroundAppearanceKey[]);
+  ] as IconDemoAppearanceKey[]);
 }
 
-function resolveIconPlaygroundProps(
-  selected: Set<IconPlaygroundAppearanceKey>
+function resolveIconDemoProps(
+  selected: Set<IconDemoAppearanceKey>
 ): Pick<PrismIconProps, "size" | "weight" | "fill"> {
   const size: PrismIconSizeName = selected.has("sizeGigantic")
     ? "gigantic"
@@ -260,13 +260,13 @@ const IconCell = memo(function IconCell({
 });
 
 /**
- * Icon customizer + full Material Symbols Rounded name grid (ligature names for
- * {@link PrismIcon}). Used on `/admin/prism/components/prism-icon`.
+ * Interactive icon demo + full Material Symbols Rounded name grid (ligature names for
+ * {@link PrismIcon}). Served from `/admin/prism/components/prism-icon`.
  */
-export function IconCustomizerPlayground() {
+export function PrismIconDemo() {
   const names = iconNames as string[];
   const [selectedAppearanceKeys, setSelectedAppearanceKeys] = useState(
-    initialIconPlaygroundSelection
+    initialIconDemoSelection
   );
   const [nameFilterQuery, setNameFilterQuery] = useState("");
   const [copyToast, setCopyToast] = useState<{
@@ -303,7 +303,7 @@ export function IconCustomizerPlayground() {
   );
 
   const iconProps = useMemo(
-    () => resolveIconPlaygroundProps(selectedAppearanceKeys),
+    () => resolveIconDemoProps(selectedAppearanceKeys),
     [selectedAppearanceKeys]
   );
 
@@ -323,10 +323,10 @@ export function IconCustomizerPlayground() {
     [filteredIconNames]
   );
 
-  const handleToggleAppearanceKey = (key: IconPlaygroundAppearanceKey) => {
+  const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
     setSelectedAppearanceKeys((previous) => {
       const next = new Set(previous);
-      const exclusiveGroup = ICON_PLAYGROUND_EXCLUSIVE_KEY_GROUPS.find((g) =>
+      const exclusiveGroup = ICON_DEMO_EXCLUSIVE_KEY_GROUPS.find((g) =>
         g.includes(key)
       );
       if (exclusiveGroup) {
@@ -409,7 +409,7 @@ export function IconCustomizerPlayground() {
 
         <div className="mb-4 w-full overflow-x-auto pb-1">
           <div className="flex min-w-min flex-row flex-nowrap items-start gap-10">
-          {ICON_PLAYGROUND_CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
+          {ICON_DEMO_OPTION_COLUMNS.map(({ heading, keys }) => (
             <div key={heading} className="shrink-0 space-y-1">
               <PrismTypography role="overline" size="small">
                 {heading}
@@ -426,7 +426,7 @@ export function IconCustomizerPlayground() {
                     className="rounded border-input"
                   />
                   <PrismTypography role="label" size="medium" tone="muted">
-                    {ICON_PLAYGROUND_DISPLAY_LABEL[appearanceKey]}
+                    {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
                   </PrismTypography>
                 </label>
               ))}

@@ -83,7 +83,7 @@ import { PrismPathBar } from "@ui";
 
 The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: Material **`color`** (`ColorName`), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`**, **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `medium` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
 
-Admin and system-sheet previews: `/admin/prism/components/prism-button`, `ButtonCustomizerPlayground` / `ButtonVariantsList` from `@system-sheet`.
+Admin demo: **`/admin/prism/components/prism-button`** — **`PrismButtonDemo`** from **`@admin`** (packages/admin `prism-button.tsx`).
 
 ### PrismCard
 
@@ -159,7 +159,7 @@ import { PrismDivider } from "@ui";
 
 Exports: **`PrismDivider`**, **`PrismDividerProps`**, **`prismDividerRootVariants`**, **`prismDividerBarVariants`**, line/tone/spacing type aliases.
 
-Admin playground: **`/admin/prism/components/prism-divider`** (`PrismDividerCustomizerPlayground` from `@system-sheet`, same customize pattern as **`ButtonCustomizerPlayground`**).
+Admin demo: **`/admin/prism/components/prism-divider`** — **`PrismDividerDemo`** from **`@admin`** (same interactive pattern as **`PrismButtonDemo`**).
 
 ### PrismCodeBlock
 
@@ -266,7 +266,7 @@ When adding a new language, map its token categories to this same table so color
 
 **Exports:** `PrismCodeBlock`, `PrismCodeBlockProps`, `PrismCodeBlockMode`, `PrismCodeBlockHighlightLanguage`, `PrismCodeBlockSyntaxColorFamily`, `PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES`.
 
-Admin playground: **`/admin/prism/components/prism-code-block`** (`PrismCodeBlockPlayground` from `@system-sheet`) — section titles use **`PrismTypography`** **sans** with **`typography-title-large`** + **bold** for **Customize** and **`typography-title-small`** + **bold** for **Example** and **CodeBlock**. **Example** follows **Customize** (language sample, mode, **`color`**, width, toggles, **`disableCopyButton`**). **CodeBlock** shows generated JSX that **updates with Customize** (so matching props can be copied), but the **preview chrome is fixed**: **`language="tsx"`**, **line numbers on**, **language chip on**, **`mode="card"`**, **`color="grey"`**, copy on, **monospace** body — it does not mirror mode / color / width / checkbox state visually.
+Admin demo: **`/admin/prism/components/prism-code-block`** — **`PrismCodeBlockDemo`** from **`@admin`** — section titles use **`PrismTypography`** **sans** with **`typography-title-large`** + **bold** for **Customize** and **`typography-title-small`** + **bold** for **Example** and **CodeBlock**. **Example** follows **Customize** (language sample, mode, **`color`**, width, toggles, **`disableCopyButton`**). **CodeBlock** shows generated JSX that **updates with Customize** (so matching props can be copied), but the **preview chrome is fixed**: **`language="tsx"`**, **line numbers on**, **language chip on**, **`mode="card"`**, **`color="grey"`**, copy on, **monospace** body — it does not mirror mode / color / width / checkbox state visually.
 
 ### PrismIcon
 
@@ -291,7 +291,7 @@ import { PrismIcon } from "@ui";
 
 **Shared vocabulary:** **PrismIcon** and **PrismButton** use the same **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
-Admin and system-sheet preview: `/admin/prism/components/prism-icon`, `IconCustomizerPlayground` from `@system-sheet`. The playground exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
+Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. The demo exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
 
 ### Layout wrappers (`prism-layout.tsx`)
 
@@ -577,7 +577,7 @@ packages/
 ├── ui/
 │   └── styles/
 │       └── globals.css          # Main styles + scans all Prism packages
-├── system-sheet/
+├── admin/
 │   └── source/                  # Scanned by ui/styles/globals.css
 └── utilities/
     └── source/                  # Scanned by ui/styles/globals.css
@@ -591,7 +591,7 @@ packages/
    @source "../components/**/*.{ts,tsx}"; /* UI package */
    @source "../source/**/*.{ts,tsx}"; /* UI package (presets) */
    @source "../../utilities/source/**/*.{ts,tsx}"; /* Utilities package */
-   @source "../../system-sheet/source/**/*.{ts,tsx}"; /* System-sheet package */
+   @source "../../admin/source/**/*.{ts,tsx}"; /* Admin package */
    ```
 
 2. These paths work in both contexts:
@@ -674,7 +674,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 5. **Shared `PrismSize`** everywhere Prism renders stepped scale (see `packages/ui/source/prism-size.ts`).
 6. **Palette vs semantic colour:** `PrismButton` **`color`** = `ColorName`; `PrismTypography` **`tone`** = semantic `text-*` role.
 7. **Prefer `asChild`** (Radix `Slot`) over ad-hoc span wrappers for composition.
-8. **Admin + `@system-sheet`** are the live JSX reference: `/admin/prism/components/*` (for example `ButtonCustomizerPlayground` / `ButtonVariantsList` in `packages/system-sheet/source/button.tsx`). Typography scale and weight previews use **`TypeScalePreview`** / **`FontWeightPreview`** on **`/admin/prism/components/prism-typography`** — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
+8. **Admin + `@admin`** are the live JSX reference: `/admin/prism/components/[component]` drives **`PRISM_ADMIN_COMPONENT_REGISTRY`** (for example **`PrismButtonDemo`** in `packages/admin/source/prism-button.tsx`). Typography previews live in **`PrismTypographyDemo`** (`packages/admin/source/prism-typography.tsx`) — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
 9. **Docs stay canonical:** this section + per-component headings below; do not duplicate long prose in side files.
 
 ### Before → after (illustrative)
@@ -741,12 +741,12 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 ## Naming Conventions (Option Names)
 
-Prism UI and the system-sheet use a **single canonical form** for option names so you only maintain one spelling. For the rationale and rules that govern new props, read **[Prop Ergonomics & Variant Axes](#prop-ergonomics--variant-axes)** above.
+Prism UI and the admin demos use a **single canonical form** for option names so you only maintain one spelling. For the rationale and rules that govern new props, read **[Prop Ergonomics & Variant Axes](#prop-ergonomics--variant-axes)** above.
 
 | Where                                 | Form                | Notes                                                                                                            |
 | ------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | **Code** (keys, state, props)         | **camelCase**       | `gap="none"`, `disableGrow`, `paint="monochrome"`. This is the source of truth.                               |
-| **Display labels** (button customizer) | **bare tokens**    | Same pattern as PrismIcon playground (see system-sheet source).                                              |
+| **Display labels** (button demo toggles) | **bare tokens**    | Same pattern as PrismIcon demo (see `packages/admin/source/prism-icon.tsx`).                                              |
 | **DOM data attributes**               | **data-kebab-case** | PrismButton exposes semantic values (e.g. `data-gap="none"`, `data-line="bottom"`) via `camelToKebab`.        |
 
 **Rules:**

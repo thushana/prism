@@ -29,7 +29,7 @@
       "@logger/*": ["../../packages/logger/source/*"],
       "@ui": ["../../packages/ui/source"],
       "@utilities": ["../../packages/utilities/source"],
-      "@system-sheet": ["../../packages/system-sheet/source"],
+      "@admin": ["../../packages/admin/source"],
       "@authentication": ["../../packages/authentication/source"],
       "@authentication/*": ["../../packages/authentication/source/*"]
     }

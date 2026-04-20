@@ -143,7 +143,7 @@ function randomPlaygroundLanguage(): string {
  * Admin playground for {@link PrismCodeBlock} — mirrors the customize pattern
  * used by {@link PrismDividerCustomizerPlayground}.
  */
-export function PrismCodeBlockPlayground(): React.JSX.Element {
+export function PrismCodeBlockDemo(): React.JSX.Element {
   /** SSR-safe defaults; `useLayoutEffect` randomizes language and color before paint. */
   const [language, setLanguage] = useState("tsx");
   const [mode, setMode] = useState<PrismCodeBlockMode>("card");

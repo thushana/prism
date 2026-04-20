@@ -140,7 +140,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
  *
  * Usage in your app:
  * ```tsx
- * import { SystemSheetPage } from "@prism/core/system-sheet";
+ * import { SystemSheetPage } from "@prism/core/admin";
  * import { headers } from "next/headers";
  *
  * export const dynamic = "force-dynamic";

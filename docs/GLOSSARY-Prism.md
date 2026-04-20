@@ -6,7 +6,7 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 **Definition**: A shared library or module in the Prism monorepo that can be used across multiple apps.
 
-**Context**: Packages live in `packages/` directory and are referenced via npm workspace file references. Examples: `ui`, `database`, `logger`, `cli`, `charts`, `authentication`, `intelligence`, `system-sheet`, `utilities`.
+**Context**: Packages live in `packages/` directory and are referenced via npm workspace file references. Examples: `ui`, `database`, `logger`, `cli`, `charts`, `authentication`, `intelligence`, `admin`, `utilities`.
 
 **Related**: App, Workspace, Monorepo
 
@@ -118,7 +118,7 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 **Definition**: A password-protected admin page that displays system information, health status, and diagnostics.
 
-**Context**: Provided by the `system-sheet` package. Uses web authentication (`PRISM_KEY_WEB`) for access control.
+**Context**: Implemented in the `admin` package (`SystemSheetPage`). Uses web authentication (`PRISM_KEY_WEB`) for access control.
 
 **Related**: Authentication, Package
 

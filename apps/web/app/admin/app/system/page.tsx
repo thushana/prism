@@ -1,6 +1,6 @@
 import * as React from "react";
-import { SystemSheetPage } from "@system-sheet";
-import type { SystemSheetData } from "@system-sheet";
+import { SystemSheetPage } from "@admin";
+import type { SystemSheetData } from "@admin";
 import { AdminPageShell } from "authentication";
 import { requireAdminPage } from "authentication/admin-page";
 import { headers, cookies } from "next/headers";
