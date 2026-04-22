@@ -5,7 +5,15 @@ import { ChevronDown, Copy, Palette } from "lucide-react";
 import { cn } from "@utilities";
 
 import { colorHexValues, type ColorName } from "../styles/color-values";
-import { PRISM_DEFAULT_COLOR_NAMES } from "../styles/prism-color";
+import {
+  normalizePrismColorSpec,
+  PrismColor,
+  prismDefaultFamilyKebabToColorName,
+  type PartialPrismColorSpec,
+  type PrismDefaultPaletteShadeKey,
+  type PrismPaletteId,
+  type PrismSwatchKey,
+} from "../styles/prism-color";
 import { PrismTypography } from "./prism-typography";
 
 /** Matches {@link PrismButton} normal-size vertical padding (`BASE_PADDING_VERTICAL`). */
@@ -24,18 +32,34 @@ const PRISM_COLOR_PICKER_TITLE_INSET_AFTER_LEADING_ICON = 6;
 const PRISM_COLOR_PICKER_ICON_SIZE = 22;
 /** Copy control icon is ~⅔ of the trigger icon size (rounded). */
 const PRISM_COLOR_PICKER_COPY_ICON_SIZE = Math.round(
-  (PRISM_COLOR_PICKER_ICON_SIZE * 2) / 3
+  (PRISM_COLOR_PICKER_ICON_SIZE * 2) / 3,
 );
 
 const PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL =
   "Select color from palette";
-const PRISM_COLOR_PICKER_DEFAULT_PANEL_ARIA_LABEL = "Material color palette";
 
-const MATERIAL_SHADE_ORDER = [
+/** Default (Material) palette: shade row order for the picker grid (includes accent keys). */
+export const PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER = [
   50, 100, 200, 300, 400, 500, 600, 700, 800, 900, "a100", "a200", "a400", "a700",
 ] as const;
 
-type MaterialShadeKey = (typeof MATERIAL_SHADE_ORDER)[number];
+type MaterialShadeKey =
+  (typeof PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER)[number];
+
+/** Tailwind palette: numeric shade rows only (50–950, no accents). Matches `tailwind-color-values.ts`. */
+export const PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER = [
+  50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950,
+] as const;
+
+type TailwindNumericShade =
+  (typeof PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER)[number];
+
+export type PrismColorPickerSwatch = {
+  palette: PrismPaletteId;
+  family: PrismSwatchKey;
+  shade: MaterialShadeKey | TailwindNumericShade;
+  hex: string;
+};
 
 export function materialColorDisplayName(colorName: ColorName): string {
   const withSpaces = colorName.replace(/([A-Z])/g, " $1").trim();
@@ -45,6 +69,22 @@ export function materialColorDisplayName(colorName: ColorName): string {
     .join(" ");
 }
 
+function capitalizeWord(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+/** Display title for a palette family key (Material uses ColorName formatting; Tailwind uses title-case segments). */
+export function paletteFamilyDisplayTitle(
+  palette: PrismPaletteId,
+  familyKebab: PrismSwatchKey,
+): string {
+  if (palette === "tailwind") {
+    return familyKebab.split("-").map(capitalizeWord).join(" ");
+  }
+  const cn = prismDefaultFamilyKebabToColorName(familyKebab);
+  return cn ? materialColorDisplayName(cn) : capitalizeWord(familyKebab);
+}
+
 function normalizeHexadecimalColorString(input: string): string {
   const trimmed = input.trim();
   if (!trimmed) return "";
@@ -52,58 +92,108 @@ function normalizeHexadecimalColorString(input: string): string {
   return withHash.toLowerCase();
 }
 
-function materialShadeLabelDisplay(shade: MaterialShadeKey): string {
+/** Stable comparison for picker cells (#hex or CSS color strings such as oklch). */
+function normalizePickerColorToken(input: string): string {
+  return input.trim().replace(/\s+/g, " ");
+}
+
+function materialShadeLabelDisplay(
+  shade: MaterialShadeKey | TailwindNumericShade,
+): string {
   if (typeof shade === "number") return String(shade);
   return shade.replace("a", "A");
 }
 
-export function findMaterialSwatchForHex(
-  hexadecimalColor: string
-): { colorName: ColorName; shade: MaterialShadeKey; hex: string } | null {
-  const normalized = normalizeHexadecimalColorString(hexadecimalColor);
-  if (!normalized || normalized.length < 4) return null;
-  for (const colorName of PRISM_DEFAULT_COLOR_NAMES) {
-    const shades = colorHexValues[colorName];
-    for (const shade of MATERIAL_SHADE_ORDER) {
-      const value = shades[shade];
-      if (value && normalizeHexadecimalColorString(value) === normalized) {
-        return { colorName, shade, hex: value };
+function resolvePickerCellHex(
+  palette: PrismPaletteId,
+  family: PrismSwatchKey,
+  shade: MaterialShadeKey | TailwindNumericShade,
+): string | null {
+  if (palette === "tailwind") {
+    if (typeof shade !== "number") return null;
+    return PrismColor.hex({ palette: "tailwind", family, shade });
+  }
+  return PrismColor.hex({
+    palette: "default",
+    family,
+    shade: shade as PrismDefaultPaletteShadeKey,
+  });
+}
+
+function shadeOrderForPalette(
+  palette: PrismPaletteId,
+): readonly (MaterialShadeKey | TailwindNumericShade)[] {
+  return palette === "tailwind"
+    ? PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER
+    : PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER;
+}
+
+/**
+ * Finds an exact palette swatch whose resolved color string matches `hexadecimalColor`
+ * (hex or CSS color syntax such as oklch).
+ */
+export function findPaletteSwatchForHex(
+  palette: PrismPaletteId,
+  hexadecimalColor: string,
+): PrismColorPickerSwatch | null {
+  const normalizedInput = normalizePickerColorToken(hexadecimalColor);
+  if (!normalizedInput) return null;
+
+  const families = PrismColor.Loop.families(palette);
+  const shades = shadeOrderForPalette(palette);
+
+  for (const shade of shades) {
+    for (const family of families) {
+      const hex = resolvePickerCellHex(palette, family, shade);
+      if (!hex) continue;
+      if (normalizePickerColorToken(hex) === normalizedInput) {
+        return { palette, family, shade, hex };
       }
     }
   }
   return null;
 }
 
-/** Clipboard text: `Display name / shade / selected #hexadecimal` (third segment is always the current selection). */
-export function formatPrismColorPickerClipboardText(
-  materialSwatchForPresentation: {
-    colorName: ColorName;
-    shade: MaterialShadeKey;
-    hex: string;
-  } | null,
-  selectedHexadecimalColor: string
-): string {
-  const selectedNormalized =
-    normalizeHexadecimalColorString(selectedHexadecimalColor);
-  if (!materialSwatchForPresentation) return selectedNormalized || "";
-  if (!selectedNormalized) {
-    return `${materialColorDisplayName(materialSwatchForPresentation.colorName).toUpperCase()} / ${materialShadeLabelDisplay(materialSwatchForPresentation.shade)}`;
-  }
-  return `${materialColorDisplayName(materialSwatchForPresentation.colorName).toUpperCase()} / ${materialShadeLabelDisplay(materialSwatchForPresentation.shade)} / ${selectedNormalized}`;
+/**
+ * Same as {@link findPaletteSwatchForHex} for the default Material palette only (backward compatible shape).
+ */
+export function findMaterialSwatchForHex(
+  hexadecimalColor: string,
+): { colorName: ColorName; shade: MaterialShadeKey; hex: string } | null {
+  const r = findPaletteSwatchForHex("default", hexadecimalColor);
+  if (!r || r.palette !== "default") return null;
+  const cn = prismDefaultFamilyKebabToColorName(r.family);
+  if (!cn) return null;
+  return {
+    colorName: cn,
+    shade: r.shade as MaterialShadeKey,
+    hex: r.hex,
+  };
 }
 
-/** Same visible pattern as the trigger: `NAME • shade • #hex`. */
-function materialSwatchPickerDisplayTitle(
-  colorName: ColorName,
-  shade: MaterialShadeKey,
-  hexadecimalColor: string
+/** Clipboard text: `Display name / shade / selected token` (third segment is always the current selection). */
+export function formatPrismColorPickerClipboardText(
+  swatch: PrismColorPickerSwatch | null,
+  selectedColorHex: string,
 ): string {
-  const normalized = normalizeHexadecimalColorString(hexadecimalColor);
-  return `${materialColorDisplayName(colorName).toUpperCase()} • ${materialShadeLabelDisplay(shade)} • ${normalized}`;
+  const selectedNormalized = normalizePickerColorToken(selectedColorHex);
+  if (!swatch) return selectedNormalized || "";
+  const title = paletteFamilyDisplayTitle(swatch.palette, swatch.family).toUpperCase();
+  const shadePart = materialShadeLabelDisplay(swatch.shade);
+  if (!selectedNormalized) {
+    return `${title} / ${shadePart}`;
+  }
+  return `${title} / ${shadePart} / ${selectedNormalized}`;
+}
+
+/** Same visible pattern as the trigger: `NAME • shade • token`. */
+function swatchPickerDisplayTitle(swatch: PrismColorPickerSwatch): string {
+  const normalized = normalizePickerColorToken(swatch.hex);
+  return `${paletteFamilyDisplayTitle(swatch.palette, swatch.family).toUpperCase()} • ${materialShadeLabelDisplay(swatch.shade)} • ${normalized}`;
 }
 
 function hexadecimalColorToRgbChannels(
-  hexadecimalColor: string
+  hexadecimalColor: string,
 ): { red: number; green: number; blue: number } | null {
   const normalized = normalizeHexadecimalColorString(hexadecimalColor);
   const compact = normalized.slice(1);
@@ -125,23 +215,29 @@ function hexadecimalColorToRgbChannels(
 }
 
 /**
- * Closest palette swatch when the hexadecimal value does not appear exactly in {@link colorHexValues}
- * (for example arbitrary or design-token-only colors).
+ * Closest palette swatch in **default Material** space when the value is not exact (RGB distance on #hex cells).
+ * Tailwind palette does not implement nearest-match (return null); use exact {@link findPaletteSwatchForHex}.
  */
-export function findNearestMaterialSwatchForHexadecimal(
-  hexadecimalColor: string
-): { colorName: ColorName; shade: MaterialShadeKey; hex: string } | null {
+export function findNearestPaletteSwatchForHex(
+  palette: PrismPaletteId,
+  hexadecimalColor: string,
+): PrismColorPickerSwatch | null {
+  const exact = findPaletteSwatchForHex(palette, hexadecimalColor);
+  if (exact) return exact;
+  if (palette !== "default") return null;
+
   const targetRgb = hexadecimalColorToRgbChannels(hexadecimalColor);
   if (!targetRgb) return null;
 
   let bestDistanceSquared = Number.POSITIVE_INFINITY;
-  let bestSwatch:
-    | { colorName: ColorName; shade: MaterialShadeKey; hex: string }
-    | undefined;
+  let bestSwatch: PrismColorPickerSwatch | undefined;
 
-  for (const shade of MATERIAL_SHADE_ORDER) {
-    for (const colorName of PRISM_DEFAULT_COLOR_NAMES) {
-      const hex = colorHexValues[colorName][shade];
+  const families = PrismColor.Loop.families("default");
+  const shades = shadeOrderForPalette("default");
+
+  for (const shade of shades) {
+    for (const family of families) {
+      const hex = resolvePickerCellHex("default", family, shade);
       if (!hex) continue;
       const rgb = hexadecimalColorToRgbChannels(hex);
       if (!rgb) continue;
@@ -151,7 +247,7 @@ export function findNearestMaterialSwatchForHexadecimal(
         (targetRgb.blue - rgb.blue) ** 2;
       if (distanceSquared < bestDistanceSquared) {
         bestDistanceSquared = distanceSquared;
-        bestSwatch = { colorName, shade, hex };
+        bestSwatch = { palette: "default", family, shade: shade as MaterialShadeKey, hex };
       }
     }
   }
@@ -159,10 +255,22 @@ export function findNearestMaterialSwatchForHexadecimal(
   return bestSwatch ?? null;
 }
 
-/** WCAG relative luminance 0–1 */
-function relativeLuminanceFromHexadecimal(
-  hexadecimalColor: string
-): number {
+export function findNearestMaterialSwatchForHexadecimal(
+  hexadecimalColor: string,
+): { colorName: ColorName; shade: MaterialShadeKey; hex: string } | null {
+  const r = findNearestPaletteSwatchForHex("default", hexadecimalColor);
+  if (!r) return null;
+  const cn = prismDefaultFamilyKebabToColorName(r.family);
+  if (!cn) return null;
+  return {
+    colorName: cn,
+    shade: r.shade as MaterialShadeKey,
+    hex: r.hex,
+  };
+}
+
+/** WCAG relative luminance 0–1 — works for `#rrggbb` inputs only; other syntax falls back to mid gray. */
+function relativeLuminanceFromHexadecimal(hexadecimalColor: string): number {
   const rgb = hexadecimalColorToRgbChannels(hexadecimalColor);
   if (!rgb) return 0.5;
   const linearizeChannel = (channel: number) => {
@@ -175,26 +283,23 @@ function relativeLuminanceFromHexadecimal(
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 }
 
-/**
- * Foreground on the filled trigger: luminance comes from the **actual** background fill;
- * hue family for pairing light/dark label colors comes from the palette swatch used for labels (exact or nearest).
- */
 function resolveTriggerForegroundHexadecimal(
-  materialSwatchForLabeling:
-    | { colorName: ColorName; shade: MaterialShadeKey; hex: string }
-    | null,
-  triggerBackgroundHexadecimal: string
+  swatchForLabeling: PrismColorPickerSwatch | null,
+  triggerBackgroundToken: string,
 ): string {
   const normalizedBackground =
-    normalizeHexadecimalColorString(triggerBackgroundHexadecimal) || "#808080";
+    normalizeHexadecimalColorString(triggerBackgroundToken) || "#808080";
   const luminance = relativeLuminanceFromHexadecimal(normalizedBackground);
 
-  if (materialSwatchForLabeling) {
-    const shades = colorHexValues[materialSwatchForLabeling.colorName];
-    if (luminance < 0.45) {
-      return shades[100] ?? shades[50] ?? shades.a100 ?? "#ffffff";
+  if (swatchForLabeling && swatchForLabeling.palette === "default") {
+    const cn = prismDefaultFamilyKebabToColorName(swatchForLabeling.family);
+    if (cn) {
+      const shades = colorHexValues[cn];
+      if (luminance < 0.45) {
+        return shades[100] ?? shades[50] ?? shades.a100 ?? "#ffffff";
+      }
+      return shades[900] ?? shades[800] ?? shades.a700 ?? "#171717";
     }
-    return shades[900] ?? shades[800] ?? shades.a700 ?? "#171717";
   }
 
   return luminance < 0.45 ? "#ffffff" : "#171717";
@@ -205,6 +310,8 @@ export type PrismColorPickerProps = {
   label?: string;
   selectedColorHex: string;
   onSelectedColorChange: (selectedHexadecimalColor: string) => void;
+  /** Palette + future PrismColor fields; only `palette` is read today. */
+  color?: PartialPrismColorSpec;
   id?: string;
   disabled?: boolean;
 };
@@ -213,6 +320,7 @@ export function PrismColorPicker({
   label,
   selectedColorHex,
   onSelectedColorChange,
+  color: colorSpec,
   id,
   disabled = false,
 }: PrismColorPickerProps) {
@@ -227,64 +335,68 @@ export function PrismColorPicker({
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
+  const paletteId = React.useMemo(
+    () => normalizePrismColorSpec(colorSpec).palette,
+    [colorSpec?.palette],
+  );
+
   React.useEffect(() => {
     if (!isOpen) setHoverPreviewHexadecimal(null);
   }, [isOpen]);
 
   /** Committed value (grid selection ring, parent state, clipboard). */
-  const normalizedActualSelectedHexadecimal = React.useMemo(
-    () => normalizeHexadecimalColorString(selectedColorHex),
-    [selectedColorHex]
+  const normalizedActualSelectedToken = React.useMemo(
+    () => normalizePickerColorToken(selectedColorHex),
+    [selectedColorHex],
   );
 
-  const selectedMaterialSwatchExact = React.useMemo(
-    () => findMaterialSwatchForHex(selectedColorHex),
-    [selectedColorHex]
+  const selectedSwatchExact = React.useMemo(
+    () => findPaletteSwatchForHex(paletteId, selectedColorHex),
+    [paletteId, selectedColorHex],
   );
 
-  const nearestMaterialSwatchForCommittedSelection = React.useMemo(
-    () => findNearestMaterialSwatchForHexadecimal(selectedColorHex),
-    [selectedColorHex]
+  const nearestSwatchForCommittedSelection = React.useMemo(
+    () => findNearestPaletteSwatchForHex(paletteId, selectedColorHex),
+    [paletteId, selectedColorHex],
   );
 
-  const materialSwatchForCommittedSelection =
-    selectedMaterialSwatchExact ?? nearestMaterialSwatchForCommittedSelection;
+  const swatchForCommittedSelection =
+    selectedSwatchExact ?? nearestSwatchForCommittedSelection;
 
   /** Hover preview drives the trigger until click commits or pointer leaves the swatch grid. */
   const hexadecimalForTriggerFace =
     hoverPreviewHexadecimal ?? selectedColorHex;
 
-  const normalizedHexadecimalForTriggerFace = React.useMemo(
-    () => normalizeHexadecimalColorString(hexadecimalForTriggerFace),
-    [hexadecimalForTriggerFace]
+  const normalizedTokenForTriggerFace = React.useMemo(
+    () => normalizePickerColorToken(hexadecimalForTriggerFace),
+    [hexadecimalForTriggerFace],
   );
 
-  const materialSwatchForPresentationOnTriggerFace = React.useMemo(() => {
-    const exactSwatch = findMaterialSwatchForHex(hexadecimalForTriggerFace);
+  const swatchForPresentationOnTriggerFace = React.useMemo(() => {
+    const exact = findPaletteSwatchForHex(paletteId, hexadecimalForTriggerFace);
     return (
-      exactSwatch ??
-      findNearestMaterialSwatchForHexadecimal(hexadecimalForTriggerFace)
+      exact ?? findNearestPaletteSwatchForHex(paletteId, hexadecimalForTriggerFace)
     );
-  }, [hexadecimalForTriggerFace]);
+  }, [paletteId, hexadecimalForTriggerFace]);
 
-  const triggerBackgroundHexadecimal =
-    normalizedHexadecimalForTriggerFace || "#e5e5e5";
+  const triggerBackgroundToken =
+    normalizedTokenForTriggerFace || "#e5e5e5";
   const triggerForegroundHexadecimal = React.useMemo(
     () =>
       resolveTriggerForegroundHexadecimal(
-        materialSwatchForPresentationOnTriggerFace,
-        triggerBackgroundHexadecimal
+        swatchForPresentationOnTriggerFace,
+        triggerBackgroundToken,
       ),
-    [materialSwatchForPresentationOnTriggerFace, triggerBackgroundHexadecimal]
+    [swatchForPresentationOnTriggerFace, triggerBackgroundToken],
   );
 
   const clipboardColorText = React.useMemo(
     () =>
       formatPrismColorPickerClipboardText(
-        materialSwatchForCommittedSelection,
-        selectedColorHex
+        swatchForCommittedSelection,
+        selectedColorHex,
       ),
-    [materialSwatchForCommittedSelection, selectedColorHex]
+    [swatchForCommittedSelection, selectedColorHex],
   );
 
   const handleCopyToClipboard = React.useCallback(async () => {
@@ -321,7 +433,7 @@ export function PrismColorPicker({
       setIsOpen(false);
       triggerRef.current?.focus();
     },
-    [onSelectedColorChange]
+    [onSelectedColorChange],
   );
 
   const handleSwatchGridPointerLeave = React.useCallback(
@@ -335,7 +447,7 @@ export function PrismColorPicker({
       }
       setHoverPreviewHexadecimal(null);
     },
-    []
+    [],
   );
 
   const handleSwatchButtonBlur = React.useCallback(
@@ -351,30 +463,44 @@ export function PrismColorPicker({
       }
       setHoverPreviewHexadecimal(null);
     },
-    []
+    [],
   );
 
   const MATERIAL_SWATCH_CELL_SIZE = "1.5rem";
-  const gridTemplateColumns = `repeat(19, ${MATERIAL_SWATCH_CELL_SIZE})`;
+  const families = React.useMemo(
+    () => [...PrismColor.Loop.families(paletteId)],
+    [paletteId],
+  );
+  const shadeRows = shadeOrderForPalette(paletteId);
+  const gridTemplateColumns = `repeat(${families.length}, ${MATERIAL_SWATCH_CELL_SIZE})`;
   const gridAutoRows = MATERIAL_SWATCH_CELL_SIZE;
 
-  const materialColorTitleText = materialSwatchForPresentationOnTriggerFace
-    ? materialColorDisplayName(
-        materialSwatchForPresentationOnTriggerFace.colorName
+  const panelAriaLabel =
+    paletteId === "tailwind"
+      ? "Tailwind color palette"
+      : "Material color palette";
+
+  const familyTitleText = swatchForPresentationOnTriggerFace
+    ? paletteFamilyDisplayTitle(
+        swatchForPresentationOnTriggerFace.palette,
+        swatchForPresentationOnTriggerFace.family,
       ).toUpperCase()
     : "—";
-  const materialShadeDisplayPart = materialSwatchForPresentationOnTriggerFace
-    ? materialShadeLabelDisplay(
-        materialSwatchForPresentationOnTriggerFace.shade
-      )
+  const shadeDisplayPart = swatchForPresentationOnTriggerFace
+    ? materialShadeLabelDisplay(swatchForPresentationOnTriggerFace.shade)
     : "—";
-  const triggerFaceHexadecimalDisplayPart =
-    normalizedHexadecimalForTriggerFace || "—";
+  const triggerFaceTokenDisplayPart =
+    normalizedTokenForTriggerFace || "—";
+
+  const luminanceForRing =
+    relativeLuminanceFromHexadecimal(
+      normalizeHexadecimalColorString(triggerBackgroundToken) || "#aaaaaa",
+    );
   const isDarkBackground =
-    relativeLuminanceFromHexadecimal(triggerBackgroundHexadecimal) < 0.45;
+    Number.isFinite(luminanceForRing) && luminanceForRing < 0.45;
 
   const triggerInlineStyle: React.CSSProperties = {
-    backgroundColor: triggerBackgroundHexadecimal,
+    backgroundColor: triggerBackgroundToken,
     color: triggerForegroundHexadecimal,
     padding: `${PRISM_COLOR_PICKER_TRIGGER_PADDING_VERTICAL}px ${PRISM_COLOR_PICKER_TRIGGER_PADDING_HORIZONTAL}px`,
     gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
@@ -413,7 +539,7 @@ export function PrismColorPicker({
               ? "ring-1 ring-inset ring-white/20"
               : "ring-1 ring-inset ring-black/12",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            disabled && "pointer-events-none opacity-50"
+            disabled && "pointer-events-none opacity-50",
           )}
         >
           <span
@@ -436,7 +562,7 @@ export function PrismColorPicker({
               as="span"
               className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
             >
-              {materialColorTitleText}
+              {familyTitleText}
             </PrismTypography>
             <PrismTypography
               role="body"
@@ -445,7 +571,7 @@ export function PrismColorPicker({
               as="span"
               className="shrink-0 tracking-tight text-current"
             >
-              {` • ${materialShadeDisplayPart} • ${triggerFaceHexadecimalDisplayPart}`}
+              {` • ${shadeDisplayPart} • ${triggerFaceTokenDisplayPart}`}
             </PrismTypography>
           </span>
           <ChevronDown
@@ -454,7 +580,7 @@ export function PrismColorPicker({
             aria-hidden
             className={cn(
               "shrink-0 transition-transform",
-              isOpen && "rotate-180"
+              isOpen && "rotate-180",
             )}
           />
         </button>
@@ -464,13 +590,13 @@ export function PrismColorPicker({
           id={copyControlId}
           disabled={disabled || !clipboardColorText}
           onClick={() => void handleCopyToClipboard()}
-          title="Copy name / shade / hexadecimal"
-          aria-label="Copy color name, shade level, and hexadecimal value"
+          title="Copy name / shade / color"
+          aria-label="Copy color name, shade level, and value"
           className={cn(
             "inline-flex shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-1 text-muted-foreground shadow-none",
             "transition-colors hover:text-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            "disabled:pointer-events-none disabled:opacity-40"
+            "disabled:pointer-events-none disabled:opacity-40",
           )}
         >
           <Copy
@@ -485,7 +611,7 @@ export function PrismColorPicker({
         <div
           id={panelId}
           role="dialog"
-          aria-label={label ?? PRISM_COLOR_PICKER_DEFAULT_PANEL_ARIA_LABEL}
+          aria-label={label ?? panelAriaLabel}
           className="absolute left-0 top-full z-50 mt-1 w-max max-h-[min(70vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
         >
           <div
@@ -493,31 +619,35 @@ export function PrismColorPicker({
             style={{ gridTemplateColumns, gridAutoRows }}
             onPointerLeave={handleSwatchGridPointerLeave}
           >
-            {MATERIAL_SHADE_ORDER.map((shade) =>
-              PRISM_DEFAULT_COLOR_NAMES.map((colorName) => {
-                const swatchHexadecimalColor = colorHexValues[colorName][shade];
+            {shadeRows.map((shade) =>
+              families.map((family) => {
+                const swatchHexadecimalColor = resolvePickerCellHex(
+                  paletteId,
+                  family,
+                  shade,
+                );
                 if (!swatchHexadecimalColor) {
                   return (
                     <div
-                      key={`${colorName}-${String(shade)}`}
+                      key={`${family}-${String(shade)}`}
                       className="bg-muted/20"
                       aria-hidden
                     />
                   );
                 }
-                const normalizedSwatchHexadecimal =
-                  normalizeHexadecimalColorString(swatchHexadecimalColor);
+                const normalizedSwatchToken =
+                  normalizePickerColorToken(swatchHexadecimalColor);
                 const isSelected =
-                  normalizedActualSelectedHexadecimal ===
-                  normalizedSwatchHexadecimal;
-                const pickerDisplayTitle = materialSwatchPickerDisplayTitle(
-                  colorName,
-                  shade,
-                  swatchHexadecimalColor
-                );
+                  normalizedActualSelectedToken === normalizedSwatchToken;
+                const pickerDisplayTitle = swatchPickerDisplayTitle({
+                  palette: paletteId,
+                  family,
+                  shade: shade as PrismColorPickerSwatch["shade"],
+                  hex: swatchHexadecimalColor,
+                });
                 return (
                   <button
-                    key={`${colorName}-${String(shade)}`}
+                    key={`${family}-${String(shade)}`}
                     type="button"
                     title={pickerDisplayTitle}
                     aria-label={pickerDisplayTitle}
@@ -535,11 +665,11 @@ export function PrismColorPicker({
                     className={cn(
                       "border border-transparent transition-transform hover:z-10 hover:scale-110 hover:border-foreground/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring",
                       isSelected &&
-                        "z-10 ring-2 ring-ring ring-offset-1 ring-offset-background"
+                        "z-10 ring-2 ring-ring ring-offset-1 ring-offset-background",
                     )}
                   />
                 );
-              })
+              }),
             )}
           </div>
         </div>

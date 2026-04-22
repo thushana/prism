@@ -23,6 +23,17 @@ describe("PrismColor.Loop", () => {
   });
 });
 
+describe("PrismColor.syntax (tailwind)", () => {
+  it("uses resolved color strings (not var) so code blocks work when @theme keys are tree-shaken", () => {
+    const map = PrismColor.syntax.tokenStyles({
+      palette: "tailwind",
+      swatchPrimary: "violet",
+    });
+    expect(map.keyword.light).toMatch(/^oklch\(/);
+    expect(map.keyword.light).not.toContain("var(");
+  });
+});
+
 describe("resolveCodeBlockColor", () => {
   it("defaults to blue, range 2", () => {
     const r = resolveCodeBlockColor(undefined);
@@ -156,6 +167,19 @@ describe("PrismColor.gradient.linearStrings", () => {
     });
     expect(g.light).toContain("400");
     expect(g.dark).toContain("500");
+  });
+
+  it("stopResolution resolved uses literal colors (no var()) for tailwind swatches", () => {
+    const g = PrismColor.gradient.linearStrings({
+      palette: "tailwind",
+      swatches: ["violet", "pink"],
+      direction: "horizontal",
+      shade: { light: 400, dark: 700 },
+      stopResolution: "resolved",
+    });
+    expect(g.light).not.toContain("var(--");
+    expect(g.light).toContain("linear-gradient");
+    expect(g.light).toContain("oklch(");
   });
 });
 
