@@ -54,6 +54,7 @@ export function PrismColorPickerDemo(): React.JSX.Element {
         color={{ palette }}
         selectedColorHex={selectedColorHex}
         onSelectedColorChange={setSelectedColorHex}
+        showResolvedColorBelow
       />
     </div>
   );

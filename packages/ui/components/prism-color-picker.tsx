@@ -6,8 +6,10 @@ import { cn } from "@utilities";
 
 import { colorHexValues, type ColorName } from "../styles/color-values";
 import {
+  approximateRelativeLuminanceFromCssColor,
   normalizePrismColorSpec,
   PrismColor,
+  PRISM_TINTED_SURFACE_MAX_LUMA,
   prismDefaultFamilyKebabToColorName,
   type PartialPrismColorSpec,
   type PrismDefaultPaletteShadeKey,
@@ -312,6 +314,11 @@ export type PrismColorPickerProps = {
   onSelectedColorChange: (selectedHexadecimalColor: string) => void;
   /** Palette + future PrismColor fields; only `palette` is read today. */
   color?: PartialPrismColorSpec;
+  /**
+   * When true, shows the resolved CSS color (`#hex` or `oklch(...)`) on its own line under the trigger
+   * instead of inside it (keeps long oklch strings out of the pill).
+   */
+  showResolvedColorBelow?: boolean;
   id?: string;
   disabled?: boolean;
 };
@@ -321,6 +328,7 @@ export function PrismColorPicker({
   selectedColorHex,
   onSelectedColorChange,
   color: colorSpec,
+  showResolvedColorBelow = false,
   id,
   disabled = false,
 }: PrismColorPickerProps) {
@@ -381,7 +389,7 @@ export function PrismColorPicker({
 
   const triggerBackgroundToken =
     normalizedTokenForTriggerFace || "#e5e5e5";
-  const triggerForegroundHexadecimal = React.useMemo(
+  const triggerForegroundFallback = React.useMemo(
     () =>
       resolveTriggerForegroundHexadecimal(
         swatchForPresentationOnTriggerFace,
@@ -389,6 +397,31 @@ export function PrismColorPicker({
       ),
     [swatchForPresentationOnTriggerFace, triggerBackgroundToken],
   );
+
+  /**
+   * Same rule for default + Tailwind: when the trigger face reads as dark (by approximate luminance),
+   * label text uses the swatch family at shade 100 — not numeric shade alone (Tailwind vs Material differ).
+   */
+  const triggerTextColor = React.useMemo(() => {
+    const sw = swatchForPresentationOnTriggerFace;
+    if (
+      sw &&
+      approximateRelativeLuminanceFromCssColor(triggerBackgroundToken) <
+        PRISM_TINTED_SURFACE_MAX_LUMA
+    ) {
+      return PrismColor.hex({
+        palette: paletteId,
+        family: sw.family,
+        shade: 100,
+      });
+    }
+    return triggerForegroundFallback;
+  }, [
+    swatchForPresentationOnTriggerFace,
+    paletteId,
+    triggerBackgroundToken,
+    triggerForegroundFallback,
+  ]);
 
   const clipboardColorText = React.useMemo(
     () =>
@@ -489,19 +522,14 @@ export function PrismColorPicker({
   const shadeDisplayPart = swatchForPresentationOnTriggerFace
     ? materialShadeLabelDisplay(swatchForPresentationOnTriggerFace.shade)
     : "—";
-  const triggerFaceTokenDisplayPart =
-    normalizedTokenForTriggerFace || "—";
 
-  const luminanceForRing =
-    relativeLuminanceFromHexadecimal(
-      normalizeHexadecimalColorString(triggerBackgroundToken) || "#aaaaaa",
-    );
   const isDarkBackground =
-    Number.isFinite(luminanceForRing) && luminanceForRing < 0.45;
+    approximateRelativeLuminanceFromCssColor(triggerBackgroundToken) <
+    PRISM_TINTED_SURFACE_MAX_LUMA;
 
   const triggerInlineStyle: React.CSSProperties = {
     backgroundColor: triggerBackgroundToken,
-    color: triggerForegroundHexadecimal,
+    color: triggerTextColor,
     padding: `${PRISM_COLOR_PICKER_TRIGGER_PADDING_VERTICAL}px ${PRISM_COLOR_PICKER_TRIGGER_PADDING_HORIZONTAL}px`,
     gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
     borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
@@ -526,7 +554,13 @@ export function PrismColorPicker({
           id={triggerId}
           disabled={disabled}
           aria-label={
-            label ? undefined : PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL
+            label
+              ? undefined
+              : `${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${
+                  normalizedTokenForTriggerFace
+                    ? `. ${normalizedTokenForTriggerFace}`
+                    : ""
+                }`
           }
           aria-expanded={isOpen}
           aria-haspopup="dialog"
@@ -571,7 +605,7 @@ export function PrismColorPicker({
               as="span"
               className="shrink-0 tracking-tight text-current"
             >
-              {` • ${shadeDisplayPart} • ${triggerFaceTokenDisplayPart}`}
+              {` • ${shadeDisplayPart}`}
             </PrismTypography>
           </span>
           <ChevronDown
@@ -606,6 +640,19 @@ export function PrismColorPicker({
           />
         </button>
       </div>
+
+      {showResolvedColorBelow && normalizedTokenForTriggerFace ? (
+        <PrismTypography
+          role="label"
+          size="small"
+          font="mono"
+          as="div"
+          className="mt-1.5 max-w-full truncate text-muted-foreground"
+          title={normalizedTokenForTriggerFace}
+        >
+          {normalizedTokenForTriggerFace}
+        </PrismTypography>
+      ) : null}
 
       {isOpen ? (
         <div
