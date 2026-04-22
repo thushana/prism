@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  getColorForIndex,
   getDefaultPrismButtonPresetNames,
+  getPrismDefaultColorNameForIndex,
   PrismButton,
   PrismTypography,
 } from "@ui";
@@ -269,7 +269,7 @@ function usePresetColors(): Record<string, ColorName> {
   return useState(() => {
     const names = getDefaultPrismButtonPresetNames();
     return Object.fromEntries(
-      names.map((name, i) => [name, getColorForIndex(i)])
+      names.map((name, i) => [name, getPrismDefaultColorNameForIndex(i)])
     ) as Record<string, ColorName>;
   })[0];
 }

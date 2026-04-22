@@ -3,6 +3,7 @@ import { PrismBadgeDemo } from "./prism-badge";
 import { PrismButtonDemo } from "./prism-button";
 import { PrismCardDemo } from "./prism-card";
 import { PrismCodeBlockDemo } from "./prism-code-block";
+import { PrismColorDemo } from "./prism-color";
 import { PrismColorPickerDemo } from "./prism-color-picker";
 import { PrismDividerDemo } from "./prism-divider";
 import { PrismIconDemo } from "./prism-icon";
@@ -15,6 +16,7 @@ export type PrismAdminComponentSlug =
   | "prism-button"
   | "prism-card"
   | "prism-code-block"
+  | "prism-color"
   | "prism-color-picker"
   | "prism-divider"
   | "prism-icon"
@@ -52,6 +54,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     description:
       "Read-only string → Prism panel: optional highlight, line numbers, palette, copy.",
     Demo: PrismCodeBlockDemo,
+  },
+  "prism-color": {
+    title: "PrismColor",
+    description:
+      "ColorLoop, gradient.linearStrings, palette vars (default + tailwind), syntax preview.",
+    Demo: PrismColorDemo,
   },
   "prism-color-picker": {
     title: "PrismColorPicker",

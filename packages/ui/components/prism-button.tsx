@@ -10,7 +10,8 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
 import { gsap } from "gsap";
-import { colorSpectrum, type ColorName } from "../styles/color-spectrum";
+import { type ColorName } from "../styles/color-values";
+import { nextPrismDefaultColorName } from "../styles/prism-color";
 import type { PrismSize } from "../source/prism-size";
 import { resolvePrismButtonPreset } from "../source/prism-button-presets";
 
@@ -35,10 +36,9 @@ function toDataAttrs(
   return out;
 }
 
-/** Next color in MUI palette order (wraps after blueGrey to red) */
+/** Next color in default palette loop (same order as ColorLoop default). */
 function nextColorInSpectrum(color: ColorName): ColorName {
-  const i = colorSpectrum.indexOf(color);
-  return colorSpectrum[(i + 1) % colorSpectrum.length];
+  return nextPrismDefaultColorName(color);
 }
 
 /** Variant: `plain` = no icon, `icon` = with Lucide icon */

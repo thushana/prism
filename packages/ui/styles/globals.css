@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./colors.css" layer(theme);
+@import "./tailwind-colors.css" layer(theme);
 @import "./background-utilities.css";
 @import "./layout-wrappers.css";
 
@@ -64,6 +65,13 @@
 }
 
 :root {
+  /* Prism surface tokens (used with PrismColorSpec.surface) */
+  --prism-blur-max: 1.5rem;
+  --prism-blur-light: calc(var(--prism-blur-max) * 0.33);
+  --prism-blur-strong: calc(var(--prism-blur-max) * 0.66);
+  --prism-shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+  --prism-shadow-medium: 0 4px 12px 0 rgb(0 0 0 / 0.15);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

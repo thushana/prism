@@ -3,9 +3,9 @@
 import {
   PrismCodeBlock,
   PrismIcon,
-  PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES,
+  PRISM_DEFAULT_COLOR_LOOP,
   type PrismCodeBlockMode,
-  type PrismCodeBlockSyntaxColorFamily,
+  type PrismSwatchKey,
   PrismTypography,
 } from "@ui";
 import { useLayoutEffect, useMemo, useState } from "react";
@@ -123,14 +123,14 @@ const CUSTOMIZER_INPUT_CLASS =
 
 const CUSTOMIZER_SELECT_CLASS = `${CUSTOMIZER_INPUT_CLASS} appearance-none pr-10`;
 
-const SYNTAX_COLOR_FAMILY_OPTIONS: { value: PrismCodeBlockSyntaxColorFamily; label: string }[] =
-  PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES.map((value) => ({
+const SYNTAX_COLOR_FAMILY_OPTIONS: { value: PrismSwatchKey; label: string }[] =
+  [...PRISM_DEFAULT_COLOR_LOOP].map((value) => ({
     value,
     label: value,
   }));
 
-function randomMaterialColorFamily(): PrismCodeBlockSyntaxColorFamily {
-  const list = PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES;
+function randomMaterialColorFamily(): PrismSwatchKey {
+  const list = PRISM_DEFAULT_COLOR_LOOP;
   return list[Math.floor(Math.random() * list.length)]!;
 }
 
@@ -149,7 +149,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
   const [mode, setMode] = useState<PrismCodeBlockMode>("card");
   const [disableLineNumbers, setDisableLineNumbers] = useState(false);
   const [disableLanguageLabel, setDisableLanguageLabel] = useState(false);
-  const [color, setColor] = useState<PrismCodeBlockSyntaxColorFamily>("blue");
+  const [color, setColor] = useState<PrismSwatchKey>("blue");
 
   useLayoutEffect(() => {
     setColor(randomMaterialColorFamily());
@@ -173,7 +173,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
     const lines: string[] = ["<PrismCodeBlock"];
     lines.push(`  mode="${mode}"`);
     if (language) lines.push(`  language="${language}"`);
-    lines.push(`  color="${color}"`);
+    lines.push(`  color={{ swatchPrimary: "${color}" }}`);
     if (characterMaxWidth != null) {
       lines.push(`  characterMaxWidth={${characterMaxWidth}}`);
     }
@@ -299,7 +299,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
                 className={CUSTOMIZER_SELECT_CLASS}
                 value={color}
                 onChange={(e) =>
-                  setColor(e.target.value as PrismCodeBlockSyntaxColorFamily)
+                  setColor(e.target.value as PrismSwatchKey)
                 }
               >
                 {SYNTAX_COLOR_FAMILY_OPTIONS.map((o) => (
@@ -384,7 +384,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             disableLineNumbers={disableLineNumbers}
             disableLanguageLabel={disableLanguageLabel}
             disableCopyButton={disableCopyButton}
-            color={color}
+            color={{ swatchPrimary: color }}
             characterMaxWidth={characterMaxWidth}
             language={languageProp}
           >
@@ -407,7 +407,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             mode="card"
             disableLineNumbers={false}
             disableLanguageLabel={false}
-            color="grey"
+            color={{ swatchPrimary: "grey" }}
             language="tsx"
           >
             {generatedUsage}

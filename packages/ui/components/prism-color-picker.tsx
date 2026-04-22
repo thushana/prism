@@ -5,7 +5,7 @@ import { ChevronDown, Copy, Palette } from "lucide-react";
 import { cn } from "@utilities";
 
 import { colorHexValues, type ColorName } from "../styles/color-values";
-import { colorSpectrum } from "../styles/color-spectrum";
+import { PRISM_DEFAULT_COLOR_NAMES } from "../styles/prism-color";
 import { PrismTypography } from "./prism-typography";
 
 /** Matches {@link PrismButton} normal-size vertical padding (`BASE_PADDING_VERTICAL`). */
@@ -62,7 +62,7 @@ export function findMaterialSwatchForHex(
 ): { colorName: ColorName; shade: MaterialShadeKey; hex: string } | null {
   const normalized = normalizeHexadecimalColorString(hexadecimalColor);
   if (!normalized || normalized.length < 4) return null;
-  for (const colorName of colorSpectrum) {
+  for (const colorName of PRISM_DEFAULT_COLOR_NAMES) {
     const shades = colorHexValues[colorName];
     for (const shade of MATERIAL_SHADE_ORDER) {
       const value = shades[shade];
@@ -140,7 +140,7 @@ export function findNearestMaterialSwatchForHexadecimal(
     | undefined;
 
   for (const shade of MATERIAL_SHADE_ORDER) {
-    for (const colorName of colorSpectrum) {
+    for (const colorName of PRISM_DEFAULT_COLOR_NAMES) {
       const hex = colorHexValues[colorName][shade];
       if (!hex) continue;
       const rgb = hexadecimalColorToRgbChannels(hex);
@@ -494,7 +494,7 @@ export function PrismColorPicker({
             onPointerLeave={handleSwatchGridPointerLeave}
           >
             {MATERIAL_SHADE_ORDER.map((shade) =>
-              colorSpectrum.map((colorName) => {
+              PRISM_DEFAULT_COLOR_NAMES.map((colorName) => {
                 const swatchHexadecimalColor = colorHexValues[colorName][shade];
                 if (!swatchHexadecimalColor) {
                   return (

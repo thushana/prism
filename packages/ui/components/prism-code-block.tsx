@@ -7,6 +7,14 @@ import { cn } from "@utilities";
 import { PrismIcon } from "./prism-icon";
 import { PrismTypography } from "./prism-typography";
 
+import {
+  PrismColor,
+  PRISM_CODE_BLOCK_BASE_CSS,
+  resolveCodeBlockColor,
+  type PartialPrismColorSpec,
+  type SyntaxPaletteMap,
+} from "../styles/prism-color";
+
 // ─── types ───────────────────────────────────────────────────────────────────
 
 /** Panel + wash: `card` = filled Material tint; `transparent` = no panel fill. */
@@ -21,35 +29,6 @@ export type PrismCodeBlockHighlightLanguage =
   | "css"
   | "json";
 
-/**
- * Material color families that exist in `@ui/styles/colors.css` (kebab-case, no shade).
- * Pass one as {@link PrismCodeBlockProps.color}; token colors are derived.
- */
-export const PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES = [
-  "red",
-  "pink",
-  "purple",
-  "deep-purple",
-  "indigo",
-  "blue",
-  "light-blue",
-  "cyan",
-  "teal",
-  "green",
-  "light-green",
-  "lime",
-  "yellow",
-  "amber",
-  "orange",
-  "deep-orange",
-  "brown",
-  "blue-grey",
-  "grey",
-] as const;
-
-export type PrismCodeBlockSyntaxColorFamily =
-  (typeof PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES)[number];
-
 export type PrismCodeBlockProps = {
   children: string;
   language?: string;
@@ -59,21 +38,14 @@ export type PrismCodeBlockProps = {
   disableLanguageLabel?: boolean;
   characterMaxWidth?: number | null;
   /**
-   * Material palette family (no shade), e.g. `"purple"`. Keywords/tags/braces stay on that
-   * family’s shade ramp; **string** uses the ring **+1** family, **property** **−1**, **number**
-   * **−2** (e.g. purple → deep-purple, pink, red). Values resolve to `var(--color-{family}-{n})`
-   * in `colors.css`.
+   * PrismColor spec: `swatchPrimary`, optional `palette`, optional `colorLoop`
+   * (`range` caps ring offsets; omit for full ±2 behaviour).
    */
-  color?: PrismCodeBlockSyntaxColorFamily | (string & {});
+  color?: PartialPrismColorSpec;
   /** When set, the copy control is not rendered. */
   disableCopyButton?: boolean;
   className?: string;
 };
-
-// ─── syntax token map ──────────────────────────────────────────────────────────
-// Inline-style colors backed by Prism @theme Material palette vars (see
-// styles/colors.css). Inline styles bypass any class-generation issues so
-// highlighting always paints; dark variants resolved via the .dark scope below.
 
 type TokenKind =
   | "keyword"
@@ -85,141 +57,6 @@ type TokenKind =
   | "punct"
   | "brace"
   | "plain";
-
-type TokenStyle = { light: string; dark: string };
-
-function paletteVar(shade: string): string {
-  return `var(--color-${shade})`;
-}
-
-function pair(lightShade: string, darkShade: string): TokenStyle {
-  return { light: paletteVar(lightShade), dark: paletteVar(darkShade) };
-}
-
-type SyntaxPaletteMap = Record<Exclude<TokenKind, "plain">, TokenStyle>;
-
-const TOKEN_KINDS_NO_PLAIN: Exclude<TokenKind, "plain">[] = [
-  "keyword",
-  "string",
-  "comment",
-  "tag",
-  "property",
-  "number",
-  "punct",
-  "brace",
-];
-
-const MATERIAL_SYNTAX_RING = PRISM_CODE_BLOCK_MATERIAL_COLOR_FAMILIES;
-
-function materialColor(family: string, shade: number): string {
-  return `var(--color-${family}-${shade})`;
-}
-
-/** Material palette starts at 50; lighten further with 50% `white` (CSS keyword). */
-function veilHalfWhite(base: string): string {
-  return `color-mix(in srgb, ${base} 50%, white)`;
-}
-
-function normalizeMaterialFamily(
-  raw: string | undefined,
-): PrismCodeBlockSyntaxColorFamily {
-  const s = (raw ?? "blue")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "");
-  return (MATERIAL_SYNTAX_RING as readonly string[]).includes(s)
-    ? (s as PrismCodeBlockSyntaxColorFamily)
-    : "blue";
-}
-
-/** Walk the ordered hue ring: positive = next family, negative = previous (wraps). */
-function ringFamilyAtOffset(
-  primary: PrismCodeBlockSyntaxColorFamily,
-  offset: number,
-): PrismCodeBlockSyntaxColorFamily {
-  const i = MATERIAL_SYNTAX_RING.indexOf(primary);
-  const base = i === -1 ? MATERIAL_SYNTAX_RING.indexOf("blue") : i;
-  const n = MATERIAL_SYNTAX_RING.length;
-  const j = (base + offset) % n;
-  return MATERIAL_SYNTAX_RING[(j + n) % n]!;
-}
-
-function pairFamilyShades(
-  family: PrismCodeBlockSyntaxColorFamily,
-  lightShade: number,
-  darkShade: number,
-): TokenStyle {
-  return pair(`${family}-${lightShade}`, `${family}-${darkShade}`);
-}
-
-/** Full token ramp: primary family + immediate ring neighbours (±1, −2); all vars from `colors.css`. */
-function buildSyntaxTokenMapFromFamily(
-  primary: PrismCodeBlockSyntaxColorFamily,
-): SyntaxPaletteMap {
-  if (primary === "grey") {
-    return {
-      keyword:  pairFamilyShades("grey", 800, 300),
-      string:   pairFamilyShades("grey", 700, 400),
-      comment:  pair("blue-grey-500", "blue-grey-400"),
-      tag:      pairFamilyShades("grey", 800, 300),
-      property: pairFamilyShades("grey", 700, 400),
-      number:   pairFamilyShades("grey", 700, 400),
-      punct:    pairFamilyShades("grey", 600, 400),
-      brace:    pairFamilyShades("grey", 900, 300),
-    };
-  }
-
-  /** Ring neighbours for tonal spread: +1 / −1 for string & property, −2 for numbers. */
-  const oneUp = ringFamilyAtOffset(primary, 1);
-  const oneDown = ringFamilyAtOffset(primary, -1);
-  const twoDown = ringFamilyAtOffset(primary, -2);
-
-  return {
-    keyword:  pairFamilyShades(primary, 800, 300),
-    string:   pairFamilyShades(oneUp, 800, 300),
-    comment:  pair("blue-grey-500", "blue-grey-400"),
-    tag:      pairFamilyShades(primary, 700, 400),
-    property: pairFamilyShades(oneDown, 700, 400),
-    number:   pairFamilyShades(twoDown, 900, 200),
-    punct:    pair("grey-600", "grey-400"),
-    brace:    pairFamilyShades(primary, 900, 300),
-  };
-}
-
-function panelFillFor(
-  syntaxFamily: PrismCodeBlockSyntaxColorFamily,
-  panelMode: PrismCodeBlockMode,
-): { light: string; dark: string } {
-  if (panelMode === "transparent") {
-    return { light: "transparent", dark: "transparent" };
-  }
-  if (syntaxFamily === "grey") {
-    return {
-      light: veilHalfWhite(materialColor("grey", 100)),
-      dark: materialColor("grey", 900),
-    };
-  }
-  return {
-    light: veilHalfWhite(materialColor(syntaxFamily, 50)),
-    dark: materialColor(syntaxFamily, 900),
-  };
-}
-
-function darkTokenRulesForInstance(
-  instanceId: string,
-  map: SyntaxPaletteMap,
-): string {
-  return TOKEN_KINDS_NO_PLAIN.map(
-    (k) =>
-      `.dark [data-slot="code-block"][data-prism-cb="${instanceId}"] [data-tk="${k}"] { color: ${map[k].dark} !important; }`,
-  ).join("\n");
-}
-
-/** Panel fill reads `--pcb-fill` / `--pcb-fill-dark` from each `[data-slot="code-block"]`. */
-const PRISM_CODE_BLOCK_BASE_CSS = `
-[data-slot="code-block"] .prism-code-block-panel-fill { background: var(--pcb-fill); }
-.dark [data-slot="code-block"] .prism-code-block-panel-fill { background: var(--pcb-fill-dark) !important; }
-`;
 
 type Token = { kind: TokenKind; text: string };
 
@@ -556,19 +393,36 @@ function PrismCodeBlock({
 }: PrismCodeBlockProps): React.JSX.Element {
   const [copied, setCopied] = React.useState(false);
 
-  const materialFamily = normalizeMaterialFamily(colorProp);
+  const resolvedColor = React.useMemo(
+    () => resolveCodeBlockColor(colorProp),
+    [
+      colorProp?.palette,
+      colorProp?.swatchPrimary,
+      colorProp?.colorLoop?.center,
+      colorProp?.colorLoop?.range,
+    ],
+  );
   const syntaxTokenMap = React.useMemo(
-    () => buildSyntaxTokenMapFromFamily(materialFamily),
-    [materialFamily],
+    () => PrismColor.syntax.tokenStylesFromResolved(resolvedColor),
+    [
+      resolvedColor.palette,
+      resolvedColor.primary,
+      resolvedColor.colorLoopRange,
+    ],
   );
   const panelFill = React.useMemo(
-    () => panelFillFor(materialFamily, mode),
-    [materialFamily, mode],
+    () => PrismColor.syntax.panelFillFromResolved(resolvedColor, mode),
+    [
+      resolvedColor.palette,
+      resolvedColor.primary,
+      resolvedColor.colorLoopRange,
+      mode,
+    ],
   );
 
   const reactInstanceId = React.useId().replace(/[^a-zA-Z0-9]/g, "") || "pcb";
   const instanceDarkCss = React.useMemo(
-    () => darkTokenRulesForInstance(reactInstanceId, syntaxTokenMap),
+    () => PrismColor.syntax.darkTokenCss(reactInstanceId, syntaxTokenMap),
     [reactInstanceId, syntaxTokenMap],
   );
 
@@ -604,7 +458,8 @@ function PrismCodeBlock({
       <div
         data-slot="code-block"
         data-mode={mode}
-        data-prism-material-family={materialFamily}
+        data-prism-palette={resolvedColor.palette}
+        data-prism-swatch-primary={resolvedColor.primary}
         data-prism-cb={reactInstanceId}
         className={cn("min-w-0 font-mono", className)}
         style={{
