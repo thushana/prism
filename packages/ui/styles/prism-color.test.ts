@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  approximateRelativeLuminanceFromCssColor,
   getPrismDefaultColorNameForIndex,
   nextPrismDefaultColorName,
   normalizePrismColorSpec,
@@ -7,6 +8,7 @@ import {
   PRISM_DEFAULT_COLOR_NAMES,
   PRISM_TAILWIND_COLOR_LOOP,
   PrismColor,
+  prismLabelOnFilledSurface,
   resolveCodeBlockColor,
 } from "./prism-color";
 import { tailwindColorValues } from "./tailwind-color-values";
@@ -187,5 +189,52 @@ describe("PrismColor.hex (default)", () => {
   it("returns a hex string for Material purple 600", () => {
     const v = PrismColor.hex({ family: "purple", shade: 600 });
     expect(v).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+});
+
+describe("approximateRelativeLuminanceFromCssColor", () => {
+  it("parses 6-digit hex", () => {
+    expect(approximateRelativeLuminanceFromCssColor("#000000")).toBeLessThan(0.1);
+    expect(approximateRelativeLuminanceFromCssColor("#ffffff")).toBeGreaterThan(0.9);
+  });
+
+  it("reads oklch lightness from leading percentage", () => {
+    const dark = approximateRelativeLuminanceFromCssColor("oklch(35% 0.15 280)");
+    const light = approximateRelativeLuminanceFromCssColor("oklch(96% 0.02 280)");
+    expect(dark).toBeLessThan(0.45);
+    expect(light).toBeGreaterThan(0.45);
+  });
+});
+
+describe("prismLabelOnFilledSurface", () => {
+  it("uses label family shade 100 on dark hex (default palette)", () => {
+    const onBlue = prismLabelOnFilledSurface({
+      palette: "default",
+      surfaceCss: "#1565c0",
+      labelFamily: "blue",
+    });
+    expect(onBlue).toBe(PrismColor.hex({ palette: "default", family: "blue", shade: 100 }));
+  });
+
+  it("uses label family shade 100 on dark oklch (tailwind palette)", () => {
+    const label = prismLabelOnFilledSurface({
+      palette: "tailwind",
+      surfaceCss: "oklch(32% 0.18 280)",
+      labelFamily: "violet",
+    });
+    expect(label).toBe(
+      PrismColor.hex({ palette: "tailwind", family: "violet", shade: 100 }),
+    );
+  });
+
+  it("uses neutral 700 on light surfaces", () => {
+    const label = prismLabelOnFilledSurface({
+      palette: "tailwind",
+      surfaceCss: "#f4f4f5",
+      labelFamily: "violet",
+    });
+    expect(label).toBe(
+      PrismColor.hex({ palette: "tailwind", family: "zinc", shade: 700 }),
+    );
   });
 });

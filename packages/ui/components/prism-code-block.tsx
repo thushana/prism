@@ -10,6 +10,7 @@ import { PrismTypography } from "./prism-typography";
 import {
   PrismColor,
   PRISM_CODE_BLOCK_BASE_CSS,
+  prismLabelOnFilledSurface,
   resolveCodeBlockColor,
   type PartialPrismColorSpec,
   type SyntaxPaletteMap,
@@ -433,6 +434,28 @@ function PrismCodeBlock({
   const chipLabel = normalizedLanguage ?? "code";
   const hideLineNumbers = disableLineNumbers;
 
+  /** Gutter digits: same luminance rule as the color picker (default + Tailwind). */
+  const lineNumberStyle = React.useMemo((): React.CSSProperties => {
+    const base: React.CSSProperties = {
+      flexShrink: 0,
+      fontSize: "0.6rem",
+      lineHeight: 1.2,
+      fontWeight: 300,
+      userSelect: "none",
+      fontVariantNumeric: "tabular-nums",
+    };
+    const color = prismLabelOnFilledSurface({
+      palette: resolvedColor.palette,
+      surfaceCss: panelFill.light,
+      labelFamily: resolvedColor.primary,
+    });
+    return { ...base, color, opacity: 0.92 };
+  }, [
+    resolvedColor.palette,
+    resolvedColor.primary,
+    panelFill.light,
+  ]);
+
   const lines = children.replace(/\n$/, "").split("\n");
 
   const handleCopy = async () => {
@@ -484,18 +507,7 @@ function PrismCodeBlock({
               {lines.map((line, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", minHeight: "1.6em" }}>
                   {!hideLineNumbers ? (
-                    <span
-                      aria-hidden
-                      style={{
-                        flexShrink: 0,
-                        fontSize: "0.6rem",
-                        lineHeight: 1.2,
-                        fontWeight: 300,
-                        opacity: 0.35,
-                        userSelect: "none",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
+                    <span aria-hidden style={lineNumberStyle}>
                       {i + 1}
                     </span>
                   ) : null}
