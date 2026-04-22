@@ -15,6 +15,7 @@ export { PrismBadgeDemo } from "./prism-badge";
 export { PrismButtonDemo } from "./prism-button";
 export { PrismCardDemo } from "./prism-card";
 export { PrismCodeBlockDemo } from "./prism-code-block";
+export { PrismColorDemo } from "./prism-color";
 export { PrismColorPickerDemo } from "./prism-color-picker";
 export { PrismDividerDemo } from "./prism-divider";
 export { PrismIconDemo } from "./prism-icon";

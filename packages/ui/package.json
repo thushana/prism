@@ -9,19 +9,20 @@
   },
   "scripts": {
     "generate:colors": "node scripts/generate-material-colors.js",
+    "generate:tailwind-colors": "node scripts/generate-tailwind-colors.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint components source styles",
     "test": "vitest",
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@prism/utilities": "file:../utilities",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gsap": "^3.13.0",
     "lucide-react": "^1.0.0",
-    "tailwind-merge": "^3.5.0",
-    "@prism/utilities": "file:../utilities"
+    "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {
     "next": "^16.0.0",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@types/react": "^19.2.6",
     "material-ui-colors": "^1.0.0",
+    "tailwindcss": "^4.2.2",
     "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   }
