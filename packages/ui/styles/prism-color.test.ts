@@ -192,6 +192,14 @@ describe("PrismColor.hex (default)", () => {
   });
 });
 
+describe("PrismColor.relativeLuminanceFromHex", () => {
+  it("matches WCAG black / white endpoints", () => {
+    expect(PrismColor.relativeLuminanceFromHex("#000000")).toBeLessThan(0.1);
+    expect(PrismColor.relativeLuminanceFromHex("#ffffff")).toBeGreaterThan(0.9);
+    expect(PrismColor.relativeLuminanceFromHex("#fff")).toBeGreaterThan(0.9);
+  });
+});
+
 describe("approximateRelativeLuminanceFromCssColor", () => {
   it("parses 6-digit hex", () => {
     expect(approximateRelativeLuminanceFromCssColor("#000000")).toBeLessThan(0.1);

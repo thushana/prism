@@ -271,27 +271,13 @@ export function findNearestMaterialSwatchForHexadecimal(
   };
 }
 
-/** WCAG relative luminance 0–1 — works for `#rrggbb` inputs only; other syntax falls back to mid gray. */
-function relativeLuminanceFromHexadecimal(hexadecimalColor: string): number {
-  const rgb = hexadecimalColorToRgbChannels(hexadecimalColor);
-  if (!rgb) return 0.5;
-  const linearizeChannel = (channel: number) => {
-    const x = channel / 255;
-    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
-  };
-  const red = linearizeChannel(rgb.red);
-  const green = linearizeChannel(rgb.green);
-  const blue = linearizeChannel(rgb.blue);
-  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-}
-
 function resolveTriggerForegroundHexadecimal(
   swatchForLabeling: PrismColorPickerSwatch | null,
   triggerBackgroundToken: string,
 ): string {
   const normalizedBackground =
     normalizeHexadecimalColorString(triggerBackgroundToken) || "#808080";
-  const luminance = relativeLuminanceFromHexadecimal(normalizedBackground);
+  const luminance = PrismColor.relativeLuminanceFromHex(normalizedBackground);
 
   if (swatchForLabeling && swatchForLabeling.palette === "default") {
     const cn = prismDefaultFamilyKebabToColorName(swatchForLabeling.family);
