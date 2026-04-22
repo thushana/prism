@@ -219,11 +219,42 @@ const TOKEN_KINDS_NO_PLAIN: Exclude<TokenKind, "plain">[] = [
   "brace",
 ];
 
+/**
+ * Parse `{family}-{shade}` (e.g. `slate-500`, `blue-grey-400`). Shade must be numeric (Tailwind + Material ramps).
+ */
+function parseFamilyNumericShadeSlug(slug: string): {
+  family: PrismSwatchKey;
+  shade: number;
+} | null {
+  const m = slug.match(/^(.*)-(\d+)$/);
+  if (!m) return null;
+  return { family: m[1]!, shade: parseInt(m[2]!, 10) };
+}
+
 function pairSlug(
   palette: PrismPaletteId,
   lightSlug: string,
   darkSlug: string,
+  resolvedSyntaxColors: boolean,
 ): TokenStyle {
+  if (resolvedSyntaxColors) {
+    const a = parseFamilyNumericShadeSlug(lightSlug);
+    const b = parseFamilyNumericShadeSlug(darkSlug);
+    if (a && b) {
+      return {
+        light: PrismColor.hex({
+          palette,
+          family: a.family,
+          shade: a.shade,
+        }),
+        dark: PrismColor.hex({
+          palette,
+          family: b.family,
+          shade: b.shade,
+        }),
+      };
+    }
+  }
   return {
     light: cssVarForSlug(palette, lightSlug),
     dark: cssVarForSlug(palette, darkSlug),
@@ -236,19 +267,30 @@ function neutralRampFamily(palette: PrismPaletteId): PrismSwatchKey {
 }
 
 /** Comment tokens: Material uses blue-grey; Tailwind uses slate (no blue-grey family). */
-function syntaxCommentPair(palette: PrismPaletteId): TokenStyle {
+function syntaxCommentPair(
+  palette: PrismPaletteId,
+  resolvedSyntaxColors: boolean,
+): TokenStyle {
   if (palette === "tailwind") {
-    return pairSlug(palette, "slate-500", "slate-400");
+    return pairSlug(palette, "slate-500", "slate-400", resolvedSyntaxColors);
   }
-  return pairSlug(palette, "blue-grey-500", "blue-grey-400");
+  return pairSlug(
+    palette,
+    "blue-grey-500",
+    "blue-grey-400",
+    resolvedSyntaxColors,
+  );
 }
 
 /** Punctuation: grey-600 ramp vs zinc for tailwind. */
-function syntaxPunctPair(palette: PrismPaletteId): TokenStyle {
+function syntaxPunctPair(
+  palette: PrismPaletteId,
+  resolvedSyntaxColors: boolean,
+): TokenStyle {
   if (palette === "tailwind") {
-    return pairSlug(palette, "zinc-600", "zinc-400");
+    return pairSlug(palette, "zinc-600", "zinc-400", resolvedSyntaxColors);
   }
-  return pairSlug(palette, "grey-600", "grey-400");
+  return pairSlug(palette, "grey-600", "grey-400", resolvedSyntaxColors);
 }
 
 function pairFamilyShades(
@@ -256,7 +298,14 @@ function pairFamilyShades(
   family: PrismSwatchKey,
   lightShade: number,
   darkShade: number,
+  resolvedSyntaxColors: boolean,
 ): TokenStyle {
+  if (resolvedSyntaxColors) {
+    return {
+      light: PrismColor.hex({ palette, family, shade: lightShade }),
+      dark: PrismColor.hex({ palette, family, shade: darkShade }),
+    };
+  }
   return {
     light: cssVarForFamilyShade(palette, family, lightShade),
     dark: cssVarForFamilyShade(palette, family, darkShade),
@@ -333,6 +382,9 @@ function buildSyntaxTokenMap(
   primary: PrismSwatchKey,
   range: number,
 ): SyntaxPaletteMap {
+  /** Tailwind `--color-tailwind-*` theme keys are often omitted from CSS when unused; use literal oklch/hex. */
+  const resolvedSyntaxColors = palette === "tailwind";
+
   const oneUp =
     range >= 1 ? ringFamilyAtOffset(palette, primary, 1) : primary;
   const oneDown =
@@ -343,26 +395,26 @@ function buildSyntaxTokenMap(
   if (primary === "grey" || primary === "gray") {
     const g = neutralRampFamily(palette);
     return {
-      keyword: pairFamilyShades(palette, g, 800, 300),
-      string: pairFamilyShades(palette, g, 700, 400),
-      comment: syntaxCommentPair(palette),
-      tag: pairFamilyShades(palette, g, 800, 300),
-      property: pairFamilyShades(palette, g, 700, 400),
-      number: pairFamilyShades(palette, g, 700, 400),
-      punct: pairFamilyShades(palette, g, 600, 400),
-      brace: pairFamilyShades(palette, g, 900, 300),
+      keyword: pairFamilyShades(palette, g, 800, 300, resolvedSyntaxColors),
+      string: pairFamilyShades(palette, g, 700, 400, resolvedSyntaxColors),
+      comment: syntaxCommentPair(palette, resolvedSyntaxColors),
+      tag: pairFamilyShades(palette, g, 800, 300, resolvedSyntaxColors),
+      property: pairFamilyShades(palette, g, 700, 400, resolvedSyntaxColors),
+      number: pairFamilyShades(palette, g, 700, 400, resolvedSyntaxColors),
+      punct: pairFamilyShades(palette, g, 600, 400, resolvedSyntaxColors),
+      brace: pairFamilyShades(palette, g, 900, 300, resolvedSyntaxColors),
     };
   }
 
   return {
-    keyword: pairFamilyShades(palette, primary, 800, 300),
-    string: pairFamilyShades(palette, oneUp, 800, 300),
-    comment: syntaxCommentPair(palette),
-    tag: pairFamilyShades(palette, primary, 700, 400),
-    property: pairFamilyShades(palette, oneDown, 700, 400),
-    number: pairFamilyShades(palette, twoDown, 900, 200),
-    punct: syntaxPunctPair(palette),
-    brace: pairFamilyShades(palette, primary, 900, 300),
+    keyword: pairFamilyShades(palette, primary, 800, 300, resolvedSyntaxColors),
+    string: pairFamilyShades(palette, oneUp, 800, 300, resolvedSyntaxColors),
+    comment: syntaxCommentPair(palette, resolvedSyntaxColors),
+    tag: pairFamilyShades(palette, primary, 700, 400, resolvedSyntaxColors),
+    property: pairFamilyShades(palette, oneDown, 700, 400, resolvedSyntaxColors),
+    number: pairFamilyShades(palette, twoDown, 900, 200, resolvedSyntaxColors),
+    punct: syntaxPunctPair(palette, resolvedSyntaxColors),
+    brace: pairFamilyShades(palette, primary, 900, 300, resolvedSyntaxColors),
   };
 }
 
@@ -374,11 +426,29 @@ function panelFillFor(
   if (panelMode === "transparent") {
     return { light: "transparent", dark: "transparent" };
   }
+  const resolvedSyntaxColors = palette === "tailwind";
+
   if (syntaxFamily === "grey" || syntaxFamily === "gray") {
     const g = neutralRampFamily(palette);
+    if (resolvedSyntaxColors) {
+      const lightBase = PrismColor.hex({ palette, family: g, shade: 100 });
+      const darkBase = PrismColor.hex({ palette, family: g, shade: 900 });
+      return {
+        light: veilHalfWhite(lightBase),
+        dark: darkBase,
+      };
+    }
     return {
       light: veilHalfWhite(cssVarForFamilyShade(palette, g, 100)),
       dark: cssVarForFamilyShade(palette, g, 900),
+    };
+  }
+  if (resolvedSyntaxColors) {
+    const lightBase = PrismColor.hex({ palette, family: syntaxFamily, shade: 50 });
+    const darkBase = PrismColor.hex({ palette, family: syntaxFamily, shade: 900 });
+    return {
+      light: veilHalfWhite(lightBase),
+      dark: darkBase,
     };
   }
   return {
@@ -409,6 +479,21 @@ function kebabToColorName(kebab: PrismSwatchKey): ColorName | null {
   }
   return null;
 }
+
+/** Default palette only: maps kebab-case family (`deep-purple`) to generated {@link ColorName}. */
+export function prismDefaultFamilyKebabToColorName(
+  kebab: PrismSwatchKey,
+): ColorName | null {
+  return kebabToColorName(kebab);
+}
+
+/** Material numeric ramp + accent keys (see `color-values.ts`). */
+export type PrismDefaultPaletteShadeKey =
+  | number
+  | "a100"
+  | "a200"
+  | "a400"
+  | "a700";
 
 function gradientDirectionCss(
   direction: "horizontal" | "vertical" | "angled",
@@ -495,14 +580,19 @@ export const PrismColor = {
 
   /**
    * Resolved color string: hex from `color-values.ts` (default) or `tailwind-color-values.ts` (tailwind, often oklch).
+   * Tailwind palette accepts numeric shades only; default palette also accepts Material accent keys (`a100`…).
    */
   hex(opts: {
     palette?: PrismPaletteId;
     family: PrismSwatchKey;
-    shade: number;
+    shade: PrismDefaultPaletteShadeKey;
   }): string {
     const palette = resolvePaletteId(opts.palette);
     if (palette === "tailwind") {
+      if (typeof opts.shade !== "number") {
+        warnPrismHexFallback("tailwind palette requires numeric shade", opts.shade);
+        return PRISM_HEX_FALLBACK;
+      }
       const fam = opts.family as TailwindPaletteFamily;
       const row = tailwindColorValues[fam];
       if (!row) {
@@ -601,8 +691,14 @@ export const PrismColor = {
       swatches: PrismSwatchKey[];
       direction: "horizontal" | "vertical" | "angled";
       shade?: number | { light: number; dark: number };
+      /**
+       * `cssVar` — `var(--color-*)` stops (needs theme tokens in CSS). Prefer `resolved` when
+       * inlined in `style=` and the bundle may omit unused `@theme` keys (common for Tailwind-prefixed vars).
+       */
+      stopResolution?: "cssVar" | "resolved";
     }): { light: string; dark: string } {
       const palette = resolvePaletteId(opts.palette);
+      const resolution = opts.stopResolution ?? "cssVar";
       const dir = gradientDirectionCss(opts.direction);
       const swatches = opts.swatches;
       const n = swatches.length;
@@ -623,7 +719,11 @@ export const PrismColor = {
       const build = (shadeNum: number): string => {
         const stops = swatches.map((fam, i) => {
           const pct = n === 1 ? 50 : (i / (n - 1)) * 100;
-          return `${cssVarForFamilyShade(palette, fam, shadeNum)} ${pct}%`;
+          const colorToken =
+            resolution === "resolved"
+              ? PrismColor.hex({ palette, family: fam, shade: shadeNum })
+              : cssVarForFamilyShade(palette, fam, shadeNum);
+          return `${colorToken} ${pct}%`;
         });
         return `linear-gradient(${dir}, ${stops.join(", ")})`;
       };

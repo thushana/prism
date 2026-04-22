@@ -42,6 +42,39 @@ function colorLoopChips(
   return out;
 }
 
+/** Readable label on arbitrary CSS color from {@link PrismColor.hex} (#hex or oklch). */
+function foregroundForFill(cssColor: string): string {
+  const t = cssColor.trim();
+  const hexMatch = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(t);
+  if (hexMatch) {
+    const compact = hexMatch[1]!;
+    const full =
+      compact.length === 3
+        ? compact
+            .split("")
+            .map((c) => c + c)
+            .join("")
+        : compact;
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    const rs = r / 255;
+    const gs = g / 255;
+    const bs = b / 255;
+    const lin = (x: number) =>
+      x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    const lum =
+      0.2126 * lin(rs) + 0.7152 * lin(gs) + 0.0722 * lin(bs);
+    return lum < 0.45 ? "#ffffff" : "#171717";
+  }
+  const oklch = /^oklch\(\s*([\d.]+)%/i.exec(t);
+  if (oklch) {
+    const lp = parseFloat(oklch[1]!);
+    return lp > 62 ? "#171717" : "#ffffff";
+  }
+  return "#ffffff";
+}
+
 /**
  * Admin: PrismColor — ColorLoop, gradient builder, syntax via PrismCodeBlock, both palettes.
  */
@@ -72,6 +105,9 @@ export function PrismColorDemo(): JSX.Element {
         swatches: [g1, g2, g3],
         direction: gradDir,
         shade: { light: gradShadeLight, dark: gradShadeDark },
+        // Tailwind --color-tailwind-* theme keys are often tree-shaken from CSS unless a utility references them;
+        // resolved stops (hex/oklch) keep inline previews working.
+        stopResolution: palette === "tailwind" ? "resolved" : "cssVar",
       }),
     [palette, g1, g2, g3, gradDir, gradShadeLight, gradShadeDark],
   );
@@ -188,20 +224,26 @@ ${spec.split("\n").join("\n  ")}
         ColorLoop visualization
       </PrismTypography>
       <div className="mb-8 flex flex-wrap gap-2">
-        {loopVisual.map(({ offset, family }) => (
-          <span
-            key={`${offset}-${family}`}
-            title={`offset ${offset}`}
-            className="rounded-md border border-border px-2 py-1 font-mono text-xs"
-            style={{
-              backgroundColor: PrismColor.var({ palette, family, shade: 500 }),
-              color: "white",
-              textShadow: "0 0 2px rgb(0 0 0 / 0.6)",
-            }}
-          >
-            {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}: {family}
-          </span>
-        ))}
+        {loopVisual.map(({ offset, family }) => {
+          const fill = PrismColor.hex({ palette, family, shade: 500 });
+          const fg = foregroundForFill(fill);
+          return (
+            <span
+              key={`${offset}-${family}`}
+              title={`offset ${offset}`}
+              className="rounded-md border border-border px-2 py-1 font-mono text-xs"
+              style={{
+                backgroundColor: fill,
+                color: fg,
+                textShadow:
+                  fg === "#ffffff" ? "0 0 2px rgb(0 0 0 / 0.55)" : undefined,
+              }}
+            >
+              {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}:{" "}
+              {family}
+            </span>
+          );
+        })}
       </div>
 
       <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
