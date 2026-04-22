@@ -547,6 +547,39 @@ export function normalizePrismColorSpec(
   };
 }
 
+// ─── WCAG luminance (shared: PrismColor.relativeLuminanceFromHex + CSS string approx.) ─
+
+function parseHex6RgbChannels(hexInput: string): { r: number; g: number; b: number } | null {
+  const n = hexInput.trim().toLowerCase();
+  const withHash = n.startsWith("#") ? n : `#${n}`;
+  const compact = withHash.slice(1);
+  if (/^[0-9a-f]{6}$/i.test(compact)) {
+    return {
+      r: parseInt(compact.slice(0, 2), 16),
+      g: parseInt(compact.slice(2, 4), 16),
+      b: parseInt(compact.slice(4, 6), 16),
+    };
+  }
+  if (/^[0-9a-f]{3}$/i.test(compact)) {
+    return {
+      r: parseInt(compact[0]! + compact[0]!, 16),
+      g: parseInt(compact[1]! + compact[1]!, 16),
+      b: parseInt(compact[2]! + compact[2]!, 16),
+    };
+  }
+  return null;
+}
+
+function wcagRelativeLuminanceSrgb(rgb: { r: number; g: number; b: number }): number {
+  const lin = (c: number) => {
+    const x = c / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  };
+  return (
+    0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g) + 0.0722 * lin(rgb.b)
+  );
+}
+
 // ─── PrismColor namespace ────────────────────────────────────────────────────
 
 export const PrismColor = {
@@ -564,6 +597,16 @@ export const PrismColor = {
     ): PrismSwatchKey {
       return ringFamilyAtOffset(resolvePaletteId(palette), from, offset);
     },
+  },
+
+  /**
+   * WCAG 2.x **relative luminance** (0–1) for `#rgb` / `#rrggbb`.
+   * Invalid hex → `0.5`.
+   */
+  relativeLuminanceFromHex(hexColor: string): number {
+    const rgb = parseHex6RgbChannels(hexColor);
+    if (!rgb) return 0.5;
+    return wcagRelativeLuminanceSrgb(rgb);
   },
 
   /**
@@ -742,47 +785,17 @@ export const PrismColor = {
  */
 export const PRISM_TINTED_SURFACE_MAX_LUMA = 0.45;
 
-function parseHex6RgbChannels(hexInput: string): { r: number; g: number; b: number } | null {
-  const n = hexInput.trim().toLowerCase();
-  const withHash = n.startsWith("#") ? n : `#${n}`;
-  const compact = withHash.slice(1);
-  if (/^[0-9a-f]{6}$/i.test(compact)) {
-    return {
-      r: parseInt(compact.slice(0, 2), 16),
-      g: parseInt(compact.slice(2, 4), 16),
-      b: parseInt(compact.slice(4, 6), 16),
-    };
-  }
-  if (/^[0-9a-f]{3}$/i.test(compact)) {
-    return {
-      r: parseInt(compact[0]! + compact[0]!, 16),
-      g: parseInt(compact[1]! + compact[1]!, 16),
-      b: parseInt(compact[2]! + compact[2]!, 16),
-    };
-  }
-  return null;
-}
-
-function wcagRelativeLuminanceSrgb(rgb: { r: number; g: number; b: number }): number {
-  const lin = (c: number) => {
-    const x = c / 255;
-    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
-  };
-  return (
-    0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g) + 0.0722 * lin(rgb.b)
-  );
-}
-
 /**
  * Approximate **0–1** relative luminance for CSS `<color>` strings in inline styles (`#hex`, `oklch(...)`).
- * `transparent` is treated as light. Unknown syntax → `0.5`.
+ * Hex values use {@link PrismColor.relativeLuminanceFromHex}. `transparent` is treated as light. Unknown syntax → `0.5`.
  */
 export function approximateRelativeLuminanceFromCssColor(css: string): number {
   const t = css.trim().toLowerCase();
   if (!t || t === "transparent") return 0.98;
   if (t.includes("color-mix")) return 0.62;
-  const rgb = parseHex6RgbChannels(t);
-  if (rgb) return wcagRelativeLuminanceSrgb(rgb);
+  if (parseHex6RgbChannels(t) !== null) {
+    return PrismColor.relativeLuminanceFromHex(t);
+  }
   const oklch = /^oklch\(\s*([\d.]+)%/i.exec(css);
   if (oklch) {
     const lp = parseFloat(oklch[1]!);
