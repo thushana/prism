@@ -375,7 +375,7 @@ export function PrismColorPicker({
   const panelId = `${triggerId}-panel`;
   const copyControlId = `${triggerId}-copy`;
   const [isOpen, setIsOpen] = React.useState(false);
-  const [hoverPreviewHexadecimal, setHoverPreviewHexadecimal] = React.useState<
+  const [hoverPreviewPaint, setHoverPreviewPaint] = React.useState<
     string | null
   >(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
@@ -388,39 +388,38 @@ export function PrismColorPicker({
   const paletteId = normalizedColor.palette;
 
   React.useEffect(() => {
-    if (!isOpen) setHoverPreviewHexadecimal(null);
+    if (!isOpen) setHoverPreviewPaint(null);
   }, [isOpen]);
 
-  /** Committed color token from `color` (picker state has one source of truth). */
-  const resolvedSelectedHex = React.useMemo(
+  /** Resolved CSS `<color>` from committed `color` (hex, `oklch(...)`, etc.). */
+  const resolvedPaintFromSpec = React.useMemo(
     () => prismColorSpecToHex(colorSpec),
     [colorSpec],
   );
 
-  /** Committed value (grid selection ring, clipboard). */
-  const normalizedActualSelectedToken = React.useMemo(
-    () => normalizePickerColorToken(resolvedSelectedHex),
-    [resolvedSelectedHex],
+  /** Normalized committed paint string (grid selection ring vs cell tokens). */
+  const normalizedCommittedPaintToken = React.useMemo(
+    () => normalizePickerColorToken(resolvedPaintFromSpec),
+    [resolvedPaintFromSpec],
   );
 
   /** Hover preview drives the trigger until click commits or pointer leaves the swatch grid. */
-  const hexadecimalForTriggerFace =
-    hoverPreviewHexadecimal ?? resolvedSelectedHex;
+  const paintOnTriggerFace = hoverPreviewPaint ?? resolvedPaintFromSpec;
 
-  const normalizedTokenForTriggerFace = React.useMemo(
-    () => normalizePickerColorToken(hexadecimalForTriggerFace),
-    [hexadecimalForTriggerFace],
+  const normalizedPaintOnTrigger = React.useMemo(
+    () => normalizePickerColorToken(paintOnTriggerFace),
+    [paintOnTriggerFace],
   );
 
   const swatchForPresentationOnTriggerFace = React.useMemo(() => {
-    const exact = findPaletteSwatchForHex(paletteId, hexadecimalForTriggerFace);
+    const exact = findPaletteSwatchForHex(paletteId, paintOnTriggerFace);
     return (
-      exact ?? findNearestPaletteSwatchForHex(paletteId, hexadecimalForTriggerFace)
+      exact ?? findNearestPaletteSwatchForHex(paletteId, paintOnTriggerFace)
     );
-  }, [paletteId, hexadecimalForTriggerFace]);
+  }, [paletteId, paintOnTriggerFace]);
 
   const triggerBackgroundToken =
-    normalizedTokenForTriggerFace || "#e5e5e5";
+    normalizedPaintOnTrigger || "#e5e5e5";
   const triggerForegroundFallback = React.useMemo(
     () =>
       resolveTriggerForegroundHexadecimal(
@@ -492,7 +491,7 @@ export function PrismColorPicker({
       family: PrismSwatchKey,
       shadeKey: MaterialShadeKey | TailwindNumericShade,
     ) => {
-      setHoverPreviewHexadecimal(null);
+      setHoverPreviewPaint(null);
       const nextFamily = PrismColor.Loop.normalize(paletteId, family);
       onColorChange({
         ...colorSpec,
@@ -515,7 +514,7 @@ export function PrismColorPicker({
       ) {
         return;
       }
-      setHoverPreviewHexadecimal(null);
+      setHoverPreviewPaint(null);
     },
     [],
   );
@@ -531,7 +530,7 @@ export function PrismColorPicker({
       ) {
         return;
       }
-      setHoverPreviewHexadecimal(null);
+      setHoverPreviewPaint(null);
     },
     [],
   );
@@ -617,8 +616,8 @@ export function PrismColorPicker({
           id={triggerId}
           disabled={disabled}
           aria-label={`${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${
-            normalizedTokenForTriggerFace
-              ? `. ${normalizedTokenForTriggerFace}`
+            normalizedPaintOnTrigger
+              ? `. ${normalizedPaintOnTrigger}`
               : ""
           }`}
           aria-expanded={isOpen}
@@ -666,16 +665,16 @@ export function PrismColorPicker({
             >
               {` • ${shadeDisplayPart}`}
             </PrismTypography>
-            {showColorCode && normalizedTokenForTriggerFace ? (
+            {showColorCode && normalizedPaintOnTrigger ? (
               <PrismTypography
                 role="body"
                 size="small"
                 font="mono"
                 as="span"
                 className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
-                title={normalizedTokenForTriggerFace}
+                title={normalizedPaintOnTrigger}
               >
-                {` • ${normalizedTokenForTriggerFace}`}
+                {` • ${normalizedPaintOnTrigger}`}
               </PrismTypography>
             ) : null}
           </span>
@@ -757,12 +756,12 @@ export function PrismColorPicker({
           >
             {shadeRows.map((shadeKey) =>
               families.map((family) => {
-                const swatchHexadecimalColor = resolvePickerCellHex(
+                const cellResolvedPaint = resolvePickerCellHex(
                   paletteId,
                   family,
                   shadeKey,
                 );
-                if (!swatchHexadecimalColor) {
+                if (!cellResolvedPaint) {
                   return (
                     <div
                       key={`${family}-${String(shadeKey)}`}
@@ -772,14 +771,14 @@ export function PrismColorPicker({
                   );
                 }
                 const normalizedSwatchToken =
-                  normalizePickerColorToken(swatchHexadecimalColor);
+                  normalizePickerColorToken(cellResolvedPaint);
                 const isSelected =
-                  normalizedActualSelectedToken === normalizedSwatchToken;
+                  normalizedCommittedPaintToken === normalizedSwatchToken;
                 const pickerDisplayTitle = swatchPickerDisplayTitle({
                   palette: paletteId,
                   family,
                   shade: shadeKey as PrismColorPickerSwatch["shade"],
-                  hex: swatchHexadecimalColor,
+                  hex: cellResolvedPaint,
                 });
                 return (
                   <button
@@ -787,12 +786,12 @@ export function PrismColorPicker({
                     type="button"
                     title={pickerDisplayTitle}
                     aria-label={pickerDisplayTitle}
-                    style={{ backgroundColor: swatchHexadecimalColor }}
+                    style={{ backgroundColor: cellResolvedPaint }}
                     onPointerEnter={() =>
-                      setHoverPreviewHexadecimal(swatchHexadecimalColor)
+                      setHoverPreviewPaint(cellResolvedPaint)
                     }
                     onFocus={() =>
-                      setHoverPreviewHexadecimal(swatchHexadecimalColor)
+                      setHoverPreviewPaint(cellResolvedPaint)
                     }
                     onBlur={handleSwatchButtonBlur}
                     onClick={() =>
