@@ -8,11 +8,12 @@ import {
   PrismColorPicker,
   PrismIcon,
   PrismTypography,
+  prismColorPickerClipboardColorProp,
   type PartialPrismColorSpec,
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "@ui";
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const CUSTOMIZER_INPUT_CLASS =
   "box-border h-10 w-full max-w-xs rounded-md border border-input bg-background px-4 py-0 text-sm font-mono leading-10";
@@ -47,23 +48,9 @@ function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
   disabled: boolean;
 }): string {
   const lines: string[] = ["<PrismColorPicker"];
-
-  const pal = spec.palette ?? "default";
-  const fam = spec.swatchPrimary ?? "purple";
-
-  lines.push("  color={{");
-  if (pal !== "default") {
-    lines.push(`    palette: "${pal}",`);
+  for (const line of prismColorPickerClipboardColorProp(spec).split("\n")) {
+    lines.push(`  ${line}`);
   }
-  lines.push(`    swatchPrimary: "${fam}",`);
-  if (spec.shade !== undefined) {
-    const s = spec.shade;
-    lines.push(
-      `    shade: ${typeof s === "string" ? JSON.stringify(s) : s},`,
-    );
-  }
-  lines.push("  }}");
-
   lines.push("  onColorChange={setColor}");
   if (p.showColorCode) lines.push("  showColorCode");
   if (p.showCopyButton) lines.push("  showCopyButton");
@@ -76,24 +63,17 @@ function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
  * Admin playground for {@link PrismColorPicker} — layout matches {@link PrismCodeBlockDemo}.
  */
 export function PrismColorPickerDemo(): React.JSX.Element {
-  const [color, setColor] = useState<PartialPrismColorSpec>({
-    palette: "default",
-    swatchPrimary: "purple",
-    shade: 500,
+  const [color, setColor] = useState<PartialPrismColorSpec>(() => {
+    const palette = randomPalette();
+    return {
+      palette,
+      swatchPrimary: randomSwatchForPalette(palette),
+      shade: 500,
+    };
   });
   const [showColorCode, setShowColorCode] = useState(false);
   const [showCopyButton, setShowCopyButton] = useState(false);
   const [disabled, setDisabled] = useState(false);
-
-  useLayoutEffect(() => {
-    const p = randomPalette();
-    const fam = randomSwatchForPalette(p);
-    setColor({
-      palette: p,
-      swatchPrimary: fam,
-      shade: 500,
-    });
-  }, []);
 
   const palette = color.palette ?? "default";
   const swatchPrimary = color.swatchPrimary ?? "purple";
