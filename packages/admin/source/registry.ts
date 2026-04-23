@@ -63,7 +63,7 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
   },
   "prism-color-picker": {
     title: "PrismColorPicker",
-    description: "Color: swatch grid and hex value.",
+    description: "Dropdown palette and color picker for PrismColor.",
     Demo: PrismColorPickerDemo,
   },
   "prism-divider": {

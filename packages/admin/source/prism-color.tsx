@@ -1,10 +1,14 @@
 "use client";
 
 import {
+  PrismBadge,
   PrismCodeBlock,
   PrismColor,
+  PrismColorPicker,
   PrismIcon,
   PrismTypography,
+  PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER,
+  PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER,
   PRISM_DEFAULT_COLOR_LOOP,
   type PrismPaletteId,
   type PrismSwatchKey,
@@ -26,6 +30,19 @@ const GRADIENT_DIRECTIONS = [
 const INPUT_CLASS =
   "box-border h-10 w-full max-w-xs rounded-md border border-input bg-background px-4 py-0 text-sm font-mono leading-10";
 const SELECT_CLASS = `${INPUT_CLASS} appearance-none pr-10`;
+
+/** Material numeric ramp only — `linearStrings` single-shade mode uses one number and derives the dark pair. */
+const MATERIAL_NUMERIC_SHADE_OPTIONS = PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER.filter(
+  (s) => typeof s === "number",
+) as readonly number[];
+
+function gradientShadeSelectOptions(
+  palette: PrismPaletteId,
+): readonly number[] {
+  return palette === "tailwind"
+    ? PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER
+    : MATERIAL_NUMERIC_SHADE_OPTIONS;
+}
 
 function colorLoopChips(
   palette: PrismPaletteId,
@@ -80,48 +97,68 @@ function foregroundForFill(cssColor: string): string {
  */
 export function PrismColorDemo(): JSX.Element {
   const [palette, setPalette] = useState<PrismPaletteId>("default");
-  const families = useMemo(
-    () => [...PrismColor.Loop.families(palette)],
-    [palette],
-  );
 
-  const maxLoopRange = Math.floor(families.length / 2);
+  /** Library clamp: `range ?? 2`, capped at ⌊ring length / 2⌋ (not a hard max of 2). */
+  const maxLoopRange = Math.floor(
+    PrismColor.Loop.families(palette).length / 2,
+  );
 
   const [loopCenter, setLoopCenter] = useState<PrismSwatchKey>("purple");
   const [loopRange, setLoopRange] = useState(2);
+  const effectiveLoopRange = Math.min(loopRange, maxLoopRange);
 
-  const [g1, setG1] = useState<PrismSwatchKey>("purple");
-  const [g2, setG2] = useState<PrismSwatchKey>("pink");
-  const [g3, setG3] = useState<PrismSwatchKey>("red");
-  const [gradDir, setGradDir] =
+  const [gradientStopFamilyFirst, setGradientStopFamilyFirst] =
+    useState<PrismSwatchKey>("purple");
+  const [gradientStopFamilySecond, setGradientStopFamilySecond] =
+    useState<PrismSwatchKey>("pink");
+  const [gradientStopFamilyThird, setGradientStopFamilyThird] =
+    useState<PrismSwatchKey>("red");
+  const [gradientDirection, setGradientDirection] =
     useState<(typeof GRADIENT_DIRECTIONS)[number]["value"]>("horizontal");
-  const [gradShadeLight, setGradShadeLight] = useState(100);
-  const [gradShadeDark, setGradShadeDark] = useState(800);
+  /** Single ramp step: `linearStrings` builds light stops at this shade and dark stops at `900 − shade` (clamped). */
+  const [gradientShade, setGradientShade] = useState(500);
 
   const gradientPair = useMemo(
     () =>
       PrismColor.gradient.linearStrings({
         palette,
-        swatches: [g1, g2, g3],
-        direction: gradDir,
-        shade: { light: gradShadeLight, dark: gradShadeDark },
-        // Tailwind --color-tailwind-* theme keys are often tree-shaken from CSS unless a utility references them;
-        // resolved stops (hex/oklch) keep inline previews working.
-        stopResolution: palette === "tailwind" ? "resolved" : "cssVar",
+        swatches: [
+          gradientStopFamilyFirst,
+          gradientStopFamilySecond,
+          gradientStopFamilyThird,
+        ],
+        direction: gradientDirection,
+        shade: gradientShade,
+        // Inline `style={{ backgroundImage }}` must use literal colors: `var(--color-*)` is only valid when
+        // the app’s CSS defines those tokens; this admin page may not load the full theme, so both palettes
+        // use resolved #hex / oklch stops (see `linearStrings` JSDoc).
+        stopResolution: "resolved",
       }),
-    [palette, g1, g2, g3, gradDir, gradShadeLight, gradShadeDark],
+    [
+      palette,
+      gradientStopFamilyFirst,
+      gradientStopFamilySecond,
+      gradientStopFamilyThird,
+      gradientDirection,
+      gradientShade,
+    ],
+  );
+
+  const gradientDarkPairedShade = Math.min(
+    900,
+    Math.max(50, 900 - gradientShade),
   );
 
   const loopVisual = useMemo(
-    () => colorLoopChips(palette, loopCenter, loopRange),
-    [palette, loopCenter, loopRange],
+    () => colorLoopChips(palette, loopCenter, effectiveLoopRange),
+    [palette, loopCenter, effectiveLoopRange],
   );
 
   const codeSample = useMemo(() => {
     const spec = `color={{
     palette: "${palette}",
     swatchPrimary: "${loopCenter}",
-    colorLoop: { center: "${loopCenter}", range: ${loopRange} },
+    colorLoop: { center: "${loopCenter}", range: ${effectiveLoopRange} },
   }}`;
     return `<PrismCodeBlock
   language="tsx"
@@ -130,7 +167,7 @@ ${spec.split("\n").join("\n  ")}
 >
   {\`const x = 1\`}
 </PrismCodeBlock>`;
-  }, [palette, loopCenter, loopRange]);
+  }, [palette, loopCenter, effectiveLoopRange]);
 
   return (
     // Remount controls when switching palette so invalid swatches (e.g. "purple" vs Tailwind-only names) reset.
@@ -145,12 +182,12 @@ ${spec.split("\n").join("\n  ")}
         <code className="font-mono text-foreground">PrismCodeBlock</code>.
       </PrismTypography>
 
-      <div className="mb-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mb-6 flex min-w-0 max-w-md flex-col gap-4">
         <div>
           <PrismTypography role="overline" size="small" className="mb-1 block">
             palette
           </PrismTypography>
-          <div className="relative max-w-xs">
+          <div className="relative">
             <select
               className={SELECT_CLASS}
               value={palette}
@@ -174,48 +211,35 @@ ${spec.split("\n").join("\n  ")}
           </div>
         </div>
 
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            ColorLoop center
-          </PrismTypography>
-          <div className="relative max-w-xs">
-            <select
-              className={SELECT_CLASS}
-              value={loopCenter}
-              onChange={(e) =>
-                setLoopCenter(e.target.value as PrismSwatchKey)
-              }
-            >
-              {families.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-            <PrismIcon
-              name="expand_more"
-              size={16}
-              weight="regular"
-              fill="off"
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-          </div>
-        </div>
+        <PrismColorPicker
+          color={{ palette, swatchPrimary: loopCenter, shade: 500 }}
+          onColorChange={(next) => {
+            const f = next.swatchPrimary;
+            if (f) setLoopCenter(PrismColor.Loop.normalize(palette, f));
+          }}
+        />
 
         <div>
           <PrismTypography role="overline" size="small" className="mb-1 block">
-            colorLoop.range (budget)
+            ColorLoop range
           </PrismTypography>
           <input
             type="range"
             min={0}
             max={maxLoopRange}
-            value={Math.min(loopRange, maxLoopRange)}
+            value={effectiveLoopRange}
             onChange={(e) => setLoopRange(Number(e.target.value))}
-            className="max-w-xs"
+            className="w-full max-w-md"
+            aria-valuemin={0}
+            aria-valuemax={maxLoopRange}
+            aria-valuenow={effectiveLoopRange}
           />
           <PrismTypography role="label" size="small" className="mt-1 font-mono text-muted-foreground">
-            {loopRange}
+            {effectiveLoopRange}
+            <span className="font-sans text-muted-foreground"> / {maxLoopRange}</span>
+            <span className="mt-0.5 block font-sans text-[11px] normal-case tracking-normal text-muted-foreground">
+              Omit in props → defaults to 2; max is ⌊palette size / 2⌋.
+            </span>
           </PrismTypography>
         </div>
       </div>
@@ -228,10 +252,11 @@ ${spec.split("\n").join("\n  ")}
           const fill = PrismColor.hex({ palette, family, shade: 500 });
           const fg = foregroundForFill(fill);
           return (
-            <span
+            <PrismBadge
               key={`${offset}-${family}`}
+              variant="outline"
               title={`offset ${offset}`}
-              className="rounded-md border border-border px-2 py-1 font-mono text-xs"
+              className="rounded-md border-border py-1 font-mono font-normal"
               style={{
                 backgroundColor: fill,
                 color: fg,
@@ -241,7 +266,7 @@ ${spec.split("\n").join("\n  ")}
             >
               {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}:{" "}
               {family}
-            </span>
+            </PrismBadge>
           );
         })}
       </div>
@@ -249,49 +274,74 @@ ${spec.split("\n").join("\n  ")}
       <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
         Gradient preview (multi-swatch)
       </PrismTypography>
-      <div className="mb-4 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[g1, g2, g3].map((val, idx) => (
-          <div key={idx}>
-            <PrismTypography role="overline" size="small" className="mb-1 block">
-              swatch {idx + 1}
-            </PrismTypography>
-            <div className="relative max-w-xs">
-              <select
-                className={SELECT_CLASS}
-                value={val}
-                onChange={(e) => {
-                  const v = e.target.value as PrismSwatchKey;
-                  if (idx === 0) setG1(v);
-                  else if (idx === 1) setG2(v);
-                  else setG3(v);
-                }}
-              >
-                {families.map((f) => (
-                  <option key={f} value={f}>
-                    {f}
-                  </option>
-                ))}
-              </select>
-              <PrismIcon
-                name="expand_more"
-                size={16}
-                weight="regular"
-                fill="off"
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-            </div>
+      <div className="mb-4 flex min-w-0 max-w-md flex-col gap-4">
+        <PrismColorPicker
+          color={{ palette, swatchPrimary: gradientStopFamilyFirst, shade: 500 }}
+          onColorChange={(next) => {
+            const f = next.swatchPrimary;
+            if (f) setGradientStopFamilyFirst(PrismColor.Loop.normalize(palette, f));
+          }}
+        />
+        <PrismColorPicker
+          color={{ palette, swatchPrimary: gradientStopFamilySecond, shade: 500 }}
+          onColorChange={(next) => {
+            const f = next.swatchPrimary;
+            if (f) setGradientStopFamilySecond(PrismColor.Loop.normalize(palette, f));
+          }}
+        />
+        <PrismColorPicker
+          color={{ palette, swatchPrimary: gradientStopFamilyThird, shade: 500 }}
+          onColorChange={(next) => {
+            const f = next.swatchPrimary;
+            if (f) setGradientStopFamilyThird(PrismColor.Loop.normalize(palette, f));
+          }}
+        />
+        <div>
+          <PrismTypography role="overline" size="small" className="mb-1 block">
+            Gradient shade (ramp step)
+          </PrismTypography>
+          <PrismTypography role="body" size="small" className="mb-2 text-muted-foreground">
+            One step for both preview rows: light uses this shade on each stop; dark uses{" "}
+            <code className="font-mono text-foreground">
+              clamp(900 − shade, 50, 900)
+            </code>{" "}
+            (<code className="font-mono text-foreground">{gradientDarkPairedShade}</code> here) — same rule as{" "}
+            <code className="font-mono text-foreground">PrismColor.gradient.linearStrings</code> with a numeric{" "}
+            <code className="font-mono text-foreground">shade</code>.
+          </PrismTypography>
+          <div className="relative">
+            <select
+              className={SELECT_CLASS}
+              value={gradientShade}
+              onChange={(e) => setGradientShade(Number(e.target.value))}
+            >
+              {gradientShadeSelectOptions(palette).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <PrismIcon
+              name="expand_more"
+              size={16}
+              weight="regular"
+              fill="off"
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
           </div>
-        ))}
+        </div>
         <div>
           <PrismTypography role="overline" size="small" className="mb-1 block">
             direction
           </PrismTypography>
-          <div className="relative max-w-xs">
+          <div className="relative">
             <select
               className={SELECT_CLASS}
-              value={gradDir}
+              value={gradientDirection}
               onChange={(e) =>
-                setGradDir(e.target.value as typeof gradDir)
+                setGradientDirection(
+                  e.target.value as typeof gradientDirection,
+                )
               }
             >
               {GRADIENT_DIRECTIONS.map((o) => (
@@ -310,53 +360,43 @@ ${spec.split("\n").join("\n  ")}
           </div>
         </div>
       </div>
-      <div className="mb-2 grid grid-cols-2 gap-4 sm:max-w-md">
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            shade light
-          </PrismTypography>
-          <input
-            type="number"
-            className={INPUT_CLASS}
-            value={gradShadeLight}
-            onChange={(e) => setGradShadeLight(Number(e.target.value))}
-            min={50}
-            max={950}
-            step={50}
-          />
-        </div>
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            shade dark (gradient stop)
-          </PrismTypography>
-          <input
-            type="number"
-            className={INPUT_CLASS}
-            value={gradShadeDark}
-            onChange={(e) => setGradShadeDark(Number(e.target.value))}
-            min={50}
-            max={950}
-            step={50}
-          />
-        </div>
-      </div>
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+      <PrismTypography role="body" size="small" className="mb-2 max-w-xl text-muted-foreground">
+        Previews apply <code className="font-mono text-foreground">background-image</code> from{" "}
+        <code className="font-mono text-foreground">gradientPair.light</code> /{" "}
+        <code className="font-mono text-foreground">.dark</code> so you can eyeball the gradient next to the
+        controls.
+      </PrismTypography>
+      <div className="mb-6 flex min-w-0 flex-col gap-4">
         <div>
           <PrismTypography role="label" size="small" className="mb-1 block text-muted-foreground">
-            linearStrings — light stops
+            Gradient preview — light stops
           </PrismTypography>
           <div
-            className="h-24 rounded-xl border border-border shadow-sm"
-            style={{ backgroundImage: gradientPair.light }}
+            className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
+            role="presentation"
+            style={{
+              height: "6rem",
+              minHeight: "6rem",
+              backgroundImage: gradientPair.light,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "100% 100%",
+            }}
           />
         </div>
         <div>
           <PrismTypography role="label" size="small" className="mb-1 block text-muted-foreground">
-            linearStrings — dark stops
+            Gradient preview — dark stops
           </PrismTypography>
           <div
-            className="h-24 rounded-xl border border-border shadow-sm"
-            style={{ backgroundImage: gradientPair.dark }}
+            className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
+            role="presentation"
+            style={{
+              height: "6rem",
+              minHeight: "6rem",
+              backgroundImage: gradientPair.dark,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "100% 100%",
+            }}
           />
         </div>
       </div>
@@ -372,7 +412,7 @@ ${spec.split("\n").join("\n  ")}
           color={{
             palette,
             swatchPrimary: loopCenter,
-            colorLoop: { center: loopCenter, range: loopRange },
+            colorLoop: { center: loopCenter, range: effectiveLoopRange },
           }}
         >
           {`const Example = () => (
