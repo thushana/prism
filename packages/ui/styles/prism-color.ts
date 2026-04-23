@@ -72,12 +72,20 @@ export type PrismSwatchKey = string;
  */
 export type PrismPaletteId = "default" | "tailwind" | (string & {});
 
+/** Material numeric ramp + accent keys (see `color-values.ts`). Tailwind ramps use numeric shades only. */
+export type PrismDefaultPaletteShadeKey =
+  | number
+  | "a100"
+  | "a200"
+  | "a400"
+  | "a700";
+
 export type PrismColorSpec = {
   palette?: PrismPaletteId;
   swatchPrimary?: PrismSwatchKey;
   swatchSecondary?: PrismSwatchKey;
   swatchTertiary?: PrismSwatchKey;
-  shade?: number;
+  shade?: PrismDefaultPaletteShadeKey;
   tier?: "full" | "soft" | "mono";
   semanticText?:
     | "primary"
@@ -487,14 +495,6 @@ export function prismDefaultFamilyKebabToColorName(
   return kebabToColorName(kebab);
 }
 
-/** Material numeric ramp + accent keys (see `color-values.ts`). */
-export type PrismDefaultPaletteShadeKey =
-  | number
-  | "a100"
-  | "a200"
-  | "a400"
-  | "a700";
-
 function gradientDirectionCss(
   direction: "horizontal" | "vertical" | "angled",
 ): string {
@@ -506,7 +506,7 @@ function gradientDirectionCss(
 /** Normalized spec — defaults merged; swatches validated against the palette loop. */
 export type NormalizedPrismColorSpec = {
   palette: PrismPaletteId;
-  shade: number;
+  shade: PrismDefaultPaletteShadeKey;
   tier: "full" | "soft" | "mono";
   swatchPrimary?: PrismSwatchKey;
   swatchSecondary?: PrismSwatchKey;
@@ -521,8 +521,8 @@ export function normalizePrismColorSpec(
   partial: PartialPrismColorSpec | undefined,
 ): NormalizedPrismColorSpec {
   const palette = resolvePaletteId(partial?.palette);
-  const shade =
-    typeof partial?.shade === "number" && Number.isFinite(partial.shade)
+  const shade: PrismDefaultPaletteShadeKey =
+    partial?.shade !== undefined && partial?.shade !== null
       ? partial.shade
       : 500;
   const tier = partial?.tier ?? "full";
@@ -775,6 +775,24 @@ export const PrismColor = {
     },
   },
 } as const;
+
+/**
+ * Resolved CSS `<color>` for a partial Prism spec (picker + surfaces): `palette` +
+ * `swatchPrimary` + `shade` via {@link PrismColor.hex}.
+ */
+export function prismColorSpecToHex(spec: PartialPrismColorSpec | undefined): string {
+  const n = normalizePrismColorSpec(spec);
+  const palette = n.palette;
+  const family =
+    n.swatchPrimary ?? PrismColor.Loop.normalize(palette, "blue");
+  const shadePart: PrismDefaultPaletteShadeKey =
+    spec?.shade !== undefined && spec?.shade !== null ? spec.shade : n.shade;
+  return PrismColor.hex({
+    palette,
+    family,
+    shade: shadePart,
+  });
+}
 
 // ─── shared surface / label contrast (default + tailwind) ───────────────────
 

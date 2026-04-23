@@ -531,7 +531,9 @@ export function PrismButton(
       restButton.onPointerEnter?.(e as React.PointerEvent<HTMLButtonElement>);
   };
   const onLeave = (e: React.PointerEvent<HTMLElement>) => {
-    if (!disabled && !toggled) {
+    /** Always clear local hover on leave. If we skip when `toggled`, `hovered` stays true and
+     *  sticks after `toggled` becomes false — monochrome / inverted fills then look “stuck on”. */
+    if (!disabled) {
       requestAnimationFrame(() => setHovered(false));
     }
     if (asChild)

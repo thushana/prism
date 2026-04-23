@@ -10,12 +10,14 @@ import {
   normalizePrismColorSpec,
   PrismColor,
   PRISM_TINTED_SURFACE_MAX_LUMA,
+  prismColorSpecToHex,
   prismDefaultFamilyKebabToColorName,
   type PartialPrismColorSpec,
   type PrismDefaultPaletteShadeKey,
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "../styles/prism-color";
+import { PrismButton } from "./prism-button";
 import { PrismTypography } from "./prism-typography";
 
 /** Matches {@link PrismButton} normal-size vertical padding (`BASE_PADDING_VERTICAL`). */
@@ -39,6 +41,15 @@ const PRISM_COLOR_PICKER_COPY_ICON_SIZE = Math.round(
 
 const PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL =
   "Select color from palette";
+
+/** Built-in Material vs Tailwind switch (segmented control in the popover). */
+const PRISM_COLOR_PICKER_PALETTE_TOGGLE: readonly {
+  id: "default" | "tailwind";
+  label: string;
+}[] = [
+  { id: "default", label: "Material" },
+  { id: "tailwind", label: "Tailwind" },
+];
 
 /** Default (Material) palette: shade row order for the picker grid (includes accent keys). */
 export const PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER = [
@@ -173,25 +184,64 @@ export function findMaterialSwatchForHex(
   };
 }
 
-/** Clipboard text: `Display name / shade / selected token` (third segment is always the current selection). */
-export function formatPrismColorPickerClipboardText(
-  swatch: PrismColorPickerSwatch | null,
-  selectedColorHex: string,
+/** Swatch used for labels + the resolved CSS token for that face (committed value, hover preview, or cell hex). */
+export type PrismColorPickerColorFace = {
+  swatch: PrismColorPickerSwatch | null;
+  token: string;
+};
+
+/** `FAMILY • shade • token` — trigger strip (with token when shown), grid cell titles, tooltips. */
+export function prismColorPickerDisplayBullets(
+  face: PrismColorPickerColorFace,
 ): string {
-  const selectedNormalized = normalizePickerColorToken(selectedColorHex);
-  if (!swatch) return selectedNormalized || "";
-  const title = paletteFamilyDisplayTitle(swatch.palette, swatch.family).toUpperCase();
-  const shadePart = materialShadeLabelDisplay(swatch.shade);
-  if (!selectedNormalized) {
-    return `${title} / ${shadePart}`;
+  const t = normalizePickerColorToken(face.token);
+  if (!face.swatch) {
+    return t || "—";
   }
-  return `${title} / ${shadePart} / ${selectedNormalized}`;
+  const family = paletteFamilyDisplayTitle(
+    face.swatch.palette,
+    face.swatch.family,
+  ).toUpperCase();
+  const shade = materialShadeLabelDisplay(face.swatch.shade);
+  if (!t) {
+    return `${family} • ${shade}`;
+  }
+  return `${family} • ${shade} • ${t}`;
 }
 
-/** Same visible pattern as the trigger: `NAME • shade • token`. */
+function sanitizeSingleLineJsComment(body: string): string {
+  return body.trim().replace(/\s+/g, " ").replace(/\*\//g, "*\\/");
+}
+
+/**
+ * Clipboard text: a pasteable JSX `color={{ … }}` block (same shape as {@link PartialPrismColorSpec}).
+ * Omits `palette` when `"default"`. Trailing `//` comment is {@link prismColorSpecToHex} for that spec
+ * (hex or e.g. `oklch(...)` for Tailwind literals).
+ */
+export function prismColorPickerClipboardColorProp(
+  partial: PartialPrismColorSpec | undefined,
+): string {
+  const n = normalizePrismColorSpec(partial);
+  const family =
+    n.swatchPrimary ?? PrismColor.Loop.normalize(n.palette, "blue");
+  const resolved = sanitizeSingleLineJsComment(prismColorSpecToHex(partial));
+
+  const lines: string[] = ["color={{"];
+  if (n.palette !== "default") {
+    lines.push(`  palette: ${JSON.stringify(n.palette)},`);
+  }
+  lines.push(
+    `  swatchPrimary: ${JSON.stringify(family)}, // ${resolved || "—"}`,
+  );
+  const shadeLit =
+    typeof n.shade === "string" ? JSON.stringify(n.shade) : String(n.shade);
+  lines.push(`  shade: ${shadeLit},`);
+  lines.push("}}");
+  return lines.join("\n");
+}
+
 function swatchPickerDisplayTitle(swatch: PrismColorPickerSwatch): string {
-  const normalized = normalizePickerColorToken(swatch.hex);
-  return `${paletteFamilyDisplayTitle(swatch.palette, swatch.family).toUpperCase()} • ${materialShadeLabelDisplay(swatch.shade)} • ${normalized}`;
+  return prismColorPickerDisplayBullets({ swatch, token: swatch.hex });
 }
 
 function hexadecimalColorToRgbChannels(
@@ -294,27 +344,29 @@ function resolveTriggerForegroundHexadecimal(
 }
 
 export type PrismColorPickerProps = {
-  /** Optional field caption; omit when the surrounding layout already describes the control. */
-  label?: string;
-  selectedColorHex: string;
-  onSelectedColorChange: (selectedHexadecimalColor: string) => void;
-  /** Palette + future PrismColor fields; only `palette` is read today. */
-  color?: PartialPrismColorSpec;
   /**
-   * When true, shows the resolved CSS color (`#hex` or `oklch(...)`) on its own line under the trigger
-   * instead of inside it (keeps long oklch strings out of the pill).
+   * Single controlled model: {@link PartialPrismColorSpec}. Selection is `swatchPrimary` + `shade`
+   * (+ `palette`); the resolved CSS color is always {@link prismColorSpecToHex}. Grid columns follow
+   * {@link PrismColor.Loop.families} order — `swatchPrimary` does not reorder columns.
    */
-  showResolvedColorBelow?: boolean;
+  color: PartialPrismColorSpec;
+  onColorChange: (next: PartialPrismColorSpec) => void;
+  /**
+   * When true, appends ` • {token}` inside the **trigger** (the main closed pill that opens the palette).
+   * Copy uses {@link prismColorPickerClipboardColorProp} on the **committed** spec.
+   */
+  showColorCode?: boolean;
+  /** When true, shows the copy control beside the trigger (clipboard: `color={{ … }}` + resolved token comment). */
+  showCopyButton?: boolean;
   id?: string;
   disabled?: boolean;
 };
 
 export function PrismColorPicker({
-  label,
-  selectedColorHex,
-  onSelectedColorChange,
   color: colorSpec,
-  showResolvedColorBelow = false,
+  onColorChange,
+  showColorCode = false,
+  showCopyButton = false,
   id,
   disabled = false,
 }: PrismColorPickerProps) {
@@ -329,37 +381,31 @@ export function PrismColorPicker({
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
-  const paletteId = React.useMemo(
-    () => normalizePrismColorSpec(colorSpec).palette,
-    [colorSpec?.palette],
+  const normalizedColor = React.useMemo(
+    () => normalizePrismColorSpec(colorSpec),
+    [colorSpec],
   );
+  const paletteId = normalizedColor.palette;
 
   React.useEffect(() => {
     if (!isOpen) setHoverPreviewHexadecimal(null);
   }, [isOpen]);
 
-  /** Committed value (grid selection ring, parent state, clipboard). */
+  /** Committed color token from `color` (picker state has one source of truth). */
+  const resolvedSelectedHex = React.useMemo(
+    () => prismColorSpecToHex(colorSpec),
+    [colorSpec],
+  );
+
+  /** Committed value (grid selection ring, clipboard). */
   const normalizedActualSelectedToken = React.useMemo(
-    () => normalizePickerColorToken(selectedColorHex),
-    [selectedColorHex],
+    () => normalizePickerColorToken(resolvedSelectedHex),
+    [resolvedSelectedHex],
   );
-
-  const selectedSwatchExact = React.useMemo(
-    () => findPaletteSwatchForHex(paletteId, selectedColorHex),
-    [paletteId, selectedColorHex],
-  );
-
-  const nearestSwatchForCommittedSelection = React.useMemo(
-    () => findNearestPaletteSwatchForHex(paletteId, selectedColorHex),
-    [paletteId, selectedColorHex],
-  );
-
-  const swatchForCommittedSelection =
-    selectedSwatchExact ?? nearestSwatchForCommittedSelection;
 
   /** Hover preview drives the trigger until click commits or pointer leaves the swatch grid. */
   const hexadecimalForTriggerFace =
-    hoverPreviewHexadecimal ?? selectedColorHex;
+    hoverPreviewHexadecimal ?? resolvedSelectedHex;
 
   const normalizedTokenForTriggerFace = React.useMemo(
     () => normalizePickerColorToken(hexadecimalForTriggerFace),
@@ -386,7 +432,7 @@ export function PrismColorPicker({
 
   /**
    * Same rule for default + Tailwind: when the trigger face reads as dark (by approximate luminance),
-   * label text uses the swatch family at shade 100 — not numeric shade alone (Tailwind vs Material differ).
+   * trigger text uses the swatch family at shade 100 — not numeric shade alone (Tailwind vs Material differ).
    */
   const triggerTextColor = React.useMemo(() => {
     const sw = swatchForPresentationOnTriggerFace;
@@ -410,12 +456,8 @@ export function PrismColorPicker({
   ]);
 
   const clipboardColorText = React.useMemo(
-    () =>
-      formatPrismColorPickerClipboardText(
-        swatchForCommittedSelection,
-        selectedColorHex,
-      ),
-    [swatchForCommittedSelection, selectedColorHex],
+    () => prismColorPickerClipboardColorProp(colorSpec),
+    [colorSpec],
   );
 
   const handleCopyToClipboard = React.useCallback(async () => {
@@ -446,13 +488,22 @@ export function PrismColorPicker({
   }, [isOpen]);
 
   const handleSelectSwatch = React.useCallback(
-    (swatchHexadecimalColor: string) => {
+    (
+      family: PrismSwatchKey,
+      shadeKey: MaterialShadeKey | TailwindNumericShade,
+    ) => {
       setHoverPreviewHexadecimal(null);
-      onSelectedColorChange(swatchHexadecimalColor);
+      const nextFamily = PrismColor.Loop.normalize(paletteId, family);
+      onColorChange({
+        ...colorSpec,
+        palette: paletteId,
+        swatchPrimary: nextFamily,
+        shade: shadeKey as PrismDefaultPaletteShadeKey,
+      });
       setIsOpen(false);
       triggerRef.current?.focus();
     },
-    [onSelectedColorChange],
+    [colorSpec, onColorChange, paletteId],
   );
 
   const handleSwatchGridPointerLeave = React.useCallback(
@@ -483,6 +534,39 @@ export function PrismColorPicker({
       setHoverPreviewHexadecimal(null);
     },
     [],
+  );
+
+  const togglePaletteKey: "default" | "tailwind" =
+    paletteId === "tailwind" ? "tailwind" : "default";
+
+  const handlePaletteToggle = React.useCallback(
+    (next: "default" | "tailwind") => {
+      if (disabled || next === togglePaletteKey) return;
+      const prevFam =
+        normalizedColor.swatchPrimary ??
+        PrismColor.Loop.normalize(paletteId, "blue");
+      const family = PrismColor.Loop.normalize(next, prevFam);
+      let shade: PrismDefaultPaletteShadeKey =
+        colorSpec?.shade ?? normalizedColor.shade;
+      if (next === "tailwind" && typeof shade !== "number") {
+        shade = 500;
+      }
+      onColorChange({
+        ...colorSpec,
+        palette: next,
+        swatchPrimary: family,
+        shade,
+      });
+    },
+    [
+      colorSpec,
+      disabled,
+      normalizedColor.shade,
+      normalizedColor.swatchPrimary,
+      onColorChange,
+      paletteId,
+      togglePaletteKey,
+    ],
   );
 
   const MATERIAL_SWATCH_CELL_SIZE = "1.5rem";
@@ -523,13 +607,6 @@ export function PrismColorPicker({
 
   return (
     <div ref={rootRef} className="relative">
-      {label ? (
-        <label htmlFor={triggerId} className="mb-2 block cursor-pointer">
-          <PrismTypography role="label" size="small" font="sans" as="span">
-            {label}
-          </PrismTypography>
-        </label>
-      ) : null}
       <div
         className="flex items-stretch"
         style={{ gap: PRISM_COLOR_PICKER_LAYOUT_GAP }}
@@ -539,15 +616,11 @@ export function PrismColorPicker({
           type="button"
           id={triggerId}
           disabled={disabled}
-          aria-label={
-            label
-              ? undefined
-              : `${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${
-                  normalizedTokenForTriggerFace
-                    ? `. ${normalizedTokenForTriggerFace}`
-                    : ""
-                }`
-          }
+          aria-label={`${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${
+            normalizedTokenForTriggerFace
+              ? `. ${normalizedTokenForTriggerFace}`
+              : ""
+          }`}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           aria-controls={panelId}
@@ -593,6 +666,18 @@ export function PrismColorPicker({
             >
               {` • ${shadeDisplayPart}`}
             </PrismTypography>
+            {showColorCode && normalizedTokenForTriggerFace ? (
+              <PrismTypography
+                role="body"
+                size="small"
+                font="mono"
+                as="span"
+                className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
+                title={normalizedTokenForTriggerFace}
+              >
+                {` • ${normalizedTokenForTriggerFace}`}
+              </PrismTypography>
+            ) : null}
           </span>
           <ChevronDown
             size={PRISM_COLOR_PICKER_ICON_SIZE}
@@ -605,64 +690,82 @@ export function PrismColorPicker({
           />
         </button>
 
-        <button
-          type="button"
-          id={copyControlId}
-          disabled={disabled || !clipboardColorText}
-          onClick={() => void handleCopyToClipboard()}
-          title="Copy name / shade / color"
-          aria-label="Copy color name, shade level, and value"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-1 text-muted-foreground shadow-none",
-            "transition-colors hover:text-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            "disabled:pointer-events-none disabled:opacity-40",
-          )}
-        >
-          <Copy
-            size={PRISM_COLOR_PICKER_COPY_ICON_SIZE}
-            strokeWidth={2}
-            aria-hidden
-          />
-        </button>
+        {showCopyButton ? (
+          <button
+            type="button"
+            id={copyControlId}
+            disabled={disabled || !clipboardColorText}
+            onClick={() => void handleCopyToClipboard()}
+            title={clipboardColorText ? `Copy: ${clipboardColorText}` : undefined}
+            aria-label={
+              clipboardColorText
+                ? `Copy ${clipboardColorText}`
+                : "Copy color"
+            }
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-1 text-muted-foreground shadow-none",
+              "transition-colors hover:text-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "disabled:pointer-events-none disabled:opacity-40",
+            )}
+          >
+            <Copy
+              size={PRISM_COLOR_PICKER_COPY_ICON_SIZE}
+              strokeWidth={2}
+              aria-hidden
+            />
+          </button>
+        ) : null}
       </div>
-
-      {showResolvedColorBelow && normalizedTokenForTriggerFace ? (
-        <PrismTypography
-          role="label"
-          size="small"
-          font="mono"
-          as="div"
-          className="mt-1.5 max-w-full truncate text-muted-foreground"
-          title={normalizedTokenForTriggerFace}
-        >
-          {normalizedTokenForTriggerFace}
-        </PrismTypography>
-      ) : null}
 
       {isOpen ? (
         <div
           id={panelId}
           role="dialog"
-          aria-label={label ?? panelAriaLabel}
+          aria-label={panelAriaLabel}
           className="absolute left-0 top-full z-50 mt-1 w-max max-h-[min(70vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
         >
+          <div
+            role="radiogroup"
+            aria-label="Palette source"
+            className="mb-2 grid min-w-[min(100%,14rem)] grid-cols-2 gap-2"
+          >
+            {PRISM_COLOR_PICKER_PALETTE_TOGGLE.map((opt) => {
+              const selected = togglePaletteKey === opt.id;
+              return (
+                <PrismButton
+                  key={opt.id}
+                  color="red"
+                  label={opt.label}
+                  variant="plain"
+                  shape="rectangle"
+                  line="bottom"
+                  spacing="tight"
+                  paint="monochrome"
+                  disableGrow
+                  toggled={selected}
+                  disabled={disabled}
+                  onClick={() => handlePaletteToggle(opt.id)}
+                />
+              );
+            })}
+          </div>
           <div
             className="grid gap-px bg-border p-px"
             style={{ gridTemplateColumns, gridAutoRows }}
             onPointerLeave={handleSwatchGridPointerLeave}
           >
-            {shadeRows.map((shade) =>
+            {shadeRows.map((shadeKey) =>
               families.map((family) => {
                 const swatchHexadecimalColor = resolvePickerCellHex(
                   paletteId,
                   family,
-                  shade,
+                  shadeKey,
                 );
                 if (!swatchHexadecimalColor) {
                   return (
                     <div
-                      key={`${family}-${String(shade)}`}
+                      key={`${family}-${String(shadeKey)}`}
                       className="bg-muted/20"
                       aria-hidden
                     />
@@ -675,12 +778,12 @@ export function PrismColorPicker({
                 const pickerDisplayTitle = swatchPickerDisplayTitle({
                   palette: paletteId,
                   family,
-                  shade: shade as PrismColorPickerSwatch["shade"],
+                  shade: shadeKey as PrismColorPickerSwatch["shade"],
                   hex: swatchHexadecimalColor,
                 });
                 return (
                   <button
-                    key={`${family}-${String(shade)}`}
+                    key={`${family}-${String(shadeKey)}`}
                     type="button"
                     title={pickerDisplayTitle}
                     aria-label={pickerDisplayTitle}
@@ -693,7 +796,7 @@ export function PrismColorPicker({
                     }
                     onBlur={handleSwatchButtonBlur}
                     onClick={() =>
-                      handleSelectSwatch(swatchHexadecimalColor)
+                      handleSelectSwatch(family, shadeKey)
                     }
                     className={cn(
                       "border border-transparent transition-transform hover:z-10 hover:scale-110 hover:border-foreground/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring",
