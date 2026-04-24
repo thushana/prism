@@ -62,6 +62,16 @@ const PRISM_COLOR_PICKER_LOOP_PILL_PX = PRISM_COLOR_PICKER_ICON_SIZE;
 const PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL =
   "Select color from palette";
 
+/**
+ * Popover section headings — `role="overline"` / `size="small"` (+ `uppercase` utility) so
+ * {@link PrismTypography} caps accent applies; trigger copy stays `label` + `small` without accent.
+ */
+const PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS = "mb-1 block uppercase";
+
+/** Closed trigger: gradient word uses `label`/`small`; swatch family uses `label`/`large` + `font-bold`. */
+const PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS =
+  "min-w-0 truncate uppercase text-current";
+
 /** Built-in Material vs Tailwind switch (segmented control in the popover). */
 const PRISM_COLOR_PICKER_PALETTE_TOGGLE: readonly {
   id: "default" | "tailwind";
@@ -755,11 +765,11 @@ export function PrismColorPicker({
           {isGradientMode ? (
             <span className="flex min-w-0 flex-1 items-center gap-x-1 gap-y-0.5">
               <PrismTypography
-                role="body"
+                role="label"
                 size="small"
                 font="sans"
                 as="span"
-                className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
+                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS}
               >
                 GRADIENT
               </PrismTypography>
@@ -767,11 +777,14 @@ export function PrismColorPicker({
           ) : (
             <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5">
               <PrismTypography
-                role="body"
-                size="small"
+                role="label"
+                size="large"
                 font="sans"
                 as="span"
-                className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
+                className={cn(
+                  PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS,
+                  "font-bold",
+                )}
               >
                 {familyTitleText}
               </PrismTypography>
@@ -904,13 +917,14 @@ export function PrismColorPicker({
           id={panelId}
           role="dialog"
           aria-label={panelAriaLabel}
-          className="absolute left-0 top-full z-50 mt-1 w-max min-w-0 max-h-[min(70vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
+          className="absolute left-0 top-full z-50 mt-1 flex max-h-[min(85dvh,40rem)] w-max min-w-0 max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
         >
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto overscroll-contain p-2">
           <div className="mb-2">
             <PrismTypography
-              role="label"
-              size="medium"
-              className="mb-1 block uppercase"
+              role="overline"
+              size="small"
+              className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
             >
               MODE
             </PrismTypography>
@@ -943,9 +957,9 @@ export function PrismColorPicker({
           {loopSurfaceMode === "single" ? (
             <div className="mb-2 min-w-[min(100%,18rem)]">
               <PrismTypography
-                role="label"
-                size="medium"
-                className="mb-1 block uppercase"
+                role="overline"
+                size="small"
+                className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
               >
                 COLORLOOP RANGE
               </PrismTypography>
@@ -985,9 +999,9 @@ export function PrismColorPicker({
                 }
               >
                 <PrismTypography
-                  role="label"
-                  size="medium"
-                  className="mb-1 block uppercase"
+                  role="overline"
+                  size="small"
+                  className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
                 >
                   COLORS
                 </PrismTypography>
@@ -1054,9 +1068,9 @@ export function PrismColorPicker({
               <div className="mb-2 grid min-w-0 grid-cols-2 gap-3">
                 <div className="min-w-0">
                   <PrismTypography
-                    role="label"
-                    size="medium"
-                    className="mb-1 block uppercase"
+                    role="overline"
+                    size="small"
+                    className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
                   >
                     DIRECTION
                   </PrismTypography>
@@ -1089,9 +1103,9 @@ export function PrismColorPicker({
                 </div>
                 <div className="min-w-0">
                   <PrismTypography
-                    role="label"
-                    size="medium"
-                    className="mb-1 block uppercase"
+                    role="overline"
+                    size="small"
+                    className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
                   >
                     SHADE
                   </PrismTypography>
@@ -1142,9 +1156,9 @@ export function PrismColorPicker({
           )}
           <div className="mb-2">
             <PrismTypography
-              role="label"
-              size="medium"
-              className="mb-1 block uppercase"
+              role="overline"
+              size="small"
+              className={PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS}
             >
               PALETTE
             </PrismTypography>
@@ -1232,6 +1246,7 @@ export function PrismColorPicker({
                 );
               }),
             )}
+          </div>
           </div>
         </div>
       ) : null}

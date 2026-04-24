@@ -5,41 +5,15 @@ import {
   PrismCodeBlock,
   PrismColor,
   PrismColorPicker,
-  PrismIcon,
   PrismTypography,
   clampPrismColorLoopRange,
-  PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER,
-  PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER,
   PRISM_DEFAULT_COLOR_LOOP,
   type PartialPrismColorSpec,
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "@ui";
 import type { JSX } from "react";
-import { useEffect, useMemo, useState } from "react";
-
-const GRADIENT_DIRECTIONS = [
-  { value: "horizontal" as const, label: "horizontal" },
-  { value: "vertical" as const, label: "vertical" },
-  { value: "angled" as const, label: "angled (135deg)" },
-];
-
-const INPUT_CLASS =
-  "box-border h-10 w-full max-w-xs rounded-md border border-input bg-background px-4 py-0 text-sm font-mono leading-10";
-const SELECT_CLASS = `${INPUT_CLASS} appearance-none pr-10`;
-
-/** Material numeric ramp only — `linearStrings` single-shade mode uses one number and derives the dark pair. */
-const MATERIAL_NUMERIC_SHADE_OPTIONS = PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER.filter(
-  (s) => typeof s === "number",
-) as readonly number[];
-
-function gradientShadeSelectOptions(
-  palette: PrismPaletteId,
-): readonly number[] {
-  return palette === "tailwind"
-    ? PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER
-    : MATERIAL_NUMERIC_SHADE_OPTIONS;
-}
+import { useMemo, useState } from "react";
 
 function colorLoopChips(
   palette: PrismPaletteId,
@@ -56,7 +30,7 @@ function colorLoopChips(
   return out;
 }
 
-/** Readable label on arbitrary CSS color from {@link PrismColor.hex} (#hex or oklch). */
+/** Readable label on arbitrary CSS color from {@link PrismColor.hex}. */
 function foregroundForFill(cssColor: string): string {
   const t = cssColor.trim();
   const hexMatch = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(t);
@@ -89,325 +63,277 @@ function foregroundForFill(cssColor: string): string {
   return "#ffffff";
 }
 
-function applySwatchFromPicker(
+/**
+ * Merges picker emissions into committed spec. When `next` omits `gradient`, clear any previous
+ * `gradient` so it does not stick across updates.
+ */
+function mergePartialPrismPickerSpec(
+  prev: PartialPrismColorSpec,
   next: PartialPrismColorSpec,
-  currentPalette: PrismPaletteId,
-  setPagePalette: (p: PrismPaletteId) => void,
-  setSwatch: (f: PrismSwatchKey) => void,
-): void {
-  const pal = next.palette ?? currentPalette;
-  if (next.palette !== undefined) setPagePalette(next.palette);
-  const f = next.swatchPrimary;
-  if (f) setSwatch(PrismColor.Loop.normalize(pal, f));
+): PartialPrismColorSpec {
+  const nextHasGradient = Object.prototype.hasOwnProperty.call(next, "gradient");
+  const base = nextHasGradient
+    ? { ...prev, ...next }
+    : (() => {
+        const { gradient: _drop, ...restPrev } = prev;
+        return { ...restPrev, ...next };
+      })();
+  if (
+    Object.prototype.hasOwnProperty.call(base, "gradient") &&
+    base.gradient === undefined
+  ) {
+    const { gradient: _g, ...rest } = base;
+    return rest;
+  }
+  return base;
 }
 
+const CHECKBOX_ROW_CLASS =
+  "flex cursor-pointer flex-wrap items-center gap-x-6 gap-y-3";
+
 /**
- * Admin: PrismColor — ColorLoop, gradient builder, syntax via PrismCodeBlock, both palettes.
+ * Admin: PrismColor — one picker drives the full {@link PartialPrismColorSpec}; previews show
+ * ColorLoop, {@link PrismColor.gradient.linearStrings}, and {@link PrismCodeBlock} wiring.
  */
 export function PrismColorDemo(): JSX.Element {
-  const [palette, setPalette] = useState<PrismPaletteId>("default");
+  const [spec, setSpec] = useState<PartialPrismColorSpec>(() => ({
+    palette: "default",
+    swatchPrimary: "purple",
+    shade: 500,
+  }));
+  const [showColorCode, setShowColorCode] = useState(false);
+  const [showCopyButton, setShowCopyButton] = useState(true);
+  const [disabled, setDisabled] = useState(false);
 
-  const maxLoopRange = Math.floor(
-    PrismColor.Loop.families(palette).length / 2,
+  const palette = spec.palette ?? "default";
+  const loopCenter = PrismColor.Loop.normalize(
+    palette,
+    spec.colorLoop?.center ?? spec.swatchPrimary ?? "purple",
   );
-
-  const [loopCenter, setLoopCenter] = useState<PrismSwatchKey>("purple");
-  const [loopRange, setLoopRange] = useState(2);
-  const effectiveLoopRange = clampPrismColorLoopRange(palette, loopRange);
-
-  useEffect(() => {
-    setLoopRange((r) => clampPrismColorLoopRange(palette, r));
-  }, [palette, maxLoopRange]);
-
-  const [gradientStopFamilyFirst, setGradientStopFamilyFirst] =
-    useState<PrismSwatchKey>("purple");
-  const [gradientStopFamilySecond, setGradientStopFamilySecond] =
-    useState<PrismSwatchKey>("pink");
-  const [gradientStopFamilyThird, setGradientStopFamilyThird] =
-    useState<PrismSwatchKey>("red");
-  const [gradientDirection, setGradientDirection] =
-    useState<(typeof GRADIENT_DIRECTIONS)[number]["value"]>("horizontal");
-  /** Single ramp step: `linearStrings` builds light stops at this shade and dark stops at `900 − shade` (clamped). */
-  const [gradientShade, setGradientShade] = useState(500);
-
-  const gradientPair = useMemo(
-    () =>
-      PrismColor.gradient.linearStrings({
-        palette,
-        swatches: [
-          gradientStopFamilyFirst,
-          gradientStopFamilySecond,
-          gradientStopFamilyThird,
-        ],
-        direction: gradientDirection,
-        shade: gradientShade,
-        // Inline `style={{ backgroundImage }}` must use literal colors: `var(--color-*)` is only valid when
-        // the app’s CSS defines those tokens; this admin page may not load the full theme, so both palettes
-        // use resolved #hex / oklch stops (see `linearStrings` JSDoc).
-        stopResolution: "resolved",
-      }),
-    [
-      palette,
-      gradientStopFamilyFirst,
-      gradientStopFamilySecond,
-      gradientStopFamilyThird,
-      gradientDirection,
-      gradientShade,
-    ],
-  );
-
-  const gradientDarkPairedShade = Math.min(
-    900,
-    Math.max(50, 900 - gradientShade),
-  );
+  const loopRange = clampPrismColorLoopRange(palette, spec.colorLoop?.range);
 
   const loopVisual = useMemo(
-    () => colorLoopChips(palette, loopCenter, effectiveLoopRange),
-    [palette, loopCenter, effectiveLoopRange],
+    () => colorLoopChips(palette, loopCenter, loopRange),
+    [palette, loopCenter, loopRange],
   );
 
-  const codeSample = useMemo(() => {
-    const spec = `color={{
-    palette: "${palette}",
-    swatchPrimary: "${loopCenter}",
-    colorLoop: { center: "${loopCenter}", range: ${effectiveLoopRange} },
-  }}`;
-    return `<PrismCodeBlock
-  language="tsx"
-  mode="card"
-${spec.split("\n").join("\n  ")}
->
-  {\`const x = 1\`}
-</PrismCodeBlock>`;
-  }, [palette, loopCenter, effectiveLoopRange]);
+  const gradientPair = useMemo(() => {
+    const g = spec.gradient;
+    const swatches = g?.swatches;
+    if (!g || !swatches?.length) return null;
+    return PrismColor.gradient.linearStrings({
+      palette,
+      swatches,
+      direction: g.direction ?? "horizontal",
+      shade: g.shade ?? 500,
+      stopResolution: "resolved",
+    });
+  }, [palette, spec.gradient]);
+
+  const specJson = useMemo(
+    () => JSON.stringify(spec, null, 2),
+    [spec],
+  );
 
   return (
-    // Remount when switching palette so picker-internal UI resets; page state is synced from pickers.
-    <div key={palette} className="mb-6 min-w-0">
-      <PrismTypography role="title" size="large" as="h2" className="mb-4 font-bold">
-        Customize
-      </PrismTypography>
-
-      <div className="mb-6 flex min-w-0 max-w-md flex-col gap-4">
-        <PrismTypography role="overline" size="small" className="mb-1 block">
-          ColorLoop center
+    <div className="min-w-0 space-y-10">
+      <header className="max-w-2xl space-y-2">
+        <PrismTypography role="title" size="large" as="h2" className="font-bold">
+          PrismColor
         </PrismTypography>
-        <PrismColorPicker
-          color={{ palette, swatchPrimary: loopCenter, shade: 500 }}
-          onColorChange={(next) =>
-            applySwatchFromPicker(next, palette, setPalette, setLoopCenter)
-          }
-        />
+        <PrismTypography role="body" size="medium" tone="muted">
+          Use a single <code className="font-mono text-foreground">PrismColorPicker</code> for
+          palette, single swatch, ColorLoop range, and multi-stop gradients. Sections below read the
+          committed <code className="font-mono text-foreground">PartialPrismColorSpec</code> — no
+          duplicate ramp or direction controls on this page.
+        </PrismTypography>
+      </header>
 
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            ColorLoop range
-          </PrismTypography>
-          <input
-            type="range"
-            min={0}
-            max={maxLoopRange}
-            value={effectiveLoopRange}
-            onChange={(e) => setLoopRange(Number(e.target.value))}
-            className="w-full max-w-md"
-            aria-valuemin={0}
-            aria-valuemax={maxLoopRange}
-            aria-valuenow={effectiveLoopRange}
-          />
-          <PrismTypography role="label" size="small" className="mt-1 font-mono text-muted-foreground">
-            {effectiveLoopRange}
-            <span className="font-sans text-muted-foreground"> / {maxLoopRange}</span>
-            <span className="mt-0.5 block font-sans text-[11px] normal-case tracking-normal text-muted-foreground">
-              Same clamp as{" "}
-              <code className="font-mono text-foreground">clampPrismColorLoopRange</code>
-              : omitted range defaults to 2, then min 0 / max {maxLoopRange} (⌊ring / 2⌋).
-            </span>
-          </PrismTypography>
-        </div>
-      </div>
-
-      <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
-        ColorLoop visualization
-      </PrismTypography>
-      <div className="mb-8 flex flex-wrap gap-2">
-        {loopVisual.map(({ offset, family }) => {
-          const fill = PrismColor.hex({ palette, family, shade: 500 });
-          const fg = foregroundForFill(fill);
-          return (
-            <PrismBadge
-              key={`${offset}-${family}`}
-              variant="outline"
-              title={`offset ${offset}`}
-              className="rounded-md border-border py-1 font-mono font-normal"
-              style={{
-                backgroundColor: fill,
-                color: fg,
-                textShadow:
-                  fg === "#ffffff" ? "0 0 2px rgb(0 0 0 / 0.55)" : undefined,
-              }}
-            >
-              {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}:{" "}
-              {family}
-            </PrismBadge>
-          );
-        })}
-      </div>
-
-      <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
-        Gradient preview (multi-swatch)
-      </PrismTypography>
-      <div className="mb-4 flex min-w-0 max-w-md flex-col gap-4">
-        <PrismColorPicker
-          color={{ palette, swatchPrimary: gradientStopFamilyFirst, shade: 500 }}
-          onColorChange={(next) =>
-            applySwatchFromPicker(
-              next,
-              palette,
-              setPalette,
-              setGradientStopFamilyFirst,
-            )
-          }
-        />
-        <PrismColorPicker
-          color={{ palette, swatchPrimary: gradientStopFamilySecond, shade: 500 }}
-          onColorChange={(next) =>
-            applySwatchFromPicker(
-              next,
-              palette,
-              setPalette,
-              setGradientStopFamilySecond,
-            )
-          }
-        />
-        <PrismColorPicker
-          color={{ palette, swatchPrimary: gradientStopFamilyThird, shade: 500 }}
-          onColorChange={(next) =>
-            applySwatchFromPicker(
-              next,
-              palette,
-              setPalette,
-              setGradientStopFamilyThird,
-            )
-          }
-        />
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            Gradient shade (ramp step)
-          </PrismTypography>
-          <PrismTypography role="body" size="small" className="mb-2 text-muted-foreground">
-            One step for both preview rows: light uses this shade on each stop; dark uses{" "}
-            <code className="font-mono text-foreground">
-              clamp(900 − shade, 50, 900)
-            </code>{" "}
-            (<code className="font-mono text-foreground">{gradientDarkPairedShade}</code> here) — same rule as{" "}
-            <code className="font-mono text-foreground">PrismColor.gradient.linearStrings</code> with a numeric{" "}
-            <code className="font-mono text-foreground">shade</code>.
-          </PrismTypography>
-          <div className="relative">
-            <select
-              className={SELECT_CLASS}
-              value={gradientShade}
-              onChange={(e) => setGradientShade(Number(e.target.value))}
-            >
-              {gradientShadeSelectOptions(palette).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <PrismIcon
-              name="expand_more"
-              size={16}
-              weight="regular"
-              fill="off"
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+      <section className="max-w-xl space-y-4">
+        <PrismTypography role="overline" size="small" className="mb-1 block">
+          PrismColorPicker
+        </PrismTypography>
+        <div className={CHECKBOX_ROW_CLASS}>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showColorCode}
+              onChange={() => setShowColorCode((v) => !v)}
+              className="rounded border-input"
             />
-          </div>
-        </div>
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            direction
-          </PrismTypography>
-          <div className="relative">
-            <select
-              className={SELECT_CLASS}
-              value={gradientDirection}
-              onChange={(e) =>
-                setGradientDirection(
-                  e.target.value as typeof gradientDirection,
-                )
-              }
-            >
-              {GRADIENT_DIRECTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <PrismIcon
-              name="expand_more"
-              size={16}
-              weight="regular"
-              fill="off"
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+              showColorCode
+            </PrismTypography>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showCopyButton}
+              onChange={() => setShowCopyButton((v) => !v)}
+              className="rounded border-input"
             />
-          </div>
+            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+              showCopyButton
+            </PrismTypography>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={() => setDisabled((v) => !v)}
+              className="rounded border-input"
+            />
+            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+              disabled
+            </PrismTypography>
+          </label>
         </div>
-      </div>
-      <PrismTypography role="body" size="small" className="mb-2 max-w-xl text-muted-foreground">
-        Previews apply <code className="font-mono text-foreground">background-image</code> from{" "}
-        <code className="font-mono text-foreground">gradientPair.light</code> /{" "}
-        <code className="font-mono text-foreground">.dark</code> so you can eyeball the gradient next to the
-        controls.
-      </PrismTypography>
-      <div className="mb-6 flex min-w-0 flex-col gap-4">
-        <div>
-          <PrismTypography role="label" size="small" className="mb-1 block text-muted-foreground">
-            Gradient preview — light stops
-          </PrismTypography>
-          <div
-            className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
-            role="presentation"
-            style={{
-              height: "6rem",
-              minHeight: "6rem",
-              backgroundImage: gradientPair.light,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "100% 100%",
-            }}
+        <div key={palette} className="relative min-w-0">
+          <PrismColorPicker
+            color={spec}
+            onColorChange={(next) =>
+              setSpec((s) => mergePartialPrismPickerSpec(s, next))
+            }
+            showColorCode={showColorCode}
+            showCopyButton={showCopyButton}
+            disabled={disabled}
           />
         </div>
-        <div>
-          <PrismTypography role="label" size="small" className="mb-1 block text-muted-foreground">
-            Gradient preview — dark stops
-          </PrismTypography>
-          <div
-            className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
-            role="presentation"
-            style={{
-              height: "6rem",
-              minHeight: "6rem",
-              backgroundImage: gradientPair.dark,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "100% 100%",
-            }}
-          />
-        </div>
-      </div>
+      </section>
 
-      <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
-        Syntax preview (PrismCodeBlock)
-      </PrismTypography>
-      <div className="mb-8 max-w-3xl">
+      <section className="max-w-3xl space-y-3">
+        <PrismTypography role="overline" size="small" className="mb-1 block">
+          Committed spec
+        </PrismTypography>
+        <PrismTypography role="body" size="small" tone="muted" className="max-w-2xl">
+          Live <code className="font-mono text-foreground">PartialPrismColorSpec</code> from the
+          picker (includes <code className="font-mono text-foreground">colorLoop</code>,{" "}
+          <code className="font-mono text-foreground">gradient</code>, etc. when set).
+        </PrismTypography>
+        <PrismCodeBlock
+          className="font-mono"
+          mode="card"
+          language="json"
+          disableLineNumbers
+          color={spec}
+        >
+          {specJson}
+        </PrismCodeBlock>
+      </section>
+
+      <section className="space-y-3">
+        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+          ColorLoop ring
+        </PrismTypography>
+        <PrismTypography role="body" size="small" tone="muted" className="max-w-2xl">
+          Chips use <code className="font-mono text-foreground">PrismColor.Loop.step</code> with
+          center <code className="font-mono text-foreground">{loopCenter}</code> and range{" "}
+          <code className="font-mono text-foreground">{loopRange}</code> (from{" "}
+          <code className="font-mono text-foreground">clampPrismColorLoopRange</code>).
+        </PrismTypography>
+        <div className="flex flex-wrap gap-2">
+          {loopVisual.map(({ offset, family }) => {
+            const fill = PrismColor.hex({ palette, family, shade: 500 });
+            const fg = foregroundForFill(fill);
+            return (
+              <PrismBadge
+                key={`${offset}-${family}`}
+                variant="outline"
+                title={`offset ${offset}`}
+                className="rounded-md border-border py-1 font-mono font-normal"
+                style={{
+                  backgroundColor: fill,
+                  color: fg,
+                  textShadow:
+                    fg === "#ffffff" ? "0 0 2px rgb(0 0 0 / 0.55)" : undefined,
+                }}
+              >
+                {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}:{" "}
+                {family}
+              </PrismBadge>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="max-w-3xl space-y-4">
+        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+          Gradient → PrismColor.gradient.linearStrings
+        </PrismTypography>
+        <PrismTypography role="body" size="small" tone="muted">
+          When the picker commits a <code className="font-mono text-foreground">gradient</code>,
+          previews call{" "}
+          <code className="font-mono text-foreground">linearStrings</code> with{" "}
+          <code className="font-mono text-foreground">
+            {`stopResolution: "resolved"`}
+          </code>{" "}
+          so
+          literal colors work in <code className="font-mono text-foreground">backgroundImage</code>{" "}
+          without loading every CSS variable in admin.
+        </PrismTypography>
+        {gradientPair ? (
+          <div className="flex min-w-0 flex-col gap-3">
+            <div>
+              <PrismTypography
+                role="label"
+                size="small"
+                className="mb-1 block text-muted-foreground"
+              >
+                Light stops
+              </PrismTypography>
+              <div
+                className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
+                role="presentation"
+                style={{
+                  height: "5rem",
+                  minHeight: "5rem",
+                  backgroundImage: gradientPair.light,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "100% 100%",
+                }}
+              />
+            </div>
+            <div>
+              <PrismTypography
+                role="label"
+                size="small"
+                className="mb-1 block text-muted-foreground"
+              >
+                Dark stops
+              </PrismTypography>
+              <div
+                className="box-border w-full max-w-xl shrink-0 rounded-xl border border-border shadow-sm"
+                role="presentation"
+                style={{
+                  height: "5rem",
+                  minHeight: "5rem",
+                  backgroundImage: gradientPair.dark,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "100% 100%",
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <PrismTypography role="body" size="small" className="italic text-muted-foreground">
+            Switch the picker to Gradient mode and add swatches to see paired light/dark ramps here.
+          </PrismTypography>
+        )}
+      </section>
+
+      <section className="max-w-3xl space-y-3">
+        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+          PrismCodeBlock
+        </PrismTypography>
+        <PrismTypography role="body" size="small" tone="muted">
+          Syntax highlighting uses the same committed spec on the{" "}
+          <code className="font-mono text-foreground">color</code> prop.
+        </PrismTypography>
         <PrismCodeBlock
           className="font-mono"
           mode="card"
           language="tsx"
-          color={{
-            palette,
-            swatchPrimary: loopCenter,
-            colorLoop: { center: loopCenter, range: effectiveLoopRange },
-          }}
+          color={spec}
         >
           {`const Example = () => (
   <section className="p-4">
@@ -415,17 +341,10 @@ ${spec.split("\n").join("\n  ")}
   </section>
 );`}
         </PrismCodeBlock>
-      </div>
+      </section>
 
-      <PrismTypography role="title" size="small" as="h3" className="mb-3 font-bold">
-        CodeBlock (copy)
-      </PrismTypography>
-      <PrismCodeBlock className="font-mono" mode="card" language="tsx">
-        {codeSample}
-      </PrismCodeBlock>
-
-      <PrismTypography role="body" size="small" className="mt-6 text-muted-foreground">
-        Default Material loop length: {PRISM_DEFAULT_COLOR_LOOP.length} families. Tailwind loop:{" "}
+      <PrismTypography role="body" size="small" className="text-muted-foreground">
+        Default Material loop: {PRISM_DEFAULT_COLOR_LOOP.length} families. Tailwind loop:{" "}
         {PrismColor.Loop.families("tailwind").length}.
       </PrismTypography>
     </div>
