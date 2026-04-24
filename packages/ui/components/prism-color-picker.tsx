@@ -750,68 +750,75 @@ export function PrismColorPicker({
             disabled && "pointer-events-none opacity-50",
           )}
         >
-          <span className="inline-flex shrink-0 items-center text-current">
-            {isGradientMode ? (
-              <PrismIcon
-                name="gradient"
-                size={PRISM_COLOR_PICKER_ICON_SIZE}
-                weight="regular"
-                fill="off"
-                aria-hidden
-              />
-            ) : (
-              <Palette
-                size={PRISM_COLOR_PICKER_ICON_SIZE}
-                strokeWidth={2}
-                aria-hidden
-              />
-            )}
-          </span>
           {isGradientMode ? (
-            <span className="flex min-w-0 flex-1 items-center gap-x-1 gap-y-0.5">
-              <PrismTypography
-                role="label"
-                size="large"
-                font="sans"
-                as="span"
-                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
+            <>
+              <span
+                className="flex w-1/2 min-w-0 shrink-0 items-center text-current"
+                style={{ gap: PRISM_COLOR_PICKER_TRIGGER_GAP }}
               >
-                GRADIENT
-              </PrismTypography>
-            </span>
+                <span className="inline-flex shrink-0 items-center text-current">
+                  <PrismIcon
+                    name="gradient"
+                    size={PRISM_COLOR_PICKER_ICON_SIZE}
+                    weight="regular"
+                    fill="off"
+                    aria-hidden
+                  />
+                </span>
+                <PrismTypography
+                  role="label"
+                  size="large"
+                  font="sans"
+                  as="span"
+                  className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
+                >
+                  GRADIENT
+                </PrismTypography>
+              </span>
+              <span className="min-w-0 flex-1 shrink" aria-hidden />
+            </>
           ) : (
-            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5">
-              <PrismTypography
-                role="label"
-                size="large"
-                font="sans"
-                as="span"
-                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
-              >
-                {familyTitleText}
-              </PrismTypography>
-              <PrismTypography
-                role="body"
-                size="small"
-                font="mono"
-                as="span"
-                className="shrink-0 tracking-tight text-current"
-              >
-                {` • ${shadeDisplayPart}`}
-              </PrismTypography>
-              {showColorCode && normalizedPaintOnTrigger ? (
+            <>
+              <span className="inline-flex shrink-0 items-center text-current">
+                <Palette
+                  size={PRISM_COLOR_PICKER_ICON_SIZE}
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5">
+                <PrismTypography
+                  role="label"
+                  size="large"
+                  font="sans"
+                  as="span"
+                  className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
+                >
+                  {familyTitleText}
+                </PrismTypography>
                 <PrismTypography
                   role="body"
                   size="small"
                   font="mono"
                   as="span"
-                  className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
-                  title={normalizedPaintOnTrigger}
+                  className="shrink-0 tracking-tight text-current"
                 >
-                  {` • ${normalizedPaintOnTrigger}`}
+                  {` • ${shadeDisplayPart}`}
                 </PrismTypography>
-              ) : null}
-            </span>
+                {showColorCode && normalizedPaintOnTrigger ? (
+                  <PrismTypography
+                    role="body"
+                    size="small"
+                    font="mono"
+                    as="span"
+                    className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
+                    title={normalizedPaintOnTrigger}
+                  >
+                    {` • ${normalizedPaintOnTrigger}`}
+                  </PrismTypography>
+                ) : null}
+              </span>
+            </>
           )}
           {!isGradientMode &&
           hasActiveColorLoop &&
