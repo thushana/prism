@@ -68,18 +68,18 @@ export function PrismColorPickerDemo(): React.JSX.Element {
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 pt-8">
         <PrismTypography
           role="title"
-          size="large"
-          as="h3"
+          size="small"
+          as="h2"
           font="sans"
-          className="mb-2 font-bold"
+          className="mb-3 font-bold"
         >
           Customize
         </PrismTypography>
 
-        <div className="mb-6 flex flex-wrap gap-6">
+        <div className="flex flex-wrap gap-6">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
@@ -115,13 +115,13 @@ export function PrismColorPickerDemo(): React.JSX.Element {
           </label>
         </div>
 
-        <div className="mb-5">
+        <div className="pt-10">
           <PrismTypography
             role="title"
             size="small"
             as="h2"
             font="sans"
-            className="mb-4 font-bold"
+            className="mb-3 font-bold"
           >
             Example
           </PrismTypography>
@@ -134,15 +134,15 @@ export function PrismColorPickerDemo(): React.JSX.Element {
           />
         </div>
 
-        <div className="mt-8">
+        <div className="pt-10">
           <PrismTypography
             role="title"
             size="small"
             as="h2"
             font="sans"
-            className="mb-4 font-bold"
+            className="mb-3 font-bold"
           >
-            PrismColorPicker
+            Code Sample
           </PrismTypography>
           <PrismCodeBlock
             className="font-mono"
