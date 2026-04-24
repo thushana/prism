@@ -4,9 +4,7 @@ import {
   PRISM_DEFAULT_COLOR_LOOP,
   PRISM_TAILWIND_COLOR_LOOP,
   PrismCodeBlock,
-  PrismColor,
   PrismColorPicker,
-  PrismIcon,
   PrismTypography,
   prismColorPickerClipboardColorProp,
   type PartialPrismColorSpec,
@@ -15,31 +13,14 @@ import {
 } from "@ui";
 import { useMemo, useState } from "react";
 
-const CUSTOMIZER_INPUT_CLASS =
-  "box-border h-10 w-full max-w-xs rounded-md border border-input bg-background px-4 py-0 text-sm font-mono leading-10";
-
-const CUSTOMIZER_SELECT_CLASS = `${CUSTOMIZER_INPUT_CLASS} appearance-none pr-10`;
-
-function familiesForPalette(palette: PrismPaletteId): readonly PrismSwatchKey[] {
-  return palette === "tailwind"
-    ? PRISM_TAILWIND_COLOR_LOOP
-    : PRISM_DEFAULT_COLOR_LOOP;
-}
-
 function randomPalette(): PrismPaletteId {
   return Math.random() < 0.5 ? "default" : "tailwind";
 }
 
 function randomSwatchForPalette(palette: PrismPaletteId): PrismSwatchKey {
-  const ring = familiesForPalette(palette);
+  const ring =
+    palette === "tailwind" ? PRISM_TAILWIND_COLOR_LOOP : PRISM_DEFAULT_COLOR_LOOP;
   return ring[Math.floor(Math.random() * ring.length)]!;
-}
-
-function mergeSpec(
-  base: PartialPrismColorSpec,
-  patch: PartialPrismColorSpec,
-): PartialPrismColorSpec {
-  return { ...base, ...patch };
 }
 
 function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
@@ -75,19 +56,6 @@ export function PrismColorPickerDemo(): React.JSX.Element {
   const [showCopyButton, setShowCopyButton] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
-  const palette = color.palette ?? "default";
-  const swatchPrimary = color.swatchPrimary ?? "purple";
-
-  const applySwatchChange = (fam: PrismSwatchKey) => {
-    const normalized = PrismColor.Loop.normalize(palette, fam);
-    setColor((prev) =>
-      mergeSpec(prev, {
-        swatchPrimary: normalized,
-        shade: prev.shade ?? 500,
-      }),
-    );
-  };
-
   const generatedUsage = useMemo(
     () =>
       formatPickerSnippet(color, {
@@ -97,8 +65,6 @@ export function PrismColorPickerDemo(): React.JSX.Element {
       }),
     [color, showColorCode, showCopyButton, disabled],
   );
-
-  const swatchOptions = [...familiesForPalette(palette)];
 
   return (
     <>
@@ -112,34 +78,6 @@ export function PrismColorPickerDemo(): React.JSX.Element {
         >
           Customize
         </PrismTypography>
-
-        <div className="mb-4 min-w-0 max-w-xs">
-          <PrismTypography role="overline" size="small" font="sans" className="mb-1 block">
-            swatchPrimary
-          </PrismTypography>
-          <div className="relative">
-            <select
-              className={CUSTOMIZER_SELECT_CLASS}
-              value={swatchPrimary}
-              onChange={(e) =>
-                applySwatchChange(e.target.value as PrismSwatchKey)
-              }
-            >
-              {swatchOptions.map((fam) => (
-                <option key={fam} value={fam}>
-                  {fam}
-                </option>
-              ))}
-            </select>
-            <PrismIcon
-              name="expand_more"
-              size={16}
-              weight="regular"
-              fill="off"
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-          </div>
-        </div>
 
         <div className="mb-6 flex flex-wrap gap-6">
           <label className="flex cursor-pointer items-center gap-2">

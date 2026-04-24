@@ -6,5 +6,7 @@ export * from "./prism-layout";
 export * from "./prism-button";
 export * from "./prism-code-block";
 export * from "./prism-color-picker";
+export * from "./prism-color-picker-clipboard";
+export * from "./prism-color-picker-helpers";
 export * from "./prism-typography";
 export * from "./prism-path-bar";
