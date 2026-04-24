@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  PrismBadge,
+  PRISM_META_CHIP_OUTLINE_CLASS,
   PrismCodeBlock,
   PrismColor,
   PrismColorPicker,
@@ -12,6 +12,7 @@ import {
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "@ui";
+import { cn } from "@utilities";
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
 
@@ -236,11 +237,13 @@ export function PrismColorDemo(): JSX.Element {
             const fill = PrismColor.hex({ palette, family, shade: 500 });
             const fg = foregroundForFill(fill);
             return (
-              <PrismBadge
+              <span
                 key={`${offset}-${family}`}
-                variant="outline"
                 title={`offset ${offset}`}
-                className="rounded-md border-border py-1 font-mono font-normal"
+                className={cn(
+                  PRISM_META_CHIP_OUTLINE_CLASS,
+                  "rounded-md py-1 font-mono font-normal",
+                )}
                 style={{
                   backgroundColor: fill,
                   color: fg,
@@ -250,7 +253,7 @@ export function PrismColorDemo(): JSX.Element {
               >
                 {offset === 0 ? "center" : `${offset > 0 ? "+" : ""}${offset}`}:{" "}
                 {family}
-              </PrismBadge>
+              </span>
             );
           })}
         </div>

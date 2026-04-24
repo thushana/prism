@@ -1,4 +1,3 @@
-export * from "./prism-badge";
 export * from "./prism-divider";
 export * from "./prism-card";
 export * from "./prism-icon";

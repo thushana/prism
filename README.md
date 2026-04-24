@@ -125,7 +125,7 @@ pnpm run dev:web
 
 ### Packages
 
-- **packages/ui**: Shared UI components (PrismButton, PrismCard, PrismBadge, PrismIcon, layout wrappers, …)
+- **packages/ui**: Shared UI components (PrismButton, PrismCard, PrismIcon, layout wrappers, read-only chip class bundles, …)
   - Radix UI primitives
   - Class Variance Authority for variants
   - Material Symbols Rounded icons (via Google Fonts)

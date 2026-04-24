@@ -11,7 +11,6 @@ export type {
 } from "./system/types";
 export { getRelativeTime, formatDateTimeWithRelative } from "./system/data";
 
-export { PrismBadgeDemo } from "./prism-badge";
 export { PrismButtonDemo } from "./prism-button";
 export { PrismCardDemo } from "./prism-card";
 export { PrismCodeBlockDemo } from "./prism-code-block";

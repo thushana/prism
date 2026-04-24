@@ -9,7 +9,6 @@ This file is the **canonical usage reference** for the UI package (import paths,
 ```
 packages/ui/
 ├── components/          # React components (main exports)
-│   ├── prism-badge.tsx
 │   ├── prism-divider.tsx
 │   ├── prism-code-block.tsx
 │   ├── prism-card.tsx
@@ -19,6 +18,7 @@ packages/ui/
 │   └── index.ts
 ├── source/              # Presets and secondary modules
 │   ├── prism-button-presets.ts
+│   ├── prism-meta-chip.ts
 │   └── index.ts
 ├── styles/             # Font configurations and global CSS
 │   ├── fonts.ts        # Next.js font configurations
@@ -42,7 +42,7 @@ The UI package is automatically available in all apps via npm workspaces. No ins
 import {
   PrismButton,
   PrismCard,
-  PrismBadge,
+  PRISM_META_CHIP_OUTLINE_CLASS,
   PrismDivider,
   PrismCodeBlock,
   PrismIcon,
@@ -117,22 +117,24 @@ import {
 </PrismCard>
 ```
 
-### PrismBadge
+### Read-only metadata chips
 
-Small status label (CVA variants: `default`, `secondary`, `outline`, `destructive`). Style helpers also export **`prismBadgeVariants`** if you need raw classes.
+Small labels (timezone, commit SHA, etc.) use Tailwind bundles from **`source/prism-meta-chip.ts`**: **`PRISM_META_CHIP_OUTLINE_CLASS`**, **`PRISM_META_CHIP_SECONDARY_CLASS`**, and optional **`PRISM_META_CHIP_INTERACTIVE_CLASS`** when the chip sits inside `<a>`. Use **`PrismButton`** for actions—there is no separate badge component.
 
 **Import:**
 
 ```typescript
-import { PrismBadge } from "@ui";
+import {
+  PRISM_META_CHIP_OUTLINE_CLASS,
+  PRISM_META_CHIP_SECONDARY_CLASS,
+} from "@ui";
 ```
 
 **Example:**
 
 ```tsx
-<PrismBadge variant="default">New</PrismBadge>
-<PrismBadge variant="secondary">Draft</PrismBadge>
-<PrismBadge variant="outline">Published</PrismBadge>
+<span className={PRISM_META_CHIP_OUTLINE_CLASS}>Published</span>
+<span className={PRISM_META_CHIP_SECONDARY_CLASS}>Draft</span>
 ```
 
 ### PrismDivider

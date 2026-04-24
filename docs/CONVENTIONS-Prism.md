@@ -220,7 +220,7 @@ packages/
 
 ### File Organization Rules
 
-- **`packages/ui/components/`** - Shared UI components (`PrismButton`, `PrismCard`, `PrismBadge`, `PrismIcon`, `PrismLayout*`, …); **`packages/ui/source/`** holds presets and package glue
+- **`packages/ui/components/`** - Shared UI components (`PrismButton`, `PrismCard`, `PrismIcon`, `PrismLayout*`, …); **`packages/ui/source/`** holds presets, meta chip class bundles, and package glue
 - **`packages/database/source/`** - Database schema and queries
 - **`packages/utilities/source/`** - Utility functions (classnames, etc.)
 - **`packages/logger/source/`** - Centralized logging for client/server
