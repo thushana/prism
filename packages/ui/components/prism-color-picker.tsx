@@ -64,13 +64,18 @@ const PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL =
 
 /**
  * Popover section headings — `role="overline"` / `size="small"` (+ `uppercase` utility) so
- * {@link PrismTypography} caps accent applies; trigger copy stays `label` + `small` without accent.
+ * {@link PrismTypography} caps accent applies (overline only; closed trigger uses `label`/`large`).
  */
 const PRISM_COLOR_PICKER_POPOVER_SECTION_CLASS = "mb-1 block uppercase";
 
-/** Closed trigger: gradient word uses `label`/`small`; swatch family uses `label`/`large` + `font-bold`. */
+/** Closed trigger primary line (gradient word or swatch family): `label`/`large` + `font-bold`. */
 const PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS =
   "min-w-0 truncate uppercase text-current";
+
+const PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS = cn(
+  PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS,
+  "font-bold",
+);
 
 /** Built-in Material vs Tailwind switch (segmented control in the popover). */
 const PRISM_COLOR_PICKER_PALETTE_TOGGLE: readonly {
@@ -766,10 +771,10 @@ export function PrismColorPicker({
             <span className="flex min-w-0 flex-1 items-center gap-x-1 gap-y-0.5">
               <PrismTypography
                 role="label"
-                size="small"
+                size="large"
                 font="sans"
                 as="span"
-                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS}
+                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
               >
                 GRADIENT
               </PrismTypography>
@@ -781,10 +786,7 @@ export function PrismColorPicker({
                 size="large"
                 font="sans"
                 as="span"
-                className={cn(
-                  PRISM_COLOR_PICKER_TRIGGER_PRIMARY_CLASS,
-                  "font-bold",
-                )}
+                className={PRISM_COLOR_PICKER_TRIGGER_PRIMARY_LABEL_CLASS}
               >
                 {familyTitleText}
               </PrismTypography>

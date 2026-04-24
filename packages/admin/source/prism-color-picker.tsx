@@ -40,8 +40,22 @@ function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
   return `${lines.join("\n")}\n`;
 }
 
+/** Space under the shell header before the first in-demo heading (`AdminPageShell` already renders the page `h1`). */
+const PRISM_COLOR_PICKER_DEMO_PAGE_TOP_PAD = "pt-8";
+/** Space above each in-demo section heading after prior content. */
+const PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD = "pt-10";
+/** Tight gap from section heading to the control or block directly below. */
+const PRISM_COLOR_PICKER_DEMO_HEADING_TO_BODY = "mb-3";
+/** Combined utility for in-demo `h2` titles (spacing + weight). */
+const PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS = `${PRISM_COLOR_PICKER_DEMO_HEADING_TO_BODY} font-bold`;
+/** Root wrapper: bottom margin for shell + top pad before first heading. */
+const PRISM_COLOR_PICKER_DEMO_ROOT_CLASS = `mb-6 ${PRISM_COLOR_PICKER_DEMO_PAGE_TOP_PAD}`;
+
 /**
- * Admin playground for {@link PrismColorPicker} — layout matches {@link PrismCodeBlockDemo}.
+ * Admin playground for {@link PrismColorPicker}.
+ *
+ * The route title from `AdminPageShell` is the document `h1`; Customize / Example / Code Sample are
+ * sibling `h2`s for in-page sections (no skipped heading levels).
  */
 export function PrismColorPickerDemo(): React.JSX.Element {
   const [color, setColor] = useState<PartialPrismColorSpec>(() => {
@@ -68,13 +82,13 @@ export function PrismColorPickerDemo(): React.JSX.Element {
 
   return (
     <>
-      <div className="mb-6 pt-8">
+      <div className={PRISM_COLOR_PICKER_DEMO_ROOT_CLASS}>
         <PrismTypography
           role="title"
           size="small"
           as="h2"
           font="sans"
-          className="mb-3 font-bold"
+          className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
         >
           Customize
         </PrismTypography>
@@ -115,13 +129,13 @@ export function PrismColorPickerDemo(): React.JSX.Element {
           </label>
         </div>
 
-        <div className="pt-10">
+        <div className={PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD}>
           <PrismTypography
             role="title"
             size="small"
             as="h2"
             font="sans"
-            className="mb-3 font-bold"
+            className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
           >
             Example
           </PrismTypography>
@@ -134,13 +148,13 @@ export function PrismColorPickerDemo(): React.JSX.Element {
           />
         </div>
 
-        <div className="pt-10">
+        <div className={PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD}>
           <PrismTypography
             role="title"
             size="small"
             as="h2"
             font="sans"
-            className="mb-3 font-bold"
+            className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
           >
             Code Sample
           </PrismTypography>
