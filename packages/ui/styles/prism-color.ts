@@ -104,9 +104,10 @@ export type PrismColorSpec = {
     direction: "horizontal" | "vertical" | "angled";
     shade?: number | { light: number; dark: number };
   };
+  /** `center` defaults to {@link PrismColorSpec.swatchPrimary} in consumers when omitted. */
   colorLoop?: {
-    center: PrismSwatchKey;
-    range: number;
+    center?: PrismSwatchKey;
+    range?: number;
   };
 };
 
@@ -354,14 +355,50 @@ function ringFamilyAtOffset(
   return ring[(j + n) % n]!;
 }
 
-function clampColorLoopRange(
+/** Hard max for `colorLoop.range`: **⌊ring length / 2⌋** (same cap as {@link clampPrismColorLoopRange}). */
+export function maxPrismColorLoopRange(palette: PrismPaletteId): number {
+  return Math.floor(loopFor(resolvePaletteId(palette)).length / 2);
+}
+
+/**
+ * Upper bound for ColorLoop `range` inside the {@link PrismColorPicker} UI (self-activated when the
+ * committed `range > 0`). Wider rings remain valid on `PartialPrismColorSpec` / {@link PrismCodeBlock}
+ * up to {@link maxPrismColorLoopRange}.
+ */
+export const PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER = 2;
+
+/** Slider / UI ceiling for the picker: `min(ring max, {@link PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER})`. */
+export function maxPrismColorLoopRangeForPicker(palette: PrismPaletteId): number {
+  return Math.min(
+    maxPrismColorLoopRange(palette),
+    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER,
+  );
+}
+
+/**
+ * Clamps `colorLoop.range` to the palette ring: default **2** when `range` is omitted, hard max
+ * **{@link maxPrismColorLoopRange}**, minimum **0**. Same rule as {@link resolveCodeBlockColor}.
+ */
+export function clampPrismColorLoopRange(
   palette: PrismPaletteId,
   range: number | undefined,
 ): number {
-  const ring = loopFor(palette);
-  const maxR = Math.floor(ring.length / 2);
+  const maxR = maxPrismColorLoopRange(palette);
   const r = range ?? 2;
   return Math.max(0, Math.min(maxR, Math.floor(r)));
+}
+
+/**
+ * Like {@link clampPrismColorLoopRange}, then capped at {@link PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER} for picker UX.
+ */
+export function clampPrismColorLoopRangeForPicker(
+  palette: PrismPaletteId,
+  range: number | undefined,
+): number {
+  return Math.min(
+    clampPrismColorLoopRange(palette, range),
+    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER,
+  );
 }
 
 export type ResolvedCodeBlockColor = {
@@ -381,7 +418,7 @@ export function resolveCodeBlockColor(
     palette,
     spec?.swatchPrimary ?? spec?.colorLoop?.center,
   );
-  const range = clampColorLoopRange(palette, spec?.colorLoop?.range);
+  const range = clampPrismColorLoopRange(palette, spec?.colorLoop?.range);
   return { palette, primary: anchor, colorLoopRange: range };
 }
 

@@ -7,19 +7,16 @@ import {
   PrismColorPicker,
   PrismIcon,
   PrismTypography,
+  clampPrismColorLoopRange,
   PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER,
   PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER,
   PRISM_DEFAULT_COLOR_LOOP,
+  type PartialPrismColorSpec,
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "@ui";
 import type { JSX } from "react";
-import { useMemo, useState } from "react";
-
-const PALETTE_OPTIONS: { value: PrismPaletteId; label: string }[] = [
-  { value: "default", label: "default (Material CSS vars)" },
-  { value: "tailwind", label: "tailwind (prefixed --color-tailwind-*)" },
-];
+import { useEffect, useMemo, useState } from "react";
 
 const GRADIENT_DIRECTIONS = [
   { value: "horizontal" as const, label: "horizontal" },
@@ -92,20 +89,35 @@ function foregroundForFill(cssColor: string): string {
   return "#ffffff";
 }
 
+function applySwatchFromPicker(
+  next: PartialPrismColorSpec,
+  currentPalette: PrismPaletteId,
+  setPagePalette: (p: PrismPaletteId) => void,
+  setSwatch: (f: PrismSwatchKey) => void,
+): void {
+  const pal = next.palette ?? currentPalette;
+  if (next.palette !== undefined) setPagePalette(next.palette);
+  const f = next.swatchPrimary;
+  if (f) setSwatch(PrismColor.Loop.normalize(pal, f));
+}
+
 /**
  * Admin: PrismColor — ColorLoop, gradient builder, syntax via PrismCodeBlock, both palettes.
  */
 export function PrismColorDemo(): JSX.Element {
   const [palette, setPalette] = useState<PrismPaletteId>("default");
 
-  /** Library clamp: `range ?? 2`, capped at ⌊ring length / 2⌋ (not a hard max of 2). */
   const maxLoopRange = Math.floor(
     PrismColor.Loop.families(palette).length / 2,
   );
 
   const [loopCenter, setLoopCenter] = useState<PrismSwatchKey>("purple");
   const [loopRange, setLoopRange] = useState(2);
-  const effectiveLoopRange = Math.min(loopRange, maxLoopRange);
+  const effectiveLoopRange = clampPrismColorLoopRange(palette, loopRange);
+
+  useEffect(() => {
+    setLoopRange((r) => clampPrismColorLoopRange(palette, r));
+  }, [palette, maxLoopRange]);
 
   const [gradientStopFamilyFirst, setGradientStopFamilyFirst] =
     useState<PrismSwatchKey>("purple");
@@ -170,53 +182,21 @@ ${spec.split("\n").join("\n  ")}
   }, [palette, loopCenter, effectiveLoopRange]);
 
   return (
-    // Remount controls when switching palette so invalid swatches (e.g. "purple" vs Tailwind-only names) reset.
+    // Remount when switching palette so picker-internal UI resets; page state is synced from pickers.
     <div key={palette} className="mb-6 min-w-0">
       <PrismTypography role="title" size="large" as="h2" className="mb-4 font-bold">
         Customize
       </PrismTypography>
-      <PrismTypography role="body" size="medium" className="mb-4 text-muted-foreground">
-        Live ColorLoop offsets, gradient strings from{" "}
-        <code className="font-mono text-foreground">PrismColor.gradient.linearStrings</code>,
-        and syntax coloring with the same palette in a real{" "}
-        <code className="font-mono text-foreground">PrismCodeBlock</code>.
-      </PrismTypography>
 
       <div className="mb-6 flex min-w-0 max-w-md flex-col gap-4">
-        <div>
-          <PrismTypography role="overline" size="small" className="mb-1 block">
-            palette
-          </PrismTypography>
-          <div className="relative">
-            <select
-              className={SELECT_CLASS}
-              value={palette}
-              onChange={(e) =>
-                setPalette(e.target.value as PrismPaletteId)
-              }
-            >
-              {PALETTE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <PrismIcon
-              name="expand_more"
-              size={16}
-              weight="regular"
-              fill="off"
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-          </div>
-        </div>
-
+        <PrismTypography role="overline" size="small" className="mb-1 block">
+          ColorLoop center
+        </PrismTypography>
         <PrismColorPicker
           color={{ palette, swatchPrimary: loopCenter, shade: 500 }}
-          onColorChange={(next) => {
-            const f = next.swatchPrimary;
-            if (f) setLoopCenter(PrismColor.Loop.normalize(palette, f));
-          }}
+          onColorChange={(next) =>
+            applySwatchFromPicker(next, palette, setPalette, setLoopCenter)
+          }
         />
 
         <div>
@@ -238,7 +218,9 @@ ${spec.split("\n").join("\n  ")}
             {effectiveLoopRange}
             <span className="font-sans text-muted-foreground"> / {maxLoopRange}</span>
             <span className="mt-0.5 block font-sans text-[11px] normal-case tracking-normal text-muted-foreground">
-              Omit in props → defaults to 2; max is ⌊palette size / 2⌋.
+              Same clamp as{" "}
+              <code className="font-mono text-foreground">clampPrismColorLoopRange</code>
+              : omitted range defaults to 2, then min 0 / max {maxLoopRange} (⌊ring / 2⌋).
             </span>
           </PrismTypography>
         </div>
@@ -277,24 +259,36 @@ ${spec.split("\n").join("\n  ")}
       <div className="mb-4 flex min-w-0 max-w-md flex-col gap-4">
         <PrismColorPicker
           color={{ palette, swatchPrimary: gradientStopFamilyFirst, shade: 500 }}
-          onColorChange={(next) => {
-            const f = next.swatchPrimary;
-            if (f) setGradientStopFamilyFirst(PrismColor.Loop.normalize(palette, f));
-          }}
+          onColorChange={(next) =>
+            applySwatchFromPicker(
+              next,
+              palette,
+              setPalette,
+              setGradientStopFamilyFirst,
+            )
+          }
         />
         <PrismColorPicker
           color={{ palette, swatchPrimary: gradientStopFamilySecond, shade: 500 }}
-          onColorChange={(next) => {
-            const f = next.swatchPrimary;
-            if (f) setGradientStopFamilySecond(PrismColor.Loop.normalize(palette, f));
-          }}
+          onColorChange={(next) =>
+            applySwatchFromPicker(
+              next,
+              palette,
+              setPalette,
+              setGradientStopFamilySecond,
+            )
+          }
         />
         <PrismColorPicker
           color={{ palette, swatchPrimary: gradientStopFamilyThird, shade: 500 }}
-          onColorChange={(next) => {
-            const f = next.swatchPrimary;
-            if (f) setGradientStopFamilyThird(PrismColor.Loop.normalize(palette, f));
-          }}
+          onColorChange={(next) =>
+            applySwatchFromPicker(
+              next,
+              palette,
+              setPalette,
+              setGradientStopFamilyThird,
+            )
+          }
         />
         <div>
           <PrismTypography role="overline" size="small" className="mb-1 block">
