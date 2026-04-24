@@ -261,7 +261,7 @@ export function PrismDividerDemo(): React.JSX.Element {
                       <PrismTypography
                         role="label"
                         size="medium"
-                        tone="muted"
+                        color={{ semanticText: "muted" }}
                         font="mono"
                       >
                         {OPTION_PROP_LABEL[key]}
@@ -367,7 +367,7 @@ export function PrismDividerDemo(): React.JSX.Element {
               : "rounded-xl border border-dashed border-border bg-background p-8"
           }
         >
-          <PrismTypography role="body" size="medium" tone="muted">
+          <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
             Content above
           </PrismTypography>
           <PrismDivider
@@ -383,7 +383,7 @@ export function PrismDividerDemo(): React.JSX.Element {
             iconFill={dividerProps.iconFill}
             surfaceClassName={dividerProps.surfaceClassName}
           />
-          <PrismTypography role="body" size="medium" tone="muted">
+          <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
             Content below
           </PrismTypography>
         </div>

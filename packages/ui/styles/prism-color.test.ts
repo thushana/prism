@@ -9,6 +9,7 @@ import {
   PRISM_TAILWIND_COLOR_LOOP,
   PrismColor,
   prismColorSpecToIconGlyphPaint,
+  prismColorSpecToTypographyPaint,
   prismLabelOnFilledSurface,
   resolveCodeBlockColor,
 } from "./prism-color";
@@ -273,5 +274,46 @@ describe("prismLabelOnFilledSurface", () => {
     expect(label).toBe(
       PrismColor.hex({ palette: "tailwind", family: "zinc", shade: 700 }),
     );
+  });
+});
+
+describe("prismColorSpecToTypographyPaint", () => {
+  it("returns empty paint when spec is undefined or empty", () => {
+    expect(prismColorSpecToTypographyPaint(undefined)).toEqual({});
+    expect(prismColorSpecToTypographyPaint({})).toEqual({});
+  });
+
+  it("maps semanticText to Tailwind text-* class", () => {
+    expect(prismColorSpecToTypographyPaint({ semanticText: "muted" })).toEqual({
+      semanticTextClass: "text-muted-foreground",
+    });
+    expect(
+      prismColorSpecToTypographyPaint({ semanticText: "inherit" }),
+    ).toEqual({});
+  });
+
+  it("prefers swatch-based solid hex over semanticText", () => {
+    const p = prismColorSpecToTypographyPaint({
+      semanticText: "muted",
+      swatchPrimary: "red",
+      shade: 600,
+    });
+    expect(p.semanticTextClass).toBeUndefined();
+    expect(p.solidStyle?.color).toBe(
+      PrismColor.hex({ palette: "default", family: "red", shade: 600 }),
+    );
+  });
+
+  it("returns gradient clip style when gradient.swatches is non-empty", () => {
+    const p = prismColorSpecToTypographyPaint({
+      swatchPrimary: "indigo",
+      shade: 500,
+      gradient: {
+        swatches: ["purple", "blue"],
+        direction: "horizontal",
+      },
+    });
+    expect(p.gradientClipStyle?.backgroundImage).toMatch(/^linear-gradient/);
+    expect(p.gradientClipStyle?.WebkitBackgroundClip).toBe("text");
   });
 });

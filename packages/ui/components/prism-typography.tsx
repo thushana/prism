@@ -5,11 +5,16 @@
  *
  * **Zone:** `animationZone` — `whole` | `line` | `word` | `character` | `none`.
  * **Kind:** `animationKind` — `fadeIn` | `moveIn` | `none`. If zone is set and kind is `none`, fade-in is used (same as legacy “zone without type”).
+ *
+ * **Colour:** {@link PartialPrismColorSpec} via **`color`** only — resolved by {@link prismColorSpecToTypographyPaint}
+ * (semantic `text-*` roles, palette hex, or gradient + background-clip). Omit **`color`** to inherit the cascade.
+ * Gradient text disables line/word/character split animations (plain whole-text motion only if configured).
  */
 
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   type CSSProperties,
   type ElementType,
@@ -21,6 +26,10 @@ import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { cn } from "@utilities";
 import type { PrismSize } from "../source/prism-size";
+import {
+  prismColorSpecToTypographyPaint,
+  type PartialPrismColorSpec,
+} from "../styles/prism-color";
 
 gsap.registerPlugin(SplitText);
 
@@ -54,30 +63,6 @@ export type PrismTypographyAnimationZone =
   | "none";
 
 export type PrismTypographyAnimationKind = "fadeIn" | "moveIn" | "none";
-
-/** Semantic text color → `text-*` utilities (shadcn-style tokens). */
-export type PrismTypographyTone =
-  | "inherit"
-  | "foreground"
-  | "muted"
-  | "primary"
-  | "primaryForeground"
-  | "secondaryForeground"
-  | "destructive"
-  | "accentForeground"
-  | "cardForeground";
-
-const TONE_CLASS: Record<PrismTypographyTone, string | undefined> = {
-  inherit: undefined,
-  foreground: "text-foreground",
-  muted: "text-muted-foreground",
-  primary: "text-primary",
-  primaryForeground: "text-primary-foreground",
-  secondaryForeground: "text-secondary-foreground",
-  destructive: "text-destructive",
-  accentForeground: "text-accent-foreground",
-  cardForeground: "text-card-foreground",
-};
 
 type PrismTypographyElement =
   | "h1"
@@ -269,7 +254,11 @@ function yForZone(zone: ResolvedAnimationZone, kind: ResolvedAnimationKind): num
 export type PrismTypographyProps = {
   role: PrismTypographyRole;
   size?: PrismTypographySize;
-  tone?: PrismTypographyTone;
+  /**
+   * Prism colour spec — semantic roles, palette hex, or gradient (see {@link prismColorSpecToTypographyPaint}).
+   * Omit to inherit surrounding text colour.
+   */
+  color?: PartialPrismColorSpec;
   font?: PrismTypographyFont;
   fontFamily?: string;
   animationZone?: PrismTypographyAnimationZone;
@@ -283,7 +272,7 @@ export type PrismTypographyProps = {
 export function PrismTypography({
   role,
   size: sizeProp,
-  tone = "inherit",
+  color: colorSpec,
   font = "sans",
   fontFamily,
   as,
@@ -297,10 +286,21 @@ export function PrismTypography({
   const size = sizeProp ?? "medium";
   const Comp = (as ?? DEFAULT_ELEMENT[role][size]) as ElementType;
 
-  const animationZoneResolved = resolveAnimationZone(
+  const paint = useMemo(
+    () => prismColorSpecToTypographyPaint(colorSpec),
+    [colorSpec],
+  );
+  const needsGradientTextWrapper = paint.gradientClipStyle !== undefined;
+  const hasSolidTypographyPaint =
+    paint.solidStyle !== undefined && !needsGradientTextWrapper;
+
+  const animationZoneBase = resolveAnimationZone(
     animationZoneProp,
     children
   );
+  const animationZoneResolved = needsGradientTextWrapper
+    ? null
+    : animationZoneBase;
   const animationKindResolved = resolveAnimationKind(
     animationKindProp,
     animationZoneResolved !== null
@@ -484,21 +484,30 @@ export function PrismTypography({
 
   const balanceWrap = { textWrap: "balance" } as CSSProperties;
   const capsAccent = defaultCapsAccentStyle(role, size);
+  const solidFromPaint = hasSolidTypographyPaint ? paint.solidStyle : undefined;
   const mergedStyle =
     fontFamily !== undefined && fontFamily !== ""
       ? {
           ...balanceWrap,
           ...(capsAccent ?? {}),
+          ...solidFromPaint,
           ...style,
           fontFamily,
         }
       : {
           ...balanceWrap,
           ...(capsAccent ?? {}),
+          ...solidFromPaint,
           ...style,
         };
 
   const typographyClass = `typography-${role}-${size}`;
+
+  const body = needsGradientTextWrapper ? (
+    <span style={paint.gradientClipStyle as CSSProperties}>{children}</span>
+  ) : (
+    children
+  );
 
   return (
     <Comp
@@ -506,14 +515,14 @@ export function PrismTypography({
       className={cn(
         typographyClass,
         fontClass,
-        TONE_CLASS[tone],
+        paint.semanticTextClass,
         animationClass,
         className
       )}
       style={mergedStyle}
       {...rest}
     >
-      {children}
+      {body}
     </Comp>
   );
 }

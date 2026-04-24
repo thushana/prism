@@ -340,7 +340,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLineNumbers((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
               disableLineNumbers
             </PrismTypography>
           </label>
@@ -351,7 +351,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLanguageLabel((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
               disableLanguageLabel
             </PrismTypography>
           </label>
@@ -362,7 +362,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" tone="muted" font="mono">
+            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
               disableCopyButton
             </PrismTypography>
           </label>

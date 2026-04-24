@@ -564,7 +564,9 @@ function ButtonCustomizerSection() {
               role="title"
               size="medium"
               className="block"
-              tone={copyToast.isError ? "destructive" : "inherit"}
+              color={{
+                semanticText: copyToast.isError ? "destructive" : "inherit",
+              }}
             >
               {copyToast.title}
             </PrismTypography>
@@ -572,7 +574,7 @@ function ButtonCustomizerSection() {
               <PrismTypography
                 role="body"
                 size="small"
-                tone="muted"
+                color={{ semanticText: "muted" }}
                 font="mono"
                 className="mt-1 block break-all"
               >
@@ -620,7 +622,7 @@ function ButtonCustomizerSection() {
                     <PrismTypography
                       role="label"
                       size="medium"
-                      tone="muted"
+                      color={{ semanticText: "muted" }}
                       font="mono"
                     >
                       {OPTION_PROP_LABEL[key]}
@@ -631,7 +633,12 @@ function ButtonCustomizerSection() {
             ))}
           </div>
           <div className="mb-4 flex items-center gap-3">
-            <PrismTypography role="label" size="medium" font="mono" tone="muted">
+            <PrismTypography
+              role="label"
+              size="medium"
+              font="mono"
+              color={{ semanticText: "muted" }}
+            >
               {currentSampleSnippet}
             </PrismTypography>
             <button

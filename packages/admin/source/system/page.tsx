@@ -318,7 +318,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                         role="title"
                         size="large"
                         as="h3"
-                        tone="foreground"
+                        color={{ semanticText: "foreground" }}
                       >
                         {entry.title}
                       </PrismTypography>

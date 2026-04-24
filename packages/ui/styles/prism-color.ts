@@ -80,6 +80,21 @@ export type PrismDefaultPaletteShadeKey =
   | "a400"
   | "a700";
 
+/**
+ * Theme text roles for {@link prismColorSpecToTypographyPaint} / {@link PrismTypography}.
+ * **`inherit`** — no `text-*` class; use the surrounding cascade.
+ */
+export type PrismColorSemanticText =
+  | "inherit"
+  | "foreground"
+  | "muted"
+  | "primary"
+  | "primaryForeground"
+  | "secondaryForeground"
+  | "destructive"
+  | "accentForeground"
+  | "cardForeground";
+
 export type PrismColorSpec = {
   palette?: PrismPaletteId;
   swatchPrimary?: PrismSwatchKey;
@@ -87,13 +102,7 @@ export type PrismColorSpec = {
   swatchTertiary?: PrismSwatchKey;
   shade?: PrismDefaultPaletteShadeKey;
   tier?: "full" | "soft" | "mono";
-  semanticText?:
-    | "primary"
-    | "primaryForeground"
-    | "secondaryForeground"
-    | "destructive"
-    | "accentForeground"
-    | "cardForeground";
+  semanticText?: PrismColorSemanticText;
   surface?: {
     blur?: "none" | "light" | "strong";
     dropShadow?: "none" | "soft" | "medium";
@@ -869,6 +878,79 @@ export function prismColorSpecToIconGlyphPaint(
     return { gradient: light };
   }
   return { solid: prismColorSpecToHex(spec) };
+}
+
+const PRISM_COLOR_SEMANTIC_TEXT_TO_CLASS: Partial<
+  Record<PrismColorSemanticText, string>
+> = {
+  foreground: "text-foreground",
+  muted: "text-muted-foreground",
+  primary: "text-primary",
+  primaryForeground: "text-primary-foreground",
+  secondaryForeground: "text-secondary-foreground",
+  destructive: "text-destructive",
+  accentForeground: "text-accent-foreground",
+  cardForeground: "text-card-foreground",
+};
+
+/**
+ * Resolves {@link PartialPrismColorSpec} for body/heading text:
+ * - **Gradient** swatches → background-clip text styles (same technique as {@link prismColorSpecToIconGlyphPaint}).
+ * - **Swatch** fields (`swatchPrimary` / `secondary` / `tertiary`) → solid `color` via {@link prismColorSpecToHex}
+ *   (wins over `semanticText` when any swatch field is set).
+ * - **`semanticText`** only (not `inherit`) → Tailwind `text-*` role class.
+ * - Empty / missing spec → inherit (no paint).
+ */
+export type PrismTypographyPaint = {
+  semanticTextClass?: string;
+  solidStyle?: { color: string };
+  gradientClipStyle?: Record<string, string | number>;
+};
+
+export function prismColorSpecToTypographyPaint(
+  spec: PartialPrismColorSpec | undefined,
+): PrismTypographyPaint {
+  if (spec === undefined || spec === null || Object.keys(spec).length === 0) {
+    return {};
+  }
+
+  const g = spec.gradient;
+  if (g && Array.isArray(g.swatches) && g.swatches.length > 0) {
+    const paint = prismColorSpecToIconGlyphPaint(spec);
+    if (!paint) return {};
+    if ("solid" in paint) {
+      return { solidStyle: { color: paint.solid } };
+    }
+    return {
+      gradientClipStyle: {
+        display: "inline-block",
+        backgroundImage: paint.gradient,
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "100% 100%",
+        color: "transparent",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+      },
+    };
+  }
+
+  const hasSwatch =
+    spec.swatchPrimary !== undefined ||
+    spec.swatchSecondary !== undefined ||
+    spec.swatchTertiary !== undefined;
+
+  if (hasSwatch) {
+    return { solidStyle: { color: prismColorSpecToHex(spec) } };
+  }
+
+  const sem = spec.semanticText;
+  if (sem !== undefined && sem !== "inherit") {
+    const cls = PRISM_COLOR_SEMANTIC_TEXT_TO_CLASS[sem];
+    return cls !== undefined ? { semanticTextClass: cls } : {};
+  }
+
+  return {};
 }
 
 // ─── shared surface / label contrast (default + tailwind) ───────────────────

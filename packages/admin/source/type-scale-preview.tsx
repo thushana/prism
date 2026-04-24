@@ -758,7 +758,7 @@ export function TypeScalePreview({
                 <PrismTypography
                   role="label"
                   size="medium"
-                  tone="muted"
+                  color={{ semanticText: "muted" }}
                   font="mono"
                 >
                   {TYPOGRAPHY_OPTION_LABEL[key]}

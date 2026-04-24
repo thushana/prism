@@ -108,7 +108,7 @@ function resolveCenterContent(
     const char = Array.from(props.letter.trim())[0] ?? "";
     if (!char) return null;
     return (
-      <PrismTypography role="title" size="small" tone="foreground" as="span">
+      <PrismTypography role="title" size="small" color={{ semanticText: "foreground" }} as="span">
         {char}
       </PrismTypography>
     );

@@ -27,7 +27,7 @@ export function PrismCardDemo(): JSX.Element {
           </PrismCardAction>
         </PrismCardHeader>
         <PrismCardContent className="space-y-2">
-          <PrismTypography role="body" size="medium" tone="muted">
+          <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
             Body content uses card padding from the content region. Use this
             slot for forms, lists, or summaries.
           </PrismTypography>
