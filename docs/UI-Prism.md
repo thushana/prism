@@ -417,15 +417,15 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 ### PrismTypography component
 
-Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Prefer the **`tone`** prop or `className` for semantic colour (e.g. `tone="muted"` or `className="text-muted-foreground"`), plus spacing utilities as needed.
+Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Use the **`color`** prop with **`PartialPrismColorSpec`** (same model as **`PrismIcon`**, **`PrismColorPicker`**, …): **`semanticText`** for theme roles (`muted`, `foreground`, `primary`, …), **`swatchPrimary`** + **`shade`** for palette hex, or **`gradient`** for background-clip text. Omit **`color`** to inherit the cascade. You may still use **`className`** for spacing or one-off utilities.
 
-**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyTone`, `PrismTypographyAnimationZone`, `PrismTypographyAnimationKind`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
+**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyAnimationZone`, `PrismTypographyAnimationKind`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
 
 **Props (`PrismTypographyProps`):**
 
 - `role` (required): `display` | `headline` | `title` | `body` | `label` | `overline`
 - `size` (optional): `small` | `medium` | `large` | `huge` | `gigantic` — defaults to `medium`
-- `tone` (optional): maps to shadcn-style `text-*` tokens (`foreground`, `muted`, `primary`, …); default `inherit`
+- `color` (optional): **`PartialPrismColorSpec`** — resolved by **`prismColorSpecToTypographyPaint`** in `prism-color.ts` (semantic `text-*` classes, solid hex, or gradient). Omitted → inherit surrounding text colour
 - `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
 - `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
 - `animationZone` / `animationKind` (optional): scroll-reveal via GSAP (`SplitText`); see source for defaults when a zone is set without a kind
@@ -439,10 +439,10 @@ Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc 
 import { PrismTypography } from "@ui";
 
 <PrismTypography role="headline" size="large">Heading 1</PrismTypography>
-<PrismTypography role="body" size="medium" tone="muted">
+<PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
   Body text
 </PrismTypography>
-<PrismTypography role="overline" size="small" tone="muted">
+<PrismTypography role="overline" size="small" color={{ semanticText: "muted" }}>
   Section label
 </PrismTypography>
 ```
@@ -670,7 +670,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 - **Boolean sprawl:** Mutually exclusive choices were modeled as parallel flags; callers could express invalid combinations.
 - **Inconsistent negation:** Mix of `noXxx`, `XxxNo`, and positive animation flags. Prism standardizes motion opt-outs on **`disableXxx`** (MUI-style).
-- **Name collisions:** `color` meant different things on `PrismButton` (palette) vs `PrismTypography` (semantic text) — typography now uses **`tone`**.
+- **Name collisions (resolved):** `PrismButton` **`color`** is still **`ColorName`** (Material family). **`PrismTypography`** **`color`** is **`PartialPrismColorSpec`** (semantic + palette + gradient), aligned with **`PrismIcon`** / pickers.
 - **Fragmented size vocabulary:** One shared **`PrismSize`** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`) applies to `PrismButton`, `PrismIcon` (named steps), and `PrismTypography` type scale. `normal` → `medium`; old `large2x` → `huge`. **`medium` stays size-only** — it does not appear on `PrismIcon` **`weight`** (avoids `size="medium" weight="medium"` confusion).
 
 ### Nine rules (cheat sheet)
@@ -680,7 +680,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 3. **Opt-outs:** `disableMotion`, `disableGrow`, … — not `noGrow` / `gapNo`.
 4. **camelCase** prop names; **lowercase or camelCase** literals per existing Prism tokens (`gap="none"`, `shape="rectangleRounded"`).
 5. **Shared `PrismSize`** everywhere Prism renders stepped scale (see `packages/ui/source/prism-size.ts`).
-6. **Palette vs semantic colour:** `PrismButton` **`color`** = `ColorName`; `PrismTypography` **`tone`** = semantic `text-*` role.
+6. **Palette vs semantic colour:** `PrismButton` **`color`** = `ColorName`; `PrismTypography` **`color`** = **`PartialPrismColorSpec`** (use **`semanticText`** for theme `text-*` roles, or swatches / gradient for brand paint).
 7. **Prefer `asChild`** (Radix `Slot`) over ad-hoc span wrappers for composition.
 8. **Admin + `@admin`** are the live JSX reference: `/admin/prism/components/[component]` drives **`PRISM_ADMIN_COMPONENT_REGISTRY`** (for example **`PrismButtonDemo`** in `packages/admin/source/prism-button.tsx`). Typography previews live in **`PrismTypographyDemo`** (`packages/admin/source/prism-typography.tsx`) — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
 9. **Docs stay canonical:** this section + per-component headings below; do not duplicate long prose in side files.
@@ -710,8 +710,8 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 ```
 
 ```tsx
-// PrismTypography: semantic colour + animation axes
-<PrismTypography role="body" size="medium" tone="muted" />
+// PrismTypography: PrismColor + animation axes
+<PrismTypography role="body" size="medium" color={{ semanticText: "muted" }} />
 <PrismTypography
   role="headline"
   size="large"
@@ -724,7 +724,10 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 | Old | New |
 | --- | --- |
-| `color` (on Typography) | `tone` |
+| `tone="muted"` (Typography) | `color={{ semanticText: "muted" }}` |
+| `tone="foreground"` | `color={{ semanticText: "foreground" }}` |
+| `tone="inherit"` | omit **`color`** or `color={{ semanticText: "inherit" }}` |
+| `color` (on Typography) | **`color={{ … }}`** as **`PartialPrismColorSpec`** (not `ColorName`) |
 | `colorVariant`, kebab paint literals | `paint` (camelCase union) |
 | `lineNo` / `lineBottom` booleans | `line="none"` \| `"bottom"` \| `"full"` |
 | `gapNo` | `gap="none"` |

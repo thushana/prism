@@ -53,7 +53,12 @@ export function PasswordForm({ error }: PasswordFormProps) {
           <PrismTypography role="headline" size="medium" as="h1">
             Authentication Required
           </PrismTypography>
-          <PrismTypography role="body" size="medium" tone="muted" className="mt-2">
+          <PrismTypography
+            role="body"
+            size="medium"
+            color={{ semanticText: "muted" }}
+            className="mt-2"
+          >
             Please enter the password to access this page
           </PrismTypography>
         </div>
@@ -87,7 +92,7 @@ export function PasswordForm({ error }: PasswordFormProps) {
               <PrismTypography
                 role="body"
                 size="small"
-                tone="destructive"
+                color={{ semanticText: "destructive" }}
                 className="mt-2"
               >
                 {submitError || error}

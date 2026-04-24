@@ -531,7 +531,7 @@ function PrismCodeBlock({
               role="label"
               size="small"
               font="mono"
-              tone="muted"
+              color={{ semanticText: "muted" }}
               className="inline uppercase tracking-wide"
             >
               {chipLabel}

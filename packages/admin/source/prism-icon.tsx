@@ -461,7 +461,7 @@ export function PrismIconDemo(): JSX.Element {
               <PrismTypography
                 role="body"
                 size="small"
-                tone="muted"
+                color={{ semanticText: "muted" }}
                 font="mono"
                 className="mt-1 block break-all"
               >
@@ -574,7 +574,7 @@ export function PrismIconDemo(): JSX.Element {
                       <PrismTypography
                         role="label"
                         size="medium"
-                        tone="muted"
+                        color={{ semanticText: "muted" }}
                         font="mono"
                       >
                         {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
@@ -592,7 +592,7 @@ export function PrismIconDemo(): JSX.Element {
             Example
           </PrismTypography>
           {exampleIconNames.length === 0 ? (
-            <PrismTypography role="body" size="medium" tone="muted">
+            <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
               Add at least one icon name in Customize.
             </PrismTypography>
           ) : (
@@ -640,7 +640,7 @@ export function PrismIconDemo(): JSX.Element {
           <PrismTypography
             role="label"
             size="medium"
-            tone="muted"
+            color={{ semanticText: "muted" }}
             className="block uppercase"
             font="mono"
           >

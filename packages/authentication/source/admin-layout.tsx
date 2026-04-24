@@ -35,7 +35,7 @@ export function AdminBackLink({
         role="body"
         size="small"
         as="span"
-        tone="muted"
+        color={{ semanticText: "muted" }}
         className="group-hover:text-foreground"
       >
         ← {label}
@@ -148,7 +148,7 @@ export function AdminPageShell({
                     {title}
                   </PrismTypography>
                   {description && (
-                    <PrismTypography role="body" size="medium" tone="muted">
+                    <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
                       {description}
                     </PrismTypography>
                   )}

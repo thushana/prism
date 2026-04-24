@@ -85,7 +85,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                   role="body"
                   size="small"
                   as="span"
-                  tone="muted"
+                  color={{ semanticText: "muted" }}
                   aria-hidden
                   className="select-none px-2"
                 >
@@ -101,7 +101,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                     role="body"
                     size="small"
                     as="span"
-                    tone="muted"
+                    color={{ semanticText: "muted" }}
                     className="group-hover:text-foreground"
                   >
                     {segment.label}
@@ -112,7 +112,9 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
                   role="body"
                   size="small"
                   as="span"
-                  tone={isLast ? "foreground" : "muted"}
+                  color={{
+                    semanticText: isLast ? "foreground" : "muted",
+                  }}
                 >
                   {segment.label}
                 </PrismTypography>
