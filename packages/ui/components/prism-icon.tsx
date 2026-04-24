@@ -1,5 +1,9 @@
 import { cn } from "@utilities";
 import type { PrismSize } from "../source/prism-size";
+import {
+  prismColorSpecToIconGlyphPaint,
+  type PartialPrismColorSpec,
+} from "../styles/prism-color";
 
 /** Named size steps map to pixel `fontSize` / clamped `opsz` (20–48); aligns with `PrismButton` `size`. */
 export type PrismIconSizeName = PrismSize;
@@ -31,6 +35,12 @@ export interface PrismIconProps {
    */
   weight?: PrismIconWeightName | number;
   fill?: PrismIconFillMode;
+  /**
+   * Same shape as other Prism `color` props; resolved by `prismColorSpecToIconGlyphPaint`:
+   * solid `color`, or **`gradient.swatches`** → resolved `linear-gradient` + background-clip text
+   * (light ramp; glyphs cannot use `color: linear-gradient(...)`).
+   */
+  color?: PartialPrismColorSpec;
 }
 
 const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
@@ -76,11 +86,36 @@ export function PrismIcon({
   size = "medium",
   weight = "regular",
   fill = "off",
+  color: colorSpec,
 }: PrismIconProps) {
   const sizePx = resolvePrismIconSizePx(size);
   const weightValue = resolvePrismIconWeightValue(weight);
   const filled = resolvePrismIconFill(fill);
   const opsz = Math.min(48, Math.max(20, sizePx));
+  const glyphPaint =
+    colorSpec !== undefined &&
+    colorSpec !== null &&
+    Object.keys(colorSpec).length > 0
+      ? prismColorSpecToIconGlyphPaint(colorSpec)
+      : undefined;
+
+  const gradientClipStyle =
+    glyphPaint && "gradient" in glyphPaint
+      ? {
+          display: "inline-block" as const,
+          backgroundImage: glyphPaint.gradient,
+          backgroundRepeat: "no-repeat" as const,
+          backgroundSize: "100% 100%" as const,
+          color: "transparent",
+          WebkitBackgroundClip: "text" as const,
+          backgroundClip: "text" as const,
+          WebkitTextFillColor: "transparent" as const,
+        }
+      : {};
+
+  const solidStyle =
+    glyphPaint && "solid" in glyphPaint ? { color: glyphPaint.solid } : {};
+
   return (
     <span
       className={cn("material-symbols-rounded", className)}
@@ -88,6 +123,8 @@ export function PrismIcon({
         fontSize: `${sizePx}px`,
         fontFeatureSettings: '"liga" 1',
         fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' ${weightValue}, 'GRAD' 0, 'opsz' ${opsz}`,
+        ...solidStyle,
+        ...gradientClipStyle,
       }}
     >
       {name}

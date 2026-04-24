@@ -8,6 +8,7 @@ import {
   PRISM_DEFAULT_COLOR_NAMES,
   PRISM_TAILWIND_COLOR_LOOP,
   PrismColor,
+  prismColorSpecToIconGlyphPaint,
   prismLabelOnFilledSurface,
   resolveCodeBlockColor,
 } from "./prism-color";
@@ -182,6 +183,34 @@ describe("PrismColor.gradient.linearStrings", () => {
     expect(g.light).not.toContain("var(--");
     expect(g.light).toContain("linear-gradient");
     expect(g.light).toContain("oklch(");
+  });
+});
+
+describe("prismColorSpecToIconGlyphPaint", () => {
+  it("returns solid hex for swatch-only spec", () => {
+    const p = prismColorSpecToIconGlyphPaint({
+      swatchPrimary: "indigo",
+      shade: 500,
+    });
+    expect(p).toEqual({ solid: expect.stringMatching(/^#/i) });
+  });
+
+  it("returns resolved linear-gradient for gradient.swatches", () => {
+    const p = prismColorSpecToIconGlyphPaint({
+      palette: "default",
+      swatchPrimary: "blue",
+      shade: 500,
+      gradient: {
+        swatches: ["indigo", "grey"],
+        direction: "horizontal",
+        shade: 500,
+      },
+    });
+    expect(p && "gradient" in p).toBe(true);
+    if (p && "gradient" in p) {
+      expect(p.gradient).toContain("linear-gradient");
+      expect(p.gradient).not.toContain("var(--");
+    }
   });
 });
 

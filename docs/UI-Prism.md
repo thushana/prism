@@ -280,20 +280,26 @@ Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home
 import { PrismIcon } from "@ui";
 ```
 
-**Props (`PrismIconProps`):** `name`, `size`, `weight`, `fill`, `className`.
+**Props (`PrismIconProps`):** `name`, `size`, `weight`, `fill`, optional **`color`** (`PartialPrismColorSpec` — solid via **`prismColorSpecToHex`**; **`gradient.swatches`** via **`prismColorSpecToIconGlyphPaint`** + background-clip text because `color` cannot be a gradient), `className`.
 
 **Example:**
 
 ```tsx
 <PrismIcon name="home" size="medium" weight="regular" fill="off" />
-<PrismIcon name="settings" size="large" weight="regular" fill="off" />
+<PrismIcon
+  name="settings"
+  size="large"
+  weight="regular"
+  fill="off"
+  color={{ swatchPrimary: "indigo", shade: 500 }}
+/>
 <PrismIcon name="favorite" size="medium" weight="regular" fill="on" />
 <PrismIcon name="star" size="large" weight="light" fill="off" />
 ```
 
 **Shared vocabulary:** **PrismIcon** and **PrismButton** use the same **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
-Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. The demo exposes **size**, **weight**, and **fill** with the same string tokens as the component API, a live JSX snippet for `home`, and a scrollable grid of supported ligature names; click an icon or **Copy** to copy JSX to the clipboard (toast feedback).
+Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds names to the Example strip, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example**, **Code sample** (first preview icon + emitted `color` block), and **All icon names** (separate grid filter; click a cell to copy JSX, toast feedback).
 
 ### Layout wrappers (`prism-layout.tsx`)
 

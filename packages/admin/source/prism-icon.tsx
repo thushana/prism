@@ -1,7 +1,15 @@
 "use client";
 
-import { PrismIcon, PrismTypography } from "@ui";
+import {
+  PrismButton,
+  PrismCodeBlock,
+  PrismColorPicker,
+  PrismIcon,
+  PrismTypography,
+  prismColorPickerClipboardColorProp,
+} from "@ui";
 import type {
+  PartialPrismColorSpec,
   PrismIconFillMode,
   PrismIconProps,
   PrismIconSizeName,
@@ -15,8 +23,8 @@ import {
   useRef,
   useState,
 } from "react";
+import type { JSX } from "react";
 import { createPortal } from "react-dom";
-import { Copy } from "lucide-react";
 import iconNames from "./material-icons-round-names.json";
 
 /** Checkbox keys for the icon admin demo (mutually exclusive within each group). */
@@ -95,7 +103,7 @@ function initialIconDemoSelection(): Set<IconDemoAppearanceKey> {
 }
 
 function resolveIconDemoProps(
-  selected: Set<IconDemoAppearanceKey>
+  selected: Set<IconDemoAppearanceKey>,
 ): Pick<PrismIconProps, "size" | "weight" | "fill"> {
   const size: PrismIconSizeName = selected.has("sizeGigantic")
     ? "gigantic"
@@ -145,20 +153,23 @@ function formatWeightAttributeForSnippet(
 
 function formatPrismIconSnippet(
   name: string,
-  props: Pick<PrismIconProps, "size" | "weight" | "fill">
+  props: Pick<PrismIconProps, "size" | "weight" | "fill">,
+  color?: PartialPrismColorSpec,
 ): string {
-  return (
-    "<PrismIcon " +
-    'name="' +
-    escapeIconNameForJsxAttribute(name) +
-    '" ' +
-    formatSizeAttributeForSnippet(props.size) +
-    " " +
-    formatWeightAttributeForSnippet(props.weight) +
-    ' fill="' +
-    fillModeForSnippet(props.fill) +
-    '" />'
-  );
+  const lines = [
+    "<PrismIcon",
+    `  name="${escapeIconNameForJsxAttribute(name)}"`,
+    `  ${formatSizeAttributeForSnippet(props.size)}`,
+    `  ${formatWeightAttributeForSnippet(props.weight)}`,
+    `  fill="${fillModeForSnippet(props.fill)}"`,
+  ];
+  if (color && Object.keys(color).length > 0) {
+    for (const line of prismColorPickerClipboardColorProp(color).split("\n")) {
+      lines.push(`  ${line}`);
+    }
+  }
+  lines.push("/>", "");
+  return lines.join("\n");
 }
 
 /**
@@ -226,35 +237,35 @@ function buildIconNameSections(iconNameList: string[]): IconNameSection[] {
     }));
 }
 
-const PREVIEW_ICON_NAMES = ["home", "star", "favorite", "settings"] as const;
-
 const IconCell = memo(function IconCell({
   name,
   iconProps,
+  iconColor,
   onCopied,
 }: {
   name: string;
   iconProps: Pick<PrismIconProps, "size" | "weight" | "fill">;
+  iconColor?: PartialPrismColorSpec;
   onCopied: (snippet: string) => void;
 }) {
   const handleCopyIconSnippet = useCallback(async () => {
-    const snippet = formatPrismIconSnippet(name, iconProps);
+    const snippet = formatPrismIconSnippet(name, iconProps, iconColor);
     try {
       await navigator.clipboard.writeText(snippet);
       onCopied(snippet);
     } catch {
       onCopied("");
     }
-  }, [name, iconProps, onCopied]);
+  }, [name, iconProps, iconColor, onCopied]);
 
   return (
     <button
       type="button"
       onClick={handleCopyIconSnippet}
       title={name + " \u2014 click to copy JSX"}
-      className="flex aspect-square min-h-10 w-full items-center justify-center rounded-md border border-transparent text-foreground hover:border-border hover:bg-muted/60"
+      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent text-foreground hover:border-border hover:bg-muted/60"
     >
-      <PrismIcon name={name} {...iconProps} />
+      <PrismIcon name={name} {...iconProps} color={iconColor} />
     </button>
   );
 });
@@ -262,29 +273,46 @@ const IconCell = memo(function IconCell({
 /**
  * Interactive icon demo + full Material Symbols Rounded name grid (ligature names for
  * {@link PrismIcon}). Served from `/admin/prism/components/prism-icon`.
+ * Section layout: Customize (add names, color, axes) → Example → Code sample → All icon names.
  */
-export function PrismIconDemo() {
+export function PrismIconDemo(): JSX.Element {
   const names = iconNames as string[];
   const [selectedAppearanceKeys, setSelectedAppearanceKeys] = useState(
-    initialIconDemoSelection
+    initialIconDemoSelection,
   );
-  const [nameFilterQuery, setNameFilterQuery] = useState("");
+  const [exampleIconNames, setExampleIconNames] = useState<string[]>([
+    "home",
+    "star",
+    "favorite",
+    "settings",
+  ]);
+  const [addIconDraft, setAddIconDraft] = useState("");
+  const [addComboboxFocused, setAddComboboxFocused] = useState(false);
+  const addComboboxBlurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const [gridFilterQuery, setGridFilterQuery] = useState("");
+  const [iconColor, setIconColor] = useState<PartialPrismColorSpec>({
+    palette: "default",
+    swatchPrimary: "indigo",
+    shade: 500,
+  });
   const [copyToast, setCopyToast] = useState<{
     title: string;
     detail?: string;
   } | null>(null);
   const copyToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
+    null,
   );
 
-  const showCopyToast = useCallback((detail?: string) => {
+  const showTransientToast = useCallback((title: string, detail?: string) => {
     if (copyToastTimeoutRef.current) {
       clearTimeout(copyToastTimeoutRef.current);
     }
     const trimmedDetail =
       detail && detail.length > 88 ? detail.slice(0, 85) + "..." : detail;
     setCopyToast({
-      title: "Copied to clipboard",
+      title,
       detail: trimmedDetail,
     });
     copyToastTimeoutRef.current = setTimeout(() => {
@@ -298,36 +326,78 @@ export function PrismIconDemo() {
       if (copyToastTimeoutRef.current) {
         clearTimeout(copyToastTimeoutRef.current);
       }
+      if (addComboboxBlurTimeoutRef.current) {
+        clearTimeout(addComboboxBlurTimeoutRef.current);
+      }
     },
-    []
+    [],
   );
 
   const iconProps = useMemo(
     () => resolveIconDemoProps(selectedAppearanceKeys),
-    [selectedAppearanceKeys]
+    [selectedAppearanceKeys],
   );
+
+  const sampleIconName = exampleIconNames[0] ?? "home";
 
   const currentSampleSnippet = useMemo(
-    () => formatPrismIconSnippet("home", iconProps),
-    [iconProps]
+    () => formatPrismIconSnippet(sampleIconName, iconProps, iconColor),
+    [sampleIconName, iconProps, iconColor],
   );
 
-  const filteredIconNames = useMemo(() => {
-    const query = nameFilterQuery.trim().toLowerCase();
+  const filteredGridIconNames = useMemo(() => {
+    const query = gridFilterQuery.trim().toLowerCase();
     if (!query) return names;
     return names.filter((n) => n.toLowerCase().includes(query));
-  }, [names, nameFilterQuery]);
+  }, [names, gridFilterQuery]);
 
   const iconNameSections = useMemo(
-    () => buildIconNameSections(filteredIconNames),
-    [filteredIconNames]
+    () => buildIconNameSections(filteredGridIconNames),
+    [filteredGridIconNames],
+  );
+
+  const addIconSuggestions = useMemo(() => {
+    const q = addIconDraft.trim().toLowerCase();
+    if (q.length === 0) return [];
+    return names.filter((n) => n.toLowerCase().includes(q)).slice(0, 50);
+  }, [names, addIconDraft]);
+
+  const openAddCombobox = useCallback(() => {
+    if (addComboboxBlurTimeoutRef.current) {
+      clearTimeout(addComboboxBlurTimeoutRef.current);
+      addComboboxBlurTimeoutRef.current = null;
+    }
+    setAddComboboxFocused(true);
+  }, []);
+
+  const scheduleCloseAddCombobox = useCallback(() => {
+    if (addComboboxBlurTimeoutRef.current) {
+      clearTimeout(addComboboxBlurTimeoutRef.current);
+    }
+    addComboboxBlurTimeoutRef.current = setTimeout(() => {
+      setAddComboboxFocused(false);
+      addComboboxBlurTimeoutRef.current = null;
+    }, 200);
+  }, []);
+
+  const addIconByName = useCallback(
+    (match: string) => {
+      if (!names.includes(match)) return;
+      setExampleIconNames((prev) =>
+        prev.includes(match) ? prev : [...prev, match],
+      );
+      setAddIconDraft("");
+      setAddComboboxFocused(false);
+      showTransientToast("Added to preview", match);
+    },
+    [names, showTransientToast],
   );
 
   const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
     setSelectedAppearanceKeys((previous) => {
       const next = new Set(previous);
       const exclusiveGroup = ICON_DEMO_EXCLUSIVE_KEY_GROUPS.find((g) =>
-        g.includes(key)
+        g.includes(key),
       );
       if (exclusiveGroup) {
         for (const k of exclusiveGroup) next.delete(k);
@@ -337,17 +407,28 @@ export function PrismIconDemo() {
     });
   };
 
-  const handleCopySampleSnippet = async () => {
-    await navigator.clipboard.writeText(currentSampleSnippet);
-    showCopyToast(currentSampleSnippet);
-  };
+  const handleAddIconToExample = useCallback(() => {
+    const raw = addIconDraft.trim();
+    const q = raw.toLowerCase();
+    if (!q) return;
+    const exact = names.find((n) => n.toLowerCase() === q);
+    const match = exact ?? names.find((n) => n.toLowerCase().includes(q));
+    if (!match) {
+      showTransientToast(
+        "No matching icon",
+        `No ligature name equals or contains "${raw}".`,
+      );
+      return;
+    }
+    addIconByName(match);
+  }, [addIconDraft, names, addIconByName, showTransientToast]);
 
   const handleIconCopied = useCallback(
     (snippet: string) => {
       if (!snippet) return;
-      showCopyToast(snippet);
+      showTransientToast("Copied to clipboard", snippet);
     },
-    [showCopyToast]
+    [showTransientToast],
   );
 
   const copyToastPortal =
@@ -394,128 +475,211 @@ export function PrismIconDemo() {
 
   return (
     <>
-    <div className="mb-8 space-y-16">
-      <div>
-        <h3 className="mb-2">Customize</h3>
-        <PrismTypography
-          role="body"
-          size="medium"
-          tone="muted"
-          className="mb-4"
-        >
-          Toggle props to preview them on the strip and in the icon grid. Click
-          any icon to copy its JSX.
-        </PrismTypography>
-
-        <div className="mb-4 w-full overflow-x-auto pb-1">
-          <div className="flex min-w-min flex-row flex-nowrap items-start gap-10">
-          {ICON_DEMO_OPTION_COLUMNS.map(({ heading, keys }) => (
-            <div key={heading} className="shrink-0 space-y-1">
-              <PrismTypography role="overline" size="small">
-                {heading}
-              </PrismTypography>
-              {keys.map((appearanceKey) => (
-                <label
-                  key={appearanceKey}
-                  className="flex cursor-pointer items-center gap-1.5"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedAppearanceKeys.has(appearanceKey)}
-                    onChange={() => handleToggleAppearanceKey(appearanceKey)}
-                    className="rounded border-input"
-                  />
-                  <PrismTypography role="label" size="medium" tone="muted">
-                    {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
-                  </PrismTypography>
-                </label>
-              ))}
-            </div>
-          ))}
-          </div>
-        </div>
-
-        <div className="mb-6 flex flex-wrap gap-6">
-          {PREVIEW_ICON_NAMES.map((previewName) => (
-            <PrismIcon key={previewName} name={previewName} {...iconProps} />
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <PrismTypography role="label" size="medium" font="mono" tone="muted">
-            {currentSampleSnippet}
+      <div className="space-y-10">
+        <section className="space-y-4">
+          <PrismTypography role="title" size="large" font="sans" as="h2">
+            Customize
           </PrismTypography>
-          <button
-            type="button"
-            onClick={handleCopySampleSnippet}
-            aria-label="Copy sample JSX to clipboard"
-            title="Copy sample JSX"
-            className="shrink-0 rounded-md border border-transparent p-2 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground"
-          >
-            <Copy className="size-4" aria-hidden />
-          </button>
-        </div>
-      </div>
 
-      <div style={{ paddingTop: "2rem" }}>
-        <div className="mb-4">
-          <h3>All icon names</h3>
-        </div>
-        <input
-          type="search"
-          value={nameFilterQuery}
-          onChange={(e) => setNameFilterQuery(e.target.value)}
-          placeholder="Filter by name…"
-          className="border-input mb-4 max-w-md rounded-md border bg-background px-3 py-2 text-sm"
-          aria-label="Filter icons by name"
-        />
-        <PrismTypography
-          role="label"
-          size="medium"
-          tone="muted"
-          className="mb-4 block uppercase"
-        >
-          Showing {filteredIconNames.length.toLocaleString()} of{" "}
-          {names.length.toLocaleString()}
-        </PrismTypography>
-        <div>
-          {iconNameSections.map(
-            ({ categorySortKey, categorySectionHeading, iconNameList }) => (
-              <div
-                key={categorySortKey}
-                style={{ marginBottom: "2.5rem", paddingTop: "1.25rem" }}
-              >
-                <PrismTypography
-                  role="overline"
-                  size="small"
-                  className="mb-3 block"
+          <form
+            className="flex max-w-2xl flex-wrap items-end gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddIconToExample();
+            }}
+          >
+            <label className="relative block min-w-48 flex-1 cursor-text space-y-1">
+              <PrismTypography role="overline" size="small" className="block">
+                Add to preview
+              </PrismTypography>
+              <input
+                id="prism-icon-demo-add-name"
+                type="text"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={addComboboxFocused && addIconSuggestions.length > 0}
+                aria-controls="prism-icon-add-suggestions"
+                value={addIconDraft}
+                onChange={(e) => setAddIconDraft(e.target.value)}
+                onFocus={openAddCombobox}
+                onBlur={scheduleCloseAddCombobox}
+                placeholder="Type to search ligature names…"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                autoComplete="off"
+              />
+              {addComboboxFocused && addIconSuggestions.length > 0 ? (
+                <ul
+                  id="prism-icon-add-suggestions"
+                  role="listbox"
+                  className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-border bg-popover py-1 text-popover-foreground shadow-md"
                 >
-                  {categorySectionHeading}
-                </PrismTypography>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(2.5rem, 1fr))",
-                    gap: "0.5rem",
-                  }}
-                >
-                  {iconNameList.map((iconName) => (
-                    <IconCell
-                      key={iconName}
-                      name={iconName}
-                      iconProps={iconProps}
-                      onCopied={handleIconCopied}
-                    />
+                  {addIconSuggestions.map((n) => (
+                    <li key={n} role="presentation">
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={false}
+                        className="w-full px-3 py-2 text-left text-sm font-mono hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-none"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          addIconByName(n);
+                        }}
+                      >
+                        {n}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </label>
+            <PrismButton
+              type="submit"
+              variant="plain"
+              color="blue"
+              label="Add"
+              size="small"
+              shape="rectangleRounded"
+            />
+          </form>
+
+          <div className="max-w-xl space-y-2">
+            <PrismTypography role="overline" size="small" className="block">
+              Icon color
+            </PrismTypography>
+            <PrismColorPicker
+              color={iconColor}
+              onColorChange={setIconColor}
+              showCopyButton={false}
+            />
+          </div>
+
+          <div className="w-full overflow-x-auto pb-1">
+            <div className="flex min-w-min flex-row flex-nowrap items-start gap-10">
+              {ICON_DEMO_OPTION_COLUMNS.map(({ heading, keys }) => (
+                <div key={heading} className="shrink-0 space-y-1">
+                  <PrismTypography role="overline" size="small">
+                    {heading}
+                  </PrismTypography>
+                  {keys.map((appearanceKey) => (
+                    <label
+                      key={appearanceKey}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedAppearanceKeys.has(appearanceKey)}
+                        onChange={() => handleToggleAppearanceKey(appearanceKey)}
+                        className="rounded border-input"
+                      />
+                      <PrismTypography
+                        role="label"
+                        size="medium"
+                        tone="muted"
+                        font="mono"
+                      >
+                        {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
+                      </PrismTypography>
+                    </label>
                   ))}
                 </div>
-              </div>
-            )
-          )}
-        </div>
-      </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-    </div>
-    {copyToastPortal}
+        <section className="space-y-4">
+          <PrismTypography role="title" size="large" font="sans" as="h2">
+            Example
+          </PrismTypography>
+          {exampleIconNames.length === 0 ? (
+            <PrismTypography role="body" size="medium" tone="muted">
+              Add at least one icon name in Customize.
+            </PrismTypography>
+          ) : (
+            <div className="flex flex-wrap gap-6">
+              {exampleIconNames.map((previewName) => (
+                <PrismIcon
+                  key={previewName}
+                  name={previewName}
+                  {...iconProps}
+                  color={iconColor}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-4">
+          <PrismTypography role="title" size="large" font="sans" as="h2">
+            Code sample
+          </PrismTypography>
+          <PrismCodeBlock
+            className="font-mono"
+            mode="card"
+            disableLineNumbers={false}
+            disableLanguageLabel={false}
+            color={{ swatchPrimary: "grey" }}
+            language="tsx"
+          >
+            {currentSampleSnippet}
+          </PrismCodeBlock>
+        </section>
+
+        <section className="space-y-4">
+          <PrismTypography role="title" size="large" font="sans" as="h2">
+            All icon names
+          </PrismTypography>
+          <p className="text-sm text-muted-foreground">
+            Browse the full set; click a cell to copy JSX. The grid filter here is separate from Add
+            to preview in Customize.
+          </p>
+          <input
+            type="search"
+            value={gridFilterQuery}
+            onChange={(e) => setGridFilterQuery(e.target.value)}
+            placeholder="Filter grid by name…"
+            className="w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Filter icon name grid"
+          />
+          <PrismTypography
+            role="label"
+            size="medium"
+            tone="muted"
+            className="block uppercase"
+            font="mono"
+          >
+            Showing {filteredGridIconNames.length.toLocaleString()} of{" "}
+            {names.length.toLocaleString()}
+          </PrismTypography>
+          <div className="space-y-10">
+            {iconNameSections.map(
+              ({ categorySortKey, categorySectionHeading, iconNameList }) => (
+                <div key={categorySortKey} className="space-y-3">
+                  <PrismTypography
+                    role="overline"
+                    size="small"
+                    className="block"
+                  >
+                    {categorySectionHeading}
+                  </PrismTypography>
+                  <div className="flex flex-wrap gap-2">
+                    {iconNameList.map((iconName) => (
+                      <IconCell
+                        key={iconName}
+                        name={iconName}
+                        iconProps={iconProps}
+                        iconColor={iconColor}
+                        onCopied={handleIconCopied}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </section>
+      </div>
+      {copyToastPortal}
     </>
   );
 }

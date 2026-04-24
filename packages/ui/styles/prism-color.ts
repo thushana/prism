@@ -831,6 +831,46 @@ export function prismColorSpecToHex(spec: PartialPrismColorSpec | undefined): st
   });
 }
 
+/**
+ * Resolves {@link PartialPrismColorSpec} for a **font glyph** (e.g. {@link PrismIcon}):
+ * either a solid CSS `<color>` or a resolved `linear-gradient(...)` for use with
+ * `background-clip: text` / transparent fill (glyphs cannot use `color: linear-gradient(...)`).
+ */
+function shadeForIconGradientStops(
+  gradientShade: number | { light: number; dark: number } | undefined,
+  normalizedShade: PrismDefaultPaletteShadeKey,
+): number | { light: number; dark: number } {
+  if (gradientShade !== undefined) return gradientShade;
+  return typeof normalizedShade === "number" ? normalizedShade : 500;
+}
+
+export function prismColorSpecToIconGlyphPaint(
+  spec: PartialPrismColorSpec | undefined,
+): { solid: string } | { gradient: string } | undefined {
+  if (!spec || Object.keys(spec).length === 0) return undefined;
+  const g = spec.gradient;
+  if (g && Array.isArray(g.swatches) && g.swatches.length > 0) {
+    const n = normalizePrismColorSpec(spec);
+    const palette = n.palette;
+    const normalizedSwatches = g.swatches.map((s) =>
+      PrismColor.Loop.normalize(palette, s),
+    );
+    const shadeForStops = shadeForIconGradientStops(g.shade, n.shade);
+    const { light } = PrismColor.gradient.linearStrings({
+      palette,
+      swatches: normalizedSwatches,
+      direction: g.direction ?? "horizontal",
+      shade: shadeForStops,
+      stopResolution: "resolved",
+    });
+    if (light === "none") {
+      return { solid: prismColorSpecToHex(spec) };
+    }
+    return { gradient: light };
+  }
+  return { solid: prismColorSpecToHex(spec) };
+}
+
 // ─── shared surface / label contrast (default + tailwind) ───────────────────
 
 /**
