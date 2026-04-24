@@ -273,7 +273,7 @@ const IconCell = memo(function IconCell({
 /**
  * Interactive icon demo + full Material Symbols Rounded name grid (ligature names for
  * {@link PrismIcon}). Served from `/admin/prism/components/prism-icon`.
- * Section layout: Customize (add names, color, axes) → Example → Code sample → All icon names.
+ * Section layout: Customize (add names, color, axes) → Example → Code sample → All icon options.
  */
 export function PrismIconDemo(): JSX.Element {
   const names = iconNames as string[];
@@ -627,19 +627,15 @@ export function PrismIconDemo(): JSX.Element {
 
         <section className="space-y-4">
           <PrismTypography role="title" size="large" font="sans" as="h2">
-            All icon names
+            All icon options
           </PrismTypography>
-          <p className="text-sm text-muted-foreground">
-            Browse the full set; click a cell to copy JSX. The grid filter here is separate from Add
-            to preview in Customize.
-          </p>
           <input
             type="search"
             value={gridFilterQuery}
             onChange={(e) => setGridFilterQuery(e.target.value)}
             placeholder="Filter grid by name…"
             className="w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Filter icon name grid"
+            aria-label="Filter icon options grid"
           />
           <PrismTypography
             role="label"

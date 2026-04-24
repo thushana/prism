@@ -5,7 +5,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@utilities";
 
-import { PrismIcon, type PrismIconProps } from "./prism-icon";
+import {
+  PrismIcon,
+  PRISM_ICON_DEFAULTS,
+  type PrismIconProps,
+} from "./prism-icon";
 import { PrismTypography } from "./prism-typography";
 
 const prismDividerRootVariants = cva(
@@ -113,9 +117,9 @@ function resolveCenterContent(
     return (
       <PrismIcon
         name={props.iconName}
-        size={props.iconSize ?? "medium"}
-        weight={props.iconWeight ?? "regular"}
-        fill={props.iconFill ?? "off"}
+        size={props.iconSize ?? PRISM_ICON_DEFAULTS.size}
+        weight={props.iconWeight ?? PRISM_ICON_DEFAULTS.weight}
+        fill={props.iconFill ?? PRISM_ICON_DEFAULTS.fill}
       />
     );
   }
