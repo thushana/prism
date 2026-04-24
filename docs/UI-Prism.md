@@ -299,7 +299,7 @@ import { PrismIcon } from "@ui";
 
 **Shared vocabulary:** **PrismIcon** and **PrismButton** use the same **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
-Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds names to the Example strip, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example**, **Code sample** (first preview icon + emitted `color` block), and **All icon options** (separate grid filter; click a cell to copy JSX, toast feedback).
+Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds names to the Example strip, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example**, **Code sample** (first preview icon + emitted `color` block), and **Icon Options** (separate grid filter; click a cell to copy JSX, toast feedback).
 
 ### Layout wrappers (`prism-layout.tsx`)
 
