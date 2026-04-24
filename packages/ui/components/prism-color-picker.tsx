@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, Copy, Palette } from "lucide-react";
+import { ChevronDown, Copy, Palette, X } from "lucide-react";
 import { gsap } from "gsap";
 import { cn } from "@utilities";
 
@@ -15,6 +15,7 @@ import {
   prismColorSpecToHex,
   type PartialPrismColorSpec,
   type PrismDefaultPaletteShadeKey,
+  type PrismColorSpec,
   type PrismSwatchKey,
 } from "../styles/prism-color";
 import { PrismButton } from "./prism-button";
@@ -78,6 +79,36 @@ const PRISM_COLOR_PICKER_LOOP_SURFACE_MODE: readonly {
   { id: "gradient", label: "Gradient" },
 ];
 
+const PRISM_COLOR_PICKER_GRADIENT_DIRECTIONS: readonly {
+  id: "horizontal" | "vertical" | "angled";
+  label: string;
+}[] = [
+  { id: "horizontal", label: "Horizontal" },
+  { id: "vertical", label: "Vertical" },
+  { id: "angled", label: "Angled" },
+];
+
+type PrismColorPickerGradientShade = NonNullable<
+  PrismColorSpec["gradient"]
+>["shade"];
+
+function normalizeGradientShadeForPalette(
+  palette: "default" | "tailwind",
+  shade: PrismColorPickerGradientShade,
+): PrismColorPickerGradientShade {
+  if (shade === undefined) return undefined;
+  const numericOptions = (
+    shadeOrderForPalette(palette) as readonly (string | number)[]
+  ).filter((s): s is number => typeof s === "number");
+  const normalizeOne = (value: number) =>
+    numericOptions.includes(value) ? value : 500;
+  if (typeof shade === "number") return normalizeOne(shade);
+  return {
+    light: normalizeOne(shade.light),
+    dark: normalizeOne(shade.dark),
+  };
+}
+
 export type PrismColorPickerProps = {
   /**
    * Single controlled model: {@link PartialPrismColorSpec}. Selection is `swatchPrimary` + `shade`
@@ -120,7 +151,9 @@ export function PrismColorPicker({
   >(null);
   const [loopSurfaceMode, setLoopSurfaceMode] = React.useState<
     "single" | "gradient"
-  >("single");
+  >(() =>
+    (colorSpec.gradient?.swatches?.length ?? 0) > 0 ? "gradient" : "single",
+  );
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const loopPillsRowRef = React.useRef<HTMLSpanElement>(null);
@@ -250,6 +283,143 @@ export function PrismColorPicker({
   /** Trigger pills render only when the committed range resolves to > 0. Popover slider is always live. */
   const hasActiveColorLoop = pickerCommittedLoopRange > 0;
 
+  // ─── gradient derived values ───────────────────────────────────────────────
+
+  const hasGradientSpec = (colorSpec.gradient?.swatches?.length ?? 0) > 0;
+  const isGradientMode = loopSurfaceMode === "gradient";
+  const gradientSwatches: PrismSwatchKey[] = colorSpec.gradient?.swatches ?? [];
+  const gradientDirection = colorSpec.gradient?.direction ?? "horizontal";
+  const gradientShadeNum: number =
+    typeof colorSpec.gradient?.shade === "number"
+      ? colorSpec.gradient.shade
+      : typeof colorSpec.gradient?.shade === "object" &&
+          colorSpec.gradient.shade !== null
+        ? (colorSpec.gradient.shade as { light: number; dark: number }).light
+        : 500;
+
+  const gradientShadeOptions = React.useMemo(
+    () =>
+      (shadeOrderForPalette(paletteId) as readonly (string | number)[]).filter(
+        (s): s is number => typeof s === "number",
+      ),
+    [paletteId],
+  );
+
+  React.useEffect(() => {
+    setLoopSurfaceMode((mode) => {
+      const next = hasGradientSpec ? "gradient" : "single";
+      return mode === next ? mode : next;
+    });
+  }, [hasGradientSpec]);
+
+  const gradientPreviewPair = React.useMemo(() => {
+    if (!isGradientMode || gradientSwatches.length === 0) return null;
+    return PrismColor.gradient.linearStrings({
+      palette: paletteId,
+      swatches: gradientSwatches,
+      direction: gradientDirection,
+      shade: gradientShadeNum,
+      stopResolution: "resolved",
+    });
+  }, [
+    isGradientMode,
+    paletteId,
+    gradientSwatches,
+    gradientDirection,
+    gradientShadeNum,
+  ]);
+
+  /** Colored circles shown in the trigger pill when in gradient mode. */
+  const gradientTriggerPills = React.useMemo(
+    () =>
+      isGradientMode
+        ? gradientSwatches.map((family) => ({
+            family,
+            paint:
+              resolvePickerCellHex(
+                paletteId,
+                family,
+                gradientShadeNum as MaterialShadeKey | TailwindNumericShade,
+              ) ?? "#737373",
+          }))
+        : [],
+    [isGradientMode, paletteId, gradientSwatches, gradientShadeNum],
+  );
+
+  // ─── gradient + mode handlers ─────────────────────────────────────────────
+
+  /** Switches mode and keeps the spec in sync: gradient↔single auto-seeds / clears `gradient`. */
+  const handleModeChange = React.useCallback(
+    (next: "single" | "gradient") => {
+      setLoopSurfaceMode(next);
+      if (next === "gradient" && (colorSpec.gradient?.swatches?.length ?? 0) === 0) {
+        const seed =
+          normalizedColor.swatchPrimary ??
+          PrismColor.Loop.normalize(paletteId, "blue");
+        onColorChange({
+          ...colorSpec,
+          gradient: { swatches: [seed], direction: "horizontal" },
+        });
+      } else if (next === "single" && colorSpec.gradient !== undefined) {
+        const { gradient: _removed, ...rest } = colorSpec;
+        onColorChange(rest);
+      }
+    },
+    [colorSpec, normalizedColor.swatchPrimary, onColorChange, paletteId],
+  );
+
+  const handleGradientRemoveSwatch = React.useCallback(
+    (index: number) => {
+      if (disabled) return;
+      const next = gradientSwatches.filter((_, i) => i !== index);
+      if (next.length === 0) {
+        const { gradient: _removed, ...rest } = colorSpec;
+        onColorChange(rest);
+        setLoopSurfaceMode("single");
+      } else {
+        onColorChange({
+          ...colorSpec,
+          gradient: {
+            swatches: next,
+            direction: gradientDirection,
+            shade: colorSpec.gradient?.shade,
+          },
+        });
+      }
+    },
+    [colorSpec, disabled, gradientDirection, gradientSwatches, onColorChange],
+  );
+
+  const handleGradientDirectionChange = React.useCallback(
+    (dir: "horizontal" | "vertical" | "angled") => {
+      if (disabled) return;
+      onColorChange({
+        ...colorSpec,
+        gradient: {
+          swatches: gradientSwatches,
+          direction: dir,
+          shade: colorSpec.gradient?.shade,
+        },
+      });
+    },
+    [colorSpec, disabled, gradientSwatches, onColorChange],
+  );
+
+  const handleGradientShadeChange = React.useCallback(
+    (shade: number) => {
+      if (disabled) return;
+      onColorChange({
+        ...colorSpec,
+        gradient: {
+          swatches: gradientSwatches,
+          direction: gradientDirection,
+          shade,
+        },
+      });
+    },
+    [colorSpec, disabled, gradientDirection, gradientSwatches, onColorChange],
+  );
+
   React.useLayoutEffect(() => {
     const r = colorSpec.colorLoop?.range;
     if (r === undefined) return;
@@ -347,6 +517,19 @@ export function PrismColorPicker({
       family: PrismSwatchKey,
       shadeKey: MaterialShadeKey | TailwindNumericShade,
     ) => {
+      if (isGradientMode) {
+        // Append stop to gradient; don't close popover so the user can keep adding.
+        const normalized = PrismColor.Loop.normalize(paletteId, family);
+        onColorChange({
+          ...colorSpec,
+          gradient: {
+            swatches: [...gradientSwatches, normalized],
+            direction: gradientDirection,
+            shade: colorSpec.gradient?.shade,
+          },
+        });
+        return;
+      }
       setHoverPreviewPaint(null);
       const nextFamily = PrismColor.Loop.normalize(paletteId, family);
       onColorChange({
@@ -369,7 +552,14 @@ export function PrismColorPicker({
       setIsOpen(false);
       triggerRef.current?.focus();
     },
-    [colorSpec, onColorChange, paletteId],
+    [
+      colorSpec,
+      gradientDirection,
+      gradientSwatches,
+      isGradientMode,
+      onColorChange,
+      paletteId,
+    ],
   );
 
   const handleSwatchGridPointerLeave = React.useCallback(
@@ -417,6 +607,21 @@ export function PrismColorPicker({
       if (next === "tailwind" && typeof shade !== "number") {
         shade = 500;
       }
+      // Re-normalize gradient swatches for the new palette ring.
+      const currentGradient = colorSpec.gradient;
+      const newGradient = currentGradient
+        ? {
+            ...currentGradient,
+            swatches: currentGradient.swatches.map((s) =>
+              PrismColor.Loop.normalize(next, s),
+            ),
+            shade: normalizeGradientShadeForPalette(
+              next,
+              currentGradient.shade,
+            ),
+          }
+        : undefined;
+
       onColorChange({
         ...colorSpec,
         palette: next,
@@ -433,6 +638,7 @@ export function PrismColorPicker({
               },
             }
           : {}),
+        ...(newGradient !== undefined ? { gradient: newGradient } : {}),
       });
     },
     [
@@ -455,6 +661,13 @@ export function PrismColorPicker({
   const gridTemplateColumns = `repeat(${families.length}, ${MATERIAL_SWATCH_CELL_SIZE})`;
   const gridAutoRows = MATERIAL_SWATCH_CELL_SIZE;
 
+  /** Matches swatch grid outer width so gradient chip row wraps instead of widening `w-max` popover. */
+  const swatchGridIntrinsicWidthCss = React.useMemo(() => {
+    const n = families.length;
+    if (n === 0) return undefined;
+    return `calc(${n} * ${MATERIAL_SWATCH_CELL_SIZE} + ${Math.max(0, n - 1)} * 1px + 2px)`;
+  }, [families.length]);
+
   const panelAriaLabel =
     paletteId === "tailwind"
       ? "Tailwind color palette"
@@ -470,20 +683,30 @@ export function PrismColorPicker({
     ? materialShadeLabelDisplay(swatchForPresentationOnTriggerFace.shade)
     : "—";
 
-  const isDarkBackground =
-    approximateRelativeLuminanceFromCssColor(triggerBackgroundToken) <
-    PRISM_TINTED_SURFACE_MAX_LUMA;
+  const isDarkBackground = isGradientMode
+    ? true // gradient triggers always use white ring
+    : approximateRelativeLuminanceFromCssColor(triggerBackgroundToken) <
+      PRISM_TINTED_SURFACE_MAX_LUMA;
 
-  const triggerInlineStyle: React.CSSProperties = {
-    backgroundColor: triggerBackgroundToken,
-    color: triggerTextColor,
-    padding: PRISM_COLOR_PICKER_TRIGGER_PADDING,
-    gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
-    borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
-  };
+  const triggerInlineStyle: React.CSSProperties =
+    isGradientMode && gradientPreviewPair
+      ? {
+          backgroundImage: gradientPreviewPair.light,
+          color: "#ffffff",
+          padding: PRISM_COLOR_PICKER_TRIGGER_PADDING,
+          gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
+          borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
+        }
+      : {
+          backgroundColor: triggerBackgroundToken,
+          color: triggerTextColor,
+          padding: PRISM_COLOR_PICKER_TRIGGER_PADDING,
+          gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
+          borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
+        };
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="relative min-w-0">
       <div
         className="flex min-w-0 items-stretch"
         style={{ gap: PRISM_COLOR_PICKER_LAYOUT_GAP }}
@@ -493,11 +716,11 @@ export function PrismColorPicker({
           type="button"
           id={triggerId}
           disabled={disabled}
-          aria-label={`${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${
-            normalizedPaintOnTrigger
-              ? `. ${normalizedPaintOnTrigger}`
-              : ""
-          }`}
+          aria-label={
+            isGradientMode
+              ? `Select gradient colors${gradientSwatches.length > 0 ? `. ${gradientSwatches.join(", ")}` : ""}`
+              : `${PRISM_COLOR_PICKER_DEFAULT_TRIGGER_ARIA_LABEL}${normalizedPaintOnTrigger ? `. ${normalizedPaintOnTrigger}` : ""}`
+          }
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           aria-controls={panelId}
@@ -513,45 +736,70 @@ export function PrismColorPicker({
           )}
         >
           <span className="inline-flex shrink-0 items-center text-current">
-            <Palette
-              size={PRISM_COLOR_PICKER_ICON_SIZE}
-              strokeWidth={2}
-              aria-hidden
-            />
+            {isGradientMode ? (
+              <PrismIcon
+                name="gradient"
+                size={PRISM_COLOR_PICKER_ICON_SIZE}
+                weight="regular"
+                fill="off"
+                aria-hidden
+              />
+            ) : (
+              <Palette
+                size={PRISM_COLOR_PICKER_ICON_SIZE}
+                strokeWidth={2}
+                aria-hidden
+              />
+            )}
           </span>
-          <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5">
-            <PrismTypography
-              role="body"
-              size="small"
-              font="sans"
-              as="span"
-              className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
-            >
-              {familyTitleText}
-            </PrismTypography>
-            <PrismTypography
-              role="body"
-              size="small"
-              font="mono"
-              as="span"
-              className="shrink-0 tracking-tight text-current"
-            >
-              {` • ${shadeDisplayPart}`}
-            </PrismTypography>
-            {showColorCode && normalizedPaintOnTrigger ? (
+          {isGradientMode ? (
+            <span className="flex min-w-0 flex-1 items-center gap-x-1 gap-y-0.5">
+              <PrismTypography
+                role="body"
+                size="small"
+                font="sans"
+                as="span"
+                className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
+              >
+                GRADIENT
+              </PrismTypography>
+            </span>
+          ) : (
+            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5">
+              <PrismTypography
+                role="body"
+                size="small"
+                font="sans"
+                as="span"
+                className="min-w-0 truncate font-bold uppercase tracking-wide text-current"
+              >
+                {familyTitleText}
+              </PrismTypography>
               <PrismTypography
                 role="body"
                 size="small"
                 font="mono"
                 as="span"
-                className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
-                title={normalizedPaintOnTrigger}
+                className="shrink-0 tracking-tight text-current"
               >
-                {` • ${normalizedPaintOnTrigger}`}
+                {` • ${shadeDisplayPart}`}
               </PrismTypography>
-            ) : null}
-          </span>
-          {hasActiveColorLoop &&
+              {showColorCode && normalizedPaintOnTrigger ? (
+                <PrismTypography
+                  role="body"
+                  size="small"
+                  font="mono"
+                  as="span"
+                  className="min-w-0 max-w-[min(12rem,45%)] shrink truncate text-current"
+                  title={normalizedPaintOnTrigger}
+                >
+                  {` • ${normalizedPaintOnTrigger}`}
+                </PrismTypography>
+              ) : null}
+            </span>
+          )}
+          {!isGradientMode &&
+          hasActiveColorLoop &&
           loopSurfaceMode === "single" &&
           loopPreviewPaints.length > 0 ? (
             <span
@@ -587,6 +835,26 @@ export function PrismColorPicker({
                     boxShadow: isCenter
                       ? "inset 0 0 0 1px rgba(255,255,255,0.95)"
                       : undefined,
+                  }}
+                />
+              ))}
+            </span>
+          ) : null}
+          {isGradientMode && gradientTriggerPills.length > 0 ? (
+            <span
+              className="ml-4 inline-flex shrink-0 items-center gap-1 text-current"
+              style={{ height: PRISM_COLOR_PICKER_ICON_SIZE }}
+              aria-label="Gradient color preview"
+            >
+              {gradientTriggerPills.map(({ family, paint }, i) => (
+                <span
+                  key={`${family}-${i}`}
+                  className="box-border shrink-0 rounded-full border border-white/60"
+                  title={family}
+                  style={{
+                    width: PRISM_COLOR_PICKER_LOOP_PILL_PX,
+                    height: PRISM_COLOR_PICKER_LOOP_PILL_PX,
+                    backgroundColor: paint,
                   }}
                 />
               ))}
@@ -636,11 +904,15 @@ export function PrismColorPicker({
           id={panelId}
           role="dialog"
           aria-label={panelAriaLabel}
-          className="absolute left-0 top-full z-50 mt-1 w-max max-h-[min(70vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
+          className="absolute left-0 top-full z-50 mt-1 w-max min-w-0 max-h-[min(70vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
         >
           <div className="mb-2">
-            <PrismTypography role="overline" size="small" className="mb-1 block">
-              Mode
+            <PrismTypography
+              role="label"
+              size="medium"
+              className="mb-1 block uppercase"
+            >
+              MODE
             </PrismTypography>
             <div
               role="radiogroup"
@@ -662,7 +934,7 @@ export function PrismColorPicker({
                     disableGrow
                     toggled={selected}
                     disabled={disabled}
-                    onClick={() => setLoopSurfaceMode(opt.id)}
+                    onClick={() => handleModeChange(opt.id)}
                   />
                 );
               })}
@@ -670,8 +942,12 @@ export function PrismColorPicker({
           </div>
           {loopSurfaceMode === "single" ? (
             <div className="mb-2 min-w-[min(100%,18rem)]">
-              <PrismTypography role="overline" size="small" className="mb-1 block">
-                ColorLoop range
+              <PrismTypography
+                role="label"
+                size="medium"
+                className="mb-1 block uppercase"
+              >
+                COLORLOOP RANGE
               </PrismTypography>
               <input
                 type="range"
@@ -698,44 +974,205 @@ export function PrismColorPicker({
               </PrismTypography>
             </div>
           ) : (
-            <div className="mb-2 max-w-sm">
-              <PrismTypography
-                role="body"
-                size="small"
-                className="text-muted-foreground"
+            <>
+              {/* ── Gradient colors (ordered) ──────────────────────── */}
+              <div
+                className="mb-2 min-w-0"
+                style={
+                  swatchGridIntrinsicWidthCss
+                    ? { maxWidth: swatchGridIntrinsicWidthCss }
+                    : undefined
+                }
               >
-                Gradient uses the{" "}
-                <code className="font-mono text-foreground">gradient</code>{" "}
-                field on{" "}
-                <code className="font-mono text-foreground">color</code> from
-                the parent — not this swatch grid.
-              </PrismTypography>
-            </div>
+                <PrismTypography
+                  role="label"
+                  size="medium"
+                  className="mb-1 block uppercase"
+                >
+                  COLORS
+                </PrismTypography>
+                {gradientSwatches.length === 0 ? (
+                  <PrismTypography
+                    role="body"
+                    size="small"
+                    as="p"
+                    className="italic text-muted-foreground"
+                  >
+                    No colors yet — click a swatch below.
+                  </PrismTypography>
+                ) : (
+                  <div className="flex min-w-0 max-w-full flex-wrap gap-1">
+                    {gradientSwatches.map((family, i) => {
+                      const paint =
+                        resolvePickerCellHex(
+                          paletteId,
+                          family,
+                          gradientShadeNum as MaterialShadeKey | TailwindNumericShade,
+                        ) ?? "#737373";
+                      const foreground =
+                        approximateRelativeLuminanceFromCssColor(paint) <
+                        PRISM_TINTED_SURFACE_MAX_LUMA
+                          ? "#ffffff"
+                          : "#171717";
+                      return (
+                        <PrismButton
+                          key={`${family}-${i}`}
+                          color="red"
+                          label={family}
+                          variant="icon"
+                          icon={X}
+                          iconPosition="right"
+                          size="small"
+                          font="mono"
+                          shape="pill"
+                          line="full"
+                          spacing="tight"
+                          paint="monochrome"
+                          disableGrow
+                          disabled={disabled}
+                          style={{
+                            backgroundColor: paint,
+                            borderColor:
+                              foreground === "#ffffff"
+                                ? "rgba(255,255,255,0.72)"
+                                : "rgba(0,0,0,0.42)",
+                            color: foreground,
+                            textShadow:
+                              foreground === "#ffffff"
+                                ? "0 1px 2px rgba(0,0,0,0.35)"
+                                : undefined,
+                          }}
+                          onClick={() => handleGradientRemoveSwatch(i)}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── Direction + shade (two columns) ─────────────────── */}
+              <div className="mb-2 grid min-w-0 grid-cols-2 gap-3">
+                <div className="min-w-0">
+                  <PrismTypography
+                    role="label"
+                    size="medium"
+                    className="mb-1 block uppercase"
+                  >
+                    DIRECTION
+                  </PrismTypography>
+                  <div
+                    role="radiogroup"
+                    aria-label="Gradient direction"
+                    className="inline-flex min-w-0 max-w-full overflow-x-auto"
+                  >
+                    {PRISM_COLOR_PICKER_GRADIENT_DIRECTIONS.map((opt, i, arr) => (
+                      <PrismButton
+                        key={opt.id}
+                        color="red"
+                        label={opt.label}
+                        variant="plain"
+                        shape="pill"
+                        line="full"
+                        spacing="tight"
+                        gap="none"
+                        paint="monochrome"
+                        disableGrow
+                        segmentPosition={
+                          i === 0 ? "first" : i === arr.length - 1 ? "last" : "middle"
+                        }
+                        toggled={gradientDirection === opt.id}
+                        disabled={disabled}
+                        onClick={() => handleGradientDirectionChange(opt.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <PrismTypography
+                    role="label"
+                    size="medium"
+                    className="mb-1 block uppercase"
+                  >
+                    SHADE
+                  </PrismTypography>
+                  <div className="relative">
+                    <select
+                      value={gradientShadeNum}
+                      disabled={disabled}
+                      onChange={(e) =>
+                        handleGradientShadeChange(Number(e.target.value))
+                      }
+                      className="box-border h-8 w-full appearance-none rounded-md border border-input bg-background px-3 pr-8 text-xs font-mono disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      {gradientShadeOptions.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <PrismIcon
+                      name="expand_more"
+                      size={14}
+                      weight="regular"
+                      fill="off"
+                      className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Light / dark gradient preview bars ──────────────── */}
+              {gradientPreviewPair ? (
+                <div className="mb-2 flex flex-col gap-1">
+                  <div
+                    className="h-7 rounded border border-border/60"
+                    title="light"
+                    role="presentation"
+                    style={{ backgroundImage: gradientPreviewPair.light }}
+                  />
+                  <div
+                    className="h-7 rounded border border-border/60 dark:border-white/10"
+                    title="dark"
+                    role="presentation"
+                    style={{ backgroundImage: gradientPreviewPair.dark }}
+                  />
+                </div>
+              ) : null}
+            </>
           )}
-          <div
-            role="radiogroup"
-            aria-label="Palette source"
-            className="mb-2 grid min-w-[min(100%,14rem)] grid-cols-2 gap-2"
-          >
-            {PRISM_COLOR_PICKER_PALETTE_TOGGLE.map((opt) => {
-              const selected = togglePaletteKey === opt.id;
-              return (
-                <PrismButton
-                  key={opt.id}
-                  color="red"
-                  label={opt.label}
-                  variant="plain"
-                  shape="rectangle"
-                  line="bottom"
-                  spacing="tight"
-                  paint="monochrome"
-                  disableGrow
-                  toggled={selected}
-                  disabled={disabled}
-                  onClick={() => handlePaletteToggle(opt.id)}
-                />
-              );
-            })}
+          <div className="mb-2">
+            <PrismTypography
+              role="label"
+              size="medium"
+              className="mb-1 block uppercase"
+            >
+              PALETTE
+            </PrismTypography>
+            <div
+              role="radiogroup"
+              aria-label="Palette source"
+              className="grid min-w-[min(100%,14rem)] grid-cols-2 gap-2"
+            >
+              {PRISM_COLOR_PICKER_PALETTE_TOGGLE.map((opt) => {
+                const selected = togglePaletteKey === opt.id;
+                return (
+                  <PrismButton
+                    key={opt.id}
+                    color="red"
+                    label={opt.label}
+                    variant="plain"
+                    shape="rectangle"
+                    line="bottom"
+                    spacing="tight"
+                    paint="monochrome"
+                    disableGrow
+                    toggled={selected}
+                    disabled={disabled}
+                    onClick={() => handlePaletteToggle(opt.id)}
+                  />
+                );
+              })}
+            </div>
           </div>
           <div
             className="grid gap-px bg-border p-px"
@@ -760,8 +1197,9 @@ export function PrismColorPicker({
                 }
                 const normalizedSwatchToken =
                   normalizePickerColorToken(cellResolvedPaint);
-                const isSelected =
-                  normalizedCommittedPaintToken === normalizedSwatchToken;
+                const isSelected = isGradientMode
+                  ? gradientSwatches.includes(family)
+                  : normalizedCommittedPaintToken === normalizedSwatchToken;
                 const pickerDisplayTitle = swatchPickerDisplayTitle({
                   palette: paletteId,
                   family,
