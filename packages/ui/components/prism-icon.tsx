@@ -22,23 +22,40 @@ export type PrismIconWeightName =
 /** Filled variant: **FILL** axis `1` when `"on"`. */
 export type PrismIconFillMode = "on" | "off";
 
+/** Single source of truth for {@link PrismIcon} when optional props are omitted. */
+export const PRISM_ICON_DEFAULTS: {
+  size: PrismIconSizeName;
+  weight: PrismIconWeightName;
+  fill: PrismIconFillMode;
+} = {
+  size: "medium",
+  weight: "regular",
+  fill: "off",
+};
+
 export interface PrismIconProps {
   name: string;
   className?: string;
   /**
    * Named step or raw pixel size for layout-driven cases (still clamps **opsz** to 20–48).
+   * @default {@link PRISM_ICON_DEFAULTS.size} (`"medium"`)
    */
   size?: PrismIconSizeName | number;
   /**
    * Named step (`light` … `heavy` → wght 100 / 200 / 400 / 600 / 700) or any **wght** integer **100–700**
    * (use a number for steps between named values, e.g. **300**).
+   * @default {@link PRISM_ICON_DEFAULTS.weight} (`"regular"`)
    */
   weight?: PrismIconWeightName | number;
+  /** @default {@link PRISM_ICON_DEFAULTS.fill} (`"off"`) */
   fill?: PrismIconFillMode;
   /**
    * Same shape as other Prism `color` props; resolved by `prismColorSpecToIconGlyphPaint`:
    * solid `color`, or **`gradient.swatches`** → resolved `linear-gradient` + background-clip text
    * (light ramp; glyphs cannot use `color: linear-gradient(...)`).
+   *
+   * When omitted, no glyph `color` / gradient is set inline — the symbol inherits **`color`**
+   * from CSS (typically the parent text color, e.g. `text-foreground`), not a fixed black hex.
    */
   color?: PartialPrismColorSpec;
 }
@@ -60,7 +77,8 @@ const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<PrismIconWeightName, number> = {
 };
 
 function resolvePrismIconSizePx(size: PrismIconProps["size"]): number {
-  if (size === undefined) return PRISM_ICON_SIZE_NAME_TO_PX.medium;
+  if (size === undefined)
+    return PRISM_ICON_SIZE_NAME_TO_PX[PRISM_ICON_DEFAULTS.size];
   if (typeof size === "number") return size;
   return PRISM_ICON_SIZE_NAME_TO_PX[size];
 }
@@ -68,7 +86,8 @@ function resolvePrismIconSizePx(size: PrismIconProps["size"]): number {
 function resolvePrismIconWeightValue(
   weight: PrismIconProps["weight"]
 ): number {
-  if (weight === undefined) return PRISM_ICON_WEIGHT_NAME_TO_VALUE.regular;
+  if (weight === undefined)
+    return PRISM_ICON_WEIGHT_NAME_TO_VALUE[PRISM_ICON_DEFAULTS.weight];
   if (typeof weight === "number") {
     return Math.min(700, Math.max(100, Math.round(weight)));
   }
@@ -76,16 +95,16 @@ function resolvePrismIconWeightValue(
 }
 
 function resolvePrismIconFill(fill: PrismIconProps["fill"]): boolean {
-  if (fill === undefined) return false;
+  if (fill === undefined) return PRISM_ICON_DEFAULTS.fill === "on";
   return fill === "on";
 }
 
 export function PrismIcon({
   name,
   className,
-  size = "medium",
-  weight = "regular",
-  fill = "off",
+  size = PRISM_ICON_DEFAULTS.size,
+  weight = PRISM_ICON_DEFAULTS.weight,
+  fill = PRISM_ICON_DEFAULTS.fill,
   color: colorSpec,
 }: PrismIconProps) {
   const sizePx = resolvePrismIconSizePx(size);
