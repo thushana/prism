@@ -58,7 +58,7 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
   "prism-color": {
     title: "PrismColor",
     description:
-      "ColorLoop, gradient.linearStrings, palette vars (default + tailwind), syntax preview.",
+      "One picker commits the full color spec; live JSON, ColorLoop chips, gradient previews, PrismCodeBlock.",
     Demo: PrismColorDemo,
   },
   "prism-color-picker": {

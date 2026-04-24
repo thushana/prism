@@ -420,7 +420,6 @@
     line-height: 1.35;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
   }
   .typography-overline-medium {
     display: block;
@@ -429,7 +428,6 @@
     line-height: 1.3;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
   .typography-overline-large {
     display: block;
@@ -438,7 +436,6 @@
     line-height: 1.3;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
   .typography-overline-huge {
     display: block;
@@ -447,7 +444,6 @@
     line-height: 1.3;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
   .typography-overline-gigantic {
     display: block;
@@ -456,7 +452,6 @@
     line-height: 1.3;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
 
   /*

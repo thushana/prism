@@ -137,6 +137,24 @@ const DEFAULT_ELEMENT: Record<
   },
 };
 
+type CapsAccentStyle = Pick<CSSProperties, "letterSpacing" | "fontWeight">;
+
+/**
+ * Open tracking + bold weight for {@link PRISM_TYPOGRAPHY_ROLES} `overline` only — merged into
+ * `style` so it wins over `.typography-*`. Intentionally **not** applied to `label` (e.g. trigger
+ * chips use `label` + `small` without changing footprint). Override with `style` when needed.
+ */
+function defaultCapsAccentStyle(
+  role: PrismTypographyRole,
+  size: PrismTypographySize,
+): CapsAccentStyle | undefined {
+  if (role !== "overline") return undefined;
+  return {
+    letterSpacing: size === "small" ? "0.17em" : "0.1em",
+    fontWeight: 700,
+  };
+}
+
 const EASE_OUT = "power3.out";
 const DURATION_WHOLE = 1;
 const DURATION_LINE = 0.72;
@@ -465,10 +483,20 @@ export function PrismTypography({
           : undefined;
 
   const balanceWrap = { textWrap: "balance" } as CSSProperties;
+  const capsAccent = defaultCapsAccentStyle(role, size);
   const mergedStyle =
     fontFamily !== undefined && fontFamily !== ""
-      ? { ...balanceWrap, ...style, fontFamily }
-      : { ...balanceWrap, ...style };
+      ? {
+          ...balanceWrap,
+          ...(capsAccent ?? {}),
+          ...style,
+          fontFamily,
+        }
+      : {
+          ...balanceWrap,
+          ...(capsAccent ?? {}),
+          ...style,
+        };
 
   const typographyClass = `typography-${role}-${size}`;
 
