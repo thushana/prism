@@ -1,5 +1,4 @@
 import type { ComponentType } from "react";
-import { PrismBadgeDemo } from "./prism-badge";
 import { PrismButtonDemo } from "./prism-button";
 import { PrismCardDemo } from "./prism-card";
 import { PrismCodeBlockDemo } from "./prism-code-block";
@@ -12,7 +11,6 @@ import { PrismPathBarDemo } from "./prism-path-bar";
 import { PrismTypographyDemo } from "./prism-typography";
 
 export type PrismAdminComponentSlug =
-  | "prism-badge"
   | "prism-button"
   | "prism-card"
   | "prism-code-block"
@@ -34,11 +32,6 @@ export type PrismAdminRegistryEntry = {
 };
 
 export const PRISM_ADMIN_COMPONENT_REGISTRY = {
-  "prism-badge": {
-    title: "PrismBadge",
-    description: "Badges: variants and link slot.",
-    Demo: PrismBadgeDemo,
-  },
   "prism-button": {
     title: "PrismButton",
     description: "Buttons: presets, controls, variant grid.",

@@ -1,5 +1,11 @@
 import { Geist_Mono } from "next/font/google";
-import { PrismBadge, PrismDivider, PrismTypography } from "@ui";
+import {
+  PRISM_META_CHIP_INTERACTIVE_CLASS,
+  PRISM_META_CHIP_OUTLINE_CLASS,
+  PrismDivider,
+  PrismTypography,
+} from "@ui";
+import { cn } from "@utilities";
 import { formatDateTimeWithRelative } from "./data";
 import type {
   SystemSheetConfig,
@@ -45,7 +51,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <PrismTypography role="overline" size="small">
               Commit Author
             </PrismTypography>
-            <PrismBadge variant="outline">{git.commitAuthor}</PrismBadge>
+            <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{git.commitAuthor}</span>
           </div>
         )}
       </div>
@@ -62,15 +68,19 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
                 rel="noopener noreferrer"
                 className="inline-block"
               >
-                <PrismBadge
-                  variant="outline"
-                  className="cursor-pointer hover:bg-accent transition-colors"
+                <span
+                  className={cn(
+                    PRISM_META_CHIP_OUTLINE_CLASS,
+                    PRISM_META_CHIP_INTERACTIVE_CLASS,
+                  )}
                 >
                   {git.commitSha.slice(0, 7)}
-                </PrismBadge>
+                </span>
               </a>
             ) : (
-              <PrismBadge variant="outline">{git.commitSha.slice(0, 7)}</PrismBadge>
+              <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                {git.commitSha.slice(0, 7)}
+              </span>
             )}
           </div>
         )}
@@ -85,12 +95,14 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
               rel="noopener noreferrer"
               className="inline-block"
             >
-              <PrismBadge
-                variant="outline"
-                className="cursor-pointer hover:bg-accent transition-colors"
+              <span
+                className={cn(
+                  PRISM_META_CHIP_OUTLINE_CLASS,
+                  PRISM_META_CHIP_INTERACTIVE_CLASS,
+                )}
               >
                 {git.repositoryName || "Repository"}
-              </PrismBadge>
+              </span>
             </a>
           </div>
         )}
@@ -98,16 +110,16 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
           <PrismTypography role="overline" size="small">
             Status
           </PrismTypography>
-          <PrismBadge variant="outline">
+          <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
             {git.status === "clean" ? "clean" : "dirty"}
-          </PrismBadge>
+          </span>
         </div>
         {git.branch && (
           <div className="space-y-1">
             <PrismTypography role="overline" size="small">
               Branch
             </PrismTypography>
-            <PrismBadge variant="outline">{git.branch}</PrismBadge>
+            <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{git.branch}</span>
           </div>
         )}
         {git.commitDate && (
@@ -115,9 +127,14 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <PrismTypography role="overline" size="small">
               Commit Date
             </PrismTypography>
-            <PrismBadge variant="outline" className="max-w-full whitespace-normal text-left">
+            <span
+              className={cn(
+                PRISM_META_CHIP_OUTLINE_CLASS,
+                "max-w-full whitespace-normal text-left",
+              )}
+            >
               {formatDateTimeWithRelative(git.commitDate)}
-            </PrismBadge>
+            </span>
           </div>
         )}
         {git.pushStatus && (
@@ -125,9 +142,14 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <PrismTypography role="overline" size="small">
               Push Status
             </PrismTypography>
-            <PrismBadge variant="outline" className="max-w-full whitespace-normal text-left">
+            <span
+              className={cn(
+                PRISM_META_CHIP_OUTLINE_CLASS,
+                "max-w-full whitespace-normal text-left",
+              )}
+            >
               {git.pushStatus}
-            </PrismBadge>
+            </span>
           </div>
         )}
       </div>
@@ -268,7 +290,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   <PrismTypography role="overline" size="small">
                     {key}
                   </PrismTypography>
-                  <PrismBadge variant="outline">{value}</PrismBadge>
+                  <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{value}</span>
                 </div>
               ))}
             </div>
@@ -322,23 +344,25 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Environment
                 </PrismTypography>
-                <PrismBadge variant="outline">{data.vercel.env}</PrismBadge>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{data.vercel.env}</span>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
                   <PrismTypography role="overline" size="small">
                     Region
                   </PrismTypography>
-                  <PrismBadge variant="outline">{data.vercel.region}</PrismBadge>
+                  <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                    {data.vercel.region}
+                  </span>
                 </div>
               )}
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Build Time
                 </PrismTypography>
-                <PrismBadge variant="outline">
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
                   {formatDateTimeWithRelative(data.vercel.buildTime)}
-                </PrismBadge>
+                </span>
               </div>
             </div>
             <div className="mt-4 space-y-3">
@@ -439,19 +463,23 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Style
                 </PrismTypography>
-                <PrismBadge variant="outline">{data.shadcn.style}</PrismBadge>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{data.shadcn.style}</span>
               </div>
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Icon Library
                 </PrismTypography>
-                <PrismBadge variant="outline">{data.shadcn.iconLibrary}</PrismBadge>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                  {data.shadcn.iconLibrary}
+                </span>
               </div>
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">
                   Base Color
                 </PrismTypography>
-                <PrismBadge variant="outline">{data.shadcn.baseColor}</PrismBadge>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                  {data.shadcn.baseColor}
+                </span>
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ import {
   type PrismPaletteId,
   type PrismSwatchKey,
 } from "@ui";
+import type { JSX } from "react";
 import { useMemo, useState } from "react";
 
 function randomPalette(): PrismPaletteId {
@@ -23,11 +24,14 @@ function randomSwatchForPalette(palette: PrismPaletteId): PrismSwatchKey {
   return ring[Math.floor(Math.random() * ring.length)]!;
 }
 
-function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
-  showColorCode: boolean;
-  showCopyButton: boolean;
-  disabled: boolean;
-}): string {
+function formatPickerSnippet(
+  spec: PartialPrismColorSpec,
+  p: {
+    showColorCode: boolean;
+    showCopyButton: boolean;
+    disabled: boolean;
+  },
+): string {
   const lines: string[] = ["<PrismColorPicker"];
   for (const line of prismColorPickerClipboardColorProp(spec).split("\n")) {
     lines.push(`  ${line}`);
@@ -40,24 +44,8 @@ function formatPickerSnippet(spec: PartialPrismColorSpec, p: {
   return `${lines.join("\n")}\n`;
 }
 
-/** Space under the shell header before the first in-demo heading (`AdminPageShell` already renders the page `h1`). */
-const PRISM_COLOR_PICKER_DEMO_PAGE_TOP_PAD = "pt-8";
-/** Space above each in-demo section heading after prior content. */
-const PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD = "pt-10";
-/** Tight gap from section heading to the control or block directly below. */
-const PRISM_COLOR_PICKER_DEMO_HEADING_TO_BODY = "mb-3";
-/** Combined utility for in-demo `h2` titles (spacing + weight). */
-const PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS = `${PRISM_COLOR_PICKER_DEMO_HEADING_TO_BODY} font-bold`;
-/** Root wrapper: bottom margin for shell + top pad before first heading. */
-const PRISM_COLOR_PICKER_DEMO_ROOT_CLASS = `mb-6 ${PRISM_COLOR_PICKER_DEMO_PAGE_TOP_PAD}`;
-
-/**
- * Admin playground for {@link PrismColorPicker}.
- *
- * The route title from `AdminPageShell` is the document `h1`; Customize / Example / Code Sample are
- * sibling `h2`s for in-page sections (no skipped heading levels).
- */
-export function PrismColorPickerDemo(): React.JSX.Element {
+/** Admin playground for {@link PrismColorPicker}; section layout matches other Prism component demos. */
+export function PrismColorPickerDemo(): JSX.Element {
   const [color, setColor] = useState<PartialPrismColorSpec>(() => {
     const palette = randomPalette();
     return {
@@ -81,19 +69,30 @@ export function PrismColorPickerDemo(): React.JSX.Element {
   );
 
   return (
-    <>
-      <div className={PRISM_COLOR_PICKER_DEMO_ROOT_CLASS}>
-        <PrismTypography
-          role="title"
-          size="small"
-          as="h2"
-          font="sans"
-          className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
-        >
+    <div className="space-y-10">
+      <section className="space-y-4">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          Example
+        </PrismTypography>
+        <PrismColorPicker
+          color={color}
+          onColorChange={setColor}
+          showColorCode={showColorCode}
+          showCopyButton={showCopyButton}
+          disabled={disabled}
+        />
+      </section>
+
+      <section className="space-y-4">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
           Customize
         </PrismTypography>
-
-        <div className="flex flex-wrap gap-6">
+        <p className="text-sm text-muted-foreground">
+          Toggle optional trigger chrome (<code className="font-mono text-foreground">showColorCode</code>,{" "}
+          <code className="font-mono text-foreground">showCopyButton</code>) and{" "}
+          <code className="font-mono text-foreground">disabled</code>.
+        </p>
+        <div className="flex flex-wrap items-center gap-6">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
@@ -128,48 +127,23 @@ export function PrismColorPickerDemo(): React.JSX.Element {
             </PrismTypography>
           </label>
         </div>
+      </section>
 
-        <div className={PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD}>
-          <PrismTypography
-            role="title"
-            size="small"
-            as="h2"
-            font="sans"
-            className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
-          >
-            Example
-          </PrismTypography>
-          <PrismColorPicker
-            color={color}
-            onColorChange={setColor}
-            showColorCode={showColorCode}
-            showCopyButton={showCopyButton}
-            disabled={disabled}
-          />
-        </div>
-
-        <div className={PRISM_COLOR_PICKER_DEMO_SECTION_TOP_PAD}>
-          <PrismTypography
-            role="title"
-            size="small"
-            as="h2"
-            font="sans"
-            className={PRISM_COLOR_PICKER_DEMO_SECTION_HEADING_CLASS}
-          >
-            Code Sample
-          </PrismTypography>
-          <PrismCodeBlock
-            className="font-mono"
-            mode="card"
-            disableLineNumbers={false}
-            disableLanguageLabel={false}
-            color={{ swatchPrimary: "grey" }}
-            language="tsx"
-          >
-            {generatedUsage}
-          </PrismCodeBlock>
-        </div>
-      </div>
-    </>
+      <section className="space-y-4">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          Code sample
+        </PrismTypography>
+        <PrismCodeBlock
+          className="font-mono"
+          mode="card"
+          disableLineNumbers={false}
+          disableLanguageLabel={false}
+          color={{ swatchPrimary: "grey" }}
+          language="tsx"
+        >
+          {generatedUsage}
+        </PrismCodeBlock>
+      </section>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import {
-  PrismBadge,
+  PRISM_META_CHIP_SECONDARY_CLASS,
   PrismButton,
   PrismCard,
   PrismCardAction,
@@ -23,7 +23,7 @@ export function PrismCardDemo(): JSX.Element {
             grid.
           </PrismCardDescription>
           <PrismCardAction>
-            <PrismBadge variant="secondary">Action slot</PrismBadge>
+            <span className={PRISM_META_CHIP_SECONDARY_CLASS}>Action slot</span>
           </PrismCardAction>
         </PrismCardHeader>
         <PrismCardContent className="space-y-2">

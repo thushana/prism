@@ -83,7 +83,7 @@ Apps generated via **`pnpm run prism generate <app-name>`** (see root `package.j
 
 Shared UI component library:
 
-- `components/` - React components (`PrismButton`, `PrismCard`, `PrismBadge`, `PrismIcon`, `PrismLayout*`, …)
+- `components/` - React components (`PrismButton`, `PrismCard`, `PrismIcon`, `PrismLayout*`, …)
 - `source/` - Presets and secondary modules (e.g. `prism-button-presets.ts`; package entry re-exports from `components/` + styles)
 - `styles/` - Font configurations and global CSS
 - `fonts/` - Font files (.woff2)
