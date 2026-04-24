@@ -565,9 +565,9 @@ export function PrismButton(
     toggled: toggled || undefined,
   });
 
-  const { className: _omit, ...restSpanSafe } =
+  const { className: _omit, style: restSpanStyle, ...restSpanSafe } =
     rest as React.ComponentProps<"span">;
-  const { className: _omitBtn, ...restButtonSafe } =
+  const { className: _omitBtn, style: restButtonStyle, ...restButtonSafe } =
     rest as React.ComponentProps<"button">;
 
   if (asChild) {
@@ -575,7 +575,7 @@ export function PrismButton(
       <Slot
         ref={rootRef as React.Ref<HTMLElement>}
         className={className}
-        style={style}
+        style={{ ...style, ...restSpanStyle }}
         title={title}
         aria-label={ariaLabel}
         {...dataAttrs}
@@ -593,7 +593,7 @@ export function PrismButton(
       ref={rootRef as React.RefObject<HTMLButtonElement>}
       type="button"
       className={className}
-      style={style}
+      style={{ ...style, ...restButtonStyle }}
       title={title}
       aria-label={ariaLabel}
       {...dataAttrs}

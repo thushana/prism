@@ -38,16 +38,44 @@ function sanitizeSingleLineJsComment(body: string): string {
 
 /**
  * Clipboard text: a pasteable JSX `color={{ … }}` block (same shape as {@link PartialPrismColorSpec}).
- * Omits `palette` when `"default"`. Trailing `//` comment is {@link prismColorSpecToHex} for that spec
- * (hex or e.g. `oklch(...)` for Tailwind literals).
  *
- * Emits `colorLoop` only when it would carry a value — i.e. `range > 0` or an explicit `center`. A spec
- * with `colorLoop: { range: 0 }` and no `center` renders as a plain picker config.
+ * - **Gradient spec** (`gradient.swatches.length > 0`): emits `gradient: { swatches, direction, shade? }`.
+ *   `swatchPrimary` / `shade` are omitted because they are not the primary control surface.
+ * - **Single spec**: emits `swatchPrimary + shade`, and `colorLoop` when `range > 0` or `center` is set.
+ *
+ * `palette` is omitted when `"default"`. Single-color output includes a trailing `//` resolved CSS
+ * color comment; gradient output stays focused on the ordered `gradient` spec.
  */
 export function prismColorPickerClipboardColorProp(
   partial: PartialPrismColorSpec | undefined,
 ): string {
   const n = normalizePrismColorSpec(partial);
+  const grad = partial?.gradient;
+
+  // ── Gradient mode ──────────────────────────────────────────────────────────
+  if (grad && grad.swatches.length > 0) {
+    const lines: string[] = ["color={{"];
+    if (n.palette !== "default") {
+      lines.push(`  palette: ${JSON.stringify(n.palette)},`);
+    }
+    lines.push("  gradient: {");
+    lines.push(
+      `    swatches: [${grad.swatches.map((s) => JSON.stringify(s)).join(", ")}],`,
+    );
+    lines.push(`    direction: "${grad.direction}",`);
+    if (grad.shade !== undefined) {
+      const shadeStr =
+        typeof grad.shade === "number"
+          ? String(grad.shade)
+          : `{ light: ${(grad.shade as { light: number; dark: number }).light}, dark: ${(grad.shade as { light: number; dark: number }).dark} }`;
+      lines.push(`    shade: ${shadeStr},`);
+    }
+    lines.push("  },");
+    lines.push("}}");
+    return lines.join("\n");
+  }
+
+  // ── Single / ColorLoop mode ────────────────────────────────────────────────
   const family =
     n.swatchPrimary ?? PrismColor.Loop.normalize(n.palette, "blue");
   const resolved = sanitizeSingleLineJsComment(prismColorSpecToHex(partial));
