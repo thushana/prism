@@ -2,8 +2,15 @@
 
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { PrismButton, PrismTypography } from "@ui";
+import {
+  PrismButton,
+  PrismCodeBlock,
+  PrismColorPicker,
+  PrismTypography,
+  prismColorPickerClipboardColorProp,
+} from "@ui";
 import type {
+  PartialPrismColorSpec,
   PrismTypographyAnimationKind,
   PrismTypographyAnimationZone,
   PrismTypographyRole,
@@ -382,6 +389,20 @@ const WEIGHT_STYLE_KEYS = [
   "styleBlack",
 ] as const satisfies readonly TypographyOptionKey[];
 
+function typographyColorSnippetFromSpec(spec: PartialPrismColorSpec): string {
+  const colorBlock = prismColorPickerClipboardColorProp(spec);
+  return [
+    "<PrismTypography",
+    '  role="headline"',
+    '  size="large"',
+    ...colorBlock.split("\n").map((line) => `  ${line}`),
+    ">",
+    "  Headline preview with PrismColor",
+    "</PrismTypography>",
+    "",
+  ].join("\n");
+}
+
 const GRADIENT_COLOR_PAIRS: ReadonlyArray<[string, string]> = [
   ["var(--color-indigo-500)", "var(--color-cyan-500)"],
   ["var(--color-purple-500)", "var(--color-pink-500)"],
@@ -490,6 +511,16 @@ export function TypeScalePreview({
   const [headlineStartIndex, setHeadlineStartIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Set<TypographyOptionKey>>(
     new Set()
+  );
+  const [pickerColor, setPickerColor] = useState<PartialPrismColorSpec>({
+    palette: "default",
+    swatchPrimary: "indigo",
+    shade: 500,
+  });
+
+  const typographyColorSnippet = useMemo(
+    () => typographyColorSnippetFromSpec(pickerColor),
+    [pickerColor],
   );
 
   const activeTypeface =
@@ -768,6 +799,56 @@ export function TypeScalePreview({
           </div>
         ))}
       </div>
+
+      <section className="mb-8 space-y-4 border-b border-border pb-8">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          PrismColor + typography
+        </PrismTypography>
+        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }}>
+          Uses the same <code className="font-mono text-xs">PartialPrismColorSpec</code> as{" "}
+          <code className="font-mono text-xs">PrismIcon</code> and the color picker demo. Independent
+          of the TONE / GRADIENT checkboxes above (those drive className / inline preview styles).
+        </PrismTypography>
+        <div className="max-w-xl space-y-2">
+          <PrismTypography role="overline" size="small" className="block">
+            Color
+          </PrismTypography>
+          <PrismColorPicker
+            color={pickerColor}
+            onColorChange={setPickerColor}
+            showCopyButton={false}
+          />
+        </div>
+        <div className="space-y-2">
+          <PrismTypography role="overline" size="small" className="block">
+            Example
+          </PrismTypography>
+          <PrismTypography
+            role="headline"
+            size="large"
+            color={pickerColor}
+            className={activeTypeface.className}
+          >
+            Headline preview with PrismColor
+          </PrismTypography>
+        </div>
+        <div className="space-y-2">
+          <PrismTypography role="overline" size="small" className="block">
+            Code sample
+          </PrismTypography>
+          <PrismCodeBlock
+            className="font-mono"
+            mode="card"
+            disableLineNumbers={false}
+            disableLanguageLabel={false}
+            color={{ swatchPrimary: "grey" }}
+            language="tsx"
+          >
+            {typographyColorSnippet}
+          </PrismCodeBlock>
+        </div>
+      </section>
+
       <div className="border-b pb-4">
         {typeScaleItemsByRole.map(({ role, items }, roleIndex) => (
           <div

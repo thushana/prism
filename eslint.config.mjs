@@ -122,9 +122,9 @@ const eslintConfig = defineConfig([
         },
         {
           selector:
-            "JSXOpeningElement[name.name='PrismTypography'] JSXAttribute[name.name='color']",
+            "JSXOpeningElement[name.name='PrismTypography'] JSXAttribute[name.name='tone']",
           message:
-            "PrismTypography uses `tone`, not `color`. See prism/docs/UI-Prism.md.",
+            "PrismTypography uses `color` (PartialPrismColorSpec), not `tone`. See prism/docs/UI-Prism.md.",
         },
         {
           selector:
