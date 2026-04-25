@@ -804,11 +804,6 @@ export function TypeScalePreview({
         <PrismTypography role="title" size="large" font="sans" as="h2">
           PrismColor + typography
         </PrismTypography>
-        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }}>
-          Uses the same <code className="font-mono text-xs">PartialPrismColorSpec</code> as{" "}
-          <code className="font-mono text-xs">PrismIcon</code> and the color picker demo. Independent
-          of the TONE / GRADIENT checkboxes above (those drive className / inline preview styles).
-        </PrismTypography>
         <div className="max-w-xl space-y-2">
           <PrismTypography role="overline" size="small" className="block">
             Color
