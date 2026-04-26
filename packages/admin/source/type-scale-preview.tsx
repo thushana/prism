@@ -267,12 +267,13 @@ const SAMPLE_INDEX_RANGE = Math.max(
   BODY_POOL.length
 );
 
+/** Group titles: lowercase axis names (same convention as PrismCodeBlock Customize overlines). */
 const TYPOGRAPHY_OPTION_COLUMNS: {
   heading: string;
   keys: TypographyOptionKey[];
 }[] = [
   {
-    heading: "STYLE",
+    heading: "font",
     keys: [
       "styleThin",
       "styleBold",
@@ -284,7 +285,7 @@ const TYPOGRAPHY_OPTION_COLUMNS: {
     ],
   },
   {
-    heading: "TONE / GRADIENT",
+    heading: "color",
     keys: [
       "toneForeground",
       "toneMuted",
@@ -295,15 +296,15 @@ const TYPOGRAPHY_OPTION_COLUMNS: {
     ],
   },
   {
-    heading: "ALIGN",
+    heading: "textAlign",
     keys: ["alignLeft", "alignCenter", "alignRight", "alignJustified"],
   },
   {
-    heading: "WRAP",
+    heading: "textWrap",
     keys: ["wrapBalance"],
   },
   {
-    heading: "ZONE",
+    heading: "animationZone",
     keys: [
       "animationWhole",
       "animationLine",
@@ -312,36 +313,37 @@ const TYPOGRAPHY_OPTION_COLUMNS: {
     ],
   },
   {
-    heading: "TYPE",
+    heading: "animationKind",
     keys: ["animationFadeIn", "animationMoveIn"],
   },
 ];
 
+/** Mono labels: literal-style tokens (same spirit as PrismButton OPTION_PROP_LABEL / picker booleans). */
 const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
-  styleThin: ".styleThin",
-  styleBold: ".styleBold",
-  styleBlack: ".styleBlack",
-  styleItalic: ".styleItalic",
-  styleCaseCaps: ".styleCaseCaps",
-  styleCaseTitle: ".styleCaseTitle",
-  styleCaseLower: ".styleCaseLower",
-  toneForeground: "foreground (text-foreground)",
-  toneMuted: "muted (text-muted-foreground)",
-  toneMonochrome: "monochrome (text-black / dark:text-white)",
-  gradientSideways: "gradient →",
-  gradientUp: "gradient ↑",
-  gradientAngle: "gradient 45°",
-  alignLeft: ".alignLeft",
-  alignCenter: ".alignCenter",
-  alignRight: ".alignRight",
-  alignJustified: ".alignJustified",
-  wrapBalance: ".wrapBalance",
-  animationWhole: ".animationWhole",
-  animationLine: ".animationLine",
-  animationWord: ".animationWord",
-  animationCharacter: ".animationCharacter",
-  animationFadeIn: ".animationFadeIn",
-  animationMoveIn: ".animationMoveIn",
+  styleThin: "thin",
+  styleBold: "bold",
+  styleBlack: "black",
+  styleItalic: "italic",
+  styleCaseCaps: "uppercase",
+  styleCaseTitle: "capitalize",
+  styleCaseLower: "lowercase",
+  toneForeground: "foreground",
+  toneMuted: "muted",
+  toneMonochrome: "monochrome",
+  gradientSideways: "gradientSideways",
+  gradientUp: "gradientUp",
+  gradientAngle: "gradientAngle",
+  alignLeft: "left",
+  alignCenter: "center",
+  alignRight: "right",
+  alignJustified: "justify",
+  wrapBalance: "balance",
+  animationWhole: "whole",
+  animationLine: "line",
+  animationWord: "word",
+  animationCharacter: "character",
+  animationFadeIn: "fadeIn",
+  animationMoveIn: "moveIn",
 };
 
 const ANIMATION_ZONE_KEYS = [
@@ -772,14 +774,22 @@ export function TypeScalePreview({
           onClick={reshuffleSamples}
         />
       </div>
-      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      <div className="mb-4 grid min-w-0 grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-7">
         {TYPOGRAPHY_OPTION_COLUMNS.map(({ heading, keys }) => (
-          <div key={heading} className="space-y-1">
-            <PrismTypography role="overline" size="small">
+          <div key={heading} className="min-w-0 space-y-1">
+            <PrismTypography
+              role="overline"
+              size="small"
+              font="sans"
+              className="mb-1 block"
+            >
               {heading}
             </PrismTypography>
             {keys.map((key) => (
-              <label key={key} className="flex items-center gap-1.5 cursor-pointer">
+              <label
+                key={key}
+                className="flex cursor-pointer items-center gap-2"
+              >
                 <input
                   type="checkbox"
                   checked={selectedOptions.has(key)}
