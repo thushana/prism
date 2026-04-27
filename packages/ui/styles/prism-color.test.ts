@@ -62,13 +62,13 @@ describe("resolveCodeBlockColor", () => {
 describe("PrismColor.var", () => {
   it("emits default (unprefixed) var", () => {
     expect(PrismColor.var({ family: "deep-purple", shade: 600 })).toBe(
-      "var(--color-deep-purple-600)",
+      "var(--color-deep-purple-600)"
     );
   });
 
   it("emits tailwind-prefixed var", () => {
     expect(
-      PrismColor.var({ palette: "tailwind", family: "violet", shade: 500 }),
+      PrismColor.var({ palette: "tailwind", family: "violet", shade: 500 })
     ).toBe("var(--color-tailwind-violet-500)");
   });
 });
@@ -99,7 +99,9 @@ describe("PRISM_DEFAULT_COLOR_LOOP", () => {
   });
 
   it("matches PRISM_DEFAULT_COLOR_NAMES length", () => {
-    expect(PRISM_DEFAULT_COLOR_NAMES.length).toBe(PRISM_DEFAULT_COLOR_LOOP.length);
+    expect(PRISM_DEFAULT_COLOR_NAMES.length).toBe(
+      PRISM_DEFAULT_COLOR_LOOP.length
+    );
   });
 
   it("aligns camelCase names with kebab-case loop by index", () => {
@@ -114,18 +116,16 @@ describe("PRISM_DEFAULT_COLOR_LOOP", () => {
 
 describe("PRISM_TAILWIND_COLOR_LOOP", () => {
   it("matches generated tailwindColorValues family key order", () => {
-    expect(PRISM_TAILWIND_COLOR_LOOP).toEqual(
-      Object.keys(tailwindColorValues),
-    );
+    expect(PRISM_TAILWIND_COLOR_LOOP).toEqual(Object.keys(tailwindColorValues));
   });
 });
 
 describe("default palette ColorName helpers", () => {
   it("getPrismDefaultColorNameForIndex wraps", () => {
     expect(getPrismDefaultColorNameForIndex(0)).toBe("red");
-    expect(getPrismDefaultColorNameForIndex(PRISM_DEFAULT_COLOR_NAMES.length)).toBe(
-      "red",
-    );
+    expect(
+      getPrismDefaultColorNameForIndex(PRISM_DEFAULT_COLOR_NAMES.length)
+    ).toBe("red");
   });
 
   it("nextPrismDefaultColorName advances and wraps", () => {
@@ -232,13 +232,21 @@ describe("PrismColor.relativeLuminanceFromHex", () => {
 
 describe("approximateRelativeLuminanceFromCssColor", () => {
   it("parses 6-digit hex", () => {
-    expect(approximateRelativeLuminanceFromCssColor("#000000")).toBeLessThan(0.1);
-    expect(approximateRelativeLuminanceFromCssColor("#ffffff")).toBeGreaterThan(0.9);
+    expect(approximateRelativeLuminanceFromCssColor("#000000")).toBeLessThan(
+      0.1
+    );
+    expect(approximateRelativeLuminanceFromCssColor("#ffffff")).toBeGreaterThan(
+      0.9
+    );
   });
 
   it("reads oklch lightness from leading percentage", () => {
-    const dark = approximateRelativeLuminanceFromCssColor("oklch(35% 0.15 280)");
-    const light = approximateRelativeLuminanceFromCssColor("oklch(96% 0.02 280)");
+    const dark = approximateRelativeLuminanceFromCssColor(
+      "oklch(35% 0.15 280)"
+    );
+    const light = approximateRelativeLuminanceFromCssColor(
+      "oklch(96% 0.02 280)"
+    );
     expect(dark).toBeLessThan(0.45);
     expect(light).toBeGreaterThan(0.45);
   });
@@ -251,7 +259,9 @@ describe("prismLabelOnFilledSurface", () => {
       surfaceCss: "#1565c0",
       labelFamily: "blue",
     });
-    expect(onBlue).toBe(PrismColor.hex({ palette: "default", family: "blue", shade: 100 }));
+    expect(onBlue).toBe(
+      PrismColor.hex({ palette: "default", family: "blue", shade: 100 })
+    );
   });
 
   it("uses label family shade 100 on dark oklch (tailwind palette)", () => {
@@ -261,7 +271,7 @@ describe("prismLabelOnFilledSurface", () => {
       labelFamily: "violet",
     });
     expect(label).toBe(
-      PrismColor.hex({ palette: "tailwind", family: "violet", shade: 100 }),
+      PrismColor.hex({ palette: "tailwind", family: "violet", shade: 100 })
     );
   });
 
@@ -272,7 +282,7 @@ describe("prismLabelOnFilledSurface", () => {
       labelFamily: "violet",
     });
     expect(label).toBe(
-      PrismColor.hex({ palette: "tailwind", family: "zinc", shade: 700 }),
+      PrismColor.hex({ palette: "tailwind", family: "zinc", shade: 700 })
     );
   });
 });
@@ -288,7 +298,12 @@ describe("prismColorSpecToTypographyPaint", () => {
       semanticTextClass: "text-muted-foreground",
     });
     expect(
-      prismColorSpecToTypographyPaint({ semanticText: "inherit" }),
+      prismColorSpecToTypographyPaint({ semanticText: "monochrome" })
+    ).toEqual({
+      semanticTextClass: "text-black dark:text-white",
+    });
+    expect(
+      prismColorSpecToTypographyPaint({ semanticText: "inherit" })
     ).toEqual({});
   });
 
@@ -300,7 +315,7 @@ describe("prismColorSpecToTypographyPaint", () => {
     });
     expect(p.semanticTextClass).toBeUndefined();
     expect(p.solidStyle?.color).toBe(
-      PrismColor.hex({ palette: "default", family: "red", shade: 600 }),
+      PrismColor.hex({ palette: "default", family: "red", shade: 600 })
     );
   });
 

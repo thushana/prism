@@ -72,10 +72,7 @@ import { PrismPathBar } from "@ui";
 
 <PrismPathBar
   mode="explicit"
-  segments={[
-    { label: "Docs", href: "/docs" },
-    { label: "Current page" },
-  ]}
+  segments={[{ label: "Docs", href: "/docs" }, { label: "Current page" }]}
 />;
 ```
 
@@ -233,32 +230,32 @@ import { PrismCodeBlock } from "@ui";
 
 **Props:**
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `string` | required | Code body; rendered, highlighted, and copied verbatim |
-| `language` | `string` | — | Optional. Drives label, `aria-label`, and highlighter selection |
-| `mode` | `"card"` \| `"transparent"` | `"card"` | **`card`**: Material wash from **`color`** (light: step **50** + **50%** `white` veil; dark: **900**; **`grey`** uses **100** / **900**). **`transparent`**: no panel background (see [Color & Surface Inheritance](#color--surface-inheritance)) |
-| `surfaceClassName` | `string` | — | Extra classes merged on the outer panel shell |
-| `disableLineNumbers` | `boolean` | `false` | Hides the faint line-number gutter |
-| `disableLanguageLabel` | `boolean` | `false` | Hides the small mono language chip |
-| `characterMaxWidth` | `number` \| `null` | `80` | Panel width is `min(100%, Nch)` so wide layouts grow up to **N** monospace characters; `null` removes the cap |
-| `color` | Material family string | `"blue"` | Kebab-case name only (e.g. **`purple`**, **`deep-purple`**). Token ramp from that family; accents use ring **+1** / **−1** / **−2**. See `buildSyntaxTokenMapFromFamily` in `prism-code-block.tsx`. Invalid values fall back to **`blue`**. **`grey`** maps to a neutral grey-only ramp |
-| `disableCopyButton` | `boolean` | `false` | When **`true`**, the copy control is not rendered |
-| `className` | `string` | — | Root wrapper |
+| Prop                   | Type                        | Default  | Description                                                                                                                                                                                                                                                                             |
+| ---------------------- | --------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`             | `string`                    | required | Code body; rendered, highlighted, and copied verbatim                                                                                                                                                                                                                                   |
+| `language`             | `string`                    | —        | Optional. Drives label, `aria-label`, and highlighter selection                                                                                                                                                                                                                         |
+| `mode`                 | `"card"` \| `"transparent"` | `"card"` | **`card`**: Material wash from **`color`** (light: step **50** + **50%** `white` veil; dark: **900**; **`grey`** uses **100** / **900**). **`transparent`**: no panel background (see [Color & Surface Inheritance](#color--surface-inheritance))                                       |
+| `surfaceClassName`     | `string`                    | —        | Extra classes merged on the outer panel shell                                                                                                                                                                                                                                           |
+| `disableLineNumbers`   | `boolean`                   | `false`  | Hides the faint line-number gutter                                                                                                                                                                                                                                                      |
+| `disableLanguageLabel` | `boolean`                   | `false`  | Hides the small mono language chip                                                                                                                                                                                                                                                      |
+| `characterMaxWidth`    | `number` \| `null`          | `80`     | Panel width is `min(100%, Nch)` so wide layouts grow up to **N** monospace characters; `null` removes the cap                                                                                                                                                                           |
+| `color`                | Material family string      | `"blue"` | Kebab-case name only (e.g. **`purple`**, **`deep-purple`**). Token ramp from that family; accents use ring **+1** / **−1** / **−2**. See `buildSyntaxTokenMapFromFamily` in `prism-code-block.tsx`. Invalid values fall back to **`blue`**. **`grey`** maps to a neutral grey-only ramp |
+| `disableCopyButton`    | `boolean`                   | `false`  | When **`true`**, the copy control is not rendered                                                                                                                                                                                                                                       |
+| `className`            | `string`                    | —        | Root wrapper                                                                                                                                                                                                                                                                            |
 
 **Syntax token → color roles** (accent families are **ring neighbours**: +1 / −1 / −2 from **`color`**; comments and punctuation use fixed neutrals):
 
-| Token category | Role | Used for |
-|---|---|---|
-| keyword | Primary family, strong shades | `const`, `type`, `#` headings |
-| string | Ring **+1** family | `"…"`, `'…'`, template backticks |
-| comment | `blue-grey` | `//`, `/* */`, `<!-- -->` |
-| tag / element | Primary family | `<div>`, `<Component>` |
-| property / attribute | Ring **−1** family | prop names, CSS properties |
-| number / literal | Ring **−2** family | `42`, numeric literals |
-| brace | Primary family | `{` `}` blocks |
-| punctuation | `grey` | `<`, `/>`, separators |
-| plain | (inherits `text-foreground`) | identifiers, prose |
+| Token category       | Role                          | Used for                         |
+| -------------------- | ----------------------------- | -------------------------------- |
+| keyword              | Primary family, strong shades | `const`, `type`, `#` headings    |
+| string               | Ring **+1** family            | `"…"`, `'…'`, template backticks |
+| comment              | `blue-grey`                   | `//`, `/* */`, `<!-- -->`        |
+| tag / element        | Primary family                | `<div>`, `<Component>`           |
+| property / attribute | Ring **−1** family            | prop names, CSS properties       |
+| number / literal     | Ring **−2** family            | `42`, numeric literals           |
+| brace                | Primary family                | `{` `}` blocks                   |
+| punctuation          | `grey`                        | `<`, `/>`, separators            |
+| plain                | (inherits `text-foreground`)  | identifiers, prose               |
 
 When adding a new language, map its token categories to this same table so colors stay consistent across highlighters.
 
@@ -417,9 +414,9 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 ### PrismTypography component
 
-Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Use the **`color`** prop with **`PartialPrismColorSpec`** (same model as **`PrismIcon`**, **`PrismColorPicker`**, …): **`semanticText`** for theme roles (`muted`, `foreground`, `primary`, …), **`swatchPrimary`** + **`shade`** for palette hex, or **`gradient`** for background-clip text. Omit **`color`** to inherit the cascade. You may still use **`className`** for spacing or one-off utilities.
+Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc `text-*` / `font-*` on raw `h*` / `p` / `span` for the Prism type scale. Use the **`color`** prop with **`PartialPrismColorSpec`** (same model as **`PrismIcon`**, **`PrismColorPicker`**, …): **`semanticText`** for theme roles (`muted`, `foreground`, `monochrome`, `primary`, …), **`swatchPrimary`** + **`shade`** for palette hex, or **`gradient`** for background-clip text. Omit **`color`** to inherit the cascade. You may still use **`className`** for spacing or one-off utilities.
 
-**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyAnimationZone`, `PrismTypographyAnimationKind`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
+**Exports:** `PrismTypography`, `PrismTypographyProps`, `PrismTypographyRole`, `PrismTypographySize`, `PrismTypographyFont`, `PrismTypographyFontWeightPreset`, `PrismTypographyAnimationZone`, `PrismTypographyAnimationKind`, `prismTypographySentenceCaseFromIdentifier`, `PRISM_TYPOGRAPHY_ROLES`, `PRISM_TYPOGRAPHY_SIZES`.
 
 **Props (`PrismTypographyProps`):**
 
@@ -428,6 +425,11 @@ Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc 
 - `color` (optional): **`PartialPrismColorSpec`** — resolved by **`prismColorSpecToTypographyPaint`** in `prism-color.ts` (semantic `text-*` classes, solid hex, or gradient). Omitted → inherit surrounding text colour
 - `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
 - `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
+- `fontWeight` (optional): `thin` | `bold` | `black` (preset weights) or a numeric CSS weight
+- `italic` (optional): boolean — toggles italic style on the text axis
+- `textTransform` (optional): CSS values `uppercase` \| `capitalize` \| `lowercase`, or **`sentenceCase`** — for plain string / number **`children`**, formats identifiers with **`prismTypographySentenceCaseFromIdentifier`** (camelCase → sentence case); use with **`role="overline"`** so built-in uppercase yields ALL CAPS labels from names like `textAlign`
+- `textAlign` (optional): `left` | `center` | `right` | `justify`
+- `textWrap` (optional): `balance` | `wrap` — when omitted, the component still merges layout defaults (including balance where the scale specifies it)
 - `animationZone` / `animationKind` (optional): scroll-reveal via GSAP (`SplitText`); see source for defaults when a zone is set without a kind
 - `as` (optional): override the rendered element for semantics or layout
 
@@ -635,14 +637,14 @@ This means a component placed on any page or inside any card renders in the ambi
 
 All Prism component styling uses CSS custom properties exposed as Tailwind utilities. Never use raw palette classes (`text-sky-600`, `bg-zinc-100`, hex, or oklch literals) in component source — doing so creates a parallel color system that breaks in dark mode and brand-theme contexts.
 
-| Token | Role |
-|---|---|
-| `bg-background` / `text-foreground` | Page-level base |
-| `bg-muted` / `text-muted-foreground` | Secondary UI — subtle panels, placeholders, line numbers |
-| `bg-card` / `text-card-foreground` | Content container surfaces |
-| `bg-primary` / `text-primary` | Brand accent — interactive emphasis, keywords |
-| `bg-secondary` / `text-secondary-foreground` | Secondary accent |
-| `text-foreground/{opacity}` | Semantic alpha tints (e.g. `/20` for gutters, `/80` for property names) |
+| Token                                        | Role                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `bg-background` / `text-foreground`          | Page-level base                                                         |
+| `bg-muted` / `text-muted-foreground`         | Secondary UI — subtle panels, placeholders, line numbers                |
+| `bg-card` / `text-card-foreground`           | Content container surfaces                                              |
+| `bg-primary` / `text-primary`                | Brand accent — interactive emphasis, keywords                           |
+| `bg-secondary` / `text-secondary-foreground` | Secondary accent                                                        |
+| `text-foreground/{opacity}`                  | Semantic alpha tints (e.g. `/20` for gutters, `/80` for property names) |
 
 ### Surface `tone` axis
 
@@ -664,7 +666,7 @@ All CSS custom properties have dark mode variants under `.dark`. Components that
 
 ## Prop Ergonomics & Variant Axes
 
-Prism UI follows the industry pattern often called **variant axes** (discriminated variant props / cva-style recipes): each *orthogonal* visual concern is one **string-literal union prop**, not a pile of mutually exclusive booleans. That removes impossible states (for example `rectangle` and `rectangleRounded` both true) and keeps JSX self-explanatory.
+Prism UI follows the industry pattern often called **variant axes** (discriminated variant props / cva-style recipes): each _orthogonal_ visual concern is one **string-literal union prop**, not a pile of mutually exclusive booleans. That removes impossible states (for example `rectangle` and `rectangleRounded` both true) and keeps JSX self-explanatory.
 
 ### Why (short audit)
 
@@ -722,23 +724,23 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 ### Migration cheatsheet
 
-| Old | New |
-| --- | --- |
-| `tone="muted"` (Typography) | `color={{ semanticText: "muted" }}` |
-| `tone="foreground"` | `color={{ semanticText: "foreground" }}` |
-| `tone="inherit"` | omit **`color`** or `color={{ semanticText: "inherit" }}` |
-| `color` (on Typography) | **`color={{ … }}`** as **`PartialPrismColorSpec`** (not `ColorName`) |
-| `colorVariant`, kebab paint literals | `paint` (camelCase union) |
-| `lineNo` / `lineBottom` booleans | `line="none"` \| `"bottom"` \| `"full"` |
-| `gapNo` | `gap="none"` |
-| `rectangle` / `rectangleRounded` | `shape="rectangle"` \| `"rectangleRounded"` |
-| `typeUppercase` / `typeLowercase` | `textCase="uppercase"` \| `"lowercase"` |
-| `noGrow`, `noMotion`, … | `disableGrow`, `disableMotion`, … |
-| `asSpan` | `asChild` |
-| `size="normal"`, `large2x` | `size="medium"`, `size="huge"` |
-| `PrismIcon` `weight="medium"` | `weight="regular"` or numeric |
-| `explicitModeSegmentList` | `mode="explicit"` + `segments` |
-| `PrismColorPicker` `isDisabled` | `disabled` |
+| Old                                  | New                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `tone="muted"` (Typography)          | `color={{ semanticText: "muted" }}`                                  |
+| `tone="foreground"`                  | `color={{ semanticText: "foreground" }}`                             |
+| `tone="inherit"`                     | omit **`color`** or `color={{ semanticText: "inherit" }}`            |
+| `color` (on Typography)              | **`color={{ … }}`** as **`PartialPrismColorSpec`** (not `ColorName`) |
+| `colorVariant`, kebab paint literals | `paint` (camelCase union)                                            |
+| `lineNo` / `lineBottom` booleans     | `line="none"` \| `"bottom"` \| `"full"`                              |
+| `gapNo`                              | `gap="none"`                                                         |
+| `rectangle` / `rectangleRounded`     | `shape="rectangle"` \| `"rectangleRounded"`                          |
+| `typeUppercase` / `typeLowercase`    | `textCase="uppercase"` \| `"lowercase"`                              |
+| `noGrow`, `noMotion`, …              | `disableGrow`, `disableMotion`, …                                    |
+| `asSpan`                             | `asChild`                                                            |
+| `size="normal"`, `large2x`           | `size="medium"`, `size="huge"`                                       |
+| `PrismIcon` `weight="medium"`        | `weight="regular"` or numeric                                        |
+| `explicitModeSegmentList`            | `mode="explicit"` + `segments`                                       |
+| `PrismColorPicker` `isDisabled`      | `disabled`                                                           |
 
 ### New component checklist
 
@@ -754,11 +756,11 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 Prism UI and the admin demos use a **single canonical form** for option names so you only maintain one spelling. For the rationale and rules that govern new props, read **[Prop Ergonomics & Variant Axes](#prop-ergonomics--variant-axes)** above.
 
-| Where                                 | Form                | Notes                                                                                                            |
-| ------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Code** (keys, state, props)         | **camelCase**       | `gap="none"`, `disableGrow`, `paint="monochrome"`. This is the source of truth.                               |
-| **Display labels** (button demo toggles) | **bare tokens**    | Same pattern as PrismIcon demo (see `packages/admin/source/prism-icon.tsx`).                                              |
-| **DOM data attributes**               | **data-kebab-case** | PrismButton exposes semantic values (e.g. `data-gap="none"`, `data-line="bottom"`) via `camelToKebab`.        |
+| Where                                    | Form                | Notes                                                                                                  |
+| ---------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Code** (keys, state, props)            | **camelCase**       | `gap="none"`, `disableGrow`, `paint="monochrome"`. This is the source of truth.                        |
+| **Display labels** (button demo toggles) | **bare tokens**     | Same pattern as PrismIcon demo (see `packages/admin/source/prism-icon.tsx`).                           |
+| **DOM data attributes**                  | **data-kebab-case** | PrismButton exposes semantic values (e.g. `data-gap="none"`, `data-line="bottom"`) via `camelToKebab`. |
 
 **Rules:**
 
@@ -777,4 +779,3 @@ This keeps one list of option names (camelCase) and avoids drift between labels,
 5. **Consistent styling** - Use Tailwind utilities and theme variables
 6. **Type safety** - All components are fully typed with TypeScript
 7. **Never hardcode package paths** - Apps should work identically in monorepo and standalone contexts
-

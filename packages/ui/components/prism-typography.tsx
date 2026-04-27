@@ -30,6 +30,9 @@ import {
   prismColorSpecToTypographyPaint,
   type PartialPrismColorSpec,
 } from "../styles/prism-color";
+import { prismTypographySentenceCaseFromIdentifier } from "./prism-typography-sentence-case";
+
+export { prismTypographySentenceCaseFromIdentifier };
 
 gsap.registerPlugin(SplitText);
 
@@ -54,6 +57,9 @@ export type PrismTypographyRole = (typeof PRISM_TYPOGRAPHY_ROLES)[number];
 export type PrismTypographySize = PrismSize;
 
 export type PrismTypographyFont = "sans" | "serif" | "mono";
+
+/** Named weight steps for {@link PrismTypographyProps.fontWeight} (maps to CSS numeric weight). */
+export type PrismTypographyFontWeightPreset = "thin" | "bold" | "black";
 
 export type PrismTypographyAnimationZone =
   | "whole"
@@ -131,7 +137,7 @@ type CapsAccentStyle = Pick<CSSProperties, "letterSpacing" | "fontWeight">;
  */
 function defaultCapsAccentStyle(
   role: PrismTypographyRole,
-  size: PrismTypographySize,
+  size: PrismTypographySize
 ): CapsAccentStyle | undefined {
   if (role !== "overline") return undefined;
   return {
@@ -230,12 +236,28 @@ function zoneMarkerClass(
   return "animationWhole";
 }
 
-function kindMarkerClass(kind: ResolvedAnimationKind | null): string | undefined {
+function kindMarkerClass(
+  kind: ResolvedAnimationKind | null
+): string | undefined {
   if (!kind) return undefined;
   return kind === "moveIn" ? "animationMoveIn" : "animationFadeIn";
 }
 
-function yForZone(zone: ResolvedAnimationZone, kind: ResolvedAnimationKind): number {
+function resolveTypographyFontWeight(
+  w: PrismTypographyFontWeightPreset | number | undefined
+): number | undefined {
+  if (w === undefined) return undefined;
+  if (typeof w === "number") return w;
+  if (w === "thin") return 200;
+  if (w === "bold") return 700;
+  if (w === "black") return 900;
+  return undefined;
+}
+
+function yForZone(
+  zone: ResolvedAnimationZone,
+  kind: ResolvedAnimationKind
+): number {
   if (kind === "fadeIn") return 0;
   switch (zone) {
     case "whole":
@@ -261,6 +283,21 @@ export type PrismTypographyProps = {
   color?: PartialPrismColorSpec;
   font?: PrismTypographyFont;
   fontFamily?: string;
+  /** Overrides the role’s default weight from the type scale (and overline caps accent when set). */
+  fontWeight?: PrismTypographyFontWeightPreset | number;
+  italic?: boolean;
+  /**
+   * **`uppercase` \| `lowercase` \| `capitalize`** — same strings as CSS `text-transform`.
+   * **`sentenceCase`** — not a CSS value: for **plain string / number `children`**, transforms the
+   * text with {@link prismTypographySentenceCaseFromIdentifier} (camelCase → sentence case); pair
+   * with **`role="overline"`** for ALL CAPS section titles from identifiers like `textAlign`.
+   */
+  textTransform?: "uppercase" | "lowercase" | "capitalize" | "sentenceCase";
+  textAlign?: "left" | "center" | "right" | "justify";
+  /**
+   * CSS `text-wrap`. When omitted, defaults to **`balance`** (historical PrismTypography behavior).
+   */
+  textWrap?: CSSProperties["textWrap"];
   animationZone?: PrismTypographyAnimationZone;
   animationKind?: PrismTypographyAnimationKind;
   as?: ElementType;
@@ -275,6 +312,11 @@ export function PrismTypography({
   color: colorSpec,
   font = "sans",
   fontFamily,
+  fontWeight: fontWeightProp,
+  italic,
+  textTransform: textTransformProp,
+  textAlign: textAlignProp,
+  textWrap: textWrapProp,
   as,
   className,
   style,
@@ -286,9 +328,14 @@ export function PrismTypography({
   const size = sizeProp ?? "medium";
   const Comp = (as ?? DEFAULT_ELEMENT[role][size]) as ElementType;
 
+  const displayChildren =
+    textTransformProp === "sentenceCase" && isPlainText(children)
+      ? prismTypographySentenceCaseFromIdentifier(String(children))
+      : children;
+
   const paint = useMemo(
     () => prismColorSpecToTypographyPaint(colorSpec),
-    [colorSpec],
+    [colorSpec]
   );
   const needsGradientTextWrapper = paint.gradientClipStyle !== undefined;
   const hasSolidTypographyPaint =
@@ -296,7 +343,7 @@ export function PrismTypography({
 
   const animationZoneBase = resolveAnimationZone(
     animationZoneProp,
-    children
+    displayChildren
   );
   const animationZoneResolved = needsGradientTextWrapper
     ? null
@@ -320,7 +367,7 @@ export function PrismTypography({
 
   useEffect(() => {
     playedRef.current = false;
-  }, [animationZoneResolved, animationKindResolved, children]);
+  }, [animationZoneResolved, animationKindResolved, displayChildren]);
 
   useLayoutEffect(() => {
     ctxRef.current?.revert();
@@ -351,7 +398,7 @@ export function PrismTypography({
       };
     }
 
-    if (!isPlainText(children)) return;
+    if (!isPlainText(displayChildren)) return;
 
     const splitType = splitTextTypeForZone(animationZoneResolved);
     if (!splitType) return;
@@ -376,7 +423,8 @@ export function PrismTypography({
 
     const targets = targetsForSplit(animationZoneResolved, split);
     ctxRef.current = gsap.context(() => {
-      if (targets.length) gsap.set(targets, y ? { opacity: 0, y } : { opacity: 0 });
+      if (targets.length)
+        gsap.set(targets, y ? { opacity: 0, y } : { opacity: 0 });
     }, el);
 
     return () => {
@@ -385,7 +433,12 @@ export function PrismTypography({
       splitRef.current?.revert();
       splitRef.current = null;
     };
-  }, [animationActive, animationZoneResolved, animationKindResolved, children]);
+  }, [
+    animationActive,
+    animationZoneResolved,
+    animationKindResolved,
+    displayChildren,
+  ]);
 
   useEffect(() => {
     if (!animationActive || !animationZoneResolved || !animationKindResolved)
@@ -417,16 +470,12 @@ export function PrismTypography({
           const y = yForZone(animationZoneResolved, animationKindResolved);
 
           if (animationZoneResolved === "whole") {
-            gsap.fromTo(
-              el,
-              y ? { opacity: 0, y } : { opacity: 0 },
-              {
-                opacity: 1,
-                ...(y ? { y: 0 } : {}),
-                duration: DURATION_WHOLE,
-                ease: EASE_OUT,
-              }
-            );
+            gsap.fromTo(el, y ? { opacity: 0, y } : { opacity: 0 }, {
+              opacity: 1,
+              ...(y ? { y: 0 } : {}),
+              duration: DURATION_WHOLE,
+              ease: EASE_OUT,
+            });
             return;
           }
 
@@ -449,17 +498,13 @@ export function PrismTypography({
                 ? DURATION_WORD
                 : DURATION_CHAR;
 
-          gsap.fromTo(
-            targets,
-            y ? { opacity: 0, y } : { opacity: 0 },
-            {
-              opacity: 1,
-              ...(y ? { y: 0 } : {}),
-              duration,
-              stagger,
-              ease: EASE_OUT,
-            }
-          );
+          gsap.fromTo(targets, y ? { opacity: 0, y } : { opacity: 0 }, {
+            opacity: 1,
+            ...(y ? { y: 0 } : {}),
+            duration,
+            stagger,
+            ease: EASE_OUT,
+          });
         }, el);
       },
       { threshold: IO_THRESHOLD, rootMargin: IO_ROOT_MARGIN }
@@ -471,7 +516,12 @@ export function PrismTypography({
       ctxRef.current?.revert();
       ctxRef.current = null;
     };
-  }, [animationActive, animationZoneResolved, animationKindResolved, children]);
+  }, [
+    animationActive,
+    animationZoneResolved,
+    animationKindResolved,
+    displayChildren,
+  ]);
 
   const fontClass =
     fontFamily !== undefined && fontFamily !== ""
@@ -482,31 +532,48 @@ export function PrismTypography({
           ? "font-mono"
           : undefined;
 
-  const balanceWrap = { textWrap: "balance" } as CSSProperties;
   const capsAccent = defaultCapsAccentStyle(role, size);
+  const resolvedFontWeight = resolveTypographyFontWeight(fontWeightProp);
+  const explicitAxisStyle: CSSProperties = {
+    ...(textWrapProp !== undefined
+      ? { textWrap: textWrapProp }
+      : ({ textWrap: "balance" } as CSSProperties)),
+    ...(resolvedFontWeight !== undefined
+      ? { fontWeight: resolvedFontWeight }
+      : {}),
+    ...(italic === true ? { fontStyle: "italic" as const } : {}),
+    ...(textTransformProp !== undefined && textTransformProp !== "sentenceCase"
+      ? { textTransform: textTransformProp }
+      : {}),
+    ...(textAlignProp !== undefined ? { textAlign: textAlignProp } : {}),
+  };
   const solidFromPaint = hasSolidTypographyPaint ? paint.solidStyle : undefined;
   const mergedStyle =
     fontFamily !== undefined && fontFamily !== ""
       ? {
-          ...balanceWrap,
           ...(capsAccent ?? {}),
+          ...explicitAxisStyle,
           ...solidFromPaint,
           ...style,
           fontFamily,
+          ...(needsGradientTextWrapper ? { overflow: "visible" as const } : {}),
         }
       : {
-          ...balanceWrap,
           ...(capsAccent ?? {}),
+          ...explicitAxisStyle,
           ...solidFromPaint,
           ...style,
+          ...(needsGradientTextWrapper ? { overflow: "visible" as const } : {}),
         };
 
   const typographyClass = `typography-${role}-${size}`;
 
   const body = needsGradientTextWrapper ? (
-    <span style={paint.gradientClipStyle as CSSProperties}>{children}</span>
+    <span style={paint.gradientClipStyle as CSSProperties}>
+      {displayChildren}
+    </span>
   ) : (
-    children
+    displayChildren
   );
 
   return (

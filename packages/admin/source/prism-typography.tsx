@@ -12,13 +12,13 @@ const geistMono = Geist_Mono({
 export function PrismTypographyDemo(): JSX.Element {
   return (
     <>
-      <FontWeightPreview
+      <TypeScalePreview
         satoshiVariableClass={satoshi.variable}
         sentientVariableClass={sentient.variable}
         zodiakVariableClass={zodiak.variable}
         geistMonoVariableClass={geistMono.variable}
       />
-      <TypeScalePreview
+      <FontWeightPreview
         satoshiVariableClass={satoshi.variable}
         sentientVariableClass={sentient.variable}
         zodiakVariableClass={zodiak.variable}

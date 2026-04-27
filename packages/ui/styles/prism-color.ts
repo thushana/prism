@@ -88,6 +88,8 @@ export type PrismColorSemanticText =
   | "inherit"
   | "foreground"
   | "muted"
+  /** Light: `text-black`; dark: `text-white` — absolute monochrome, not theme foreground. */
+  | "monochrome"
   | "primary"
   | "primaryForeground"
   | "secondaryForeground"
@@ -193,7 +195,7 @@ function loopFor(palette: PrismPaletteId): readonly PrismSwatchKey[] {
 function cssVarForFamilyShade(
   palette: PrismPaletteId,
   family: PrismSwatchKey,
-  shade: number,
+  shade: number
 ): string {
   const p = resolvePaletteId(palette);
   if (p === "default") {
@@ -203,7 +205,10 @@ function cssVarForFamilyShade(
 }
 
 /** `slug` is `family-shade` (e.g. `grey-600`, `blue-grey-500`). */
-function cssVarForSlug(palette: PrismPaletteId, familyShadeSlug: string): string {
+function cssVarForSlug(
+  palette: PrismPaletteId,
+  familyShadeSlug: string
+): string {
   const p = resolvePaletteId(palette);
   if (p === "default") {
     return `var(--color-${familyShadeSlug})`;
@@ -253,7 +258,7 @@ function pairSlug(
   palette: PrismPaletteId,
   lightSlug: string,
   darkSlug: string,
-  resolvedSyntaxColors: boolean,
+  resolvedSyntaxColors: boolean
 ): TokenStyle {
   if (resolvedSyntaxColors) {
     const a = parseFamilyNumericShadeSlug(lightSlug);
@@ -287,7 +292,7 @@ function neutralRampFamily(palette: PrismPaletteId): PrismSwatchKey {
 /** Comment tokens: Material uses blue-grey; Tailwind uses slate (no blue-grey family). */
 function syntaxCommentPair(
   palette: PrismPaletteId,
-  resolvedSyntaxColors: boolean,
+  resolvedSyntaxColors: boolean
 ): TokenStyle {
   if (palette === "tailwind") {
     return pairSlug(palette, "slate-500", "slate-400", resolvedSyntaxColors);
@@ -296,14 +301,14 @@ function syntaxCommentPair(
     palette,
     "blue-grey-500",
     "blue-grey-400",
-    resolvedSyntaxColors,
+    resolvedSyntaxColors
   );
 }
 
 /** Punctuation: grey-600 ramp vs zinc for tailwind. */
 function syntaxPunctPair(
   palette: PrismPaletteId,
-  resolvedSyntaxColors: boolean,
+  resolvedSyntaxColors: boolean
 ): TokenStyle {
   if (palette === "tailwind") {
     return pairSlug(palette, "zinc-600", "zinc-400", resolvedSyntaxColors);
@@ -316,7 +321,7 @@ function pairFamilyShades(
   family: PrismSwatchKey,
   lightShade: number,
   darkShade: number,
-  resolvedSyntaxColors: boolean,
+  resolvedSyntaxColors: boolean
 ): TokenStyle {
   if (resolvedSyntaxColors) {
     return {
@@ -337,7 +342,7 @@ function veilHalfWhite(base: string): string {
 
 function normalizeSwatch(
   palette: PrismPaletteId,
-  raw: string | undefined,
+  raw: string | undefined
 ): PrismSwatchKey {
   let s = (raw ?? "blue")
     .trim()
@@ -354,7 +359,7 @@ function normalizeSwatch(
 function ringFamilyAtOffset(
   palette: PrismPaletteId,
   primary: PrismSwatchKey,
-  offset: number,
+  offset: number
 ): PrismSwatchKey {
   const ring = loopFor(palette);
   const i = ring.indexOf(primary);
@@ -377,10 +382,12 @@ export function maxPrismColorLoopRange(palette: PrismPaletteId): number {
 export const PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER = 2;
 
 /** Slider / UI ceiling for the picker: `min(ring max, {@link PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER})`. */
-export function maxPrismColorLoopRangeForPicker(palette: PrismPaletteId): number {
+export function maxPrismColorLoopRangeForPicker(
+  palette: PrismPaletteId
+): number {
   return Math.min(
     maxPrismColorLoopRange(palette),
-    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER,
+    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER
   );
 }
 
@@ -390,7 +397,7 @@ export function maxPrismColorLoopRangeForPicker(palette: PrismPaletteId): number
  */
 export function clampPrismColorLoopRange(
   palette: PrismPaletteId,
-  range: number | undefined,
+  range: number | undefined
 ): number {
   const maxR = maxPrismColorLoopRange(palette);
   const r = range ?? 2;
@@ -402,11 +409,11 @@ export function clampPrismColorLoopRange(
  */
 export function clampPrismColorLoopRangeForPicker(
   palette: PrismPaletteId,
-  range: number | undefined,
+  range: number | undefined
 ): number {
   return Math.min(
     clampPrismColorLoopRange(palette, range),
-    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER,
+    PRISM_COLOR_LOOP_RANGE_MAX_IN_PICKER
   );
 }
 
@@ -420,12 +427,12 @@ export type ResolvedCodeBlockColor = {
  * Resolves props relevant to PrismCodeBlock: palette, anchor family, colorLoop budget.
  */
 export function resolveCodeBlockColor(
-  spec: PartialPrismColorSpec | undefined,
+  spec: PartialPrismColorSpec | undefined
 ): ResolvedCodeBlockColor {
   const palette = resolvePaletteId(spec?.palette);
   const anchor = normalizeSwatch(
     palette,
-    spec?.swatchPrimary ?? spec?.colorLoop?.center,
+    spec?.swatchPrimary ?? spec?.colorLoop?.center
   );
   const range = clampPrismColorLoopRange(palette, spec?.colorLoop?.range);
   return { palette, primary: anchor, colorLoopRange: range };
@@ -434,13 +441,12 @@ export function resolveCodeBlockColor(
 function buildSyntaxTokenMap(
   palette: PrismPaletteId,
   primary: PrismSwatchKey,
-  range: number,
+  range: number
 ): SyntaxPaletteMap {
   /** Tailwind `--color-tailwind-*` theme keys are often omitted from CSS when unused; use literal oklch/hex. */
   const resolvedSyntaxColors = palette === "tailwind";
 
-  const oneUp =
-    range >= 1 ? ringFamilyAtOffset(palette, primary, 1) : primary;
+  const oneUp = range >= 1 ? ringFamilyAtOffset(palette, primary, 1) : primary;
   const oneDown =
     range >= 1 ? ringFamilyAtOffset(palette, primary, -1) : primary;
   const twoDown =
@@ -465,7 +471,13 @@ function buildSyntaxTokenMap(
     string: pairFamilyShades(palette, oneUp, 800, 300, resolvedSyntaxColors),
     comment: syntaxCommentPair(palette, resolvedSyntaxColors),
     tag: pairFamilyShades(palette, primary, 700, 400, resolvedSyntaxColors),
-    property: pairFamilyShades(palette, oneDown, 700, 400, resolvedSyntaxColors),
+    property: pairFamilyShades(
+      palette,
+      oneDown,
+      700,
+      400,
+      resolvedSyntaxColors
+    ),
     number: pairFamilyShades(palette, twoDown, 900, 200, resolvedSyntaxColors),
     punct: syntaxPunctPair(palette, resolvedSyntaxColors),
     brace: pairFamilyShades(palette, primary, 900, 300, resolvedSyntaxColors),
@@ -475,7 +487,7 @@ function buildSyntaxTokenMap(
 function panelFillFor(
   palette: PrismPaletteId,
   syntaxFamily: PrismSwatchKey,
-  panelMode: "card" | "transparent",
+  panelMode: "card" | "transparent"
 ): { light: string; dark: string } {
   if (panelMode === "transparent") {
     return { light: "transparent", dark: "transparent" };
@@ -498,8 +510,16 @@ function panelFillFor(
     };
   }
   if (resolvedSyntaxColors) {
-    const lightBase = PrismColor.hex({ palette, family: syntaxFamily, shade: 50 });
-    const darkBase = PrismColor.hex({ palette, family: syntaxFamily, shade: 900 });
+    const lightBase = PrismColor.hex({
+      palette,
+      family: syntaxFamily,
+      shade: 50,
+    });
+    const darkBase = PrismColor.hex({
+      palette,
+      family: syntaxFamily,
+      shade: 900,
+    });
     return {
       light: veilHalfWhite(lightBase),
       dark: darkBase,
@@ -513,11 +533,11 @@ function panelFillFor(
 
 function darkTokenRulesForInstance(
   instanceId: string,
-  map: SyntaxPaletteMap,
+  map: SyntaxPaletteMap
 ): string {
   return TOKEN_KINDS_NO_PLAIN.map(
     (k) =>
-      `.dark [data-slot="code-block"][data-prism-cb="${instanceId}"] [data-tk="${k}"] { color: ${map[k].dark} !important; }`,
+      `.dark [data-slot="code-block"][data-prism-cb="${instanceId}"] [data-tk="${k}"] { color: ${map[k].dark} !important; }`
   ).join("\n");
 }
 
@@ -536,13 +556,13 @@ function kebabToColorName(kebab: PrismSwatchKey): ColorName | null {
 
 /** Default palette only: maps kebab-case family (`deep-purple`) to generated {@link ColorName}. */
 export function prismDefaultFamilyKebabToColorName(
-  kebab: PrismSwatchKey,
+  kebab: PrismSwatchKey
 ): ColorName | null {
   return kebabToColorName(kebab);
 }
 
 function gradientDirectionCss(
-  direction: "horizontal" | "vertical" | "angled",
+  direction: "horizontal" | "vertical" | "angled"
 ): string {
   if (direction === "horizontal") return "to right";
   if (direction === "vertical") return "to bottom";
@@ -564,7 +584,7 @@ export type NormalizedPrismColorSpec = {
 };
 
 export function normalizePrismColorSpec(
-  partial: PartialPrismColorSpec | undefined,
+  partial: PartialPrismColorSpec | undefined
 ): NormalizedPrismColorSpec {
   const palette = resolvePaletteId(partial?.palette);
   const shade: PrismDefaultPaletteShadeKey =
@@ -595,7 +615,9 @@ export function normalizePrismColorSpec(
 
 // ─── WCAG luminance (shared: PrismColor.relativeLuminanceFromHex + CSS string approx.) ─
 
-function parseHex6RgbChannels(hexInput: string): { r: number; g: number; b: number } | null {
+function parseHex6RgbChannels(
+  hexInput: string
+): { r: number; g: number; b: number } | null {
   const n = hexInput.trim().toLowerCase();
   const withHash = n.startsWith("#") ? n : `#${n}`;
   const compact = withHash.slice(1);
@@ -616,14 +638,16 @@ function parseHex6RgbChannels(hexInput: string): { r: number; g: number; b: numb
   return null;
 }
 
-function wcagRelativeLuminanceSrgb(rgb: { r: number; g: number; b: number }): number {
+function wcagRelativeLuminanceSrgb(rgb: {
+  r: number;
+  g: number;
+  b: number;
+}): number {
   const lin = (c: number) => {
     const x = c / 255;
     return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
   };
-  return (
-    0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g) + 0.0722 * lin(rgb.b)
-  );
+  return 0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g) + 0.0722 * lin(rgb.b);
 }
 
 // ─── PrismColor namespace ────────────────────────────────────────────────────
@@ -633,13 +657,16 @@ export const PrismColor = {
     families(palette: PrismPaletteId = "default"): readonly PrismSwatchKey[] {
       return loopFor(palette);
     },
-    normalize(palette: PrismPaletteId, raw: string | undefined): PrismSwatchKey {
+    normalize(
+      palette: PrismPaletteId,
+      raw: string | undefined
+    ): PrismSwatchKey {
       return normalizeSwatch(resolvePaletteId(palette), raw);
     },
     step(
       palette: PrismPaletteId,
       from: PrismSwatchKey,
-      offset: number,
+      offset: number
     ): PrismSwatchKey {
       return ringFamilyAtOffset(resolvePaletteId(palette), from, offset);
     },
@@ -679,7 +706,10 @@ export const PrismColor = {
     const palette = resolvePaletteId(opts.palette);
     if (palette === "tailwind") {
       if (typeof opts.shade !== "number") {
-        warnPrismHexFallback("tailwind palette requires numeric shade", opts.shade);
+        warnPrismHexFallback(
+          "tailwind palette requires numeric shade",
+          opts.shade
+        );
         return PRISM_HEX_FALLBACK;
       }
       const fam = opts.family as TailwindPaletteFamily;
@@ -742,23 +772,25 @@ export const PrismColor = {
       return buildSyntaxTokenMap(r.palette, r.primary, r.colorLoopRange);
     },
     /** Use with a {@link ResolvedCodeBlockColor} from {@link resolveCodeBlockColor} for stable memo deps. */
-    tokenStylesFromResolved(resolved: ResolvedCodeBlockColor): SyntaxPaletteMap {
+    tokenStylesFromResolved(
+      resolved: ResolvedCodeBlockColor
+    ): SyntaxPaletteMap {
       return buildSyntaxTokenMap(
         resolved.palette,
         resolved.primary,
-        resolved.colorLoopRange,
+        resolved.colorLoopRange
       );
     },
     panelFill(
       spec: PartialPrismColorSpec | undefined,
-      mode: "card" | "transparent",
+      mode: "card" | "transparent"
     ): { light: string; dark: string } {
       const r = resolveCodeBlockColor(spec);
       return panelFillFor(r.palette, r.primary, mode);
     },
     panelFillFromResolved(
       resolved: ResolvedCodeBlockColor,
-      mode: "card" | "transparent",
+      mode: "card" | "transparent"
     ): { light: string; dark: string } {
       return panelFillFor(resolved.palette, resolved.primary, mode);
     },
@@ -826,11 +858,12 @@ export const PrismColor = {
  * Resolved CSS `<color>` for a partial Prism spec (picker + surfaces): `palette` +
  * `swatchPrimary` + `shade` via {@link PrismColor.hex}.
  */
-export function prismColorSpecToHex(spec: PartialPrismColorSpec | undefined): string {
+export function prismColorSpecToHex(
+  spec: PartialPrismColorSpec | undefined
+): string {
   const n = normalizePrismColorSpec(spec);
   const palette = n.palette;
-  const family =
-    n.swatchPrimary ?? PrismColor.Loop.normalize(palette, "blue");
+  const family = n.swatchPrimary ?? PrismColor.Loop.normalize(palette, "blue");
   const shadePart: PrismDefaultPaletteShadeKey =
     spec?.shade !== undefined && spec?.shade !== null ? spec.shade : n.shade;
   return PrismColor.hex({
@@ -847,14 +880,14 @@ export function prismColorSpecToHex(spec: PartialPrismColorSpec | undefined): st
  */
 function shadeForIconGradientStops(
   gradientShade: number | { light: number; dark: number } | undefined,
-  normalizedShade: PrismDefaultPaletteShadeKey,
+  normalizedShade: PrismDefaultPaletteShadeKey
 ): number | { light: number; dark: number } {
   if (gradientShade !== undefined) return gradientShade;
   return typeof normalizedShade === "number" ? normalizedShade : 500;
 }
 
 export function prismColorSpecToIconGlyphPaint(
-  spec: PartialPrismColorSpec | undefined,
+  spec: PartialPrismColorSpec | undefined
 ): { solid: string } | { gradient: string } | undefined {
   if (!spec || Object.keys(spec).length === 0) return undefined;
   const g = spec.gradient;
@@ -862,7 +895,7 @@ export function prismColorSpecToIconGlyphPaint(
     const n = normalizePrismColorSpec(spec);
     const palette = n.palette;
     const normalizedSwatches = g.swatches.map((s) =>
-      PrismColor.Loop.normalize(palette, s),
+      PrismColor.Loop.normalize(palette, s)
     );
     const shadeForStops = shadeForIconGradientStops(g.shade, n.shade);
     const { light } = PrismColor.gradient.linearStrings({
@@ -885,6 +918,7 @@ const PRISM_COLOR_SEMANTIC_TEXT_TO_CLASS: Partial<
 > = {
   foreground: "text-foreground",
   muted: "text-muted-foreground",
+  monochrome: "text-black dark:text-white",
   primary: "text-primary",
   primaryForeground: "text-primary-foreground",
   secondaryForeground: "text-secondary-foreground",
@@ -907,8 +941,16 @@ export type PrismTypographyPaint = {
   gradientClipStyle?: Record<string, string | number>;
 };
 
+/** Optical inset for `background-clip: text` (descenders, italic side-bearing). Tune with visual QA. */
+const PRISM_TYPOGRAPHY_GRADIENT_CLIP_PADDING_EM = {
+  top: "0.08em",
+  bottom: "0.22em",
+  left: "0.07em",
+  right: "0.06em",
+} as const;
+
 export function prismColorSpecToTypographyPaint(
-  spec: PartialPrismColorSpec | undefined,
+  spec: PartialPrismColorSpec | undefined
 ): PrismTypographyPaint {
   if (spec === undefined || spec === null || Object.keys(spec).length === 0) {
     return {};
@@ -931,6 +973,14 @@ export function prismColorSpecToTypographyPaint(
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
         WebkitTextFillColor: "transparent",
+        /** Avoid clipping glyph overflow (descenders, italic side-bearings) with clip-text. */
+        overflow: "visible",
+        paddingTop: PRISM_TYPOGRAPHY_GRADIENT_CLIP_PADDING_EM.top,
+        paddingBottom: PRISM_TYPOGRAPHY_GRADIENT_CLIP_PADDING_EM.bottom,
+        paddingLeft: PRISM_TYPOGRAPHY_GRADIENT_CLIP_PADDING_EM.left,
+        paddingRight: PRISM_TYPOGRAPHY_GRADIENT_CLIP_PADDING_EM.right,
+        WebkitBoxDecorationBreak: "clone",
+        boxDecorationBreak: "clone",
       },
     };
   }
