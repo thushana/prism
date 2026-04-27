@@ -144,7 +144,19 @@ export function AdminPageShell({
               ) : null}
               {title && (
                 <div className="space-y-1">
-                  <PrismTypography role="headline" size="large" as="h1">
+                  <PrismTypography
+                    role="display"
+                    size="small"
+                    color={{
+                      gradient: {
+                        swatches: ["deep-purple", "light-blue"],
+                        direction: "angled",
+                        shade: 700,
+                      },
+                    }}
+                    fontWeight="black"
+                    textWrap="wrap"
+                  >
                     {title}
                   </PrismTypography>
                   {description && (
