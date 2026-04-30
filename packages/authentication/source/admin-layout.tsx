@@ -49,9 +49,15 @@ export type { PrismPathBarIcon, PrismPathBarSegment };
 export type AdminPageShellProps = {
   children: React.ReactNode;
   /**
-   * Page title shown as `<h1>`; also used as the path bar leaf when `prismPathBarTitleByPathPrefix` is set.
+   * Page title string; used as the path bar leaf when `prismPathBarTitleByPathPrefix` is set.
+   * When `titleSlot` is set, this is still used for the path bar (and metadata) while `titleSlot` replaces the gradient heading.
    */
   title?: string;
+  /**
+   * Optional client heading (e.g. live-updating title). When set, replaces the default gradient
+   * {@link PrismTypography} block; keep passing `title` for the path bar leaf when using auto path bar.
+   */
+  titleSlot?: React.ReactNode;
   /** Muted description rendered below the title. */
   description?: string;
   /**
@@ -88,6 +94,7 @@ export type AdminPageShellProps = {
 export function AdminPageShell({
   children,
   title,
+  titleSlot,
   description,
   explicitPrismPathBarSegments,
   prismPathBarTitleByPathPrefix,
@@ -110,6 +117,7 @@ export function AdminPageShell({
     showPathBarAuto ||
     backHref ||
     title ||
+    titleSlot ||
     showSignOut;
   const showBackLink =
     Boolean(backHref) && !showPathBarExplicit && !showPathBarAuto;
@@ -142,30 +150,32 @@ export function AdminPageShell({
               {showBackLink ? (
                 <AdminBackLink href={backHref!} label={backLabel} />
               ) : null}
-              {title && (
+              {(titleSlot ?? title) ? (
                 <div className="space-y-1">
-                  <PrismTypography
-                    role="display"
-                    size="small"
-                    color={{
-                      gradient: {
-                        swatches: ["deep-purple", "light-blue"],
-                        direction: "angled",
-                        shade: 700,
-                      },
-                    }}
-                    fontWeight="black"
-                    textWrap="wrap"
-                  >
-                    {title}
-                  </PrismTypography>
-                  {description && (
+                  {titleSlot ?? (
+                    <PrismTypography
+                      role="display"
+                      size="small"
+                      color={{
+                        gradient: {
+                          swatches: ["deep-purple", "light-blue"],
+                          direction: "angled",
+                          shade: 700,
+                        },
+                      }}
+                      fontWeight="black"
+                      textWrap="wrap"
+                    >
+                      {title}
+                    </PrismTypography>
+                  )}
+                  {description ? (
                     <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
                       {description}
                     </PrismTypography>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
             </div>
             {showSignOut && (
               <div className="shrink-0">
