@@ -6,6 +6,8 @@ This document is the **mental model** for the Prism monorepo: **what** lives whe
 
 **Versions, ranges, and scripts** live in the repo root **`package.json`** (`packageManager`, `engines`, `dependencies`, `devDependencies`, `scripts`). The list below is the **high-level stack** (names and concepts) so you can see what Prism is built on without copying numbers that drift.
 
+When Prism is embedded as a **git submodule** inside another app (e.g. TimeTraveler), run **`pnpm install` from the host app root** so React, Nivo, and other peers resolve once. A separate `pnpm install` only inside `prism/` can create a second `node_modules` tree and duplicate package types during TypeScript checks.
+
 - **Framework**: Next.js (App Router)
 - **Language**: TypeScript
 - **UI**: React
