@@ -24,7 +24,10 @@ function PrismLayoutMain({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function PrismGraphicsMain({ className, ...props }: React.ComponentProps<"div">) {
+function PrismGraphicsMain({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="graphics-main"
@@ -47,7 +50,10 @@ function PrismGraphicsLarge({
   );
 }
 
-function PrismGraphicsFull({ className, ...props }: React.ComponentProps<"div">) {
+function PrismGraphicsFull({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="graphics-full"

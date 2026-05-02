@@ -28,10 +28,9 @@ export function readApplicationSettingsFromDirectory(
   try {
     parsed = JSON.parse(raw) as unknown;
   } catch (cause) {
-    throw new Error(
-      `application-settings: ${filePath} is not valid JSON.`,
-      { cause }
-    );
+    throw new Error(`application-settings: ${filePath} is not valid JSON.`, {
+      cause,
+    });
   }
   const result = applicationSettingsSchema.safeParse(parsed);
   if (!result.success) {

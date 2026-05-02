@@ -96,9 +96,15 @@
   },
   "pnpm": {
     "overrides": {
-      "esbuild": "^0.27.2"
+      "esbuild": "^0.27.2",
+      "react": "19.2.5",
+      "react-dom": "19.2.5"
     },
-    "onlyBuiltDependencies": ["esbuild", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "exports": {
     "./ui": "./packages/ui/source/index.ts",

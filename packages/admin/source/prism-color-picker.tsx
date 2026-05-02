@@ -20,7 +20,9 @@ function randomPalette(): PrismPaletteId {
 
 function randomSwatchForPalette(palette: PrismPaletteId): PrismSwatchKey {
   const ring =
-    palette === "tailwind" ? PRISM_TAILWIND_COLOR_LOOP : PRISM_DEFAULT_COLOR_LOOP;
+    palette === "tailwind"
+      ? PRISM_TAILWIND_COLOR_LOOP
+      : PRISM_DEFAULT_COLOR_LOOP;
   return ring[Math.floor(Math.random() * ring.length)]!;
 }
 
@@ -30,7 +32,7 @@ function formatPickerSnippet(
     showColorCode: boolean;
     showCopyButton: boolean;
     disabled: boolean;
-  },
+  }
 ): string {
   const lines: string[] = ["<PrismColorPicker"];
   for (const line of prismColorPickerClipboardColorProp(spec).split("\n")) {
@@ -65,7 +67,7 @@ export function PrismColorPickerDemo(): JSX.Element {
         showCopyButton,
         disabled,
       }),
-    [color, showColorCode, showCopyButton, disabled],
+    [color, showColorCode, showCopyButton, disabled]
   );
 
   return (
@@ -88,7 +90,8 @@ export function PrismColorPickerDemo(): JSX.Element {
           Customize
         </PrismTypography>
         <p className="text-sm text-muted-foreground">
-          Toggle optional trigger chrome (<code className="font-mono text-foreground">showColorCode</code>,{" "}
+          Toggle optional trigger chrome (
+          <code className="font-mono text-foreground">showColorCode</code>,{" "}
           <code className="font-mono text-foreground">showCopyButton</code>) and{" "}
           <code className="font-mono text-foreground">disabled</code>.
         </p>
@@ -100,7 +103,12 @@ export function PrismColorPickerDemo(): JSX.Element {
               onChange={() => setShowColorCode((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               showColorCode
             </PrismTypography>
           </label>
@@ -111,7 +119,12 @@ export function PrismColorPickerDemo(): JSX.Element {
               onChange={() => setShowCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               showCopyButton
             </PrismTypography>
           </label>
@@ -122,7 +135,12 @@ export function PrismColorPickerDemo(): JSX.Element {
               onChange={() => setDisabled((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               disabled
             </PrismTypography>
           </label>

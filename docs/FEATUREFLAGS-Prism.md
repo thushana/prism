@@ -13,15 +13,15 @@ Feature flags are evaluated per request. One **context** is built per request (e
 
 ## Public API (Pointers)
 
-| Concern | Start here |
-|--------|------------|
-| Context type | [`types.ts`](../packages/feature-flags/source/types.ts) (`FeatureFlagContext`, configs) |
-| `identify` builder | [`identify.ts`](../packages/feature-flags/source/identify.ts) (`createIdentify`) |
-| Flag factory | [`flag.ts`](../packages/feature-flags/source/flag.ts) (`createFlag`) |
-| Next proxy | [`proxy.ts`](../packages/feature-flags/source/proxy.ts) (`getProxy` → sets `x-prism-flag-overrides`) |
-| Helpers | [`helpers.ts`](../packages/feature-flags/source/helpers.ts) (`parseFlagOption`, URL/env helpers) |
+| Concern               | Start here                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Context type          | [`types.ts`](../packages/feature-flags/source/types.ts) (`FeatureFlagContext`, configs)                             |
+| `identify` builder    | [`identify.ts`](../packages/feature-flags/source/identify.ts) (`createIdentify`)                                    |
+| Flag factory          | [`flag.ts`](../packages/feature-flags/source/flag.ts) (`createFlag`)                                                |
+| Next proxy            | [`proxy.ts`](../packages/feature-flags/source/proxy.ts) (`getProxy` → sets `x-prism-flag-overrides`)                |
+| Helpers               | [`helpers.ts`](../packages/feature-flags/source/helpers.ts) (`parseFlagOption`, URL/env helpers)                    |
 | Vercel Flags Explorer | [`discovery.ts`](../packages/feature-flags/source/discovery.ts) (`createFlagsDiscoveryEndpoint`, `getProviderData`) |
-| Barrel exports | [`index.ts`](../packages/feature-flags/source/index.ts) |
+| Barrel exports        | [`index.ts`](../packages/feature-flags/source/index.ts)                                                             |
 
 ## Standard Flag Factories
 

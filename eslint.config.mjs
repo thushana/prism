@@ -129,20 +129,19 @@ const eslintConfig = defineConfig([
         {
           selector:
             "JSXOpeningElement[name.name='PrismColorPicker'] JSXAttribute[name.name='isDisabled']",
-          message:
-            "PrismColorPicker uses `disabled`, not `isDisabled`.",
+          message: "PrismColorPicker uses `disabled`, not `isDisabled`.",
         },
         {
           selector:
             "JSXOpeningElement[name.name='PrismIcon'] JSXAttribute[name.name='weight'] Literal[value='medium']",
           message:
-            "`medium` is reserved for size on PrismIcon; use weight=\"regular\" or a numeric wght (100–700).",
+            '`medium` is reserved for size on PrismIcon; use weight="regular" or a numeric wght (100–700).',
         },
         {
           selector:
             "JSXOpeningElement[name.name='PrismButton'] JSXAttribute[name.name='size'] Literal[value='normal']",
           message:
-            "PrismButton size uses PrismSize; use size=\"medium\" instead of \"normal\".",
+            'PrismButton size uses PrismSize; use size="medium" instead of "normal".',
         },
       ],
     },

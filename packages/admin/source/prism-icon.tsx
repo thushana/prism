@@ -15,14 +15,7 @@ import type {
   PrismIconSizeName,
   PrismIconWeightName,
 } from "@ui";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
 import { createPortal } from "react-dom";
 import iconNames from "./material-icons-round-names.json";
@@ -44,21 +37,12 @@ type IconDemoAppearanceKey =
 
 const ICON_DEMO_EXCLUSIVE_KEY_GROUPS: IconDemoAppearanceKey[][] = [
   ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
-  [
-    "weightLight",
-    "weightThin",
-    "weightRegular",
-    "weightBold",
-    "weightHeavy",
-  ],
+  ["weightLight", "weightThin", "weightRegular", "weightBold", "weightHeavy"],
   ["fillFalse", "fillTrue"],
 ];
 
 /** Checkbox labels next to each option (matches string tokens in `PrismIcon` props). */
-const ICON_DEMO_DISPLAY_LABEL: Record<
-  IconDemoAppearanceKey,
-  string
-> = {
+const ICON_DEMO_DISPLAY_LABEL: Record<IconDemoAppearanceKey, string> = {
   sizeSmall: "small",
   sizeMedium: "medium",
   sizeLarge: "large",
@@ -103,7 +87,7 @@ function initialIconDemoSelection(): Set<IconDemoAppearanceKey> {
 }
 
 function resolveIconDemoProps(
-  selected: Set<IconDemoAppearanceKey>,
+  selected: Set<IconDemoAppearanceKey>
 ): Pick<PrismIconProps, "size" | "weight" | "fill"> {
   const size: PrismIconSizeName = selected.has("sizeGigantic")
     ? "gigantic"
@@ -154,7 +138,7 @@ function formatWeightAttributeForSnippet(
 function formatPrismIconSnippet(
   name: string,
   props: Pick<PrismIconProps, "size" | "weight" | "fill">,
-  color?: PartialPrismColorSpec,
+  color?: PartialPrismColorSpec
 ): string {
   const lines = [
     "<PrismIcon",
@@ -232,7 +216,8 @@ function buildIconNameSections(iconNameList: string[]): IconNameSection[] {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([categorySortKey, names]) => ({
       categorySortKey,
-      categorySectionHeading: categorySectionHeadingFromSortKey(categorySortKey),
+      categorySectionHeading:
+        categorySectionHeadingFromSortKey(categorySortKey),
       iconNameList: names,
     }));
 }
@@ -278,7 +263,7 @@ const IconCell = memo(function IconCell({
 export function PrismIconDemo(): JSX.Element {
   const names = iconNames as string[];
   const [selectedAppearanceKeys, setSelectedAppearanceKeys] = useState(
-    initialIconDemoSelection,
+    initialIconDemoSelection
   );
   const [exampleIconNames, setExampleIconNames] = useState<string[]>([
     "home",
@@ -288,9 +273,9 @@ export function PrismIconDemo(): JSX.Element {
   ]);
   const [addIconDraft, setAddIconDraft] = useState("");
   const [addComboboxFocused, setAddComboboxFocused] = useState(false);
-  const addComboboxBlurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const addComboboxBlurTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const [gridFilterQuery, setGridFilterQuery] = useState("");
   const [iconColor, setIconColor] = useState<PartialPrismColorSpec>({
     palette: "default",
@@ -302,7 +287,7 @@ export function PrismIconDemo(): JSX.Element {
     detail?: string;
   } | null>(null);
   const copyToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
+    null
   );
 
   const showTransientToast = useCallback((title: string, detail?: string) => {
@@ -330,19 +315,19 @@ export function PrismIconDemo(): JSX.Element {
         clearTimeout(addComboboxBlurTimeoutRef.current);
       }
     },
-    [],
+    []
   );
 
   const iconProps = useMemo(
     () => resolveIconDemoProps(selectedAppearanceKeys),
-    [selectedAppearanceKeys],
+    [selectedAppearanceKeys]
   );
 
   const sampleIconName = exampleIconNames[0] ?? "home";
 
   const currentSampleSnippet = useMemo(
     () => formatPrismIconSnippet(sampleIconName, iconProps, iconColor),
-    [sampleIconName, iconProps, iconColor],
+    [sampleIconName, iconProps, iconColor]
   );
 
   const filteredGridIconNames = useMemo(() => {
@@ -353,7 +338,7 @@ export function PrismIconDemo(): JSX.Element {
 
   const iconNameSections = useMemo(
     () => buildIconNameSections(filteredGridIconNames),
-    [filteredGridIconNames],
+    [filteredGridIconNames]
   );
 
   const addIconSuggestions = useMemo(() => {
@@ -384,20 +369,20 @@ export function PrismIconDemo(): JSX.Element {
     (match: string) => {
       if (!names.includes(match)) return;
       setExampleIconNames((prev) =>
-        prev.includes(match) ? prev : [...prev, match],
+        prev.includes(match) ? prev : [...prev, match]
       );
       setAddIconDraft("");
       setAddComboboxFocused(false);
       showTransientToast("Added to preview", match);
     },
-    [names, showTransientToast],
+    [names, showTransientToast]
   );
 
   const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
     setSelectedAppearanceKeys((previous) => {
       const next = new Set(previous);
       const exclusiveGroup = ICON_DEMO_EXCLUSIVE_KEY_GROUPS.find((g) =>
-        g.includes(key),
+        g.includes(key)
       );
       if (exclusiveGroup) {
         for (const k of exclusiveGroup) next.delete(k);
@@ -416,7 +401,7 @@ export function PrismIconDemo(): JSX.Element {
     if (!match) {
       showTransientToast(
         "No matching icon",
-        `No ligature name equals or contains "${raw}".`,
+        `No ligature name equals or contains "${raw}".`
       );
       return;
     }
@@ -428,7 +413,7 @@ export function PrismIconDemo(): JSX.Element {
       if (!snippet) return;
       showTransientToast("Copied to clipboard", snippet);
     },
-    [showTransientToast],
+    [showTransientToast]
   );
 
   const copyToastPortal =
@@ -497,7 +482,9 @@ export function PrismIconDemo(): JSX.Element {
                 type="text"
                 role="combobox"
                 aria-autocomplete="list"
-                aria-expanded={addComboboxFocused && addIconSuggestions.length > 0}
+                aria-expanded={
+                  addComboboxFocused && addIconSuggestions.length > 0
+                }
                 aria-controls="prism-icon-add-suggestions"
                 value={addIconDraft}
                 onChange={(e) => setAddIconDraft(e.target.value)}
@@ -568,7 +555,9 @@ export function PrismIconDemo(): JSX.Element {
                       <input
                         type="checkbox"
                         checked={selectedAppearanceKeys.has(appearanceKey)}
-                        onChange={() => handleToggleAppearanceKey(appearanceKey)}
+                        onChange={() =>
+                          handleToggleAppearanceKey(appearanceKey)
+                        }
                         className="rounded border-input"
                       />
                       <PrismTypography
@@ -592,7 +581,11 @@ export function PrismIconDemo(): JSX.Element {
             Example
           </PrismTypography>
           {exampleIconNames.length === 0 ? (
-            <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
+            <PrismTypography
+              role="body"
+              size="medium"
+              color={{ semanticText: "muted" }}
+            >
               Add at least one icon name in Customize.
             </PrismTypography>
           ) : (
@@ -670,7 +663,7 @@ export function PrismIconDemo(): JSX.Element {
                     ))}
                   </div>
                 </div>
-              ),
+              )
             )}
           </div>
         </section>

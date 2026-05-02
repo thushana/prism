@@ -106,8 +106,7 @@ export function AdminPageShell({
 }: AdminPageShellProps): React.JSX.Element {
   const pathname = usePathname();
   const showPathBarExplicit = Boolean(
-    explicitPrismPathBarSegments &&
-      explicitPrismPathBarSegments.length > 0
+    explicitPrismPathBarSegments && explicitPrismPathBarSegments.length > 0
   );
   const showPathBarAuto = Boolean(
     prismPathBarTitleByPathPrefix && title && !showPathBarExplicit
@@ -170,7 +169,11 @@ export function AdminPageShell({
                     </PrismTypography>
                   )}
                   {description ? (
-                    <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
+                    <PrismTypography
+                      role="body"
+                      size="medium"
+                      color={{ semanticText: "muted" }}
+                    >
                       {description}
                     </PrismTypography>
                   ) : null}

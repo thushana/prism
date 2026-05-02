@@ -244,15 +244,15 @@ packages/
 
 **Prefer Prism components over lower-level primitives.** When building UI, always reach for the highest-level Prism component that fits before dropping down to a more primitive one.
 
-| Need | Reach for first | Fall back to |
-|---|---|---|
-| Text / headings / labels | `PrismTypography` (`@ui`) | raw HTML elements |
-| Buttons (Prism design) | `PrismButton` (`@ui`) | native `<button>` + Tailwind, or a local app primitive |
-| Charts | `LineChart` / `BarChart` (`@charts`) | Nivo directly |
-| Admin page shell | `AdminPageShell` (`@authentication`) | custom `<main>` |
-| Admin back-navigation | `AdminBackLink` (`@authentication`) | raw `<Link>` |
-| Sign-out action | `SignOutForm` (`@authentication`) | custom form |
-| Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check |
+| Need                         | Reach for first                                     | Fall back to                                           |
+| ---------------------------- | --------------------------------------------------- | ------------------------------------------------------ |
+| Text / headings / labels     | `PrismTypography` (`@ui`)                           | raw HTML elements                                      |
+| Buttons (Prism design)       | `PrismButton` (`@ui`)                               | native `<button>` + Tailwind, or a local app primitive |
+| Charts                       | `LineChart` / `BarChart` (`@charts`)                | Nivo directly                                          |
+| Admin page shell             | `AdminPageShell` (`@authentication`)                | custom `<main>`                                        |
+| Admin back-navigation        | `AdminBackLink` (`@authentication`)                 | raw `<Link>`                                           |
+| Sign-out action              | `SignOutForm` (`@authentication`)                   | custom form                                            |
+| Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check                                    |
 
 `PrismButton` requires `color` and `label` — it is the design-system button (palette, animations, shapes). For minimal chrome (e.g. unstyled submit), use a native `<button>` with theme classes, or add a tiny wrapper in the app.
 

@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 function colorLoopChips(
   palette: PrismPaletteId,
   center: PrismSwatchKey,
-  range: number,
+  range: number
 ): { offset: number; family: PrismSwatchKey }[] {
   const out: { offset: number; family: PrismSwatchKey }[] = [];
   for (let o = -range; o <= range; o++) {
@@ -52,8 +52,7 @@ function foregroundForFill(cssColor: string): string {
     const bs = b / 255;
     const lin = (x: number) =>
       x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
-    const lum =
-      0.2126 * lin(rs) + 0.7152 * lin(gs) + 0.0722 * lin(bs);
+    const lum = 0.2126 * lin(rs) + 0.7152 * lin(gs) + 0.0722 * lin(bs);
     return lum < 0.45 ? "#ffffff" : "#171717";
   }
   const oklch = /^oklch\(\s*([\d.]+)%/i.exec(t);
@@ -70,9 +69,12 @@ function foregroundForFill(cssColor: string): string {
  */
 function mergePartialPrismPickerSpec(
   prev: PartialPrismColorSpec,
-  next: PartialPrismColorSpec,
+  next: PartialPrismColorSpec
 ): PartialPrismColorSpec {
-  const nextHasGradient = Object.prototype.hasOwnProperty.call(next, "gradient");
+  const nextHasGradient = Object.prototype.hasOwnProperty.call(
+    next,
+    "gradient"
+  );
   const base = nextHasGradient
     ? { ...prev, ...next }
     : (() => {
@@ -109,13 +111,13 @@ export function PrismColorDemo(): JSX.Element {
   const palette = spec.palette ?? "default";
   const loopCenter = PrismColor.Loop.normalize(
     palette,
-    spec.colorLoop?.center ?? spec.swatchPrimary ?? "purple",
+    spec.colorLoop?.center ?? spec.swatchPrimary ?? "purple"
   );
   const loopRange = clampPrismColorLoopRange(palette, spec.colorLoop?.range);
 
   const loopVisual = useMemo(
     () => colorLoopChips(palette, loopCenter, loopRange),
-    [palette, loopCenter, loopRange],
+    [palette, loopCenter, loopRange]
   );
 
   const gradientPair = useMemo(() => {
@@ -131,22 +133,32 @@ export function PrismColorDemo(): JSX.Element {
     });
   }, [palette, spec.gradient]);
 
-  const specJson = useMemo(
-    () => JSON.stringify(spec, null, 2),
-    [spec],
-  );
+  const specJson = useMemo(() => JSON.stringify(spec, null, 2), [spec]);
 
   return (
     <div className="min-w-0 space-y-10">
       <header className="max-w-2xl space-y-2">
-        <PrismTypography role="title" size="large" as="h2" className="font-bold">
+        <PrismTypography
+          role="title"
+          size="large"
+          as="h2"
+          className="font-bold"
+        >
           PrismColor
         </PrismTypography>
-        <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
-          Use a single <code className="font-mono text-foreground">PrismColorPicker</code> for
-          palette, single swatch, ColorLoop range, and multi-stop gradients. Sections below read the
-          committed <code className="font-mono text-foreground">PartialPrismColorSpec</code> — no
-          duplicate ramp or direction controls on this page.
+        <PrismTypography
+          role="body"
+          size="medium"
+          color={{ semanticText: "muted" }}
+        >
+          Use a single{" "}
+          <code className="font-mono text-foreground">PrismColorPicker</code>{" "}
+          for palette, single swatch, ColorLoop range, and multi-stop gradients.
+          Sections below read the committed{" "}
+          <code className="font-mono text-foreground">
+            PartialPrismColorSpec
+          </code>{" "}
+          — no duplicate ramp or direction controls on this page.
         </PrismTypography>
       </header>
 
@@ -162,7 +174,12 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setShowColorCode((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               showColorCode
             </PrismTypography>
           </label>
@@ -173,7 +190,12 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setShowCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               showCopyButton
             </PrismTypography>
           </label>
@@ -184,7 +206,12 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setDisabled((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               disabled
             </PrismTypography>
           </label>
@@ -206,10 +233,20 @@ export function PrismColorDemo(): JSX.Element {
         <PrismTypography role="overline" size="small" className="mb-1 block">
           Committed spec
         </PrismTypography>
-        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }} className="max-w-2xl">
-          Live <code className="font-mono text-foreground">PartialPrismColorSpec</code> from the
-          picker (includes <code className="font-mono text-foreground">colorLoop</code>,{" "}
-          <code className="font-mono text-foreground">gradient</code>, etc. when set).
+        <PrismTypography
+          role="body"
+          size="small"
+          color={{ semanticText: "muted" }}
+          className="max-w-2xl"
+        >
+          Live{" "}
+          <code className="font-mono text-foreground">
+            PartialPrismColorSpec
+          </code>{" "}
+          from the picker (includes{" "}
+          <code className="font-mono text-foreground">colorLoop</code>,{" "}
+          <code className="font-mono text-foreground">gradient</code>, etc. when
+          set).
         </PrismTypography>
         <PrismCodeBlock
           className="font-mono"
@@ -223,14 +260,32 @@ export function PrismColorDemo(): JSX.Element {
       </section>
 
       <section className="space-y-3">
-        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+        <PrismTypography
+          role="title"
+          size="small"
+          as="h3"
+          className="font-bold"
+        >
           ColorLoop ring
         </PrismTypography>
-        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }} className="max-w-2xl">
-          Chips use <code className="font-mono text-foreground">PrismColor.Loop.step</code> with
-          center <code className="font-mono text-foreground">{loopCenter}</code> and range{" "}
-          <code className="font-mono text-foreground">{loopRange}</code> (from{" "}
-          <code className="font-mono text-foreground">clampPrismColorLoopRange</code>).
+        <PrismTypography
+          role="body"
+          size="small"
+          color={{ semanticText: "muted" }}
+          className="max-w-2xl"
+        >
+          Chips use{" "}
+          <code className="font-mono text-foreground">
+            PrismColor.Loop.step
+          </code>{" "}
+          with center{" "}
+          <code className="font-mono text-foreground">{loopCenter}</code> and
+          range <code className="font-mono text-foreground">{loopRange}</code>{" "}
+          (from{" "}
+          <code className="font-mono text-foreground">
+            clampPrismColorLoopRange
+          </code>
+          ).
         </PrismTypography>
         <div className="flex flex-wrap gap-2">
           {loopVisual.map(({ offset, family }) => {
@@ -242,7 +297,7 @@ export function PrismColorDemo(): JSX.Element {
                 title={`offset ${offset}`}
                 className={cn(
                   PRISM_META_CHIP_OUTLINE_CLASS,
-                  "rounded-md py-1 font-mono font-normal",
+                  "rounded-md py-1 font-mono font-normal"
                 )}
                 style={{
                   backgroundColor: fill,
@@ -260,18 +315,28 @@ export function PrismColorDemo(): JSX.Element {
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+        <PrismTypography
+          role="title"
+          size="small"
+          as="h3"
+          className="font-bold"
+        >
           Gradient → PrismColor.gradient.linearStrings
         </PrismTypography>
-        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }}>
-          When the picker commits a <code className="font-mono text-foreground">gradient</code>,
-          previews call{" "}
-          <code className="font-mono text-foreground">linearStrings</code> with{" "}
+        <PrismTypography
+          role="body"
+          size="small"
+          color={{ semanticText: "muted" }}
+        >
+          When the picker commits a{" "}
+          <code className="font-mono text-foreground">gradient</code>, previews
+          call <code className="font-mono text-foreground">linearStrings</code>{" "}
+          with{" "}
           <code className="font-mono text-foreground">
             {`stopResolution: "resolved"`}
           </code>{" "}
-          so
-          literal colors work in <code className="font-mono text-foreground">backgroundImage</code>{" "}
+          so literal colors work in{" "}
+          <code className="font-mono text-foreground">backgroundImage</code>{" "}
           without loading every CSS variable in admin.
         </PrismTypography>
         {gradientPair ? (
@@ -318,17 +383,31 @@ export function PrismColorDemo(): JSX.Element {
             </div>
           </div>
         ) : (
-          <PrismTypography role="body" size="small" className="italic text-muted-foreground">
-            Switch the picker to Gradient mode and add swatches to see paired light/dark ramps here.
+          <PrismTypography
+            role="body"
+            size="small"
+            className="italic text-muted-foreground"
+          >
+            Switch the picker to Gradient mode and add swatches to see paired
+            light/dark ramps here.
           </PrismTypography>
         )}
       </section>
 
       <section className="max-w-3xl space-y-3">
-        <PrismTypography role="title" size="small" as="h3" className="font-bold">
+        <PrismTypography
+          role="title"
+          size="small"
+          as="h3"
+          className="font-bold"
+        >
           PrismCodeBlock
         </PrismTypography>
-        <PrismTypography role="body" size="small" color={{ semanticText: "muted" }}>
+        <PrismTypography
+          role="body"
+          size="small"
+          color={{ semanticText: "muted" }}
+        >
           Syntax highlighting uses the same committed spec on the{" "}
           <code className="font-mono text-foreground">color</code> prop.
         </PrismTypography>
@@ -346,9 +425,13 @@ export function PrismColorDemo(): JSX.Element {
         </PrismCodeBlock>
       </section>
 
-      <PrismTypography role="body" size="small" className="text-muted-foreground">
-        Default Material loop: {PRISM_DEFAULT_COLOR_LOOP.length} families. Tailwind loop:{" "}
-        {PrismColor.Loop.families("tailwind").length}.
+      <PrismTypography
+        role="body"
+        size="small"
+        className="text-muted-foreground"
+      >
+        Default Material loop: {PRISM_DEFAULT_COLOR_LOOP.length} families.
+        Tailwind loop: {PrismColor.Loop.families("tailwind").length}.
       </PrismTypography>
     </div>
   );

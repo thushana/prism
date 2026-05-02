@@ -29,13 +29,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@utilities";
 
@@ -252,7 +246,12 @@ function Row({
 }) {
   return (
     <div className="pb-12">
-      <PrismTypography role="label" size="small" as="code" className="mb-2 block">
+      <PrismTypography
+        role="label"
+        size="small"
+        as="code"
+        className="mb-2 block"
+      >
         {title}
       </PrismTypography>
       <div
@@ -588,96 +587,100 @@ function ButtonCustomizerSection() {
 
   return (
     <>
-    <div className="mb-8">
-      <h3 className="mb-2">Customize</h3>
-      <PrismTypography role="body" size="medium" className="text-muted-foreground mb-4">
-        Toggle options to preview them on the action strip below.{" "}
-        <button
-          type="button"
-          onClick={replayAnimations}
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline font-medium"
+      <div className="mb-8">
+        <h3 className="mb-2">Customize</h3>
+        <PrismTypography
+          role="body"
+          size="medium"
+          className="text-muted-foreground mb-4"
         >
-          Replay animations
-        </button>
-      </PrismTypography>
-      <div className="space-y-6">
-        <div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
-            {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
-              <div key={heading} className="space-y-1">
-                <PrismTypography role="overline" size="small">
-                  {heading}
-                </PrismTypography>
-                {keys.map((key) => (
-                  <label
-                    key={key}
-                    className="flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected.has(key)}
-                      onChange={() => toggle(key)}
-                      className="rounded border-input"
-                    />
-                    <PrismTypography
-                      role="label"
-                      size="medium"
-                      color={{ semanticText: "muted" }}
-                      font="mono"
-                    >
-                      {OPTION_PROP_LABEL[key]}
-                    </PrismTypography>
-                  </label>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div className="mb-4 flex items-center gap-3">
-            <PrismTypography
-              role="label"
-              size="medium"
-              font="mono"
-              color={{ semanticText: "muted" }}
-            >
-              {currentSampleSnippet}
-            </PrismTypography>
-            <button
-              type="button"
-              onClick={handleCopySampleSnippet}
-              aria-label="Copy sample JSX to clipboard"
-              title="Copy sample JSX"
-              className="shrink-0 rounded-md border border-transparent p-2 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground"
-            >
-              <CopyGlyph className="size-4" aria-hidden />
-            </button>
-          </div>
-          <div
-            className={`flex flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
+          Toggle options to preview them on the action strip below.{" "}
+          <button
+            type="button"
+            onClick={replayAnimations}
+            className="text-sm text-muted-foreground hover:text-foreground hover:underline font-medium"
           >
-            {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
-              <PrismButton
-                key={`${color}-${animationKey}`}
-                color={color}
-                label={label}
-                icon={icon}
-                asChild
-                {...spreadProps}
-                segmentPosition={
-                  selected.has("gapNone")
-                    ? i === 0
-                      ? "first"
-                      : i === ACTION_BUTTONS.length - 1
-                        ? "last"
-                        : "middle"
-                    : undefined
-                }
-              />
-            ))}
+            Replay animations
+          </button>
+        </PrismTypography>
+        <div className="space-y-6">
+          <div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
+              {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
+                <div key={heading} className="space-y-1">
+                  <PrismTypography role="overline" size="small">
+                    {heading}
+                  </PrismTypography>
+                  {keys.map((key) => (
+                    <label
+                      key={key}
+                      className="flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.has(key)}
+                        onChange={() => toggle(key)}
+                        className="rounded border-input"
+                      />
+                      <PrismTypography
+                        role="label"
+                        size="medium"
+                        color={{ semanticText: "muted" }}
+                        font="mono"
+                      >
+                        {OPTION_PROP_LABEL[key]}
+                      </PrismTypography>
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="mb-4 flex items-center gap-3">
+              <PrismTypography
+                role="label"
+                size="medium"
+                font="mono"
+                color={{ semanticText: "muted" }}
+              >
+                {currentSampleSnippet}
+              </PrismTypography>
+              <button
+                type="button"
+                onClick={handleCopySampleSnippet}
+                aria-label="Copy sample JSX to clipboard"
+                title="Copy sample JSX"
+                className="shrink-0 rounded-md border border-transparent p-2 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground"
+              >
+                <CopyGlyph className="size-4" aria-hidden />
+              </button>
+            </div>
+            <div
+              className={`flex flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
+            >
+              {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
+                <PrismButton
+                  key={`${color}-${animationKey}`}
+                  color={color}
+                  label={label}
+                  icon={icon}
+                  asChild
+                  {...spreadProps}
+                  segmentPosition={
+                    selected.has("gapNone")
+                      ? i === 0
+                        ? "first"
+                        : i === ACTION_BUTTONS.length - 1
+                          ? "last"
+                          : "middle"
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    {copyToastPortal}
+      {copyToastPortal}
     </>
   );
 }
@@ -950,7 +953,10 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='gap="none" (segment radius: first / middle / last)' disableGap>
+      <Row
+        title='gap="none" (segment radius: first / middle / last)'
+        disableGap
+      >
         {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
           <PrismButton
             key={color}

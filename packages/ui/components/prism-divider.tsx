@@ -93,12 +93,7 @@ export type PrismDividerProps = Omit<
 function resolveCenterContent(
   props: Pick<
     PrismDividerProps,
-    | "emblem"
-    | "letter"
-    | "iconName"
-    | "iconSize"
-    | "iconWeight"
-    | "iconFill"
+    "emblem" | "letter" | "iconName" | "iconSize" | "iconWeight" | "iconFill"
   >
 ): React.ReactNode {
   if (props.emblem !== undefined && props.emblem !== null) {
@@ -108,7 +103,12 @@ function resolveCenterContent(
     const char = Array.from(props.letter.trim())[0] ?? "";
     if (!char) return null;
     return (
-      <PrismTypography role="title" size="small" color={{ semanticText: "foreground" }} as="span">
+      <PrismTypography
+        role="title"
+        size="small"
+        color={{ semanticText: "foreground" }}
+        as="span"
+      >
         {char}
       </PrismTypography>
     );

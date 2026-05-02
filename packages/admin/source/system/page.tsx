@@ -51,7 +51,9 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <PrismTypography role="overline" size="small">
               Commit Author
             </PrismTypography>
-            <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{git.commitAuthor}</span>
+            <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+              {git.commitAuthor}
+            </span>
           </div>
         )}
       </div>
@@ -71,7 +73,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
                 <span
                   className={cn(
                     PRISM_META_CHIP_OUTLINE_CLASS,
-                    PRISM_META_CHIP_INTERACTIVE_CLASS,
+                    PRISM_META_CHIP_INTERACTIVE_CLASS
                   )}
                 >
                   {git.commitSha.slice(0, 7)}
@@ -98,7 +100,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
               <span
                 className={cn(
                   PRISM_META_CHIP_OUTLINE_CLASS,
-                  PRISM_META_CHIP_INTERACTIVE_CLASS,
+                  PRISM_META_CHIP_INTERACTIVE_CLASS
                 )}
               >
                 {git.repositoryName || "Repository"}
@@ -130,7 +132,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <span
               className={cn(
                 PRISM_META_CHIP_OUTLINE_CLASS,
-                "max-w-full whitespace-normal text-left",
+                "max-w-full whitespace-normal text-left"
               )}
             >
               {formatDateTimeWithRelative(git.commitDate)}
@@ -145,7 +147,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             <span
               className={cn(
                 PRISM_META_CHIP_OUTLINE_CLASS,
-                "max-w-full whitespace-normal text-left",
+                "max-w-full whitespace-normal text-left"
               )}
             >
               {git.pushStatus}
@@ -218,10 +220,18 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
             : "container mx-auto space-y-8 p-8 font-sans"
         }
       >
-        <PrismTypography role="body" size="large" className="text-muted-foreground">
+        <PrismTypography
+          role="body"
+          size="large"
+          className="text-muted-foreground"
+        >
           Unable to load system data. Please try again in a moment.
         </PrismTypography>
-        <PrismTypography role="body" size="medium" className="text-muted-foreground">
+        <PrismTypography
+          role="body"
+          size="medium"
+          className="text-muted-foreground"
+        >
           Make sure your app has an{" "}
           <code className="bg-muted px-1 py-0.5 rounded">
             /api/system-sheet
@@ -250,7 +260,12 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                     }`}
                     title={app.isRunning ? "Running" : "Not running"}
                   />
-                  <PrismTypography role="title" size="medium" as="p" className="inline">
+                  <PrismTypography
+                    role="title"
+                    size="medium"
+                    as="p"
+                    className="inline"
+                  >
                     {app.name}
                   </PrismTypography>
                   <a
@@ -344,7 +359,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Environment
                 </PrismTypography>
-                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{data.vercel.env}</span>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                  {data.vercel.env}
+                </span>
               </div>
               {data.vercel.region && (
                 <div className="space-y-1">
@@ -463,7 +480,9 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                 <PrismTypography role="overline" size="small">
                   Style
                 </PrismTypography>
-                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>{data.shadcn.style}</span>
+                <span className={PRISM_META_CHIP_OUTLINE_CLASS}>
+                  {data.shadcn.style}
+                </span>
               </div>
               <div className="space-y-1">
                 <PrismTypography role="overline" size="small">

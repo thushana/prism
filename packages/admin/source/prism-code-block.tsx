@@ -151,10 +151,12 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
   const [disableLanguageLabel, setDisableLanguageLabel] = useState(false);
   const [color, setColor] = useState<PrismSwatchKey>("blue");
 
+  /* eslint-disable react-hooks/set-state-in-effect -- playground: stable SSR defaults; randomize on client before paint */
   useLayoutEffect(() => {
     setColor(randomMaterialColorFamily());
     setLanguage(randomPlaygroundLanguage());
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
   const [widthInput, setWidthInput] = useState("80");
   const [disableCopyButton, setDisableCopyButton] = useState(false);
 
@@ -223,23 +225,28 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
           Pick a Material color family (no shade in the prop—e.g.{" "}
           <span className="font-mono text-foreground">purple</span>). Keywords,
           tags, and braces stay on that ramp; strings sit on the ring{" "}
-          <span className="font-mono text-foreground">+1</span> family, properties
-          on <span className="font-mono text-foreground">−1</span>, numbers on{" "}
-          <span className="font-mono text-foreground">−2</span> (
+          <span className="font-mono text-foreground">+1</span> family,
+          properties on <span className="font-mono text-foreground">−1</span>,
+          numbers on <span className="font-mono text-foreground">−2</span> (
           <span className="font-mono text-foreground">purple</span> →{" "}
           <span className="font-mono text-foreground">deep-purple</span>,{" "}
           <span className="font-mono text-foreground">pink</span>,{" "}
-          <span className="font-mono text-foreground">red</span>) so accents read
-          as tonal neighbours, not a single flat hue. Every swatch resolves to{" "}
-          <span className="font-mono text-foreground">var(--color-…)</span> in{" "}
-          <span className="font-mono text-foreground">colors.css</span>. Card
+          <span className="font-mono text-foreground">red</span>) so accents
+          read as tonal neighbours, not a single flat hue. Every swatch resolves
+          to <span className="font-mono text-foreground">var(--color-…)</span>{" "}
+          in <span className="font-mono text-foreground">colors.css</span>. Card
           wash uses the same family at 50 / 900. Copy uses the literal language
           string for the screen reader label when set.
         </PrismTypography>
 
         <div className="mb-4 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div className="min-w-0">
-            <PrismTypography role="overline" size="small" font="sans" className="mb-1 block">
+            <PrismTypography
+              role="overline"
+              size="small"
+              font="sans"
+              className="mb-1 block"
+            >
               language
             </PrismTypography>
             <div className="relative max-w-xs">
@@ -264,16 +271,19 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             </div>
           </div>
           <div className="min-w-0">
-            <PrismTypography role="overline" size="small" font="sans" className="mb-1 block">
+            <PrismTypography
+              role="overline"
+              size="small"
+              font="sans"
+              className="mb-1 block"
+            >
               mode
             </PrismTypography>
             <div className="relative max-w-xs">
               <select
                 className={CUSTOMIZER_SELECT_CLASS}
                 value={mode}
-                onChange={(e) =>
-                  setMode(e.target.value as PrismCodeBlockMode)
-                }
+                onChange={(e) => setMode(e.target.value as PrismCodeBlockMode)}
               >
                 {MODE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -291,16 +301,19 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             </div>
           </div>
           <div className="min-w-0">
-            <PrismTypography role="overline" size="small" font="sans" className="mb-1 block">
+            <PrismTypography
+              role="overline"
+              size="small"
+              font="sans"
+              className="mb-1 block"
+            >
               color
             </PrismTypography>
             <div className="relative max-w-xs">
               <select
                 className={CUSTOMIZER_SELECT_CLASS}
                 value={color}
-                onChange={(e) =>
-                  setColor(e.target.value as PrismSwatchKey)
-                }
+                onChange={(e) => setColor(e.target.value as PrismSwatchKey)}
               >
                 {SYNTAX_COLOR_FAMILY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -318,7 +331,12 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             </div>
           </div>
           <div className="min-w-0">
-            <PrismTypography role="overline" size="small" font="sans" className="mb-1 block">
+            <PrismTypography
+              role="overline"
+              size="small"
+              font="sans"
+              className="mb-1 block"
+            >
               characterMaxWidth
             </PrismTypography>
             <input
@@ -340,7 +358,12 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLineNumbers((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               disableLineNumbers
             </PrismTypography>
           </label>
@@ -351,7 +374,12 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLanguageLabel((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               disableLanguageLabel
             </PrismTypography>
           </label>
@@ -362,7 +390,12 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography role="label" size="medium" color={{ semanticText: "muted" }} font="mono">
+            <PrismTypography
+              role="label"
+              size="medium"
+              color={{ semanticText: "muted" }}
+              font="mono"
+            >
               disableCopyButton
             </PrismTypography>
           </label>

@@ -52,7 +52,11 @@ describe("buildPrismPathBarAutoSegmentList", () => {
 
   it("throws when an ancestor prefix is missing from the map", () => {
     expect(() =>
-      buildPrismPathBarAutoSegmentList("/admin/prism/components/prism-button", {}, "X")
+      buildPrismPathBarAutoSegmentList(
+        "/admin/prism/components/prism-button",
+        {},
+        "X"
+      )
     ).toThrow(/titleByPathPrefix/);
   });
 });

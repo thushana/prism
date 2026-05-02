@@ -9,7 +9,20 @@ import {
 
 /** Default (Material) palette: shade row order for the picker grid (includes accent keys). */
 export const PRISM_COLOR_PALETTE_MATERIAL_SHADE_ORDER = [
-  50, 100, 200, 300, 400, 500, 600, 700, 800, 900, "a100", "a200", "a400", "a700",
+  50,
+  100,
+  200,
+  300,
+  400,
+  500,
+  600,
+  700,
+  800,
+  900,
+  "a100",
+  "a200",
+  "a400",
+  "a700",
 ] as const;
 
 export type MaterialShadeKey =
@@ -51,7 +64,7 @@ function capitalizeWord(word: string): string {
 /** Display title for a palette family key (Material uses ColorName formatting; Tailwind uses title-case segments). */
 export function paletteFamilyDisplayTitle(
   palette: PrismPaletteId,
-  familyKebab: PrismSwatchKey,
+  familyKebab: PrismSwatchKey
 ): string {
   if (palette === "tailwind") {
     return familyKebab.split("-").map(capitalizeWord).join(" ");
@@ -73,7 +86,7 @@ export function normalizePickerColorToken(input: string): string {
 }
 
 export function materialShadeLabelDisplay(
-  shade: MaterialShadeKey | TailwindNumericShade,
+  shade: MaterialShadeKey | TailwindNumericShade
 ): string {
   if (typeof shade === "number") return String(shade);
   return shade.replace("a", "A");
@@ -82,7 +95,7 @@ export function materialShadeLabelDisplay(
 export function resolvePickerCellHex(
   palette: PrismPaletteId,
   family: PrismSwatchKey,
-  shade: MaterialShadeKey | TailwindNumericShade,
+  shade: MaterialShadeKey | TailwindNumericShade
 ): string | null {
   if (palette === "tailwind") {
     if (typeof shade !== "number") return null;
@@ -96,7 +109,7 @@ export function resolvePickerCellHex(
 }
 
 export function shadeOrderForPalette(
-  palette: PrismPaletteId,
+  palette: PrismPaletteId
 ): readonly (MaterialShadeKey | TailwindNumericShade)[] {
   return palette === "tailwind"
     ? PRISM_COLOR_PALETTE_TAILWIND_SHADE_ORDER
@@ -109,7 +122,7 @@ export function shadeOrderForPalette(
  */
 export function findPaletteSwatchForHex(
   palette: PrismPaletteId,
-  hexadecimalColor: string,
+  hexadecimalColor: string
 ): PrismColorPickerSwatch | null {
   const normalizedInput = normalizePickerColorToken(hexadecimalColor);
   if (!normalizedInput) return null;
@@ -130,7 +143,7 @@ export function findPaletteSwatchForHex(
 }
 
 function hexadecimalColorToRgbChannels(
-  hexadecimalColor: string,
+  hexadecimalColor: string
 ): { red: number; green: number; blue: number } | null {
   const normalized = normalizeHexadecimalColorString(hexadecimalColor);
   const compact = normalized.slice(1);
@@ -157,7 +170,7 @@ function hexadecimalColorToRgbChannels(
  */
 export function findNearestPaletteSwatchForHex(
   palette: PrismPaletteId,
-  hexadecimalColor: string,
+  hexadecimalColor: string
 ): PrismColorPickerSwatch | null {
   const exact = findPaletteSwatchForHex(palette, hexadecimalColor);
   if (exact) return exact;
@@ -184,7 +197,12 @@ export function findNearestPaletteSwatchForHex(
         (targetRgb.blue - rgb.blue) ** 2;
       if (distanceSquared < bestDistanceSquared) {
         bestDistanceSquared = distanceSquared;
-        bestSwatch = { palette: "default", family, shade: shade as MaterialShadeKey, hex };
+        bestSwatch = {
+          palette: "default",
+          family,
+          shade: shade as MaterialShadeKey,
+          hex,
+        };
       }
     }
   }
@@ -198,7 +216,7 @@ export function findNearestPaletteSwatchForHex(
  */
 export function resolveTriggerForegroundHexadecimal(
   swatchForLabeling: PrismColorPickerSwatch | null,
-  triggerBackgroundToken: string,
+  triggerBackgroundToken: string
 ): string {
   const normalizedBackground =
     normalizeHexadecimalColorString(triggerBackgroundToken) || "#808080";
