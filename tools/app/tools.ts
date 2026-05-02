@@ -53,7 +53,7 @@ program.hook("preAction", (thisCommand, actionCommand) => {
     // Always register commands that don't need database first
     const { registerGenerateCommand } = await import("./commands/generate.ts");
     registerGenerateCommand(program);
-    
+
     try {
       const { registerStylingCommand } = await import("./commands/styling.ts");
       registerStylingCommand(program);
@@ -61,7 +61,9 @@ program.hook("preAction", (thisCommand, actionCommand) => {
       // Silently fail if styling command can't load (e.g., @cli not available)
       if (process.argv[2] === "styling") {
         if (logger) {
-          logger.error("Styling command is not available", { error: stylingError });
+          logger.error("Styling command is not available", {
+            error: stylingError,
+          });
         } else {
           console.error("Styling command is not available:", stylingError);
         }

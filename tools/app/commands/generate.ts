@@ -140,7 +140,7 @@ function generatePackageJson(
         "@prism/utilities": "*",
         admin: "*",
         "feature-flags": "*",
-        "flags": "^4.0.0",
+        flags: "^4.0.0",
       }
     : prismRepo
       ? {
@@ -162,7 +162,7 @@ function generatePackageJson(
           "@prism/utilities": "file:./prism/packages/utilities",
           admin: "file:./prism/packages/admin",
           "feature-flags": "file:./prism/packages/feature-flags",
-          "flags": "^4.0.0",
+          flags: "^4.0.0",
         };
 
   const packageJson = {
@@ -334,7 +334,9 @@ function generateTsConfig(
           "@ui": ["node_modules/@prism/core/packages/ui/source"],
           "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
           "@admin": ["node_modules/@prism/core/packages/admin/source"],
-          "feature-flags": ["node_modules/@prism/core/packages/feature-flags/source"],
+          "feature-flags": [
+            "node_modules/@prism/core/packages/feature-flags/source",
+          ],
         }
       : {
           "@/*": ["./*"],
@@ -683,7 +685,9 @@ export async function runGenerateCommand(
         // User explicitly specified git repo - use as npm dependency
         useGitDependency = true;
         prismRepoUrl = options.prismRepo;
-        log.info(`📦 Using ${chalk.bold("💎 Prism")} from git: ${prismRepoUrl}`);
+        log.info(
+          `📦 Using ${chalk.bold("💎 Prism")} from git: ${prismRepoUrl}`
+        );
         log.info(
           "💡 This creates a deployable app with Prism as npm dependency."
         );
@@ -691,7 +695,9 @@ export async function runGenerateCommand(
         // Default: add Prism as git submodule inside the app (one deployable repo)
         useGitDependency = false;
         const defaultPrismRepo = "https://github.com/thushana/prism.git";
-        log.info(`📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`);
+        log.info(
+          `📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`
+        );
         try {
           // Initialize git first if not already initialized
           if (!fs.existsSync(path.join(targetDir, ".git"))) {
@@ -751,7 +757,7 @@ export async function runGenerateCommand(
       } catch {
         log.warn("Failed to install dependencies automatically");
         log.warn(
-          "Please run 'pnpm install' (or your package manager's install) manually in the generated app",
+          "Please run 'pnpm install' (or your package manager's install) manually in the generated app"
         );
       }
     }

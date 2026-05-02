@@ -15,8 +15,9 @@ import fs from "fs";
 import path from "path";
 
 const scriptDir = __dirname;
-const isInPrism = path.basename(path.dirname(scriptDir)) === "prism" || 
-                  path.basename(scriptDir) === "prism";
+const isInPrism =
+  path.basename(path.dirname(scriptDir)) === "prism" ||
+  path.basename(scriptDir) === "prism";
 
 // Determine paths for app root and prism root
 let APP_ROOT: string;
@@ -61,7 +62,7 @@ function sync(): void {
     console.log("Step 4: Syncing dependency versions to app root...\n");
     const synchronizeDependenciesScriptPath = path.join(
       scriptDir,
-      "sync-dependencies.ts",
+      "sync-dependencies.ts"
     );
     execSync(`tsx ${synchronizeDependenciesScriptPath} --update`, {
       stdio: "inherit",

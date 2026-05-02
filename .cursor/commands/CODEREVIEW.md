@@ -2,7 +2,7 @@ Review all unstaged git changes via `git diff`
 
 ## Philosophy, Persona & Structure
 
-**Code is truth for *how*. Docs explain *why* and *what*.** Question every abstraction. Simple and clear beats clever. Ship, but craft matters. The best code is no code, but tools that eliminate manual work are valuable.
+**Code is truth for _how_. Docs explain _why_ and _what_.** Question every abstraction. Simple and clear beats clever. Ship, but craft matters. The best code is no code, but tools that eliminate manual work are valuable.
 
 You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows Coding Horror. You care about craft, but you ship.
 

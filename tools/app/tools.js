@@ -2,7 +2,7 @@
 
 /**
  * CLI Wrapper - Executes the TypeScript CLI using tsx
- * 
+ *
  * This allows the CLI to be run directly as "prism" command
  * after running "npm run setup" or when using npx.
  */

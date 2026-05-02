@@ -1,17 +1,17 @@
 /**
  * Generate colors CSS for Tailwind v4
- * 
+ *
  * This script reads from the material-ui-colors package and generates
  * a CSS file with all colors in Tailwind v4 @theme format.
  */
 
-const colors = require('material-ui-colors');
-const fs = require('fs');
-const path = require('path');
+const colors = require("material-ui-colors");
+const fs = require("fs");
+const path = require("path");
 
 // Convert camelCase to kebab-case
 function toKebabCase(str) {
-  return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+  return str.replace(/([A-Z])/g, "-$1").toLowerCase();
 }
 
 // Generate CSS content
@@ -30,24 +30,24 @@ function generateCSS() {
 `;
 
   // Process each color
-  const colorNames = Object.keys(colors).filter(name => name !== 'common');
-  
+  const colorNames = Object.keys(colors).filter((name) => name !== "common");
+
   for (const colorName of colorNames) {
     const colorShades = colors[colorName];
     const kebabName = toKebabCase(colorName);
-    
+
     // Add comment for color group
-    css += `\n  /* ${colorName.charAt(0).toUpperCase() + colorName.slice(1).replace(/([A-Z])/g, ' $1')} */\n`;
-    
+    css += `\n  /* ${colorName.charAt(0).toUpperCase() + colorName.slice(1).replace(/([A-Z])/g, " $1")} */\n`;
+
     // Add all shades
     for (const [shade, hex] of Object.entries(colorShades)) {
-      const shadeName = shade.startsWith('A') ? `a${shade.slice(1)}` : shade;
+      const shadeName = shade.startsWith("A") ? `a${shade.slice(1)}` : shade;
       css += `  --color-${kebabName}-${shadeName}: ${hex};\n`;
     }
   }
 
-  css += '}\n';
-  
+  css += "}\n";
+
   return css;
 }
 
@@ -63,56 +63,84 @@ function generateBackgroundUtilities() {
 @layer utilities {
 `;
 
-  const colorNames = Object.keys(colors).filter(name => name !== 'common');
-  
+  const colorNames = Object.keys(colors).filter((name) => name !== "common");
+
   for (const colorName of colorNames) {
     const colorShades = colors[colorName];
     const kebabName = toKebabCase(colorName);
-    
+
     for (const [shade, hex] of Object.entries(colorShades)) {
-      const shadeName = shade.startsWith('A') ? `a${shade.slice(1)}` : shade;
+      const shadeName = shade.startsWith("A") ? `a${shade.slice(1)}` : shade;
       css += `  .background-${kebabName}-${shadeName} { background-color: var(--color-${kebabName}-${shadeName}); }\n`;
     }
   }
 
-  css += '}\n';
+  css += "}\n";
   return css;
 }
 
 // Write the CSS files
-const outputPath = path.join(__dirname, '../styles/colors.css');
+const outputPath = path.join(__dirname, "../styles/colors.css");
 const cssContent = generateCSS();
 
-fs.writeFileSync(outputPath, cssContent, 'utf-8');
+fs.writeFileSync(outputPath, cssContent, "utf-8");
 console.log(`✅ Generated colors CSS: ${outputPath}`);
-console.log(`   Colors: ${Object.keys(colors).filter(name => name !== 'common').length}`);
-console.log(`   Total shades: ${Object.values(colors).filter(c => typeof c === 'object').reduce((sum, c) => sum + Object.keys(c).length, 0)}`);
+console.log(
+  `   Colors: ${Object.keys(colors).filter((name) => name !== "common").length}`
+);
+console.log(
+  `   Total shades: ${Object.values(colors)
+    .filter((c) => typeof c === "object")
+    .reduce((sum, c) => sum + Object.keys(c).length, 0)}`
+);
 
 // Generate TypeScript color values lookup by parsing colors.css (single source of truth)
 function generateColorValuesTS() {
   // Parse colors.css to extract hex values (avoids duplication)
-  const cssContent = fs.readFileSync(outputPath, 'utf-8');
+  const cssContent = fs.readFileSync(outputPath, "utf-8");
   const colorMap = new Map();
-  
+
   // Extract color variables from CSS: --color-red-50: #ffebee;
   const varRegex = /--color-([a-z-]+)-(\d+|a\d+):\s*(#[0-9a-fA-F]+);/g;
   let match;
-  
+
   while ((match = varRegex.exec(cssContent)) !== null) {
     const [, colorKebab, shade, hex] = match;
     // Convert kebab-case to camelCase: deep-purple -> deepPurple
-    const colorName = colorKebab.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+    const colorName = colorKebab.replace(/-([a-z])/g, (_, letter) =>
+      letter.toUpperCase()
+    );
     // Store shade as number or string (a100, a200, etc.)
-    const shadeKey = shade.startsWith('a') ? shade : parseInt(shade);
-    
+    const shadeKey = shade.startsWith("a") ? shade : parseInt(shade);
+
     if (!colorMap.has(colorName)) {
       colorMap.set(colorName, {});
     }
     colorMap.get(colorName)[shadeKey] = hex.toLowerCase();
   }
-  
+
   // Maintain Material UI color order (not alphabetical)
-  const materialColorOrder = ['red', 'pink', 'purple', 'deepPurple', 'indigo', 'blue', 'lightBlue', 'cyan', 'teal', 'green', 'lightGreen', 'lime', 'yellow', 'amber', 'orange', 'deepOrange', 'brown', 'grey', 'blueGrey'];
+  const materialColorOrder = [
+    "red",
+    "pink",
+    "purple",
+    "deepPurple",
+    "indigo",
+    "blue",
+    "lightBlue",
+    "cyan",
+    "teal",
+    "green",
+    "lightGreen",
+    "lime",
+    "yellow",
+    "amber",
+    "orange",
+    "deepOrange",
+    "brown",
+    "grey",
+    "blueGrey",
+  ];
   const colorNames = Array.from(colorMap.keys()).sort((a, b) => {
     const indexA = materialColorOrder.indexOf(a);
     const indexB = materialColorOrder.indexOf(b);
@@ -121,7 +149,7 @@ function generateColorValuesTS() {
     if (indexB === -1) return -1;
     return indexA - indexB;
   });
-  
+
   let ts = `/**
  * Color hex values lookup table
  * Auto-generated by parsing colors.css (single source of truth)
@@ -132,7 +160,7 @@ function generateColorValuesTS() {
  * DO NOT EDIT MANUALLY - This file is auto-generated by scripts/generate-material-colors.js
  */
 
-export type ColorName = ${colorNames.map(name => `"${name}"`).join(' | ')};
+export type ColorName = ${colorNames.map((name) => `"${name}"`).join(" | ")};
 
 export const colorHexValues: Record<ColorName, Record<number | "a100" | "a200" | "a400" | "a700", string>> = {
 `;
@@ -143,20 +171,23 @@ export const colorHexValues: Record<ColorName, Record<number | "a100" | "a200" |
     const shadeEntries = [];
     // Sort shades: numeric first, then a100, a200, a400, a700
     const sortedShades = Object.keys(shades).sort((a, b) => {
-      if (typeof a === 'string' && typeof b === 'string') {
-        const order = { 'a100': 0, 'a200': 1, 'a400': 2, 'a700': 3 };
+      if (typeof a === "string" && typeof b === "string") {
+        const order = { a100: 0, a200: 1, a400: 2, a700: 3 };
         return (order[a] || 999) - (order[b] || 999);
       }
-      if (typeof a === 'string') return 1;
-      if (typeof b === 'string') return -1;
+      if (typeof a === "string") return 1;
+      if (typeof b === "string") return -1;
       return parseInt(a) - parseInt(b);
     });
-    
+
     for (const shadeKey of sortedShades) {
-      const key = typeof shadeKey === 'string' && shadeKey.startsWith('a') ? `"${shadeKey}"` : shadeKey;
+      const key =
+        typeof shadeKey === "string" && shadeKey.startsWith("a")
+          ? `"${shadeKey}"`
+          : shadeKey;
       shadeEntries.push(`${key}: "${shades[shadeKey]}"`);
     }
-    ts += shadeEntries.join(', ') + ' },\n';
+    ts += shadeEntries.join(", ") + " },\n";
   }
 
   ts += `} as const;\n`;
@@ -164,13 +195,16 @@ export const colorHexValues: Record<ColorName, Record<number | "a100" | "a200" |
 }
 
 // Write background utilities
-const utilitiesPath = path.join(__dirname, '../styles/background-utilities.css');
+const utilitiesPath = path.join(
+  __dirname,
+  "../styles/background-utilities.css"
+);
 const utilitiesContent = generateBackgroundUtilities();
-fs.writeFileSync(utilitiesPath, utilitiesContent, 'utf-8');
+fs.writeFileSync(utilitiesPath, utilitiesContent, "utf-8");
 console.log(`✅ Generated background utilities CSS: ${utilitiesPath}`);
 
 // Write TypeScript color values
-const colorValuesPath = path.join(__dirname, '../styles/color-values.ts');
+const colorValuesPath = path.join(__dirname, "../styles/color-values.ts");
 const colorValuesContent = generateColorValuesTS();
-fs.writeFileSync(colorValuesPath, colorValuesContent, 'utf-8');
+fs.writeFileSync(colorValuesPath, colorValuesContent, "utf-8");
 console.log(`✅ Generated color values TypeScript: ${colorValuesPath}`);

@@ -2,7 +2,7 @@
 /**
  * Sync scripts from prism/package.json into the parent project's package.json
  * This allows projects using prism to inherit scripts while maintaining local overrides
- * 
+ *
  * Can be run from:
  * - Inside prism repo: syncs to ../package.json (parent project)
  * - From parent project: syncs from ./prism/package.json
@@ -13,8 +13,9 @@ import path from "path";
 
 // Detect if we're running from prism or parent project
 const scriptDir = __dirname;
-const isInPrism = path.basename(path.dirname(scriptDir)) === "prism" || 
-                  path.basename(scriptDir) === "prism";
+const isInPrism =
+  path.basename(path.dirname(scriptDir)) === "prism" ||
+  path.basename(scriptDir) === "prism";
 
 let PRISM_PACKAGE_JSON: string;
 let MAIN_PACKAGE_JSON: string;
@@ -81,11 +82,15 @@ function syncScripts(): void {
     if (
       key === "prism" ||
       key === "tools" ||
-      (key.startsWith("database:") && mergedScripts[`db:${key.replace("database:", "")}`]) ||
-      (value.includes("-w tools") || value.includes("-w apps/")) ||
-      ((key === "test" || key === "test:run") && value.includes("--workspaces")) ||
+      (key.startsWith("database:") &&
+        mergedScripts[`db:${key.replace("database:", "")}`]) ||
+      value.includes("-w tools") ||
+      value.includes("-w apps/") ||
+      ((key === "test" || key === "test:run") &&
+        value.includes("--workspaces")) ||
       (key === "clean" && value.includes("apps/")) ||
-      (key === "dev:setup" && !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh")))
+      (key === "dev:setup" &&
+        !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh")))
     ) {
       delete mergedScripts[key];
       removedScripts.push(key);
@@ -99,30 +104,49 @@ function syncScripts(): void {
       let adaptedValue = value;
 
       // Skip database:* scripts if db:* versions already exist
-      if (key.startsWith("database:") && mainScripts[`db:${key.replace("database:", "")}`]) {
+      if (
+        key.startsWith("database:") &&
+        mainScripts[`db:${key.replace("database:", "")}`]
+      ) {
         skippedScripts.push(key);
         continue;
       }
 
       // Skip scripts that reference files that don't exist in main project
-      if (key === "clean:directories" && !fs.existsSync(path.join(mainProjectRoot, "scripts/clean-directories.ts"))) {
+      if (
+        key === "clean:directories" &&
+        !fs.existsSync(
+          path.join(mainProjectRoot, "scripts/clean-directories.ts")
+        )
+      ) {
         skippedScripts.push(key);
         continue;
       }
-      if (key === "dev:setup" && !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh"))) {
+      if (
+        key === "dev:setup" &&
+        !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh"))
+      ) {
         skippedScripts.push(key);
         continue;
       }
 
       // Skip test scripts that use workspaces (no tests configured in main project)
-      if ((key === "test" || key === "test:run" || key === "test:ui" || key === "test:coverage") && value.includes("--workspaces")) {
+      if (
+        (key === "test" ||
+          key === "test:run" ||
+          key === "test:ui" ||
+          key === "test:coverage") &&
+        value.includes("--workspaces")
+      ) {
         skippedScripts.push(key);
         continue;
       }
 
       // Skip scripts that can't be adapted (workspace-specific)
       if (
-        (value.includes("-w apps/") || value.includes("apps/web") || value.includes("-w tools")) &&
+        (value.includes("-w apps/") ||
+          value.includes("apps/web") ||
+          value.includes("-w tools")) &&
         key !== "lint:fix" && // lint:fix can be adapted
         !key.startsWith("quality") && // quality scripts can be adapted
         key !== "clean" // clean script can be adapted
@@ -195,7 +219,8 @@ function syncScripts(): void {
   }
 
   // Apps defer to prism for quality (single source of truth: prism/scripts/quality.ts)
-  const isTargetingApp = path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
+  const isTargetingApp =
+    path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
   if (isTargetingApp && mergedScripts) {
     mergedScripts.quality = "tsx prism/scripts/quality.ts";
     mergedScripts["quality:quick"] =
@@ -229,7 +254,9 @@ function syncScripts(): void {
     console.log("   No new scripts to add (all scripts already exist)");
   }
   if (skippedScripts.length > 0) {
-    console.log(`   Skipped ${skippedScripts.length} workspace-specific script(s)`);
+    console.log(
+      `   Skipped ${skippedScripts.length} workspace-specific script(s)`
+    );
   }
   if (removedScripts.length > 0) {
     console.log(`   Removed ${removedScripts.length} incompatible script(s):`);

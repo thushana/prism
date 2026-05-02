@@ -107,7 +107,6 @@ async function pushSchema(): Promise<void> {
 export async function runMigrateCommand(
   options: MigrateCommandOptions
 ): Promise<void> {
-
   logStart("Starting migrate command");
 
   // Enable debug logging if requested

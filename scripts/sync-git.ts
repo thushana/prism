@@ -10,8 +10,9 @@ import path from "path";
 
 // Detect if we're running from prism or parent project
 const scriptDir = __dirname;
-const isInPrism = path.basename(path.dirname(scriptDir)) === "prism" || 
-                  path.basename(scriptDir) === "prism";
+const isInPrism =
+  path.basename(path.dirname(scriptDir)) === "prism" ||
+  path.basename(scriptDir) === "prism";
 
 let PRISM_DIR: string;
 
@@ -36,26 +37,26 @@ function syncGit(): void {
     if (isInPrism) {
       // Running from inside prism - just pull
       console.log("📥 Pulling latest changes from prism repository...");
-      execSync("git pull", { 
-        cwd: PRISM_DIR, 
-        stdio: "inherit" 
+      execSync("git pull", {
+        cwd: PRISM_DIR,
+        stdio: "inherit",
       });
       console.log("✅ Prism repository updated");
     } else {
       // Running from parent - update submodule
       console.log("📥 Updating prism submodule...");
-      
+
       // Check if it's a git submodule
       if (isSubmodule) {
         execSync("git submodule update --remote --merge prism", {
           cwd: path.dirname(PRISM_DIR),
-          stdio: "inherit"
+          stdio: "inherit",
         });
       } else {
         // Regular git repo, just pull
         execSync("git pull", {
           cwd: PRISM_DIR,
-          stdio: "inherit"
+          stdio: "inherit",
         });
       }
       console.log("✅ Prism submodule updated");

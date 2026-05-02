@@ -25,7 +25,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-satoshi);
   --font-serif: var(--font-sentient);
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
   /* Semantic font roles (defaults; override per-page via .font-body-* / .font-headline-* on a wrapper) */
   --font-body: var(--font-satoshi);
   --font-headline: var(--font-satoshi);
@@ -156,7 +158,12 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body), var(--font-satoshi), system-ui, sans-serif;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-headline);
   }
   h1 {
@@ -189,16 +196,15 @@
     line-height: 1.5rem;
     font-weight: 500;
   }
-  code, pre, kbd {
+  code,
+  pre,
+  kbd {
     font-family: var(--font-mono);
   }
   .material-symbols-rounded {
     /* Sans fallbacks avoid body/serif inheritance when the icon font is slow or blocked. */
     font-family:
-      "Material Symbols Rounded",
-      ui-sans-serif,
-      system-ui,
-      sans-serif;
+      "Material Symbols Rounded", ui-sans-serif, system-ui, sans-serif;
     font-weight: normal;
     font-style: normal;
     font-size: 24px;
@@ -476,8 +482,3 @@
     padding-bottom: 0.08em;
   }
 }
-
-
-
-
-

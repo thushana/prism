@@ -13,8 +13,9 @@ import path from "path";
 
 const scriptDir = __dirname;
 const currentDir = path.join(scriptDir, "..");
-const isInPrism = path.basename(path.dirname(scriptDir)) === "prism" || 
-                  path.basename(scriptDir) === "prism";
+const isInPrism =
+  path.basename(path.dirname(scriptDir)) === "prism" ||
+  path.basename(scriptDir) === "prism";
 
 let PRISM_DIR: string;
 let PARENT_OR_APP_DIR: string;
@@ -55,7 +56,9 @@ function runQuality(): void {
   // If we're in prism, check for parent first
   if (isInPrism && fs.existsSync(parentPackageJson)) {
     try {
-      console.log(`📦 Running quality in parent project: ${PARENT_OR_APP_DIR}\n`);
+      console.log(
+        `📦 Running quality in parent project: ${PARENT_OR_APP_DIR}\n`
+      );
       runQualityChecks(PARENT_OR_APP_DIR, "parent project");
       console.log("\n✅ Parent project quality checks passed\n");
     } catch (error) {
@@ -63,7 +66,7 @@ function runQuality(): void {
       process.exitCode = 1;
       return;
     }
-  } 
+  }
   // If we're in a child app, run current app first
   else if (!isInPrism && fs.existsSync(currentPackageJson)) {
     try {

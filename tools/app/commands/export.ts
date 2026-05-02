@@ -112,7 +112,6 @@ async function exportUsers(format: string, output: string): Promise<void> {
 export async function runExportCommand(
   options: ExportCommandOptions
 ): Promise<void> {
-
   logStart("Starting export command");
 
   // Validate required options

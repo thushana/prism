@@ -15,7 +15,7 @@
     "monorepo"
   ],
   "engines": {
-    "node": ">=25.0.0"
+    "node": ">=24.0.0"
   },
   "bin": {
     "prism": "./tools/app/tools.mjs"
@@ -34,8 +34,8 @@
     "dev:kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true; pkill -f 'tsc --watch' 2>/dev/null || true; pkill -f 'next dev' 2>/dev/null || true; echo 'Killed all dev servers'",
     "dev:setup": "./scripts/setup-hosts.sh",
     "dev:web": "pnpm --filter web run dev",
-    "format": "prettier --write \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,tsx,json}\" \"docs/**/*.md\" \"*.{js,mjs,json}\"",
-    "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,tsx,json}\" \"docs/**/*.md\" \"*.{js,mjs,json}\"",
+    "format": "prettier --write . --log-level warn",
+    "format:check": "prettier --check . --log-level warn",
     "lint": "eslint \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\"",
     "lint:fix": "eslint \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\" --fix",
     "precommit": "pnpm run build",

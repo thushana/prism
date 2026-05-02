@@ -9,8 +9,9 @@ import path from "path";
 
 // Detect if we're running from prism or parent project
 const scriptDir = __dirname;
-const isInPrism = path.basename(path.dirname(scriptDir)) === "prism" || 
-                  path.basename(scriptDir) === "prism";
+const isInPrism =
+  path.basename(path.dirname(scriptDir)) === "prism" ||
+  path.basename(scriptDir) === "prism";
 
 let PRISM_DIR: string;
 let PARENT_DIR: string;
@@ -40,7 +41,9 @@ function syncCommands(): void {
 
   // Check if prism commands directory exists
   if (!fs.existsSync(PRISM_COMMANDS_DIR)) {
-    console.log(`ℹ️  Prism commands directory not found at: ${PRISM_COMMANDS_DIR}`);
+    console.log(
+      `ℹ️  Prism commands directory not found at: ${PRISM_COMMANDS_DIR}`
+    );
     console.log(`   Creating directory...`);
     fs.mkdirSync(PRISM_COMMANDS_DIR, { recursive: true });
     console.log(`✅ Created prism commands directory`);
@@ -59,21 +62,30 @@ function syncCommands(): void {
       const stats = fs.lstatSync(PARENT_COMMANDS_DIR);
       if (stats.isSymbolicLink()) {
         const target = fs.readlinkSync(PARENT_COMMANDS_DIR);
-        const resolvedTarget = path.resolve(path.dirname(PARENT_COMMANDS_DIR), target);
+        const resolvedTarget = path.resolve(
+          path.dirname(PARENT_COMMANDS_DIR),
+          target
+        );
         const resolvedPrismCommands = path.resolve(PRISM_COMMANDS_DIR);
-        
+
         if (resolvedTarget === resolvedPrismCommands) {
-          console.log("✅ Symlink already exists and points to correct location");
+          console.log(
+            "✅ Symlink already exists and points to correct location"
+          );
           return;
         } else {
-          console.log(`⚠️  Symlink exists but points to different location: ${target}`);
+          console.log(
+            `⚠️  Symlink exists but points to different location: ${target}`
+          );
           console.log(`   Removing old symlink...`);
           fs.unlinkSync(PARENT_COMMANDS_DIR);
         }
       } else {
         console.log(`⚠️  ${PARENT_COMMANDS_DIR} exists but is not a symlink`);
         console.log(`   It's a ${stats.isDirectory() ? "directory" : "file"}`);
-        console.log(`   Please remove it manually if you want to create a symlink`);
+        console.log(
+          `   Please remove it manually if you want to create a symlink`
+        );
         process.exit(1);
       }
     } catch (error) {
@@ -91,7 +103,9 @@ function syncCommands(): void {
     );
 
     fs.symlinkSync(relativePath, PARENT_COMMANDS_DIR, "dir");
-    console.log(`✅ Created symlink: ${PARENT_COMMANDS_DIR} -> ${PRISM_COMMANDS_DIR}`);
+    console.log(
+      `✅ Created symlink: ${PARENT_COMMANDS_DIR} -> ${PRISM_COMMANDS_DIR}`
+    );
   } catch (error) {
     console.error(`❌ Failed to create symlink: ${error}`);
     if (error instanceof Error) {

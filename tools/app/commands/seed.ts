@@ -69,7 +69,6 @@ async function seedUsers(count: number): Promise<void> {
 export async function runSeedCommand(
   options: SeedCommandOptions
 ): Promise<void> {
-
   // Parse options
   const count = options.count ? parseNumber(options.count, "count", 1) : 10;
   const table = options.table || "users";

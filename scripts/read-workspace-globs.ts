@@ -35,8 +35,8 @@ export function readWorkspaceGlobs(rootDirectoryPath: string): string[] {
   }
 
   const packageJsonPath = path.join(rootDirectoryPath, "package.json");
-  const packageJson = JSON.parse(
-    fs.readFileSync(packageJsonPath, "utf-8"),
-  ) as { workspaces?: string[] };
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8")) as {
+    workspaces?: string[];
+  };
   return packageJson.workspaces ?? [];
 }
