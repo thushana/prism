@@ -2,7 +2,7 @@ Write a commit message for the changes on disk
 
 ## Philosophy
 
-**One authoritative representation.** The commit message should capture *what* changed and *why* (if non-obvious), not *how* (the code shows that). Be concise but descriptive enough that someone reading git log understands the change.
+**One authoritative representation.** The commit message should capture _what_ changed and _why_ (if non-obvious), not _how_ (the code shows that). Be concise but descriptive enough that someone reading git log understands the change.
 
 ## Rules
 

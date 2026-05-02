@@ -5,24 +5,24 @@
  * Excludes node_modules, .git, .next, and other build/cache directories
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // Directories to exclude from cleaning
 const EXCLUDED_DIRS = new Set([
-  'node_modules',
-  '.git',
-  '.next',
-  '.vercel',
-  'dist',
-  'build',
-  '.cache',
-  '.turbo',
-  'coverage',
-  '.nyc_output',
-  '.vscode',
-  '.idea',
-  'migrations', // Keep database migrations directory structure
+  "node_modules",
+  ".git",
+  ".next",
+  ".vercel",
+  "dist",
+  "build",
+  ".cache",
+  ".turbo",
+  "coverage",
+  ".nyc_output",
+  ".vscode",
+  ".idea",
+  "migrations", // Keep database migrations directory structure
 ]);
 
 // Files/directories to always ignore
@@ -56,7 +56,10 @@ function isEmptyDir(dirPath: string): boolean {
  * Check if a directory should be excluded
  */
 function shouldExclude(dirName: string): boolean {
-  return EXCLUDED_DIRS.has(dirName) || IGNORED_PATTERNS.some(pattern => pattern.test(dirName));
+  return (
+    EXCLUDED_DIRS.has(dirName) ||
+    IGNORED_PATTERNS.some((pattern) => pattern.test(dirName))
+  );
 }
 
 /**
@@ -72,16 +75,16 @@ function removeEmptyDirs(dirPath: string, rootPath: string = dirPath): number {
     // First, recursively process subdirectories
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry);
-      
+
       try {
         const stat = fs.statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           // Skip excluded directories
           if (shouldExclude(entry)) {
             continue;
           }
-          
+
           // Recursively process subdirectory
           removedCount += removeEmptyDirs(fullPath, rootPath);
         }
@@ -97,7 +100,9 @@ function removeEmptyDirs(dirPath: string, rootPath: string = dirPath): number {
       if (dirPath !== rootPath) {
         try {
           fs.rmdirSync(dirPath);
-          console.log(`Removed empty directory: ${path.relative(process.cwd(), dirPath)}`);
+          console.log(
+            `Removed empty directory: ${path.relative(process.cwd(), dirPath)}`
+          );
           removedCount++;
         } catch (error) {
           // If removal fails, directory might not be empty or we don't have permission
@@ -120,10 +125,11 @@ console.log(`Cleaning empty directories in: ${projectRoot}\n`);
 const removedCount = removeEmptyDirs(projectRoot);
 
 if (removedCount === 0) {
-  console.log('\n✓ No empty directories found');
+  console.log("\n✓ No empty directories found");
 } else {
-  console.log(`\n✓ Removed ${removedCount} empty director${removedCount === 1 ? 'y' : 'ies'}`);
+  console.log(
+    `\n✓ Removed ${removedCount} empty director${removedCount === 1 ? "y" : "ies"}`
+  );
 }
 
 process.exit(0);
-

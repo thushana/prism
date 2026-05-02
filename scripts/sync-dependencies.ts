@@ -21,23 +21,23 @@ if (isRunningFromInsidePrismRepository) {
   prismRepositoryRootDirectoryPath = path.join(scriptDirectoryPath, "..");
   parentProjectRootDirectoryPath = path.join(
     prismRepositoryRootDirectoryPath,
-    "..",
+    ".."
   );
 } else {
   parentProjectRootDirectoryPath = path.join(scriptDirectoryPath, "..");
   prismRepositoryRootDirectoryPath = path.join(
     parentProjectRootDirectoryPath,
-    "prism",
+    "prism"
   );
 }
 
 const referenceWebApplicationPackageJsonPath = path.join(
   prismRepositoryRootDirectoryPath,
-  "apps/web/package.json",
+  "apps/web/package.json"
 );
 const parentApplicationPackageJsonPath = path.join(
   parentProjectRootDirectoryPath,
-  "package.json",
+  "package.json"
 );
 
 /** Package names: web `dependencies` mirrored to parent `dependencies`. */
@@ -89,26 +89,26 @@ function writePackageJsonFile(filePath: string, data: PackageJson): void {
 }
 
 function synchronizeDependencyVersions(
-  shouldWriteUpdatesToParentPackageJson: boolean,
+  shouldWriteUpdatesToParentPackageJson: boolean
 ): void {
   if (!fs.existsSync(referenceWebApplicationPackageJsonPath)) {
     console.error(
-      `❌ Web package.json not found: ${referenceWebApplicationPackageJsonPath}`,
+      `❌ Web package.json not found: ${referenceWebApplicationPackageJsonPath}`
     );
     process.exit(1);
   }
   if (!fs.existsSync(parentApplicationPackageJsonPath)) {
     console.error(
-      `❌ Parent package.json not found: ${parentApplicationPackageJsonPath}`,
+      `❌ Parent package.json not found: ${parentApplicationPackageJsonPath}`
     );
     process.exit(1);
   }
 
   const referencePackageJson = readPackageJsonFile(
-    referenceWebApplicationPackageJsonPath,
+    referenceWebApplicationPackageJsonPath
   );
   const parentPackageJson = readPackageJsonFile(
-    parentApplicationPackageJsonPath,
+    parentApplicationPackageJsonPath
   );
 
   const referenceRuntimeDependencies = referencePackageJson.dependencies ?? {};
@@ -128,14 +128,14 @@ function synchronizeDependencyVersions(
     const referenceVersionRange = referenceRuntimeDependencies[packageName];
     if (referenceVersionRange === undefined) {
       skippedSynchronizationDescriptionLines.push(
-        `${packageName} (not in web dependencies — skipped)`,
+        `${packageName} (not in web dependencies — skipped)`
       );
       continue;
     }
     const parentVersionRange = parentRuntimeDependencies[packageName];
     if (parentVersionRange !== referenceVersionRange) {
       versionDriftDescriptionLines.push(
-        `dependencies.${packageName}: parent "${parentVersionRange ?? "(missing)"}" → reference web "${referenceVersionRange}"`,
+        `dependencies.${packageName}: parent "${parentVersionRange ?? "(missing)"}" → reference web "${referenceVersionRange}"`
       );
       if (shouldWriteUpdatesToParentPackageJson) {
         parentRuntimeDependencies[packageName] = referenceVersionRange;
@@ -144,18 +144,17 @@ function synchronizeDependencyVersions(
   }
 
   for (const packageName of REFERENCE_WEB_APPLICATION_DEVELOPMENT_DEPENDENCY_PACKAGE_NAMES) {
-    const referenceVersionRange =
-      referenceDevelopmentDependencies[packageName];
+    const referenceVersionRange = referenceDevelopmentDependencies[packageName];
     if (referenceVersionRange === undefined) {
       skippedSynchronizationDescriptionLines.push(
-        `${packageName} (not in web devDependencies — skipped)`,
+        `${packageName} (not in web devDependencies — skipped)`
       );
       continue;
     }
     const parentVersionRange = parentDevelopmentDependencies[packageName];
     if (parentVersionRange !== referenceVersionRange) {
       versionDriftDescriptionLines.push(
-        `devDependencies.${packageName}: parent "${parentVersionRange ?? "(missing)"}" → reference web "${referenceVersionRange}"`,
+        `devDependencies.${packageName}: parent "${parentVersionRange ?? "(missing)"}" → reference web "${referenceVersionRange}"`
       );
       if (shouldWriteUpdatesToParentPackageJson) {
         parentDevelopmentDependencies[packageName] = referenceVersionRange;
@@ -165,7 +164,7 @@ function synchronizeDependencyVersions(
 
   if (skippedSynchronizationDescriptionLines.length > 0) {
     console.log(
-      "ℹ️  Allowlisted packages not present in web (left unchanged):\n",
+      "ℹ️  Allowlisted packages not present in web (left unchanged):\n"
     );
     for (const line of skippedSynchronizationDescriptionLines) {
       console.log(`   - ${line}`);
@@ -181,7 +180,7 @@ function synchronizeDependencyVersions(
   console.log(
     shouldWriteUpdatesToParentPackageJson
       ? "📝 Applying updates from prism/apps/web:\n"
-      : "⚠️  Drift vs prism/apps/web (run with --update to apply):\n",
+      : "⚠️  Drift vs prism/apps/web (run with --update to apply):\n"
   );
   for (const line of versionDriftDescriptionLines) {
     console.log(`   - ${line}`);
@@ -196,7 +195,6 @@ function synchronizeDependencyVersions(
   }
 }
 
-const shouldWriteUpdatesToParentPackageJson =
-  process.argv.includes("--update");
+const shouldWriteUpdatesToParentPackageJson = process.argv.includes("--update");
 
 synchronizeDependencyVersions(shouldWriteUpdatesToParentPackageJson);
