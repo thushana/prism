@@ -175,7 +175,13 @@ function generatePackageJson(
       start: "next start",
       lint: "eslint app --ext .ts,.tsx",
       format: 'prettier --write "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
+      "format:check":
+        'prettier --check "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
       typecheck: "tsc --noEmit",
+      test: "vitest",
+      "test:run": "vitest run",
+      "quality:ci":
+        "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
       "db:generate": "drizzle-kit generate --config=database/drizzle.config.ts",
       "db:migrate": "drizzle-kit migrate --config=database/drizzle.config.ts",
       "db:push": "drizzle-kit push --config=database/drizzle.config.ts",
@@ -208,6 +214,8 @@ function generatePackageJson(
       tsx: "^4.20.6",
       "tw-animate-css": "^1.4.0",
       typescript: "^5.9.3",
+      vitest: "^4.1.5",
+      "@vitejs/plugin-react": "^4.3.4",
     },
   };
 
