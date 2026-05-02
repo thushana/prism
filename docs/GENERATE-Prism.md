@@ -396,3 +396,4 @@ The generator is **highly opinionated** - no configuration options beyond the ap
 - Check the [Database Guide](./DATABASE-Prism.md)
 - Explore [Intelligence Tasks](./INTELLIGENCE-Prism.md)
 - Review [Deployment Guide](./DEPLOYMENT-Prism.md)
+- Set up **CI, Dependabot, and hooks** using [Project health](./PROJECT-HEALTH-Prism.md) (submodule checkout, `quality:ci`, lint-staged)
