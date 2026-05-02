@@ -15,7 +15,7 @@ import {
 
 /** `FAMILY • shade • token` — trigger strip (with token when shown), grid cell titles, tooltips. */
 export function prismColorPickerDisplayBullets(
-  face: PrismColorPickerColorFace,
+  face: PrismColorPickerColorFace
 ): string {
   const t = normalizePickerColorToken(face.token);
   if (!face.swatch) {
@@ -23,7 +23,7 @@ export function prismColorPickerDisplayBullets(
   }
   const family = paletteFamilyDisplayTitle(
     face.swatch.palette,
-    face.swatch.family,
+    face.swatch.family
   ).toUpperCase();
   const shade = materialShadeLabelDisplay(face.swatch.shade);
   if (!t) {
@@ -47,7 +47,7 @@ function sanitizeSingleLineJsComment(body: string): string {
  * color comment; gradient output stays focused on the ordered `gradient` spec.
  */
 export function prismColorPickerClipboardColorProp(
-  partial: PartialPrismColorSpec | undefined,
+  partial: PartialPrismColorSpec | undefined
 ): string {
   const n = normalizePrismColorSpec(partial);
   const grad = partial?.gradient;
@@ -60,7 +60,7 @@ export function prismColorPickerClipboardColorProp(
     }
     lines.push("  gradient: {");
     lines.push(
-      `    swatches: [${grad.swatches.map((s) => JSON.stringify(s)).join(", ")}],`,
+      `    swatches: [${grad.swatches.map((s) => JSON.stringify(s)).join(", ")}],`
     );
     lines.push(`    direction: "${grad.direction}",`);
     if (grad.shade !== undefined) {
@@ -85,7 +85,7 @@ export function prismColorPickerClipboardColorProp(
     lines.push(`  palette: ${JSON.stringify(n.palette)},`);
   }
   lines.push(
-    `  swatchPrimary: ${JSON.stringify(family)}, // ${resolved || "—"}`,
+    `  swatchPrimary: ${JSON.stringify(family)}, // ${resolved || "—"}`
   );
   const shadeLit =
     typeof n.shade === "string" ? JSON.stringify(n.shade) : String(n.shade);
@@ -110,7 +110,7 @@ export function prismColorPickerClipboardColorProp(
 
 /** Title/aria string for a single grid cell (palette + family + shade + hex). */
 export function swatchPickerDisplayTitle(
-  swatch: PrismColorPickerSwatch,
+  swatch: PrismColorPickerSwatch
 ): string {
   return prismColorPickerDisplayBullets({ swatch, token: swatch.hex });
 }

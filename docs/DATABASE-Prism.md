@@ -10,10 +10,10 @@ Prism uses **Drizzle ORM** with **Neon** (PostgreSQL). This doc is the **mental 
 
 ## Where Things Live
 
-| Area | Schema | Drizzle config | Migrations output |
-|------|--------|----------------|-------------------|
-| Shared package | [`packages/database/source/schema.ts`](../packages/database/source/schema.ts) | [`packages/database/drizzle.config.ts`](../packages/database/drizzle.config.ts) | `packages/database/migrations/` |
-| Sample app `web` | [`apps/web/database/schema.ts`](../apps/web/database/schema.ts) | [`apps/web/database/drizzle.config.ts`](../apps/web/database/drizzle.config.ts) | `apps/web/database/migrations/` (created when you generate) |
+| Area             | Schema                                                                        | Drizzle config                                                                  | Migrations output                                           |
+| ---------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Shared package   | [`packages/database/source/schema.ts`](../packages/database/source/schema.ts) | [`packages/database/drizzle.config.ts`](../packages/database/drizzle.config.ts) | `packages/database/migrations/`                             |
+| Sample app `web` | [`apps/web/database/schema.ts`](../apps/web/database/schema.ts)               | [`apps/web/database/drizzle.config.ts`](../apps/web/database/drizzle.config.ts) | `apps/web/database/migrations/` (created when you generate) |
 
 **Imports**
 

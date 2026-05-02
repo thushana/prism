@@ -66,7 +66,10 @@ export default async function AdminAppSystemPage(): Promise<React.JSX.Element> {
       description="Environment, deployment, and dependency overview."
       showSignOut
     >
-      <SystemSheetPage data={data} config={{ nestedUnderAdminPageShell: true }} />
+      <SystemSheetPage
+        data={data}
+        config={{ nestedUnderAdminPageShell: true }}
+      />
     </AdminPageShell>
   );
 }

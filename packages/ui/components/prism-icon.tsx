@@ -83,9 +83,7 @@ function resolvePrismIconSizePx(size: PrismIconProps["size"]): number {
   return PRISM_ICON_SIZE_NAME_TO_PX[size];
 }
 
-function resolvePrismIconWeightValue(
-  weight: PrismIconProps["weight"]
-): number {
+function resolvePrismIconWeightValue(weight: PrismIconProps["weight"]): number {
   if (weight === undefined)
     return PRISM_ICON_WEIGHT_NAME_TO_VALUE[PRISM_ICON_DEFAULTS.weight];
   if (typeof weight === "number") {

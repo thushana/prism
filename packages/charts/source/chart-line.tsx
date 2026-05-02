@@ -12,7 +12,8 @@ type ResponsiveLineOnlyProps = Omit<
 >;
 
 export interface LineChartProps
-  extends Omit<LineSvgProps<LineSeries>, "theme" | "height" | "width">,
+  extends
+    Omit<LineSvgProps<LineSeries>, "theme" | "height" | "width">,
     ResponsiveLineOnlyProps {
   /**
    * Optional theme override. If not provided, uses theme from CSS variables.

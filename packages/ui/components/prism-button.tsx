@@ -165,11 +165,7 @@ export function PrismButton(
   const tight = spacing === "tight";
 
   const shouldGrow =
-    !disableMotion &&
-    !disableGrow &&
-    !lineBottom &&
-    !toggled &&
-    !gapNone;
+    !disableMotion && !disableGrow && !lineBottom && !toggled && !gapNone;
 
   React.useEffect(() => {
     const el = rootRef.current;
@@ -491,8 +487,7 @@ export function PrismButton(
     ...(gapNone && {
       margin: 0,
       lineHeight: 1,
-      ...(segmentPosition &&
-        segmentPosition !== "first" && { marginLeft: -1 }),
+      ...(segmentPosition && segmentPosition !== "first" && { marginLeft: -1 }),
     }),
   };
 
@@ -565,10 +560,16 @@ export function PrismButton(
     toggled: toggled || undefined,
   });
 
-  const { className: _omit, style: restSpanStyle, ...restSpanSafe } =
-    rest as React.ComponentProps<"span">;
-  const { className: _omitBtn, style: restButtonStyle, ...restButtonSafe } =
-    rest as React.ComponentProps<"button">;
+  const {
+    className: _omit,
+    style: restSpanStyle,
+    ...restSpanSafe
+  } = rest as React.ComponentProps<"span">;
+  const {
+    className: _omitBtn,
+    style: restButtonStyle,
+    ...restButtonSafe
+  } = rest as React.ComponentProps<"button">;
 
   if (asChild) {
     return (

@@ -7,12 +7,7 @@
  * Merge order: defaultPresets[preset] + appPresets[preset] + explicit props (explicit wins).
  */
 
-import {
-  AlignJustify,
-  Circle,
-  LayoutGrid,
-  Sparkles,
-} from "lucide-react";
+import { AlignJustify, Circle, LayoutGrid, Sparkles } from "lucide-react";
 import type { PrismButtonProps } from "../components/prism-button";
 
 /** A preset is a partial set of PrismButton props (label is always from the caller). */

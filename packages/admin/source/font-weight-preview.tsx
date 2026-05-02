@@ -29,10 +29,9 @@ const WEIGHTS = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
 const SELECT_CLASS =
   "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-function buildFamilies(props: FontWeightPreviewProps): Record<
-  SansFamilyId | SerifFamilyId | MonoFamilyId,
-  FamilyConfig
-> {
+function buildFamilies(
+  props: FontWeightPreviewProps
+): Record<SansFamilyId | SerifFamilyId | MonoFamilyId, FamilyConfig> {
   return {
     satoshi: {
       id: "satoshi",
@@ -159,9 +158,7 @@ function CategoryColumn({
   activeFamily: FamilyConfig;
 }) {
   return (
-    <div
-      className="space-y-1 border-b border-border pb-8 last:border-b-0 last:pb-0 md:border-b-0 md:pb-0 md:[&:not(:first-child)]:pl-12 lg:[&:not(:first-child)]:pl-16"
-    >
+    <div className="space-y-1 border-b border-border pb-8 last:border-b-0 last:pb-0 md:border-b-0 md:pb-0 md:[&:not(:first-child)]:pl-12 lg:[&:not(:first-child)]:pl-16">
       <h2
         className={`text-lg font-semibold tracking-tight sm:text-xl ${headingClassName}`}
       >
@@ -188,7 +185,11 @@ function CategoryColumn({
           </option>
         ))}
       </select>
-      <PrismTypography role="body" size="medium" className="text-muted-foreground">
+      <PrismTypography
+        role="body"
+        size="medium"
+        className="text-muted-foreground"
+      >
         {activeFamily.subtitle}
       </PrismTypography>
       <div className="space-y-8 pt-6">

@@ -48,10 +48,10 @@ export function PrismLayoutDemo(): JSX.Element {
               size="large"
               className="text-muted-foreground"
             >
-              Feature flags, authentication, and cost tracking plug in via
-              Prism packages so you can turn capabilities on when you need
-              them. If you want a single stack that stays consistent as the
-              product grows, Prism is built for that.
+              Feature flags, authentication, and cost tracking plug in via Prism
+              packages so you can turn capabilities on when you need them. If
+              you want a single stack that stays consistent as the product
+              grows, Prism is built for that.
             </PrismTypography>
           </PrismLayoutText>
         </div>

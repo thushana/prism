@@ -8,22 +8,22 @@ Naming for admin shell props and the shared title map follows [NAMING.md](../.cu
 
 At the **repository root**, Prism apps ship an `app.json` file validated by the **`application-settings`** package (`readApplicationSettings()` from `application-settings`, server-only). Fields:
 
-| Field | Purpose |
-| --- | --- |
-| `displayName` | Human-facing app name (e.g. admin section label above application links). |
-| `description` | Short product description (e.g. `AdminPageShell` subtitle on `/admin` and `/admin/app`). |
-| `icon` | Optional string token for shell icons (e.g. Lucide export name); map in UI when you render it. |
+| Field         | Purpose                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| `displayName` | Human-facing app name (e.g. admin section label above application links).                      |
+| `description` | Short product description (e.g. `AdminPageShell` subtitle on `/admin` and `/admin/app`).       |
+| `icon`        | Optional string token for shell icons (e.g. Lucide export name); map in UI when you render it. |
 
 ## How It Works
 
-Authentication uses a **signed cookie** (`prism-admin-authentication`) set against `PRISM_KEY_WEB`. There is no user table — the password *is* the key. Suitable for internal tools with a single owner or small team.
+Authentication uses a **signed cookie** (`prism-admin-authentication`) set against `PRISM_KEY_WEB`. There is no user table — the password _is_ the key. Suitable for internal tools with a single owner or small team.
 
 Two keys exist so API and web surfaces can be rotated independently:
 
-| Key | Used by |
-|---|---|
+| Key             | Used by                                        |
+| --------------- | ---------------------------------------------- |
 | `PRISM_KEY_WEB` | Web page cookie auth (`/admin`, password form) |
-| `PRISM_KEY_API` | API route header auth (`x-prism-api-key`) |
+| `PRISM_KEY_API` | API route header auth (`x-prism-api-key`)      |
 
 ## Route Structure
 
@@ -66,7 +66,7 @@ export const revalidate = 0;
 
 export default async function MyAdminPage() {
   const gate = await requireAdminPage();
-  if (gate) return gate;            // unauthenticated → shows PasswordForm
+  if (gate) return gate; // unauthenticated → shows PasswordForm
   // … render authenticated content
 }
 ```
@@ -105,14 +105,14 @@ Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell`
 
 The package root (`@authentication`) exports **only client-safe** modules (`PasswordForm`, `AdminPageShell`, `AdminBackLink`, `SignOutForm`, and `verifyKey` from `./core`). Server-only code uses **`import "server-only"`** and **Next server APIs**; it must be imported from **subpaths** so client bundles never traverse those modules.
 
-| Export | Import from | Kind | Purpose |
-|---|---|---|---|
-| `requireAdminPage()` | `@authentication/admin-page` | async server fn | Cookie check; returns `<PasswordForm />` or `null` |
-| `checkWebAuthentication`, `clearWebAuthenticationCookie`, … | `@authentication/web` | server | Cookie signing / verification |
-| `requireApiAuthentication` | `@authentication/api` | server | `x-prism-api-key` gate |
-| `createAuthenticationRoute` | `@authentication/authentication_route` | server | Factory for `app/api/admin/authentication/route.ts` |
-| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication` | client | Admin UI chrome and forms |
-| `verifyKey` | `@authentication` | isomorphic | Shared key equality check |
+| Export                                                           | Import from                            | Kind            | Purpose                                             |
+| ---------------------------------------------------------------- | -------------------------------------- | --------------- | --------------------------------------------------- |
+| `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null`  |
+| `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                       |
+| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate                              |
+| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for `app/api/admin/authentication/route.ts` |
+| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                           |
+| `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                           |
 
 In generated `apps/web`, replace `@authentication` with the package name `authentication` and the same subpaths (e.g. `authentication/web`).
 

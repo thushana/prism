@@ -57,7 +57,10 @@ const EXCLUSIVE_GROUPS: DividerOptionKey[][] = [
 ];
 
 const CUSTOMIZER_COLUMNS: { heading: string; keys: DividerOptionKey[] }[] = [
-  { heading: "Line weight", keys: ["lwHairline", "lwThin", "lwMedium", "lwThick"] },
+  {
+    heading: "Line weight",
+    keys: ["lwHairline", "lwThin", "lwMedium", "lwThick"],
+  },
   { heading: "Tone", keys: ["toneDefault", "toneMuted", "tonePrimary"] },
   { heading: "Spacing", keys: ["spNone", "spCompact", "spComfortable"] },
   { heading: "Emblem", keys: ["emblemNone", "emblemLetter", "emblemIcon"] },
@@ -66,7 +69,6 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: DividerOptionKey[] }[] = [
     keys: ["roundedBar", "gradientLine", "surfaceCard"],
   },
 ];
-
 
 type DividerPreviewProps = {
   lineWeight: PrismDividerLineWeight;
@@ -82,7 +84,9 @@ type DividerPreviewProps = {
   surfaceClassName?: string;
 };
 
-function selectedToDividerProps(selected: Set<DividerOptionKey>): DividerPreviewProps {
+function selectedToDividerProps(
+  selected: Set<DividerOptionKey>
+): DividerPreviewProps {
   const lineWeight: PrismDividerLineWeight = selected.has("lwHairline")
     ? "hairline"
     : selected.has("lwMedium")
@@ -153,7 +157,8 @@ function formatDividerSnippet(p: DividerPreviewProps): string {
     }
     if (p.iconFill) parts.push(`  iconFill="${p.iconFill}"`);
   }
-  if (p.surfaceClassName) parts.push(`  surfaceClassName="${p.surfaceClassName}"`);
+  if (p.surfaceClassName)
+    parts.push(`  surfaceClassName="${p.surfaceClassName}"`);
   parts.push("/>");
   return `${parts.join("\n")}\n`;
 }
@@ -175,12 +180,10 @@ export function PrismDividerDemo(): React.JSX.Element {
   const [letter, setLetter] = useState("P");
   const [iconName, setIconName] = useState("deployed_code");
   const [iconSize, setIconSize] = useState<PrismSize>("medium");
-  const [iconWeight, setIconWeight] = useState<NonNullable<
-    PrismIconProps["weight"]
-  >>("regular");
-  const [iconFill, setIconFill] = useState<NonNullable<
-    PrismIconProps["fill"]
-  >>("off");
+  const [iconWeight, setIconWeight] =
+    useState<NonNullable<PrismIconProps["weight"]>>("regular");
+  const [iconFill, setIconFill] =
+    useState<NonNullable<PrismIconProps["fill"]>>("off");
 
   const toggle = (key: DividerOptionKey) => {
     setSelected((prev) => {
@@ -274,7 +277,11 @@ export function PrismDividerDemo(): React.JSX.Element {
 
             {selected.has("emblemLetter") ? (
               <div className="mb-4">
-                <PrismTypography role="overline" size="small" className="mb-1 block">
+                <PrismTypography
+                  role="overline"
+                  size="small"
+                  className="mb-1 block"
+                >
                   letter
                 </PrismTypography>
                 <input
@@ -290,7 +297,11 @@ export function PrismDividerDemo(): React.JSX.Element {
             {selected.has("emblemIcon") ? (
               <div className="mb-4 space-y-3">
                 <div>
-                  <PrismTypography role="overline" size="small" className="mb-1 block">
+                  <PrismTypography
+                    role="overline"
+                    size="small"
+                    className="mb-1 block"
+                  >
                     iconName
                   </PrismTypography>
                   <input
@@ -302,7 +313,11 @@ export function PrismDividerDemo(): React.JSX.Element {
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <div>
-                    <PrismTypography role="overline" size="small" className="mb-1 block">
+                    <PrismTypography
+                      role="overline"
+                      size="small"
+                      className="mb-1 block"
+                    >
                       iconSize
                     </PrismTypography>
                     <select
@@ -311,12 +326,18 @@ export function PrismDividerDemo(): React.JSX.Element {
                       onChange={(e) => setIconSize(e.target.value as PrismSize)}
                     >
                       {(["small", "medium", "large"] as const).map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <PrismTypography role="overline" size="small" className="mb-1 block">
+                    <PrismTypography
+                      role="overline"
+                      size="small"
+                      className="mb-1 block"
+                    >
                       iconWeight
                     </PrismTypography>
                     <select
@@ -325,23 +346,39 @@ export function PrismDividerDemo(): React.JSX.Element {
                       onChange={(e) => {
                         const v = e.target.value;
                         setIconWeight(
-                          (Number.isNaN(Number(v)) ? v : Number(v)) as NonNullable<PrismIconProps["weight"]>
+                          (Number.isNaN(Number(v))
+                            ? v
+                            : Number(v)) as NonNullable<
+                            PrismIconProps["weight"]
+                          >
                         );
                       }}
                     >
-                      {(["light", "thin", "regular", "bold", "heavy"] as const).map((w) => (
-                        <option key={w} value={w}>{w}</option>
+                      {(
+                        ["light", "thin", "regular", "bold", "heavy"] as const
+                      ).map((w) => (
+                        <option key={w} value={w}>
+                          {w}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <PrismTypography role="overline" size="small" className="mb-1 block">
+                    <PrismTypography
+                      role="overline"
+                      size="small"
+                      className="mb-1 block"
+                    >
                       iconFill
                     </PrismTypography>
                     <select
                       className="rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={iconFill}
-                      onChange={(e) => setIconFill(e.target.value as NonNullable<PrismIconProps["fill"]>)}
+                      onChange={(e) =>
+                        setIconFill(
+                          e.target.value as NonNullable<PrismIconProps["fill"]>
+                        )
+                      }
                     >
                       <option value="off">off</option>
                       <option value="on">on</option>
@@ -357,7 +394,12 @@ export function PrismDividerDemo(): React.JSX.Element {
       </div>
 
       <div className="pb-8">
-        <PrismTypography role="label" size="small" as="code" className="mb-2 block">
+        <PrismTypography
+          role="label"
+          size="small"
+          as="code"
+          className="mb-2 block"
+        >
           Preview
         </PrismTypography>
         <div
@@ -367,7 +409,11 @@ export function PrismDividerDemo(): React.JSX.Element {
               : "rounded-xl border border-dashed border-border bg-background p-8"
           }
         >
-          <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
+          <PrismTypography
+            role="body"
+            size="medium"
+            color={{ semanticText: "muted" }}
+          >
             Content above
           </PrismTypography>
           <PrismDivider
@@ -383,12 +429,15 @@ export function PrismDividerDemo(): React.JSX.Element {
             iconFill={dividerProps.iconFill}
             surfaceClassName={dividerProps.surfaceClassName}
           />
-          <PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
+          <PrismTypography
+            role="body"
+            size="medium"
+            color={{ semanticText: "muted" }}
+          >
             Content below
           </PrismTypography>
         </div>
       </div>
-
     </>
   );
 }
