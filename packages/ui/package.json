@@ -16,6 +16,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
     "@prism/utilities": "file:../utilities",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",

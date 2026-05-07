@@ -1,5 +1,7 @@
 export * from "./prism-divider";
 export * from "./prism-card";
+export * from "./prism-emoji";
+export * from "./prism-emoji-picker";
 export * from "./prism-icon";
 export * from "./prism-layout";
 export * from "./prism-button";
