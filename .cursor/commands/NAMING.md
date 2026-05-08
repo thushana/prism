@@ -18,11 +18,11 @@ Use this when naming variables, props, types, files, or identifiers. Apply consi
 ## Examples
 
 - **PrismPathBar / admin shell:** `PrismPathBarTitleEntry`, `PrismPathBarSegment`, **`segments`** (on `PrismPathBar` with `mode="explicit"`), `titleByPathPrefix`, `pageTitle`, `prismPathBarTitleByPathPrefix`, **`explicitPrismPathBarSegments`** (on `AdminPageShell`), `prismPathBarIcon`; app map constant `ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX` in `admin-path-bar-title-by-path-prefix.ts` (not `titlesByPath`, `breadcrumb`, or `adminPathBarTitles`).
-- **Props / options:** **PrismButton** variant axes: `shape` (`pill` \| `rectangle` \| `rectangleRounded`), `line` (`full` \| `bottom` \| `none`), `spacing` (`normal` \| `tight`), `gap` (`normal` \| `none`), `textCase`, `paint`, `segmentPosition`; motion opt-outs `disableMotion`, `disableGrow`, `disableColorChange`, `disableIconMotion`; state `inverted`, `disabled`, `toggled`; `asChild` for Radix `Slot`. Palette stays on **`color`** (`ColorName`). Size: `PrismSize` as above. **PrismIcon** `weight`: named `light` \| `thin` \| `regular` \| `bold` \| `heavy` (wght 100 / 200 / 400 / 600 / 700) or numeric **100–700**; **`medium` is size-only**, not a weight name.
+- **Props / options:** **PrismButton** variant axes: `shape` (`pill` \| `rectangle` \| `rectangleRounded`), `line` (`full` \| `bottom` \| `none`), `spacing` (`normal` \| `tight`), `gap` (`normal` \| `none`), `textCase`, `paint`, `segmentPosition`; motion opt-outs `disableMotion`, `disableGrow`, `disableColorChange`, `disableIconMotion`; state `inverted`, `disabled`, `toggled`; `asChild` for Radix `Slot`. **`color`** is **`PartialPrismColorSpec`** (e.g. `palette` + kebab-case `swatchPrimary`, optional `gradient`). Size: `PrismSize` as above. **PrismIcon** `weight`: named `light` \| `thin` \| `regular` \| `bold` \| `heavy` (wght 100 / 200 / 400 / 600 / 700) or numeric **100–700**; **`medium` is size-only**, not a weight name.
 - **Booleans / flags:** Use `is`/`has`/`should` for general state (`isLoading`, `hasError`, `shouldRetry`). PrismButton chainables use names above; customizer preset keys may still use `colorBackgroundLight`-style ids.
 - **Event handlers:** Props use `on` prefix (`onClick`, `onSubmit`); internal handler functions use `handle` prefix (`handleClick`, `handleSubmit`).
 - **Files / modules:** `selector-time.tsx`, `journeys-map.tsx` (kebab-case, descriptive).
-- **Types:** `ButtonProps`, `AppearanceKey`, `ColorName` (PascalCase, no abbreviations).
+- **Types:** `ButtonProps`, `AppearanceKey`, `PartialPrismColorSpec`, `ColorName` (PascalCase, no abbreviations).
 - **Constants:** `MAX_RETRY_COUNT`, `API_BASE_URL` (SCREAMING_SNAKE_CASE).
 
 ## Anti-patterns

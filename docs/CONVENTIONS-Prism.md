@@ -254,7 +254,7 @@ packages/
 | Sign-out action              | `SignOutForm` (`@authentication`)                   | custom form                                            |
 | Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check                                    |
 
-`PrismButton` requires `color` and `label` — it is the design-system button (palette, animations, shapes). For minimal chrome (e.g. unstyled submit), use a native `<button>` with theme classes, or add a tiny wrapper in the app.
+`PrismButton` requires `color` (**`PartialPrismColorSpec`**, e.g. `palette` + kebab-case `swatchPrimary`) and `label` — it is the design-system button (palette, animations, shapes). For minimal chrome (e.g. unstyled submit), use a native `<button>` with theme classes, or add a tiny wrapper in the app.
 
 **Why:** Prism components carry Tailwind class names and conventions that are guaranteed to stay in sync with the design system. Raw HTML or third-party primitives drift silently.
 
