@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  PrismButton,
   PrismCodeBlock,
   PrismColorPicker,
   PrismEmoji,
@@ -14,8 +13,7 @@ import {
   type PrismEmojiSize,
   type PrismEmojiStyle,
 } from "@ui";
-import { createPortal } from "react-dom";
-import { useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 
 const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
   { value: "native", label: "native" },
@@ -154,116 +152,6 @@ const INLINE_TYPE_DEMOS = [
   },
 ] as const;
 
-function firstGraphemeCluster(s: string): string {
-  const t = s.trim();
-  if (!t) return "";
-  const segmenter =
-    typeof Intl !== "undefined" && "Segmenter" in Intl
-      ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
-      : null;
-  const first = segmenter ? [...segmenter.segment(t)][0]?.segment : undefined;
-  if (first) return first;
-  const cp = t.codePointAt(0);
-  return cp !== undefined ? String.fromCodePoint(cp) : t;
-}
-
-/**
- * Modal overlay that hosts {@link PrismEmojiPicker}.
- *
- * Layout uses inline styles (no Tailwind dependency) and a body-portal so it
- * is unaffected by ancestor containing blocks (`transform`, `filter`,
- * `contain`) and by Tailwind class scanning across the workspace.
- */
-function PrismEmojiPickerOverlay({
-  open,
-  onClose,
-  onSelect,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSelect: (emoji: string) => void;
-}): JSX.Element | null {
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open || typeof document === "undefined") return;
-    const prevFocus = document.activeElement as HTMLElement | null;
-    const raf = requestAnimationFrame(() => {
-      dialogRef.current?.focus({ preventScroll: true });
-    });
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      cancelAnimationFrame(raf);
-      document.removeEventListener("keydown", onKeyDown);
-      prevFocus?.focus?.({ preventScroll: true });
-    };
-  }, [open, onClose]);
-
-  if (!open || typeof document === "undefined") {
-    return null;
-  }
-
-  const overlay = (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 2147483000,
-        display: "flex",
-        alignItems: "stretch",
-        justifyContent: "center",
-        padding: "1rem",
-        boxSizing: "border-box",
-      }}
-      role="presentation"
-    >
-      <button
-        type="button"
-        aria-label="Close emoji picker"
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.4)",
-          border: 0,
-          cursor: "pointer",
-          padding: 0,
-        }}
-      />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Emoji picker"
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        className="rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none"
-        style={{
-          position: "relative",
-          width: "min(40rem, 100%)",
-          maxHeight: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
-          overflow: "hidden",
-          boxSizing: "border-box",
-        }}
-      >
-        <PrismEmojiPicker className="h-full min-h-0" onEmojiSelect={onSelect} />
-      </div>
-    </div>
-  );
-
-  return createPortal(overlay, document.body);
-}
-
 /**
  * Live controls + comparison grid for {@link PrismEmoji}.
  * Layout aligned with {@link PrismIconDemo}.
@@ -281,7 +169,6 @@ export function PrismEmojiDemo(): JSX.Element {
     swatchPrimary: "indigo",
     shade: 500,
   });
-  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [inlinePhraseIndex, setInlinePhraseIndex] = useState(0);
 
   const emojiTrim = emojiInput.trim();
@@ -304,11 +191,6 @@ export function PrismEmojiDemo(): JSX.Element {
     () => formatEmojiSnippet(previewProps),
     [previewProps]
   );
-
-  const browseEmojiGlyph = useMemo(() => {
-    if (emojiTrim !== "") return firstGraphemeCluster(emojiTrim);
-    return GALLERY_EMOJI;
-  }, [emojiTrim]);
 
   useEffect(() => {
     if (INLINE_DEMO_PHRASES.length <= 1) return;
@@ -335,18 +217,14 @@ export function PrismEmojiDemo(): JSX.Element {
           {/* Col 1 — picker */}
           <div className="min-w-0 space-y-3">
             <PrismTypography role="overline" size="small" className="block">
-              Emoji
+              Emoji picker
             </PrismTypography>
-            <div>
-              <PrismButton
-                type="button"
-                variant="plain"
-                paint="monochrome"
-                color="blue"
-                label={`${browseEmojiGlyph}\u00A0Browse emoji`}
-                size="large"
-                shape="pill"
-                onClick={() => setEmojiPickerOpen(true)}
+            <div className="h-96 min-h-0 overflow-hidden rounded-lg border border-border bg-muted/20 p-3">
+              <PrismEmojiPicker
+                className="h-full min-h-0"
+                onEmojiSelect={(picked) => {
+                  setEmojiInput(picked);
+                }}
               />
             </div>
           </div>
@@ -587,15 +465,6 @@ export function PrismEmojiDemo(): JSX.Element {
           ))}
         </div>
       </section>
-
-      <PrismEmojiPickerOverlay
-        open={emojiPickerOpen}
-        onClose={() => setEmojiPickerOpen(false)}
-        onSelect={(picked) => {
-          setEmojiInput(picked);
-          setEmojiPickerOpen(false);
-        }}
-      />
     </div>
   );
 }
