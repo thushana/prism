@@ -54,6 +54,11 @@ export type AdminPageShellProps = {
    */
   title?: string;
   /**
+   * Optional rich path bar leaf (e.g. emoji raster + name). When set with auto path bar, {@link title}
+   * stays the plain-text leaf; the bar renders this node instead.
+   */
+  pathBarPageTitleContent?: React.ReactNode;
+  /**
    * Optional client heading (e.g. live-updating title). When set, replaces the default gradient
    * {@link PrismTypography} block; keep passing `title` for the path bar leaf when using auto path bar.
    */
@@ -94,6 +99,7 @@ export type AdminPageShellProps = {
 export function AdminPageShell({
   children,
   title,
+  pathBarPageTitleContent,
   titleSlot,
   description,
   explicitPrismPathBarSegments,
@@ -143,6 +149,7 @@ export function AdminPageShell({
                   pathname={pathname}
                   titleByPathPrefix={prismPathBarTitleByPathPrefix!}
                   pageTitle={title!}
+                  pageTitleContent={pathBarPageTitleContent}
                   icon={prismPathBarIcon}
                 />
               ) : null}

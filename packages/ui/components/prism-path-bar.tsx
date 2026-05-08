@@ -42,8 +42,10 @@ export type PrismPathBarProps = {
       pathname: string;
       /** Normalized path prefix → title (string uses default `href` = key, or object with optional `href`). */
       titleByPathPrefix: Record<string, PrismPathBarTitleEntry>;
-      /** Same string as the page `<h1>` when used from {@link AdminPageShell}. */
+      /** Plain-text leaf (e.g. for accessibility / fallbacks); see {@link pageTitleContent}. */
       pageTitle: string;
+      /** When set, shown as the breadcrumb leaf instead of {@link pageTitle}. */
+      pageTitleContent?: React.ReactNode;
     }
 );
 
@@ -58,7 +60,8 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
       ? buildPrismPathBarAutoSegmentList(
           props.pathname,
           props.titleByPathPrefix,
-          props.pageTitle
+          props.pageTitle,
+          props.pageTitleContent
         )
       : (props.segments ?? []);
   const lastIndex = segmentList.length - 1;
@@ -77,7 +80,7 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
           const isLast = index === lastIndex;
           return (
             <li
-              key={`${segment.label}-${index}`}
+              key={`path-seg-${index}`}
               className="inline-flex items-baseline gap-x-0"
             >
               {index > 0 ? (
