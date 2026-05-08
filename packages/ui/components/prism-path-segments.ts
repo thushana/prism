@@ -3,6 +3,8 @@
  * segment list from an authoritative title map (no slug-based labels).
  */
 
+import type { ReactNode } from "react";
+
 export type PrismPathBarTitleEntry =
   | string
   | {
@@ -11,7 +13,7 @@ export type PrismPathBarTitleEntry =
       href?: string;
     };
 
-export type PrismPathBarSegment = { label: string; href?: string };
+export type PrismPathBarSegment = { label: ReactNode; href?: string };
 
 /** Strip query/hash, ensure leading `/`, drop trailing slash except root. */
 export function normalizePathname(raw: string): string {
@@ -57,7 +59,8 @@ function resolveTitleEntry(
 export function buildPrismPathBarAutoSegmentList(
   pathname: string,
   titleByPathPrefix: Record<string, PrismPathBarTitleEntry>,
-  pageTitle: string
+  pageTitle: string,
+  pageTitleContent?: ReactNode
 ): PrismPathBarSegment[] {
   const normalized = normalizePathname(pathname);
   const ancestors = listAncestorPathPrefixes(normalized);
@@ -65,6 +68,6 @@ export function buildPrismPathBarAutoSegmentList(
   for (const prefix of ancestors) {
     segmentList.push(resolveTitleEntry(prefix, titleByPathPrefix[prefix]));
   }
-  segmentList.push({ label: pageTitle });
+  segmentList.push({ label: pageTitleContent ?? pageTitle });
   return segmentList;
 }

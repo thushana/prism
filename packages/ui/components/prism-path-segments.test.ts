@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import {
   buildPrismPathBarAutoSegmentList,
@@ -58,5 +59,16 @@ describe("buildPrismPathBarAutoSegmentList", () => {
         "X"
       )
     ).toThrow(/titleByPathPrefix/);
+  });
+
+  it("uses pageTitleContent for the leaf when provided", () => {
+    const rich = createElement("span", null, "Rich leaf");
+    const segments = buildPrismPathBarAutoSegmentList(
+      "/admin/prism/components/prism-button",
+      titleByPathPrefix,
+      "PrismButton",
+      rich
+    );
+    expect(segments.at(-1)?.label).toBe(rich);
   });
 });
