@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { cn } from "@utilities";
 import {
   useCallback,
@@ -41,10 +43,14 @@ export type PrismEmojiAnimationMode =
  */
 export function getNotoEmojiCdnBase(): string {
   try {
-    const fromEnv =
-      typeof process !== "undefined" && process.env.NEXT_PUBLIC_NOTO_EMOJI_CDN_BASE
-        ? String(process.env.NEXT_PUBLIC_NOTO_EMOJI_CDN_BASE).trim()
-        : "";
+    const proc = (
+      globalThis as unknown as {
+        process?: { env?: Record<string, string | undefined> };
+      }
+    ).process;
+    const fromEnv = proc?.env?.NEXT_PUBLIC_NOTO_EMOJI_CDN_BASE
+      ? String(proc.env.NEXT_PUBLIC_NOTO_EMOJI_CDN_BASE).trim()
+      : "";
     if (fromEnv.length > 0) {
       return fromEnv.replace(/\/$/, "");
     }
@@ -77,6 +83,8 @@ const PRISM_EMOJI_DEFAULTS: {
 export type PrismEmojiSize = PrismSize | "inherit" | number;
 
 const PRISM_EMOJI_BURST_MS = 3200;
+const PRISM_EMOJI_OCCASIONAL_MIN_MS = 5_000;
+const PRISM_EMOJI_OCCASIONAL_JITTER_MS = 5_000;
 
 const NOTO_EMOJI_CDN_RASTER_PX = 512 as const;
 
@@ -95,7 +103,9 @@ function rememberGifHeadProbeResult(url: string, outcome: GifHeadProbeOutcome) {
   gifHeadProbeResults.set(url, outcome);
   // Prevent unbounded growth in long-lived sessions.
   while (gifHeadProbeResults.size > GIF_HEAD_PROBE_CACHE_MAX) {
-    const firstKey = gifHeadProbeResults.keys().next().value as string | undefined;
+    const firstKey = gifHeadProbeResults.keys().next().value as
+      | string
+      | undefined;
     if (!firstKey) break;
     gifHeadProbeResults.delete(firstKey);
   }
@@ -182,7 +192,9 @@ function resolvePrismEmojiDisplayPx(
   return PRISM_EMOJI_SIZE_NAME_TO_PX[size];
 }
 
-function rootSizeStyle(size: PrismEmojiProps["size"] | undefined): CSSProperties {
+function rootSizeStyle(
+  size: PrismEmojiProps["size"] | undefined
+): CSSProperties {
   if (size === "inherit") {
     return {
       width: "1em",
@@ -212,10 +224,7 @@ export function normalizeCodepointSequenceKey(input: string): string | null {
     .split(/[\s,_-]+/u)
     .map((p) => p.replace(/^U\+/gi, ""))
     .filter(Boolean);
-  if (
-    parts.length === 0 ||
-    !parts.every((p) => /^[0-9a-f]{2,8}$/i.test(p))
-  ) {
+  if (parts.length === 0 || !parts.every((p) => /^[0-9a-f]{2,8}$/i.test(p))) {
     return null;
   }
   return parts.map((p) => p.toLowerCase()).join("_");
@@ -290,8 +299,8 @@ export interface PrismEmojiProps {
    */
   color?: PartialPrismColorSpec;
   /**
-   * Reserved for future use; has no effect with the current `luminosity`-blend colour
-   * implementation (luminosity blend already discards source hue/saturation).
+   * When `true` (default): apply a 3-stop duotone (shadow → base → highlight) derived from the
+   * chosen palette family. When `false`: apply a simpler single-stop colorize treatment.
    * @default {@link PRISM_EMOJI_DEFAULTS.colorDesaturate}
    */
   colorDesaturate?: boolean;
@@ -379,9 +388,12 @@ function buildColorizeMatrix(
     ].join(" ");
   }
   // Multiply each channel by the corresponding target fraction.
-  return [`${f(r)} 0 0 0 0`, `0 ${f(g)} 0 0 0`, `0 0 ${f(b)} 0 0`, "0 0 0 1 0"].join(
-    " "
-  );
+  return [
+    `${f(r)} 0 0 0 0`,
+    `0 ${f(g)} 0 0 0`,
+    `0 0 ${f(b)} 0 0`,
+    "0 0 0 1 0",
+  ].join(" ");
 }
 
 function maskStyleForPngUrl(pngUrl: string): CSSProperties {
@@ -397,9 +409,7 @@ function maskStyleForPngUrl(pngUrl: string): CSSProperties {
   };
 }
 
-function clearOccasionTimers(ref: {
-  current: { w?: number; e?: number };
-}) {
+function clearOccasionTimers(ref: { current: { w?: number; e?: number } }) {
   const { w, e } = ref.current;
   if (w !== undefined) window.clearTimeout(w);
   if (e !== undefined) window.clearTimeout(e);
@@ -462,9 +472,13 @@ export function PrismEmoji({
 
   useEffect(() => {
     loadGenerationRef.current += 1;
-    setAssetBroken(false);
-    setGifUnavailable(false);
-    setGifProbeMissing(undefined);
+    const generationAtReset = loadGenerationRef.current;
+    queueMicrotask(() => {
+      if (loadGenerationRef.current !== generationAtReset) return;
+      setAssetBroken(false);
+      setGifUnavailable(false);
+      setGifProbeMissing(undefined);
+    });
     return () => {
       loadGenerationRef.current += 1;
     };
@@ -476,22 +490,22 @@ export function PrismEmoji({
       emojiStyle !== "googleNotoAnimated" ||
       !key
     ) {
-      setGifProbeMissing(undefined);
+      queueMicrotask(() => setGifProbeMissing(undefined));
       return;
     }
 
     const url = notoAssetUrl(key, "gif");
     const cached = gifHeadProbeResults.get(url);
     if (cached === "missing") {
-      setGifProbeMissing(true);
+      queueMicrotask(() => setGifProbeMissing(true));
       return;
     }
     if (cached === "ok") {
-      setGifProbeMissing(false);
+      queueMicrotask(() => setGifProbeMissing(false));
       return;
     }
     if (cached === "unknown") {
-      setGifProbeMissing(undefined);
+      queueMicrotask(() => setGifProbeMissing(undefined));
       return;
     }
 
@@ -510,39 +524,58 @@ export function PrismEmoji({
 
   useEffect(() => {
     animationEpochRef.current += 1;
-    setBurst(false);
-    setHover(false);
-    clearOccasionTimers(occasionTimersRef);
+    const epoch = animationEpochRef.current;
+    queueMicrotask(() => {
+      if (animationEpochRef.current !== epoch) return;
+      setBurst(false);
+      setHover(false);
+      clearOccasionTimers(occasionTimersRef);
+    });
   }, [animationMode, key, emojiStyle]);
 
   useEffect(() => {
-    if (animationMode !== "once" || !key || emojiStyle !== "googleNotoAnimated") return;
+    if (animationMode !== "once" || !key || emojiStyle !== "googleNotoAnimated")
+      return;
     const epoch = animationEpochRef.current;
-    setBurst(true);
+    const start = window.setTimeout(() => {
+      if (animationEpochRef.current !== epoch) return;
+      setBurst(true);
+    }, 0);
     const t = window.setTimeout(() => {
       if (animationEpochRef.current !== epoch) return;
       setBurst(false);
     }, PRISM_EMOJI_BURST_MS);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(start);
+      window.clearTimeout(t);
+    };
   }, [animationMode, key, emojiStyle]);
 
   useEffect(() => {
-    if (animationMode !== "occasionally" || emojiStyle !== "googleNotoAnimated" || !key) {
+    if (
+      animationMode !== "occasionally" ||
+      emojiStyle !== "googleNotoAnimated" ||
+      !key
+    ) {
       return;
     }
     const epochAtStart = animationEpochRef.current;
     const plan = () => {
       if (animationEpochRef.current !== epochAtStart) return;
       clearOccasionTimers(occasionTimersRef);
-      occasionTimersRef.current.w = window.setTimeout(() => {
-        if (animationEpochRef.current !== epochAtStart) return;
-        setBurst(true);
-        occasionTimersRef.current.e = window.setTimeout(() => {
+      occasionTimersRef.current.w = window.setTimeout(
+        () => {
           if (animationEpochRef.current !== epochAtStart) return;
-          setBurst(false);
-          plan();
-        }, PRISM_EMOJI_BURST_MS);
-      }, 5000 + Math.random() * 5000);
+          setBurst(true);
+          occasionTimersRef.current.e = window.setTimeout(() => {
+            if (animationEpochRef.current !== epochAtStart) return;
+            setBurst(false);
+            plan();
+          }, PRISM_EMOJI_BURST_MS);
+        },
+        PRISM_EMOJI_OCCASIONAL_MIN_MS +
+          Math.random() * PRISM_EMOJI_OCCASIONAL_JITTER_MS
+      );
     };
     plan();
     return () => {
@@ -592,19 +625,24 @@ export function PrismEmoji({
     if (!key || emojiStyle !== "googleNotoAnimated") return false;
     if (animationMode === "loop") return true;
     if (animationMode === "hover") return hover;
-    if (animationMode === "once" || animationMode === "occasionally") return burst;
+    if (animationMode === "once" || animationMode === "occasionally")
+      return burst;
     return false;
   }, [key, emojiStyle, animationMode, hover, burst]);
 
   const pngUrl = key ? notoAssetUrl(key, "png") : "";
   const gifUrl = key ? notoAssetUrl(key, "gif") : "";
-  const useGifRaster =
-    showGif && !gifUnavailable && gifProbeMissing !== true;
+  const gifKnownMissing = gifUnavailable || gifProbeMissing === true;
+  const useGifRaster = showGif && !gifKnownMissing;
   const rasterSrc = useGifRaster ? gifUrl : pngUrl;
 
   const hoverHandlers = {
-    onMouseEnter: () => { if (animationMode === "hover") setHover(true); },
-    onMouseLeave: () => { if (animationMode === "hover") setHover(false); },
+    onMouseEnter: () => {
+      if (animationMode === "hover") setHover(true);
+    },
+    onMouseLeave: () => {
+      if (animationMode === "hover") setHover(false);
+    },
   };
 
   /** Animated preview on but this slot is showing static PNG (no GIF or GIF failed). */
@@ -651,7 +689,11 @@ export function PrismEmoji({
               focusable="false"
               style={{ position: "absolute" }}
             >
-              {renderSolidColorFilterDefs(colorFilterId, colorPaint, colorDesaturate)}
+              {renderSolidColorFilterDefs(
+                colorFilterId,
+                colorPaint,
+                colorDesaturate
+              )}
             </svg>
             <span
               className="inline-block select-none leading-none"
@@ -720,9 +762,11 @@ export function PrismEmoji({
             focusable="false"
             style={{ position: "absolute" }}
           >
-            <defs>
-              {renderSolidColorFilterDefs(colorFilterId, colorPaint, colorDesaturate)}
-            </defs>
+            {renderSolidColorFilterDefs(
+              colorFilterId,
+              colorPaint,
+              colorDesaturate
+            )}
           </svg>
           <img
             key={rasterSrc}
@@ -742,10 +786,7 @@ export function PrismEmoji({
     // Gradient fallback: mask approach — flat gradient silhouette.
     return (
       <span
-        className={cn(
-          "relative isolate inline-block shrink-0",
-          className
-        )}
+        className={cn("relative isolate inline-block shrink-0", className)}
         style={{
           ...boxStyle,
           ...mutedFallbackStyle,

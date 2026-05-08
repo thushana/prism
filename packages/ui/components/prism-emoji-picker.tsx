@@ -25,6 +25,14 @@ import { PrismTypography } from "./prism-typography";
 
 const DATA = emojiMartData as EmojiMartData;
 
+const ALIASES_BY_TARGET: Record<string, string[]> = (() => {
+  const out: Record<string, string[]> = {};
+  for (const [alias, target] of Object.entries(DATA.aliases)) {
+    (out[target] ??= []).push(alias);
+  }
+  return out;
+})();
+
 /** Larger than {@link PrismEmoji}’s `gigantic` (64px); numeric `size` is supported on {@link PrismEmoji}. */
 const PICKER_GRID_COLUMNS = 8;
 const PICKER_CELL_EMOJI_PX = 48;
@@ -44,7 +52,7 @@ function segmentSlot(
   index: number,
   total: number
 ): "first" | "middle" | "last" | undefined {
-  if (total <= 1) return "first";
+  if (total <= 1) return undefined;
   if (index === 0) return "first";
   if (index === total - 1) return "last";
   return "middle";
@@ -62,7 +70,9 @@ export interface PrismEmojiPickerProps {
   className?: string;
 }
 
-function previewToEmojiStyle(preview: PrismEmojiPickerPreview): PrismEmojiStyle {
+function previewToEmojiStyle(
+  preview: PrismEmojiPickerPreview
+): PrismEmojiStyle {
   switch (preview) {
     case "native":
       return "native";
@@ -75,25 +85,18 @@ function previewToEmojiStyle(preview: PrismEmojiPickerPreview): PrismEmojiStyle 
   }
 }
 
-function emojiIdMatchesQuery(data: EmojiMartData, id: string, query: string): boolean {
-  const q = query
-    .trim()
-    .toLowerCase()
-    .replace(/:/g, " ");
+function emojiIdMatchesQuery(
+  data: EmojiMartData,
+  id: string,
+  query: string
+): boolean {
+  const q = query.trim().toLowerCase().replace(/:/g, " ");
   if (!q) return true;
   const e = data.emojis[id];
   if (!e) return false;
   const tokens = q.split(/\s+/).filter(Boolean);
-  const aliasKeys = Object.entries(data.aliases)
-    .filter(([, target]) => target === id)
-    .map(([k]) => k);
-  const hay = [
-    id,
-    e.name,
-    ...e.keywords,
-    ...aliasKeys,
-    ...(e.emoticons ?? []),
-  ]
+  const aliasKeys = ALIASES_BY_TARGET[id] ?? [];
+  const hay = [id, e.name, ...e.keywords, ...aliasKeys, ...(e.emoticons ?? [])]
     .join(" ")
     .toLowerCase();
   return tokens.every((t) => hay.includes(t));
@@ -125,7 +128,8 @@ export function PrismEmojiPicker({
   defaultPreview = "native",
   className,
 }: PrismEmojiPickerProps): JSX.Element {
-  const [preview, setPreview] = useState<PrismEmojiPickerPreview>(defaultPreview);
+  const [preview, setPreview] =
+    useState<PrismEmojiPickerPreview>(defaultPreview);
   const [search, setSearch] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState(
     () => DATA.categories[0]?.id ?? "people"
@@ -136,18 +140,15 @@ export function PrismEmojiPicker({
   const emojiIds = useMemo(() => {
     const q = search.trim();
     if (q) {
-      return Object.keys(DATA.emojis).filter((id) => emojiIdMatchesQuery(DATA, id, q));
+      return Object.keys(DATA.emojis).filter((id) =>
+        emojiIdMatchesQuery(DATA, id, q)
+      );
     }
     const cat = DATA.categories.find((c) => c.id === activeCategoryId);
     return cat?.emojis ?? [];
   }, [search, activeCategoryId]);
-
   const handlePick = useCallback(
-    (emojiId: string) => {
-      const skin = DATA.emojis[emojiId]?.skins[0];
-      const char = skin?.native;
-      if (char) onEmojiSelect(char);
-    },
+    (emoji: string) => onEmojiSelect(emoji),
     [onEmojiSelect]
   );
 
@@ -276,7 +277,9 @@ export function PrismEmojiPicker({
                   role="gridcell"
                   title={DATA.emojis[emojiId]?.name ?? emojiId}
                   className="flex aspect-square min-h-14 w-full items-center justify-center rounded-lg border border-transparent p-1 hover:border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  onClick={() => handlePick(emojiId)}
+                  onClick={() => {
+                    if (char) handlePick(char);
+                  }}
                 >
                   {char ? (
                     <PrismEmoji
