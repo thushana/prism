@@ -103,7 +103,7 @@ export function PasswordForm({ error }: PasswordFormProps) {
           <PrismButton
             type="submit"
             variant="plain"
-            color="blue"
+            color={{ palette: "default", swatchPrimary: "blue" }}
             shape="rectangleRounded"
             label={isSubmitting ? "Authenticating…" : "Authenticate"}
             disabled={isSubmitting}

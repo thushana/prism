@@ -53,7 +53,7 @@ export function prismColorPickerClipboardColorProp(
   const grad = partial?.gradient;
 
   // ── Gradient mode ──────────────────────────────────────────────────────────
-  if (grad && grad.swatches.length > 0) {
+  if (grad && Array.isArray(grad.swatches) && grad.swatches.length > 0) {
     const lines: string[] = ["color={{"];
     if (n.palette !== "default") {
       lines.push(`  palette: ${JSON.stringify(n.palette)},`);

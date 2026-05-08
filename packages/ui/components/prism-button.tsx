@@ -10,14 +10,14 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
 import { gsap } from "gsap";
-import { type ColorName } from "../styles/color-values";
-import { nextPrismDefaultColorName } from "../styles/prism-color";
+import {
+  PrismColor,
+  type PartialPrismColorSpec,
+  type PrismPaletteId,
+  type PrismSwatchKey,
+} from "../styles/prism-color";
 import type { PrismSize } from "../source/prism-size";
 import { resolvePrismButtonPreset } from "../source/prism-button-presets";
-
-function colorToKebab(color: ColorName): string {
-  return color.replace(/([A-Z])/g, "-$1").toLowerCase();
-}
 
 /** camelCase → kebab-case for data-* attributes (DOM convention). */
 function camelToKebab(s: string): string {
@@ -36,25 +36,17 @@ function toDataAttrs(
   return out;
 }
 
-/** Next color in default palette loop (same order as ColorLoop default). */
-function nextColorInSpectrum(color: ColorName): ColorName {
-  return nextPrismDefaultColorName(color);
-}
-
 /** Variant: `plain` = no icon, `icon` = with Lucide icon */
 export type PrismButtonVariant = "plain" | "icon";
 
-/** Fill / gradient / outline modes (camelCase values). */
+/** Fill / outline modes (camelCase values). Gradients are controlled by `color.gradient`. */
 export type PrismButtonPaint =
   | "background"
   | "backgroundLight"
   | "backgroundDark"
   | "backgroundSolid"
   | "backgroundNone"
-  | "monochrome"
-  | "gradientSideways"
-  | "gradientUp"
-  | "gradientAngle";
+  | "monochrome";
 
 export type PrismButtonShape = "pill" | "rectangle" | "rectangleRounded";
 export type PrismButtonLine = "full" | "bottom" | "none";
@@ -81,8 +73,21 @@ const DRAW_SVG_SELECTOR =
   "svg path, svg line, svg polyline, svg polygon, svg circle, svg ellipse, svg rect";
 
 export interface PrismButtonProps {
-  /** Palette color name (100 fill, 800 border/text); ignored when monochrome */
-  color: ColorName;
+  /**
+   * Prism color spec for the button.
+   *
+   * Visual no-op constraint: solid fills/borders are derived like the legacy API:
+   * - `backgroundLight`: background=100, border/text=800
+   * - `backgroundDark`: background=800, border/text=100
+   * - hover swaps those two
+   *
+   * When `color.gradient` is set, a gradient background is used. If `gradient.swatches`
+   * is omitted/empty, PrismButton derives two stops from `swatchPrimary` using
+   * `PrismColor.Loop.step(+1)` (next-in-spectrum).
+   *
+   * Ignored when `paint="monochrome"`.
+   */
+  color: PartialPrismColorSpec;
   /** Button label (hidden when iconOnly; used for aria-label/title) */
   label: string;
   variant?: PrismButtonVariant;
@@ -95,7 +100,6 @@ export interface PrismButtonProps {
   gap?: PrismButtonGap;
   textCase?: PrismButtonTextCase;
   paint?: PrismButtonPaint;
-  colorSecondary?: ColorName;
   segmentPosition?: "first" | "middle" | "last";
   size?: PrismSize;
   font?: "sans" | "serif" | "mono";
@@ -117,7 +121,10 @@ const COLOR_TRANSITION =
 
 export function PrismButton(
   props: PrismButtonProps &
-    (React.ComponentProps<"button"> | React.ComponentProps<"span">)
+    (
+      | Omit<React.ComponentProps<"button">, "color">
+      | Omit<React.ComponentProps<"span">, "color">
+    )
 ) {
   const { preset, ...propsMinusPreset } = props;
   const resolved = preset
@@ -138,7 +145,6 @@ export function PrismButton(
     gap = "normal",
     textCase = "default",
     paint = "background",
-    colorSecondary,
     segmentPosition,
     size = "medium",
     font = "sans",
@@ -194,63 +200,78 @@ export function PrismButton(
     };
   }, [effectiveHovered, shouldGrow]);
 
-  const primaryColorKebab = colorToKebab(color);
   const isBackgroundNo = paint === "backgroundNone";
   const isMonochrome = paint === "monochrome";
-  const isGradient =
-    paint === "gradientSideways" ||
-    paint === "gradientUp" ||
-    paint === "gradientAngle";
   const isBackgroundSolid = paint === "backgroundSolid";
 
-  const secondColor: ColorName = colorSecondary ?? nextColorInSpectrum(color);
-  const secondaryColorKebab = colorToKebab(secondColor);
-
-  const gradientDir =
-    paint === "gradientSideways"
-      ? "to right"
-      : paint === "gradientUp"
-        ? "to top"
-        : paint === "gradientAngle"
-          ? "135deg"
-          : "to right";
   const backgroundShade = paint === "backgroundDark" ? "dark" : "light";
-  const gradientBackgroundLight = `linear-gradient(${gradientDir}, var(--color-${primaryColorKebab}-100), var(--color-${secondaryColorKebab}-100))`;
-  const gradientBackgroundDark = `linear-gradient(${gradientDir}, var(--color-${primaryColorKebab}-800), var(--color-${secondaryColorKebab}-800))`;
-  const gradientBorder = gradientBackgroundDark;
+
+  const palette: PrismPaletteId = (color?.palette ?? "default") as PrismPaletteId;
+  const primaryFamily: PrismSwatchKey = PrismColor.Loop.normalize(
+    palette,
+    color?.swatchPrimary ?? "blue-grey"
+  );
+  const baseSwatchesRaw = color?.gradient?.swatches;
+  const baseSwatches =
+    Array.isArray(baseSwatchesRaw) && baseSwatchesRaw.length > 0
+      ? baseSwatchesRaw.map((s) => PrismColor.Loop.normalize(palette, s))
+      : [primaryFamily, PrismColor.Loop.step(palette, primaryFamily, 1)];
+  const gradientDirection = color?.gradient?.direction ?? "horizontal";
+  const gradientPair = PrismColor.gradient.linearStrings({
+    palette,
+    swatches: baseSwatches,
+    direction: gradientDirection,
+    shade: { light: 100, dark: 800 },
+    stopResolution: "cssVar",
+  });
+  const gradientBorder = gradientPair.dark;
   const gradientBackground =
-    backgroundShade === "dark"
-      ? gradientBackgroundDark
-      : gradientBackgroundLight;
+    backgroundShade === "dark" ? gradientPair.dark : gradientPair.light;
   const gradientHoverBackground =
-    backgroundShade === "dark"
-      ? gradientBackgroundLight
-      : gradientBackgroundDark;
+    backgroundShade === "dark" ? gradientPair.light : gradientPair.dark;
+
+  const isGradient =
+    !isMonochrome &&
+    !isBackgroundNo &&
+    !!color?.gradient &&
+    baseSwatches.length > 0 &&
+    gradientBackground !== "none";
+
+  const solidBackgroundLight = PrismColor.var({
+    palette,
+    family: primaryFamily,
+    shade: 100,
+  });
+  const solidBackgroundDark = PrismColor.var({
+    palette,
+    family: primaryFamily,
+    shade: 800,
+  });
 
   const baseBackground = isMonochrome
     ? "#ffffff"
     : isGradient
       ? gradientBackground
       : backgroundShade === "dark"
-        ? `var(--color-${primaryColorKebab}-800)`
-        : `var(--color-${primaryColorKebab}-100)`;
+        ? solidBackgroundDark
+        : solidBackgroundLight;
   const baseForeground = isMonochrome
     ? "#000000"
     : backgroundShade === "dark"
-      ? `var(--color-${primaryColorKebab}-100)`
-      : `var(--color-${primaryColorKebab}-800)`;
+      ? solidBackgroundLight
+      : solidBackgroundDark;
   const baseHoverBackground = isMonochrome
     ? "#000000"
     : isGradient
       ? gradientHoverBackground
       : backgroundShade === "dark"
-        ? `var(--color-${primaryColorKebab}-100)`
-        : `var(--color-${primaryColorKebab}-800)`;
+        ? solidBackgroundLight
+        : solidBackgroundDark;
   const baseHoverForeground = isMonochrome
     ? "#ffffff"
     : backgroundShade === "dark"
-      ? `var(--color-${primaryColorKebab}-800)`
-      : `var(--color-${primaryColorKebab}-100)`;
+      ? solidBackgroundDark
+      : solidBackgroundLight;
 
   const backgroundValue =
     inverted && !isGradient ? baseForeground : baseBackground;
@@ -334,7 +355,7 @@ export function PrismButton(
       : foregroundValue;
   const borderSolidColor =
     isGradient && lineBottom
-      ? `var(--color-${primaryColorKebab}-800)`
+      ? solidBackgroundDark
       : typeof borderColorValue === "string"
         ? borderColorValue
         : undefined;
@@ -345,7 +366,7 @@ export function PrismButton(
     !borderSolidColor.startsWith("linear-gradient")
       ? borderSolidColor
       : segmentBorders
-        ? `var(--color-${primaryColorKebab}-800)`
+        ? solidBackgroundDark
         : undefined;
   const borderStyle: React.CSSProperties = lineNo
     ? { borderWidth: 0, borderStyle: "none" }
@@ -548,7 +569,6 @@ export function PrismButton(
     textCase: textCase !== "default" ? textCase : undefined,
     paint,
     segmentPosition,
-    colorSecondary,
     size,
     disableMotion: disableMotion || undefined,
     disableGrow: disableGrow || undefined,

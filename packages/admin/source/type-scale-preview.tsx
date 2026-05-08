@@ -971,7 +971,7 @@ export function TypeScalePreview({
                   <div className="flex justify-start pb-1">
                     <PrismButton
                       label="Change headlines"
-                      color="grey"
+                      color={{ palette: "default", swatchPrimary: "grey" }}
                       paint="monochrome"
                       variant="icon"
                       icon={RefreshCw}
@@ -1028,7 +1028,7 @@ export function TypeScalePreview({
         <div className="mt-4 flex justify-start">
           <PrismButton
             label="Reshuffle samples"
-            color="grey"
+            color={{ palette: "default", swatchPrimary: "grey" }}
             paint="monochrome"
             variant="icon"
             icon={RefreshCw}

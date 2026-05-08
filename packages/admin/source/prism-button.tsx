@@ -4,14 +4,22 @@ import {
   getDefaultPrismButtonPresetNames,
   getPrismDefaultColorNameForIndex,
   PrismButton,
+  PrismCodeBlock,
+  PrismColorPicker,
   PrismTypography,
 } from "@ui";
-import type { ColorName, PrismButtonPaint, PrismButtonSize } from "@ui";
+import type {
+  PartialPrismColorSpec,
+  PrismButtonPaint,
+  PrismButtonSize,
+  PrismSwatchKey,
+} from "@ui";
 import {
   Calendar,
   Copy as CopyGlyph,
   Download,
   Filter,
+  Gem,
   Link,
   Lock,
   Mail,
@@ -21,6 +29,7 @@ import {
   Pencil,
   Play,
   Plus,
+  RotateCcw,
   Save,
   Search,
   Send,
@@ -29,41 +38,95 @@ import {
   Trash2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, useState } from "react";
 import { cn } from "@utilities";
 
 const ACTION_BUTTONS: {
-  color: ColorName;
+  swatchPrimary: PrismSwatchKey;
   label: string;
   icon: LucideIcon;
   /** Lucide component name for pasted JSX (`icon={Download}`). */
   iconJsxName: string;
 }[] = [
-  { color: "red", label: "Download", icon: Download, iconJsxName: "Download" },
-  { color: "pink", label: "Email", icon: Mail, iconJsxName: "Mail" },
-  { color: "purple", label: "Route", icon: MapPin, iconJsxName: "MapPin" },
-  { color: "deepPurple", label: "Share", icon: Share2, iconJsxName: "Share2" },
-  { color: "indigo", label: "Save", icon: Save, iconJsxName: "Save" },
-  { color: "blue", label: "Add", icon: Plus, iconJsxName: "Plus" },
-  { color: "lightBlue", label: "Edit", icon: Pencil, iconJsxName: "Pencil" },
-  { color: "cyan", label: "Delete", icon: Trash2, iconJsxName: "Trash2" },
-  { color: "teal", label: "Send", icon: Send, iconJsxName: "Send" },
-  { color: "green", label: "Copy", icon: CopyGlyph, iconJsxName: "Copy" },
-  { color: "lightGreen", label: "Link", icon: Link, iconJsxName: "Link" },
-  { color: "lime", label: "Play", icon: Play, iconJsxName: "Play" },
-  { color: "yellow", label: "Pause", icon: Pause, iconJsxName: "Pause" },
-  { color: "amber", label: "Search", icon: Search, iconJsxName: "Search" },
-  { color: "orange", label: "Filter", icon: Filter, iconJsxName: "Filter" },
   {
-    color: "deepOrange",
+    swatchPrimary: "red",
+    label: "Download",
+    icon: Download,
+    iconJsxName: "Download",
+  },
+  { swatchPrimary: "pink", label: "Email", icon: Mail, iconJsxName: "Mail" },
+  {
+    swatchPrimary: "purple",
+    label: "Route",
+    icon: MapPin,
+    iconJsxName: "MapPin",
+  },
+  {
+    swatchPrimary: "deep-purple",
+    label: "Share",
+    icon: Share2,
+    iconJsxName: "Share2",
+  },
+  { swatchPrimary: "indigo", label: "Save", icon: Save, iconJsxName: "Save" },
+  { swatchPrimary: "blue", label: "Add", icon: Plus, iconJsxName: "Plus" },
+  {
+    swatchPrimary: "light-blue",
+    label: "Edit",
+    icon: Pencil,
+    iconJsxName: "Pencil",
+  },
+  {
+    swatchPrimary: "cyan",
+    label: "Delete",
+    icon: Trash2,
+    iconJsxName: "Trash2",
+  },
+  { swatchPrimary: "teal", label: "Send", icon: Send, iconJsxName: "Send" },
+  {
+    swatchPrimary: "green",
+    label: "Copy",
+    icon: CopyGlyph,
+    iconJsxName: "Copy",
+  },
+  {
+    swatchPrimary: "light-green",
+    label: "Link",
+    icon: Link,
+    iconJsxName: "Link",
+  },
+  { swatchPrimary: "lime", label: "Play", icon: Play, iconJsxName: "Play" },
+  {
+    swatchPrimary: "yellow",
+    label: "Pause",
+    icon: Pause,
+    iconJsxName: "Pause",
+  },
+  {
+    swatchPrimary: "amber",
+    label: "Search",
+    icon: Search,
+    iconJsxName: "Search",
+  },
+  {
+    swatchPrimary: "orange",
+    label: "Filter",
+    icon: Filter,
+    iconJsxName: "Filter",
+  },
+  {
+    swatchPrimary: "deep-orange",
     label: "Calendar",
     icon: Calendar,
     iconJsxName: "Calendar",
   },
-  { color: "brown", label: "Map", icon: Map, iconJsxName: "Map" },
-  { color: "grey", label: "Lock", icon: Lock, iconJsxName: "Lock" },
-  { color: "blueGrey", label: "Star", icon: Star, iconJsxName: "Star" },
+  { swatchPrimary: "brown", label: "Map", icon: Map, iconJsxName: "Map" },
+  { swatchPrimary: "grey", label: "Lock", icon: Lock, iconJsxName: "Lock" },
+  {
+    swatchPrimary: "blue-grey",
+    label: "Star",
+    icon: Star,
+    iconJsxName: "Star",
+  },
 ];
 
 type AppearanceKey =
@@ -93,9 +156,9 @@ type AppearanceKey =
   | "paintBackgroundSolid"
   | "paintBackgroundNone"
   | "paintMonochrome"
-  | "paintGradientSideways"
-  | "paintGradientUp"
-  | "paintGradientAngle"
+  | "gradientHorizontal"
+  | "gradientVertical"
+  | "gradientAngled"
   | "sizeSmall"
   | "sizeMedium"
   | "sizeLarge"
@@ -136,9 +199,9 @@ const OPTION_PROP_LABEL: Record<AppearanceKey, string> = {
   paintBackgroundSolid: "backgroundSolid",
   paintBackgroundNone: "backgroundNone",
   paintMonochrome: "monochrome",
-  paintGradientSideways: "gradientSideways",
-  paintGradientUp: "gradientUp",
-  paintGradientAngle: "gradientAngle",
+  gradientHorizontal: "gradientHorizontal",
+  gradientVertical: "gradientVertical",
+  gradientAngled: "gradientAngled",
   sizeSmall: "small",
   sizeMedium: "medium",
   sizeLarge: "large",
@@ -166,10 +229,8 @@ const CUSTOMIZER_EXCLUSIVE_GROUPS: AppearanceKey[][] = [
     "paintBackgroundSolid",
     "paintBackgroundNone",
     "paintMonochrome",
-    "paintGradientSideways",
-    "paintGradientUp",
-    "paintGradientAngle",
   ],
+  ["gradientHorizontal", "gradientVertical", "gradientAngled"],
   ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
   ["fontSans", "fontSerif", "fontMono"],
 ];
@@ -198,9 +259,11 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
       "lineNone",
       "spacingNormal",
       "spacingTight",
-      "gapNormal",
-      "gapNone",
     ],
+  },
+  {
+    heading: "Gap",
+    keys: ["gapNormal", "gapNone"],
   },
   {
     heading: "Paint",
@@ -211,9 +274,9 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
       "paintBackgroundSolid",
       "paintBackgroundNone",
       "paintMonochrome",
-      "paintGradientSideways",
-      "paintGradientUp",
-      "paintGradientAngle",
+      "gradientHorizontal",
+      "gradientVertical",
+      "gradientAngled",
     ],
   },
   {
@@ -247,9 +310,9 @@ function Row({
   return (
     <div className="pb-12">
       <PrismTypography
-        role="label"
+        role="overline"
         size="small"
-        as="code"
+        as="span"
         className="mb-2 block"
       >
         {title}
@@ -264,19 +327,69 @@ function Row({
 }
 
 /** Deterministic color per preset (by index) so SSR and client markup match. */
-function usePresetColors(): Record<string, ColorName> {
+function usePresetColors(): Record<string, PrismSwatchKey> {
   return useState(() => {
     const names = getDefaultPrismButtonPresetNames();
     return Object.fromEntries(
-      names.map((name, i) => [name, getPrismDefaultColorNameForIndex(i)])
-    ) as Record<string, ColorName>;
+      names.map((name, i) => {
+        const colorName = getPrismDefaultColorNameForIndex(i);
+        const kebab = colorName.replace(/([A-Z])/g, "-$1").toLowerCase();
+        return [name, kebab];
+      })
+    ) as Record<string, PrismSwatchKey>;
   })[0];
 }
 
-const SNIPPET_SAMPLE_ACTION = ACTION_BUTTONS[0];
+const DEFAULT_GROUP_PICKER_COLOR: PartialPrismColorSpec = {
+  palette: "default",
+  swatchPrimary: "red",
+};
+
+/** Live preview row: label + Gem icon; snippet matches this control. */
+const CUSTOMIZER_PREVIEW_SAMPLE = {
+  label: "Prism",
+  icon: Gem,
+  iconJsxName: "Gem",
+} as const;
 
 function escapeJsxDoubleQuotedString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function formatColorPropSpec(spec: PartialPrismColorSpec): string[] {
+  const palette = spec.palette ?? "default";
+  const primary = spec.swatchPrimary ?? "blue-grey";
+  const g = spec.gradient;
+
+  const lines: string[] = [`    palette: "${palette}",`];
+  lines.push(`    swatchPrimary: "${primary}",`);
+  if (g) {
+    const direction = g.direction ?? "horizontal";
+    if (Array.isArray(g.swatches) && g.swatches.length > 0) {
+      lines.push(
+        `    gradient: { direction: "${direction}", swatches: [${g.swatches
+          .map((s) => `"${s}"`)
+          .join(", ")}] },`
+      );
+    } else {
+      lines.push(`    gradient: { direction: "${direction}" },`);
+    }
+  }
+  return lines;
+}
+
+function applyCustomizerGradientDirection(
+  base: PartialPrismColorSpec,
+  direction?: "horizontal" | "vertical" | "angled"
+): PartialPrismColorSpec {
+  if (!direction) return { ...base };
+  return {
+    ...base,
+    gradient: {
+      ...base.gradient,
+      direction,
+    },
+  };
 }
 
 /** Spread props for `PrismButton` from customize checkboxes (single source for preview + JSX snippet). */
@@ -292,6 +405,7 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   paint?: PrismButtonPaint;
   size?: PrismButtonSize;
   font?: "sans" | "serif" | "mono";
+  gradientDirection?: "horizontal" | "vertical" | "angled";
   disableMotion?: boolean;
   disableGrow?: boolean;
   disableColorChange?: boolean;
@@ -357,15 +471,21 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
           ? "default"
           : undefined;
   let paint: PrismButtonPaint | undefined;
-  if (selected.has("paintGradientAngle")) paint = "gradientAngle";
-  else if (selected.has("paintGradientUp")) paint = "gradientUp";
-  else if (selected.has("paintGradientSideways")) paint = "gradientSideways";
-  else if (selected.has("paintMonochrome")) paint = "monochrome";
+  if (selected.has("paintMonochrome")) paint = "monochrome";
   else if (selected.has("paintBackgroundNone")) paint = "backgroundNone";
   else if (selected.has("paintBackgroundSolid")) paint = "backgroundSolid";
   else if (selected.has("paintBackgroundDark")) paint = "backgroundDark";
   else if (selected.has("paintBackgroundLight")) paint = "backgroundLight";
   else if (selected.has("paintBackground")) paint = "background";
+
+  const gradientDirection: "horizontal" | "vertical" | "angled" | undefined =
+    selected.has("gradientAngled")
+      ? "angled"
+      : selected.has("gradientVertical")
+        ? "vertical"
+        : selected.has("gradientHorizontal")
+          ? "horizontal"
+          : undefined;
 
   const iconPosition: "left" | "right" = selected.has("iconRight")
     ? "right"
@@ -382,6 +502,7 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
     paint,
     size,
     font,
+    gradientDirection,
     disableMotion: selected.has("disableMotion") || undefined,
     disableGrow: selected.has("disableGrow") || undefined,
     disableColorChange: selected.has("disableColorChange") || undefined,
@@ -392,9 +513,9 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   };
 }
 
-/** Single-line JSX for the customize strip (sample row + current toggles). */
+/** Multi-line JSX for the customize preview + current toggles. */
 function formatPrismButtonDemoSnippet(
-  sample: (typeof ACTION_BUTTONS)[number],
+  sample: { label: string; iconJsxName: string },
   p: {
     variant: "plain" | "icon";
     iconOnly?: boolean;
@@ -415,40 +536,36 @@ function formatPrismButtonDemoSnippet(
     disabled?: boolean;
     toggled?: boolean;
     segmentPosition?: "first" | "middle" | "last";
+    color: PartialPrismColorSpec;
   }
 ): string {
-  const parts: string[] = [];
-  parts.push(`color="${escapeJsxDoubleQuotedString(sample.color)}"`);
-  parts.push(`label="${escapeJsxDoubleQuotedString(sample.label)}"`);
-  parts.push(`variant="${p.variant}"`);
-  if (p.variant === "icon") {
-    parts.push(`icon={${sample.iconJsxName}}`);
-  }
-  if (p.iconPosition === "right") {
-    parts.push('iconPosition="right"');
-  }
-  if (p.iconOnly) parts.push("iconOnly");
-  if (p.shape) parts.push(`shape="${p.shape}"`);
-  if (p.line) parts.push(`line="${p.line}"`);
-  if (p.spacing) parts.push(`spacing="${p.spacing}"`);
-  if (p.gap) parts.push(`gap="${p.gap}"`);
-  if (p.textCase) parts.push(`textCase="${p.textCase}"`);
-  if (p.paint) {
-    parts.push(`paint="${escapeJsxDoubleQuotedString(p.paint)}"`);
-  }
-  if (p.size) parts.push(`size="${p.size}"`);
-  if (p.font && p.font !== "sans") parts.push(`font="${p.font}"`);
-  if (p.disableMotion) parts.push("disableMotion");
-  if (p.disableGrow) parts.push("disableGrow");
-  if (p.disableColorChange) parts.push("disableColorChange");
-  if (p.disableIconMotion) parts.push("disableIconMotion");
-  if (p.inverted) parts.push("inverted");
-  if (p.disabled) parts.push("disabled");
-  if (p.toggled) parts.push("toggled");
-  if (p.segmentPosition) {
-    parts.push(`segmentPosition="${p.segmentPosition}"`);
-  }
-  return "<PrismButton " + parts.join(" ") + " />";
+  const lines: string[] = ["<PrismButton"];
+  lines.push("  color={{");
+  for (const l of formatColorPropSpec(p.color)) lines.push(l);
+  lines.push("  }}");
+  lines.push(`  label="${escapeJsxDoubleQuotedString(sample.label)}"`);
+  lines.push(`  variant="${p.variant}"`);
+  if (p.variant === "icon") lines.push(`  icon={${sample.iconJsxName}}`);
+  if (p.iconPosition === "right") lines.push('  iconPosition="right"');
+  if (p.iconOnly) lines.push("  iconOnly");
+  if (p.shape) lines.push(`  shape="${p.shape}"`);
+  if (p.line) lines.push(`  line="${p.line}"`);
+  if (p.spacing) lines.push(`  spacing="${p.spacing}"`);
+  if (p.gap) lines.push(`  gap="${p.gap}"`);
+  if (p.textCase) lines.push(`  textCase="${p.textCase}"`);
+  if (p.paint) lines.push(`  paint="${escapeJsxDoubleQuotedString(p.paint)}"`);
+  if (p.size) lines.push(`  size="${p.size}"`);
+  if (p.font && p.font !== "sans") lines.push(`  font="${p.font}"`);
+  if (p.disableMotion) lines.push("  disableMotion");
+  if (p.disableGrow) lines.push("  disableGrow");
+  if (p.disableColorChange) lines.push("  disableColorChange");
+  if (p.disableIconMotion) lines.push("  disableIconMotion");
+  if (p.inverted) lines.push("  inverted");
+  if (p.disabled) lines.push("  disabled");
+  if (p.toggled) lines.push("  toggled");
+  if (p.segmentPosition) lines.push(`  segmentPosition="${p.segmentPosition}"`);
+  lines.push("/>");
+  return lines.join("\n");
 }
 
 /**
@@ -458,47 +575,19 @@ function formatPrismButtonDemoSnippet(
 function ButtonCustomizerSection() {
   const [selected, setSelected] = useState<Set<AppearanceKey>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
-  const [copyToast, setCopyToast] = useState<{
-    title: string;
-    detail?: string;
-    isError?: boolean;
-  } | null>(null);
-  const copyToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
+  const [groupColorMode, setGroupColorMode] = useState<"rainbow" | "unified">(
+    "rainbow"
+  );
+  const [pickedColor, setPickedColor] = useState<PartialPrismColorSpec>(
+    () => DEFAULT_GROUP_PICKER_COLOR
   );
 
   const replayAnimations = () => setAnimationKey((k) => k + 1);
 
-  const showCopyToast = useCallback(
-    (payload: { title: string; detail?: string; isError?: boolean }) => {
-      if (copyToastTimeoutRef.current) {
-        clearTimeout(copyToastTimeoutRef.current);
-      }
-      const trimmedDetail =
-        payload.detail && payload.detail.length > 88
-          ? payload.detail.slice(0, 85) + "..."
-          : payload.detail;
-      setCopyToast({
-        title: payload.title,
-        detail: trimmedDetail,
-        isError: payload.isError,
-      });
-      copyToastTimeoutRef.current = setTimeout(() => {
-        setCopyToast(null);
-        copyToastTimeoutRef.current = null;
-      }, 2800);
-    },
-    []
-  );
-
-  useEffect(
-    () => () => {
-      if (copyToastTimeoutRef.current) {
-        clearTimeout(copyToastTimeoutRef.current);
-      }
-    },
-    []
-  );
+  const resetGroupToRainbow = () => {
+    setGroupColorMode("rainbow");
+    setPickedColor(DEFAULT_GROUP_PICKER_COLOR);
+  };
 
   const toggle = (key: AppearanceKey) => {
     setSelected((prev) => {
@@ -518,72 +607,35 @@ function ButtonCustomizerSection() {
     });
   };
 
-  const { spreadProps, currentSampleSnippet } = useMemo(() => {
-    const spreadProps = buildButtonDemoSpreadProps(selected);
-    const segmentPosition =
-      spreadProps.gap === "none" ? ("first" as const) : undefined;
-    const currentSampleSnippet = formatPrismButtonDemoSnippet(
-      SNIPPET_SAMPLE_ACTION,
-      { ...spreadProps, segmentPosition }
-    );
-    return { spreadProps, currentSampleSnippet };
-  }, [selected]);
-
-  const handleCopySampleSnippet = async () => {
-    try {
-      await navigator.clipboard.writeText(currentSampleSnippet);
-      showCopyToast({
-        title: "Copied to clipboard",
-        detail: currentSampleSnippet,
-      });
-    } catch {
-      showCopyToast({
-        title: "Could not copy",
-        detail:
-          "Your browser may block clipboard access outside a secure context.",
-        isError: true,
-      });
-    }
-  };
-
-  const copyToastPortal =
-    copyToast && typeof document !== "undefined"
-      ? createPortal(
-          <div
-            role="status"
-            aria-live="polite"
-            className={cn(
-              "pointer-events-none fixed bottom-8 left-1/2 z-99999 max-w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border px-4 py-3 shadow-lg",
-              copyToast.isError
-                ? "border-destructive/40 bg-destructive/10 text-foreground"
-                : "border-border bg-popover text-popover-foreground shadow-md"
-            )}
-          >
-            <PrismTypography
-              role="title"
-              size="medium"
-              className="block"
-              color={{
-                semanticText: copyToast.isError ? "destructive" : "inherit",
-              }}
-            >
-              {copyToast.title}
-            </PrismTypography>
-            {copyToast.detail ? (
-              <PrismTypography
-                role="body"
-                size="small"
-                color={{ semanticText: "muted" }}
-                font="mono"
-                className="mt-1 block break-all"
-              >
-                {copyToast.detail}
-              </PrismTypography>
-            ) : null}
-          </div>,
-          document.body
-        )
-      : null;
+  const { spreadProps, previewColor, previewSpreadProps, currentSampleSnippet } =
+    useMemo(() => {
+      const spreadProps = buildButtonDemoSpreadProps(selected);
+      const segmentPosition =
+        spreadProps.gap === "none" ? ("first" as const) : undefined;
+      const direction = spreadProps.gradientDirection;
+      const previewColor =
+        groupColorMode === "unified"
+          ? applyCustomizerGradientDirection({ ...pickedColor }, direction)
+          : applyCustomizerGradientDirection(
+              { palette: "default", swatchPrimary: "deep-purple" },
+              direction
+            );
+      const previewSpreadProps = { ...spreadProps, variant: "icon" as const };
+      const currentSampleSnippet = formatPrismButtonDemoSnippet(
+        CUSTOMIZER_PREVIEW_SAMPLE,
+        {
+          ...previewSpreadProps,
+          segmentPosition,
+          color: previewColor,
+        }
+      );
+      return {
+        spreadProps,
+        previewColor,
+        previewSpreadProps,
+        currentSampleSnippet,
+      };
+    }, [selected, pickedColor, groupColorMode]);
 
   return (
     <>
@@ -605,7 +657,19 @@ function ButtonCustomizerSection() {
         </PrismTypography>
         <div className="space-y-6">
           <div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-0">
+              <div className="space-y-1">
+                <PrismTypography role="overline" size="small">
+                  COLOR
+                </PrismTypography>
+                <PrismColorPicker
+                  color={pickedColor}
+                  onColorChange={(next) => {
+                    setPickedColor(next);
+                    setGroupColorMode("unified");
+                  }}
+                />
+              </div>
               {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
                 <div key={heading} className="space-y-1">
                   <PrismTypography role="overline" size="small">
@@ -635,32 +699,61 @@ function ButtonCustomizerSection() {
                 </div>
               ))}
             </div>
-            <div className="mb-4 flex items-center gap-3">
-              <PrismTypography
-                role="label"
-                size="medium"
-                font="mono"
-                color={{ semanticText: "muted" }}
-              >
-                {currentSampleSnippet}
+            <div className="mt-10 mb-8">
+              <PrismTypography role="overline" size="small" className="mb-2 block">
+                Sample
               </PrismTypography>
-              <button
-                type="button"
-                onClick={handleCopySampleSnippet}
-                aria-label="Copy sample JSX to clipboard"
-                title="Copy sample JSX"
-                className="shrink-0 rounded-md border border-transparent p-2 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground"
+              <div
+                className={`flex flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
               >
-                <CopyGlyph className="size-4" aria-hidden />
-              </button>
+                <PrismButton
+                  key={`preview-${animationKey}`}
+                  color={previewColor}
+                  label={CUSTOMIZER_PREVIEW_SAMPLE.label}
+                  icon={CUSTOMIZER_PREVIEW_SAMPLE.icon}
+                  asChild
+                  {...previewSpreadProps}
+                  segmentPosition={
+                    previewSpreadProps.gap === "none" ? "first" : undefined
+                  }
+                />
+              </div>
+            </div>
+            <div className="mt-10 mb-2 flex flex-wrap items-center gap-2">
+              <PrismTypography role="overline" size="small" className="mr-auto">
+                Group Buttons
+              </PrismTypography>
+              <PrismButton
+                type="button"
+                color={{ palette: "default", swatchPrimary: "grey" }}
+                label="Rainbow palette"
+                variant="icon"
+                icon={RotateCcw}
+                iconOnly
+                line="none"
+                paint="backgroundNone"
+                onClick={resetGroupToRainbow}
+                title="Reset to rainbow palette"
+                aria-label="Reset group buttons to rainbow palette"
+              />
             </div>
             <div
               className={`flex flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
             >
-              {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
+              {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }, i) => (
                 <PrismButton
-                  key={`${color}-${animationKey}`}
-                  color={color}
+                  key={`${swatchPrimary}-${animationKey}`}
+                  color={
+                    groupColorMode === "unified"
+                      ? applyCustomizerGradientDirection(
+                          { ...pickedColor },
+                          spreadProps.gradientDirection
+                        )
+                      : applyCustomizerGradientDirection(
+                          { palette: "default", swatchPrimary },
+                          spreadProps.gradientDirection
+                        )
+                  }
                   label={label}
                   icon={icon}
                   asChild
@@ -677,10 +770,25 @@ function ButtonCustomizerSection() {
                 />
               ))}
             </div>
+            <section className="mt-12 pt-6 space-y-4">
+              <PrismTypography role="title" size="large" font="sans" as="h2">
+                Code sample
+              </PrismTypography>
+              <PrismCodeBlock
+                className="font-mono"
+                mode="card"
+                language="tsx"
+                disableLineNumbers={false}
+                disableLanguageLabel={false}
+                color={{ palette: "default", swatchPrimary: "grey" }}
+              >
+                {currentSampleSnippet}
+              </PrismCodeBlock>
+            </section>
+            <hr className="mt-6 border-border" />
           </div>
         </div>
       </div>
-      {copyToastPortal}
     </>
   );
 }
@@ -700,7 +808,10 @@ function ButtonVariantsMatrix({
         {presetNames.map((presetName) => (
           <PrismButton
             key={presetName}
-            color={presetColors[presetName] ?? "blueGrey"}
+            color={{
+              palette: "default",
+              swatchPrimary: presetColors[presetName] ?? "blue-grey",
+            }}
             preset={presetName}
             label={presetName}
             iconOnly={false}
@@ -709,10 +820,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="plain">
-        {ACTION_BUTTONS.map(({ color, label }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="plain"
             asChild
@@ -720,10 +831,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="icon (add icon to plain)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -732,10 +843,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="iconOnly (no text, alt/hover)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -745,10 +856,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="iconRight">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -758,10 +869,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='textCase="uppercase"'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -771,10 +882,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='textCase="lowercase" (label in lowercase)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -784,10 +895,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='shape="rectangle" (90° corners)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -797,10 +908,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='shape="rectangleRounded" (slight curve)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -810,10 +921,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='line="bottom" + shape="rectangle"'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -824,10 +935,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='line="none" (no border)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -837,10 +948,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='paint="backgroundLight" (100 fill, default)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -850,10 +961,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='paint="backgroundDark" (800 fill)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -863,10 +974,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='paint="backgroundSolid" (outline matches fill)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -876,10 +987,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='paint="backgroundNone" (no fill)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -889,10 +1000,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='paint="monochrome"'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -901,50 +1012,59 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='paint="gradientSideways" (L→R, next in palette)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+      <Row title='gradient: derived (horizontal)'>
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{
+              palette: "default",
+              swatchPrimary,
+              gradient: { direction: "horizontal" },
+            }}
             label={label}
             variant="icon"
             icon={icon}
-            paint="gradientSideways"
             asChild
           />
         ))}
       </Row>
-      <Row title='paint="gradientUp"'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+      <Row title='gradient: derived (vertical)'>
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{
+              palette: "default",
+              swatchPrimary,
+              gradient: { direction: "vertical" },
+            }}
             label={label}
             variant="icon"
             icon={icon}
-            paint="gradientUp"
             asChild
           />
         ))}
       </Row>
-      <Row title='paint="gradientAngle" (45°)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+      <Row title='gradient: derived (angled)'>
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{
+              palette: "default",
+              swatchPrimary,
+              gradient: { direction: "angled" },
+            }}
             label={label}
             variant="icon"
             icon={icon}
-            paint="gradientAngle"
             asChild
           />
         ))}
       </Row>
       <Row title='spacing="tight" (50% padding)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -957,10 +1077,10 @@ function ButtonVariantsMatrix({
         title='gap="none" (segment radius: first / middle / last)'
         disableGap
       >
-        {ACTION_BUTTONS.map(({ color, label, icon }, i) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }, i) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -977,10 +1097,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='size="small" + textCase="uppercase" (75%)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -991,10 +1111,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='size="medium" (100%)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1004,10 +1124,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="sizeLarge (1.5×)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1017,10 +1137,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title='size="huge" (2×)'>
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1030,10 +1150,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="disableMotion">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1043,10 +1163,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="disableGrow">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1056,10 +1176,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="disableColorChange">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1069,10 +1189,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="icons (default draw-in)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1081,10 +1201,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="disableIconMotion">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1094,10 +1214,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="inverted">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1107,10 +1227,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="disabled (33% opacity, no interaction)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}
@@ -1120,10 +1240,10 @@ function ButtonVariantsMatrix({
         ))}
       </Row>
       <Row title="toggled (locked hover state, no scaling)">
-        {ACTION_BUTTONS.map(({ color, label, icon }) => (
+        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
-            key={color}
-            color={color}
+            key={swatchPrimary}
+            color={{ palette: "default", swatchPrimary }}
             label={label}
             variant="icon"
             icon={icon}

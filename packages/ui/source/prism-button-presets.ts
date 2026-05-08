@@ -17,7 +17,11 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
   pillGradient: {
     variant: "icon",
     icon: Sparkles,
-    paint: "gradientSideways",
+    color: {
+      palette: "default",
+      swatchPrimary: "blue",
+      gradient: { direction: "horizontal" },
+    },
     size: "medium",
   },
   pillMonochrome: {
@@ -56,7 +60,10 @@ export function registerPrismButtonPresets(
   }
 }
 
-const DEFAULT_COLOR: PrismButtonProps["color"] = "blueGrey";
+const DEFAULT_COLOR: PrismButtonProps["color"] = {
+  palette: "default",
+  swatchPrimary: "blue-grey",
+};
 
 export function resolvePrismButtonPreset<T extends Record<string, unknown>>(
   preset: string | undefined,
