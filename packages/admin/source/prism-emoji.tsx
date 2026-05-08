@@ -7,9 +7,6 @@ import {
   PrismEmoji,
   PrismEmojiPicker,
   PrismTypography,
-  buildNotoEmojiRasterUrl,
-  emojiToCodepointKey,
-  normalizeCodepointSequenceKey,
   prismColorPickerClipboardColorProp,
   type PartialPrismColorSpec,
   type PrismEmojiAnimationMode,
@@ -17,7 +14,14 @@ import {
   type PrismEmojiSize,
   type PrismEmojiStyle,
 } from "@ui";
-import { useMemo, useRef, useState, type JSX } from "react";
+import { createPortal } from "react-dom";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
 
 const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
   { value: "native", label: "native" },
@@ -92,15 +96,200 @@ function formatEmojiSnippet(
   return lines.join("\n");
 }
 
-const GALLERY_EMOJI = "🎉";
+const GALLERY_EMOJI = "🌈";
+
+/** Inline demo: cycle copy so the same emoji reads in different sentences. */
+const INLINE_TEXT_ROTATE_MS = 5_000;
+
+const INLINE_DEMO_PHRASES = [
+  {
+    before: "Sunlight through the prism splintered into ",
+    after: " across the sheet.",
+  },
+  {
+    before: "The spectrum leaned a little warmer around ",
+    after: " at the red end.",
+  },
+  {
+    before: "Chromatic dispersion caught ",
+    after: " in a thin white beam.",
+  },
+  {
+    before: "They traced the rainbow and marked ",
+    after: " where the bands stacked cleanest.",
+  },
+] as const;
+
+/** Showcase {@link PrismEmoji} inline across fonts and type scale steps. */
+const INLINE_TYPE_DEMOS = [
+  {
+    id: "body-md-sans",
+    caption: "Body · medium · sans",
+    font: "sans",
+    role: "body",
+    size: "medium",
+  },
+  {
+    id: "body-lg-serif",
+    caption: "Body · large · serif",
+    font: "serif",
+    role: "body",
+    size: "large",
+  },
+  {
+    id: "body-sm-mono",
+    caption: "Body · small · mono",
+    font: "mono",
+    role: "body",
+    size: "small",
+  },
+  {
+    id: "title-md-sans",
+    caption: "Title · medium · sans",
+    font: "sans",
+    role: "title",
+    size: "medium",
+  },
+  {
+    id: "headline-sm-serif",
+    caption: "Headline · small · serif",
+    font: "serif",
+    role: "headline",
+    size: "small",
+  },
+  {
+    id: "body-lg-mono",
+    caption: "Body · large · mono",
+    font: "mono",
+    role: "body",
+    size: "large",
+  },
+] as const;
+
+function firstGraphemeCluster(s: string): string {
+  const t = s.trim();
+  if (!t) return "";
+  const segmenter =
+    typeof Intl !== "undefined" && "Segmenter" in Intl
+      ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+      : null;
+  const first = segmenter ? [...segmenter.segment(t)][0]?.segment : undefined;
+  if (first) return first;
+  const cp = t.codePointAt(0);
+  return cp !== undefined ? String.fromCodePoint(cp) : t;
+}
+
+/**
+ * Modal overlay that hosts {@link PrismEmojiPicker}.
+ *
+ * Layout uses inline styles (no Tailwind dependency) and a body-portal so it
+ * is unaffected by ancestor containing blocks (`transform`, `filter`,
+ * `contain`) and by Tailwind class scanning across the workspace.
+ */
+function PrismEmojiPickerOverlay({
+  open,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (emoji: string) => void;
+}): JSX.Element | null {
+  const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open || !mounted) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const raf = requestAnimationFrame(() => {
+      dialogRef.current?.focus({ preventScroll: true });
+    });
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("keydown", onKeyDown);
+      prevFocus?.focus?.({ preventScroll: true });
+    };
+  }, [open, mounted, onClose]);
+
+  if (!open || !mounted || typeof document === "undefined") {
+    return null;
+  }
+
+  const overlay = (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 2147483000,
+        display: "flex",
+        alignItems: "stretch",
+        justifyContent: "center",
+        padding: "1rem",
+        boxSizing: "border-box",
+      }}
+      role="presentation"
+    >
+      <button
+        type="button"
+        aria-label="Close emoji picker"
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.4)",
+          border: 0,
+          cursor: "default",
+          padding: 0,
+        }}
+      />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Emoji picker"
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className="rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none"
+        style={{
+          position: "relative",
+          width: "min(40rem, 100%)",
+          maxHeight: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          overflow: "hidden",
+          boxSizing: "border-box",
+        }}
+      >
+        <PrismEmojiPicker
+          className="h-full min-h-0"
+          onEmojiSelect={onSelect}
+        />
+      </div>
+    </div>
+  );
+
+  return createPortal(overlay, document.body);
+}
 
 /**
  * Live controls + comparison grid for {@link PrismEmoji}.
  * Layout aligned with {@link PrismIconDemo}.
  */
 export function PrismEmojiDemo(): JSX.Element {
-  const [emojiInput, setEmojiInput] = useState("🎉");
-  const [codepointInput, setCodepointInput] = useState("");
+  const [emojiInput, setEmojiInput] = useState("🌈");
   const [emojiStyle, setEmojiStyle] =
     useState<PrismEmojiStyle>("googleNotoColor");
   const [animationMode, setAnimationMode] =
@@ -113,29 +302,24 @@ export function PrismEmojiDemo(): JSX.Element {
     shade: 500,
   });
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [inlinePhraseIndex, setInlinePhraseIndex] = useState(0);
 
   const emojiTrim = emojiInput.trim();
-  const codeTrim = codepointInput.trim();
   const animationDisabled = emojiStyle !== "googleNotoAnimated";
 
   const previewProps = useMemo<PrismEmojiProps>(() => {
     const base: PrismEmojiProps = {
-      emoji: undefined,
-      codepoint: undefined,
+      emoji: emojiTrim !== "" ? emojiTrim : GALLERY_EMOJI,
       emojiStyle,
       size,
       animationMode,
     };
-    if (emojiTrim !== "") base.emoji = emojiTrim;
-    else if (codeTrim !== "") base.codepoint = codeTrim;
-    else base.emoji = "🎉";
     if (colorEnabled && emojiColor && Object.keys(emojiColor).length > 0) {
       base.color = emojiColor;
     }
     return base;
   }, [
     emojiTrim,
-    codeTrim,
     emojiStyle,
     size,
     animationMode,
@@ -143,44 +327,25 @@ export function PrismEmojiDemo(): JSX.Element {
     emojiColor,
   ]);
 
-  const resolvedKey = useMemo(() => {
-    if (emojiTrim !== "") return emojiToCodepointKey(emojiTrim);
-    if (codeTrim !== "") return normalizeCodepointSequenceKey(codeTrim);
-    return null;
-  }, [emojiTrim, codeTrim]);
-
-  const debugDisplayPx =
-    size === "inherit"
-      ? 24
-      : typeof size === "number"
-        ? size
-        : (
-            {
-              small: 20,
-              medium: 24,
-              large: 28,
-              huge: 48,
-              gigantic: 64,
-            } as const
-          )[size];
-
-  const pngDebugUrl =
-    resolvedKey !== null
-      ? buildNotoEmojiRasterUrl(resolvedKey, debugDisplayPx, "png")
-      : null;
-  const gifDebugUrl =
-    resolvedKey !== null
-      ? buildNotoEmojiRasterUrl(resolvedKey, debugDisplayPx, "gif")
-      : null;
-  const webpDebugUrl =
-    resolvedKey !== null
-      ? buildNotoEmojiRasterUrl(resolvedKey, debugDisplayPx, "webp")
-      : null;
-
   const snippet = useMemo(() => formatEmojiSnippet(previewProps), [previewProps]);
 
+  const browseEmojiGlyph = useMemo(() => {
+    if (emojiTrim !== "") return firstGraphemeCluster(emojiTrim);
+    return GALLERY_EMOJI;
+  }, [emojiTrim]);
+
+  useEffect(() => {
+    if (INLINE_DEMO_PHRASES.length <= 1) return;
+    const id = window.setInterval(() => {
+      setInlinePhraseIndex((i) => (i + 1) % INLINE_DEMO_PHRASES.length);
+    }, INLINE_TEXT_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const inlinePhrase = INLINE_DEMO_PHRASES[inlinePhraseIndex];
+
   return (
-    <div className="space-y-10">
+    <div className="relative isolate space-y-10">
       <section className="space-y-4">
         <PrismTypography role="title" size="large" font="sans" as="h2">
           Customize
@@ -191,102 +356,23 @@ export function PrismEmojiDemo(): JSX.Element {
           className="grid w-full min-w-0 grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-5"
           onSubmit={(e) => e.preventDefault()}
         >
-          {/* Col 1 — character / codepoint */}
+          {/* Col 1 — picker */}
           <div className="min-w-0 space-y-3">
             <PrismTypography role="overline" size="small" className="block">
               Emoji
             </PrismTypography>
-            <label className="relative block space-y-1">
-              <PrismTypography
-                role="label"
-                size="medium"
-                font="mono"
-                color={{ semanticText: "muted" }}
-              >
-                character
-              </PrismTypography>
-              <input
-                type="text"
-                value={emojiInput}
-                onChange={(e) => setEmojiInput(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck={false}
-                placeholder="🎉"
-                aria-label="Emoji character"
-              />
-            </label>
-            <div className="relative">
+            <div>
               <PrismButton
                 type="button"
                 variant="plain"
+                paint="monochrome"
                 color="blue"
-                label="Browse emoji"
-                size="small"
-                shape="rectangleRounded"
+                label={`${browseEmojiGlyph}\u00A0Browse emoji`}
+                size="large"
+                shape="pill"
                 onClick={() => setEmojiPickerOpen(true)}
               />
-              {emojiPickerOpen ? (
-                <>
-                  <button
-                    type="button"
-                    className="fixed inset-0 z-9999 cursor-default bg-black/40"
-                    aria-label="Close emoji picker"
-                    onClick={() => setEmojiPickerOpen(false)}
-                  />
-                  <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Emoji picker"
-                    className="fixed left-1/2 top-4 bottom-4 z-10000 flex max-h-[calc(100vh-2rem)] w-[min(40rem,calc(100vw-2rem))] min-h-0 -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <PrismEmojiPicker
-                      onEmojiSelect={(picked) => {
-                        setEmojiInput(picked);
-                        setCodepointInput("");
-                        setEmojiPickerOpen(false);
-                      }}
-                    />
-                  </div>
-                </>
-              ) : null}
             </div>
-            <label className="relative block space-y-1">
-              <PrismTypography
-                role="label"
-                size="medium"
-                font="mono"
-                color={{ semanticText: "muted" }}
-              >
-                codepoint (if character empty)
-              </PrismTypography>
-              <input
-                type="text"
-                value={codepointInput}
-                onChange={(e) => setCodepointInput(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck={false}
-                placeholder="1F389 or 1f600_fe0f"
-                aria-label="Codepoint sequence"
-              />
-            </label>
-            <PrismTypography
-              role="body"
-              size="small"
-              color={{ semanticText: "muted" }}
-              className="block wrap-break-word"
-            >
-              Browse opens the full picker (data from{" "}
-              <span className="font-mono">@emoji-mart/data</span>). You can also
-              type or paste here, or use the OS emoji shortcut (macOS:
-              Control+Command+Space; Windows: Win+. ).
-            </PrismTypography>
           </div>
 
           {/* Col 2 — Emoji Style */}
@@ -444,51 +530,6 @@ export function PrismEmojiDemo(): JSX.Element {
         <div className="flex min-h-20 items-center gap-6 rounded-lg border border-border bg-muted/20 px-6 py-6">
           <PrismEmoji {...previewProps} />
         </div>
-        <div className="max-w-3xl space-y-1 rounded-md border border-border bg-muted/30 px-4 py-3 font-mono text-xs text-muted-foreground">
-          <div>
-            <span className="text-foreground">Resolved CDN key: </span>
-            {resolvedKey ?? "(none — check emoji / codepoint)"}
-          </div>
-          {pngDebugUrl ? (
-            <div className="break-all">
-              <span className="text-foreground">PNG: </span>
-              <a
-                href={pngDebugUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary underline"
-              >
-                {pngDebugUrl}
-              </a>
-            </div>
-          ) : null}
-          {gifDebugUrl ? (
-            <div className="break-all">
-              <span className="text-foreground">GIF: </span>
-              <a
-                href={gifDebugUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary underline"
-              >
-                {gifDebugUrl}
-              </a>
-            </div>
-          ) : null}
-          {webpDebugUrl ? (
-            <div className="break-all">
-              <span className="text-foreground">WebP: </span>
-              <a
-                href={webpDebugUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary underline"
-              >
-                {webpDebugUrl}
-              </a>
-            </div>
-          ) : null}
-        </div>
       </section>
 
       <section className="space-y-4">
@@ -509,7 +550,7 @@ export function PrismEmojiDemo(): JSX.Element {
 
       <section className="space-y-4">
         <PrismTypography role="title" size="large" font="sans" as="h2">
-          Compare styles ({GALLERY_EMOJI})
+          Compare
         </PrismTypography>
         <div className="flex max-w-xl flex-col gap-8">
           {STYLE_OPTIONS.map(({ value, label }) => (
@@ -518,29 +559,62 @@ export function PrismEmojiDemo(): JSX.Element {
                 {label}
               </PrismTypography>
               <div className="flex items-center gap-4">
-                <PrismEmoji emoji={GALLERY_EMOJI} emojiStyle={value} size="huge" />
-                <PrismEmoji emoji={GALLERY_EMOJI} emojiStyle={value} size="medium" />
-                <PrismEmoji emoji={GALLERY_EMOJI} emojiStyle={value} size="small" />
+                <PrismEmoji
+                  key={`compare-${value}-${previewProps.emoji}-${previewProps.animationMode}`}
+                  {...previewProps}
+                  emojiStyle={value}
+                  size="gigantic"
+                />
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-4">
         <PrismTypography role="overline" size="small" className="block">
-          Inline in body text
+          Inline in text
         </PrismTypography>
-        <PrismTypography role="body" size="medium" className="max-w-prose">
-          Launch day went well
-          <PrismEmoji
-            emoji={GALLERY_EMOJI}
-            emojiStyle="googleNotoColor"
-            className="mx-0.5 inline-block"
-          />
-          and the team shipped on time.
-        </PrismTypography>
+        <div className="flex flex-col gap-6">
+          {INLINE_TYPE_DEMOS.map((row) => (
+            <div key={row.id} className="space-y-1.5">
+              <PrismTypography
+                role="label"
+                size="small"
+                font="mono"
+                color={{ semanticText: "muted" }}
+                className="block uppercase tracking-wide"
+              >
+                {row.caption}
+              </PrismTypography>
+              <PrismTypography
+                role={row.role}
+                size={row.size}
+                font={row.font}
+                className="max-w-prose"
+              >
+                {inlinePhrase.before}
+                <PrismEmoji
+                  key={`${row.id}-${previewProps.emoji}-${previewProps.emojiStyle}-${previewProps.animationMode}-${inlinePhraseIndex}`}
+                  {...previewProps}
+                  size="inherit"
+                  className="mx-0.5 inline-block align-middle"
+                />
+                {inlinePhrase.after}
+              </PrismTypography>
+            </div>
+          ))}
+        </div>
       </section>
+
+      <PrismEmojiPickerOverlay
+        open={emojiPickerOpen}
+        onClose={() => setEmojiPickerOpen(false)}
+        onSelect={(picked) => {
+          setEmojiInput(picked);
+          setEmojiPickerOpen(false);
+        }}
+      />
     </div>
   );
 }
