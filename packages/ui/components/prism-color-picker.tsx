@@ -634,7 +634,7 @@ export function PrismColorPicker({
       const newGradient = currentGradient
         ? {
             ...currentGradient,
-            swatches: currentGradient.swatches.map((s) =>
+            swatches: (currentGradient.swatches ?? []).map((s) =>
               PrismColor.Loop.normalize(next, s)
             ),
             shade: normalizeGradientShadeForPalette(
@@ -954,7 +954,7 @@ export function PrismColorPicker({
                   return (
                     <PrismButton
                       key={opt.id}
-                      color="red"
+                      color={{ palette: "default", swatchPrimary: "red" }}
                       label={opt.label}
                       variant="plain"
                       shape="rectangle"
@@ -1047,7 +1047,7 @@ export function PrismColorPicker({
                         return (
                           <PrismButton
                             key={`${family}-${i}`}
-                            color="red"
+                            color={{ palette: "default", swatchPrimary: "red" }}
                             label={family}
                             variant="icon"
                             icon={X}
@@ -1099,7 +1099,7 @@ export function PrismColorPicker({
                         (opt, i, arr) => (
                           <PrismButton
                             key={opt.id}
-                            color="red"
+                            color={{ palette: "default", swatchPrimary: "red" }}
                             label={opt.label}
                             variant="plain"
                             shape="pill"
@@ -1196,7 +1196,7 @@ export function PrismColorPicker({
                   return (
                     <PrismButton
                       key={opt.id}
-                      color="red"
+                      color={{ palette: "default", swatchPrimary: "red" }}
                       label={opt.label}
                       variant="plain"
                       shape="rectangle"

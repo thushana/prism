@@ -40,7 +40,7 @@ export function PrismCardDemo(): JSX.Element {
           <PrismButton
             type="button"
             variant="plain"
-            color="blue"
+            color={{ palette: "default", swatchPrimary: "blue" }}
             label="Primary"
             size="small"
             shape="rectangleRounded"
@@ -48,7 +48,7 @@ export function PrismCardDemo(): JSX.Element {
           <PrismButton
             type="button"
             variant="plain"
-            color="grey"
+            color={{ palette: "default", swatchPrimary: "grey" }}
             label="Secondary"
             size="small"
             paint="monochrome"

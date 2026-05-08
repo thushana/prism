@@ -111,7 +111,11 @@ export type PrismColorSpec = {
     elevated?: boolean;
   };
   gradient?: {
-    swatches: PrismSwatchKey[];
+    /**
+     * Gradient stop families. When omitted/empty, consumers may derive stops from other fields
+     * (e.g. `swatchPrimary` + ColorLoop step) for ergonomic one-color gradients.
+     */
+    swatches?: PrismSwatchKey[];
     direction: "horizontal" | "vertical" | "angled";
     shade?: number | { light: number; dark: number };
   };

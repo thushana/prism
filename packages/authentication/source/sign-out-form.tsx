@@ -15,7 +15,7 @@ export function SignOutForm(): React.JSX.Element {
         variant="plain"
         label="Sign out"
         textCase="uppercase"
-        color="grey"
+        color={{ palette: "default", swatchPrimary: "grey" }}
         paint="backgroundNone"
         disableColorChange
         line="none"

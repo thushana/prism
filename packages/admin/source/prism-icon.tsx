@@ -522,7 +522,7 @@ export function PrismIconDemo(): JSX.Element {
             <PrismButton
               type="submit"
               variant="plain"
-              color="blue"
+              color={{ palette: "default", swatchPrimary: "blue" }}
               label="Add"
               size="small"
               shape="rectangleRounded"

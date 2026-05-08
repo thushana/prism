@@ -198,7 +198,7 @@ export function PrismEmojiPicker({
               paint="backgroundNone"
               size="medium"
               shape="rectangleRounded"
-              color="blue"
+              color={{ palette: "default", swatchPrimary: "blue" }}
               segmentPosition={segmentSlot(index, PREVIEW_COUNT)}
               toggled={preview === id}
               className="max-w-full shrink min-w-0 normal-case!"
@@ -225,7 +225,7 @@ export function PrismEmojiPicker({
                 paint="backgroundNone"
                 size="medium"
                 shape="rectangleRounded"
-                color="blue"
+                color={{ palette: "default", swatchPrimary: "blue" }}
                 segmentPosition={slot}
                 toggled={activeCategoryId === c.id}
                 className="max-w-full shrink min-w-0 normal-case!"
