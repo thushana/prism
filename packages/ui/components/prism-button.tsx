@@ -109,6 +109,11 @@ export interface PrismButtonProps {
   disableIconMotion?: boolean;
   inverted?: boolean;
   disabled?: boolean;
+  /**
+   * Pressed / selected state: drives visuals and keeps “hover” semantics while on.
+   * With `paint="backgroundNone"`, selection uses a **tinted chip** (primary ~100) plus
+   * **full-strength** label/icon color (~800), not a faint foreground wash.
+   */
   toggled?: boolean;
   /** Merge props onto a single inner span (display-only / style-guide); not a native `<button>`. */
   asChild?: boolean;
@@ -154,7 +159,7 @@ export function PrismButton(
     disableIconMotion = false,
     inverted = false,
     disabled = false,
-    toggled = false,
+    toggled,
     asChild = false,
     className = "",
     ...rest
@@ -435,8 +440,18 @@ export function PrismButton(
 
   const transitionValue = disableMotion ? "none" : COLOR_TRANSITION;
 
+  /**
+   * Ghost buttons (`paint="backgroundNone"`): the generic hover pair swaps to
+   * `hoverForegroundValue` (light swatch) which reads as faint/disabled on a
+   * white surface. For hover **and** `toggled`, use a tinted fill +
+   * **full-strength** `foregroundValue` instead — standard “selected chip” UX.
+   */
+  const ghostSurfaceActive = isBackgroundNo && effectiveHovered;
+
   const resolvedBackground = isBackgroundNo
-    ? "transparent"
+    ? ghostSurfaceActive
+      ? solidBackgroundLight
+      : "transparent"
     : shouldChangeColor && effectiveHovered
       ? hoverBackgroundValue
       : backgroundValue;
@@ -490,9 +505,11 @@ export function PrismButton(
     fontWeight: 800,
     fontSize: `${fontSizePx}px`,
     color:
-      shouldChangeColor && effectiveHovered
-        ? hoverForegroundValue
-        : foregroundValue,
+      isBackgroundNo
+        ? foregroundValue
+        : shouldChangeColor && effectiveHovered
+          ? hoverForegroundValue
+          : foregroundValue,
     cursor: asChild || disabled ? "default" : "pointer",
     textTransform:
       textCase === "uppercase"
@@ -599,6 +616,7 @@ export function PrismButton(
         style={{ ...style, ...restSpanStyle }}
         title={title}
         aria-label={ariaLabel}
+        aria-pressed={toggled !== undefined ? toggled : undefined}
         {...dataAttrs}
         {...restSpanSafe}
         onPointerEnter={onEnter}
@@ -617,6 +635,7 @@ export function PrismButton(
       style={{ ...style, ...restButtonStyle }}
       title={title}
       aria-label={ariaLabel}
+      aria-pressed={toggled !== undefined ? toggled : undefined}
       {...dataAttrs}
       {...restButtonSafe}
       disabled={disabled}

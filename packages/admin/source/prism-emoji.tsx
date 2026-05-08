@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  PrismButton,
   PrismCodeBlock,
   PrismColorPicker,
   PrismEmoji,
@@ -13,6 +14,7 @@ import {
   type PrismEmojiSize,
   type PrismEmojiStyle,
 } from "@ui";
+import { Smile } from "lucide-react";
 import { useEffect, useMemo, useState, type JSX } from "react";
 
 const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
@@ -219,14 +221,20 @@ export function PrismEmojiDemo(): JSX.Element {
             <PrismTypography role="overline" size="small" className="block">
               Emoji picker
             </PrismTypography>
-            <div className="h-96 min-h-0 overflow-hidden rounded-lg border border-border bg-muted/20 p-3">
-              <PrismEmojiPicker
-                className="h-full min-h-0"
-                onEmojiSelect={(picked) => {
-                  setEmojiInput(picked);
-                }}
-              />
-            </div>
+            <PrismEmojiPicker
+              trigger={
+                <PrismButton
+                  type="button"
+                  variant="icon"
+                  icon={Smile}
+                  label="Browse emoji"
+                  color={{ palette: "default", swatchPrimary: "indigo" }}
+                />
+              }
+              onEmojiSelect={(picked) => {
+                setEmojiInput(picked);
+              }}
+            />
           </div>
 
           {/* Col 2 — Emoji Style */}

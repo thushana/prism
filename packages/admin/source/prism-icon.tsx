@@ -5,7 +5,9 @@ import {
   PrismCodeBlock,
   PrismColorPicker,
   PrismIcon,
+  PrismIconPicker,
   PrismTypography,
+  PRISM_MATERIAL_ICONS_ROUND_NAMES,
   prismColorPickerClipboardColorProp,
 } from "@ui";
 import type {
@@ -15,10 +17,10 @@ import type {
   PrismIconSizeName,
   PrismIconWeightName,
 } from "@ui";
+import { LayoutGrid } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
 import { createPortal } from "react-dom";
-import iconNames from "./material-icons-round-names.json";
 
 /** Checkbox keys for the icon admin demo (mutually exclusive within each group). */
 type IconDemoAppearanceKey =
@@ -258,24 +260,16 @@ const IconCell = memo(function IconCell({
 /**
  * Interactive icon demo + full Material Symbols Rounded name grid (ligature names for
  * {@link PrismIcon}). Served from `/admin/prism/components/prism-icon`.
- * Section layout: Customize (add names, color, axes) → Example → Code sample → Icon Options.
+ * Section layout: Customize (browse icons, color, axes) → Example → Code sample → Icon Options.
  */
 export function PrismIconDemo(): JSX.Element {
-  const names = iconNames as string[];
   const [selectedAppearanceKeys, setSelectedAppearanceKeys] = useState(
     initialIconDemoSelection
   );
-  const [exampleIconNames, setExampleIconNames] = useState<string[]>([
-    "home",
-    "star",
-    "favorite",
-    "settings",
-  ]);
-  const [addIconDraft, setAddIconDraft] = useState("");
-  const [addComboboxFocused, setAddComboboxFocused] = useState(false);
-  const addComboboxBlurTimeoutRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const [exampleIconNames, setExampleIconNames] = useState<string[]>([]);
+  const [lastSelectedIconName, setLastSelectedIconName] = useState<
+    string | null
+  >(null);
   const [gridFilterQuery, setGridFilterQuery] = useState("");
   const [iconColor, setIconColor] = useState<PartialPrismColorSpec>({
     palette: "default",
@@ -311,9 +305,6 @@ export function PrismIconDemo(): JSX.Element {
       if (copyToastTimeoutRef.current) {
         clearTimeout(copyToastTimeoutRef.current);
       }
-      if (addComboboxBlurTimeoutRef.current) {
-        clearTimeout(addComboboxBlurTimeoutRef.current);
-      }
     },
     []
   );
@@ -323,59 +314,39 @@ export function PrismIconDemo(): JSX.Element {
     [selectedAppearanceKeys]
   );
 
-  const sampleIconName = exampleIconNames[0] ?? "home";
+  /** Code sample reflects the last icon picked from Browse icons. */
+  const snippetSourceName = lastSelectedIconName;
 
-  const currentSampleSnippet = useMemo(
-    () => formatPrismIconSnippet(sampleIconName, iconProps, iconColor),
-    [sampleIconName, iconProps, iconColor]
-  );
+  const currentSampleSnippet = useMemo(() => {
+    if (!snippetSourceName) {
+      return "// Pick an icon with Browse icons above.";
+    }
+    return formatPrismIconSnippet(snippetSourceName, iconProps, iconColor);
+  }, [snippetSourceName, iconProps, iconColor]);
 
   const filteredGridIconNames = useMemo(() => {
     const query = gridFilterQuery.trim().toLowerCase();
-    if (!query) return names;
-    return names.filter((n) => n.toLowerCase().includes(query));
-  }, [names, gridFilterQuery]);
+    if (!query) return PRISM_MATERIAL_ICONS_ROUND_NAMES;
+    return PRISM_MATERIAL_ICONS_ROUND_NAMES.filter((n) =>
+      n.toLowerCase().includes(query)
+    );
+  }, [gridFilterQuery]);
 
   const iconNameSections = useMemo(
     () => buildIconNameSections(filteredGridIconNames),
     [filteredGridIconNames]
   );
 
-  const addIconSuggestions = useMemo(() => {
-    const q = addIconDraft.trim().toLowerCase();
-    if (q.length === 0) return [];
-    return names.filter((n) => n.toLowerCase().includes(q)).slice(0, 50);
-  }, [names, addIconDraft]);
-
-  const openAddCombobox = useCallback(() => {
-    if (addComboboxBlurTimeoutRef.current) {
-      clearTimeout(addComboboxBlurTimeoutRef.current);
-      addComboboxBlurTimeoutRef.current = null;
-    }
-    setAddComboboxFocused(true);
-  }, []);
-
-  const scheduleCloseAddCombobox = useCallback(() => {
-    if (addComboboxBlurTimeoutRef.current) {
-      clearTimeout(addComboboxBlurTimeoutRef.current);
-    }
-    addComboboxBlurTimeoutRef.current = setTimeout(() => {
-      setAddComboboxFocused(false);
-      addComboboxBlurTimeoutRef.current = null;
-    }, 200);
-  }, []);
-
   const addIconByName = useCallback(
     (match: string) => {
-      if (!names.includes(match)) return;
+      if (!PRISM_MATERIAL_ICONS_ROUND_NAMES.includes(match)) return;
+      setLastSelectedIconName(match);
       setExampleIconNames((prev) =>
         prev.includes(match) ? prev : [...prev, match]
       );
-      setAddIconDraft("");
-      setAddComboboxFocused(false);
       showTransientToast("Added to preview", match);
     },
-    [names, showTransientToast]
+    [showTransientToast]
   );
 
   const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
@@ -391,22 +362,6 @@ export function PrismIconDemo(): JSX.Element {
       return next;
     });
   };
-
-  const handleAddIconToExample = useCallback(() => {
-    const raw = addIconDraft.trim();
-    const q = raw.toLowerCase();
-    if (!q) return;
-    const exact = names.find((n) => n.toLowerCase() === q);
-    const match = exact ?? names.find((n) => n.toLowerCase().includes(q));
-    if (!match) {
-      showTransientToast(
-        "No matching icon",
-        `No ligature name equals or contains "${raw}".`
-      );
-      return;
-    }
-    addIconByName(match);
-  }, [addIconDraft, names, addIconByName, showTransientToast]);
 
   const handleIconCopied = useCallback(
     (snippet: string) => {
@@ -466,68 +421,37 @@ export function PrismIconDemo(): JSX.Element {
             Customize
           </PrismTypography>
 
-          <form
-            className="flex max-w-2xl flex-wrap items-end gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleAddIconToExample();
-            }}
-          >
-            <label className="relative block min-w-48 flex-1 cursor-text space-y-1">
-              <PrismTypography role="overline" size="small" className="block">
-                Add to preview
-              </PrismTypography>
-              <input
-                id="prism-icon-demo-add-name"
-                type="text"
-                role="combobox"
-                aria-autocomplete="list"
-                aria-expanded={
-                  addComboboxFocused && addIconSuggestions.length > 0
-                }
-                aria-controls="prism-icon-add-suggestions"
-                value={addIconDraft}
-                onChange={(e) => setAddIconDraft(e.target.value)}
-                onFocus={openAddCombobox}
-                onBlur={scheduleCloseAddCombobox}
-                placeholder="Type to search ligature names…"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                autoComplete="off"
-              />
-              {addComboboxFocused && addIconSuggestions.length > 0 ? (
-                <ul
-                  id="prism-icon-add-suggestions"
-                  role="listbox"
-                  className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-border bg-popover py-1 text-popover-foreground shadow-md"
-                >
-                  {addIconSuggestions.map((n) => (
-                    <li key={n} role="presentation">
-                      <button
-                        type="button"
-                        role="option"
-                        aria-selected={false}
-                        className="w-full px-3 py-2 text-left text-sm font-mono hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-none"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          addIconByName(n);
-                        }}
-                      >
-                        {n}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+          <div className="max-w-2xl space-y-3">
+            <PrismTypography role="overline" size="small" className="block">
+              Icon picker
+            </PrismTypography>
+            <div className="flex flex-wrap items-center gap-3">
+              {lastSelectedIconName ? (
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <PrismIcon
+                    name={lastSelectedIconName}
+                    {...iconProps}
+                    color={iconColor}
+                  />
+                  <PrismTypography role="label" size="medium" font="mono">
+                    {lastSelectedIconName}
+                  </PrismTypography>
+                </div>
               ) : null}
-            </label>
-            <PrismButton
-              type="submit"
-              variant="plain"
-              color={{ palette: "default", swatchPrimary: "blue" }}
-              label="Add"
-              size="small"
-              shape="rectangleRounded"
-            />
-          </form>
+              <PrismIconPicker
+                trigger={
+                  <PrismButton
+                    type="button"
+                    variant="icon"
+                    icon={LayoutGrid}
+                    label="Browse icons"
+                    color={{ palette: "default", swatchPrimary: "indigo" }}
+                  />
+                }
+                onIconSelect={(name) => addIconByName(name)}
+              />
+            </div>
+          </div>
 
           <div className="max-w-xl space-y-2">
             <PrismTypography role="overline" size="small" className="block">
@@ -586,7 +510,7 @@ export function PrismIconDemo(): JSX.Element {
               size="medium"
               color={{ semanticText: "muted" }}
             >
-              Add at least one icon name in Customize.
+              Use Browse icons to add examples.
             </PrismTypography>
           ) : (
             <div className="flex flex-wrap gap-6">
@@ -638,7 +562,7 @@ export function PrismIconDemo(): JSX.Element {
             font="mono"
           >
             Showing {filteredGridIconNames.length.toLocaleString()} of{" "}
-            {names.length.toLocaleString()}
+            {PRISM_MATERIAL_ICONS_ROUND_NAMES.length.toLocaleString()}
           </PrismTypography>
           <div className="space-y-10">
             {iconNameSections.map(

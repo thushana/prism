@@ -300,7 +300,16 @@ import { PrismIcon } from "@ui";
 
 **Shared vocabulary:** **PrismIcon** and **PrismButton** use the same **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
-Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds names to the Example strip, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example**, **Code sample** (first preview icon + emitted `color` block), and **Icon Options** (separate grid filter; click a cell to copy JSX, toast feedback).
+Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds icons only via **`Browse icons`** (**`PrismIconPicker`** **`trigger`** — same **`PrismButton`** pattern as the emoji demo), shows the last selection beside the button, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example** (accumulated picks), **Code sample** (**last picked** icon + emitted `color` block), and **Icon Options** (grid filter; click a cell to copy JSX, toast feedback).
+
+### PrismEmojiPicker / PrismIconPicker
+
+Both are **browse-and-select** panels for **`@emoji-mart/data`** emoji ids (**`PrismEmojiPicker`**) or Material Symbols ligature names (**`PrismIconPicker`** / **`PRISM_MATERIAL_ICONS_ROUND_NAMES`**).
+
+- **Inline:** omit **`trigger`** — render the panel where you mount the component (e.g. journey overlay embedding).
+- **Popover:** pass **`trigger`** (`ReactNode`, typically **`PrismButton`**) — the panel opens in a **`@radix-ui/react-popover`** anchored to the trigger. Optional **`open`** / **`onOpenChange`** for controlled mode; otherwise open state is internal. Selecting an item calls **`onEmojiSelect`** / **`onIconSelect`** and closes an uncontrolled popover automatically.
+
+Admin demos: **`/admin/prism/components/prism-emoji`**, **`/admin/prism/components/prism-icon`**.
 
 ### Layout wrappers (`prism-layout.tsx`)
 

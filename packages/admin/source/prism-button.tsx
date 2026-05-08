@@ -39,7 +39,6 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { cn } from "@utilities";
 
 const ACTION_BUTTONS: {
   swatchPrimary: PrismSwatchKey;
@@ -607,35 +606,45 @@ function ButtonCustomizerSection() {
     });
   };
 
-  const { spreadProps, previewColor, previewSpreadProps, currentSampleSnippet } =
-    useMemo(() => {
-      const spreadProps = buildButtonDemoSpreadProps(selected);
-      const segmentPosition =
-        spreadProps.gap === "none" ? ("first" as const) : undefined;
-      const direction = spreadProps.gradientDirection;
-      const previewColor =
-        groupColorMode === "unified"
-          ? applyCustomizerGradientDirection({ ...pickedColor }, direction)
-          : applyCustomizerGradientDirection(
-              { palette: "default", swatchPrimary: "deep-purple" },
-              direction
-            );
-      const previewSpreadProps = { ...spreadProps, variant: "icon" as const };
-      const currentSampleSnippet = formatPrismButtonDemoSnippet(
-        CUSTOMIZER_PREVIEW_SAMPLE,
-        {
-          ...previewSpreadProps,
-          segmentPosition,
-          color: previewColor,
-        }
-      );
-      return {
-        spreadProps,
-        previewColor,
-        previewSpreadProps,
-        currentSampleSnippet,
-      };
-    }, [selected, pickedColor, groupColorMode]);
+  const {
+    prismSpreadProps,
+    gradientDirection,
+    previewColor,
+    previewSpreadProps,
+    currentSampleSnippet,
+  } = useMemo(() => {
+    const spreadProps = buildButtonDemoSpreadProps(selected);
+    /** Not a PrismButton prop — only drives `color.gradient.direction` via {@link applyCustomizerGradientDirection}. */
+    const { gradientDirection, ...prismSpreadProps } = spreadProps;
+    const segmentPosition =
+      spreadProps.gap === "none" ? ("first" as const) : undefined;
+    const previewColor =
+      groupColorMode === "unified"
+        ? applyCustomizerGradientDirection({ ...pickedColor }, gradientDirection)
+        : applyCustomizerGradientDirection(
+            { palette: "default", swatchPrimary: "deep-purple" },
+            gradientDirection
+          );
+    const previewSpreadProps = {
+      ...prismSpreadProps,
+      variant: "icon" as const,
+    };
+    const currentSampleSnippet = formatPrismButtonDemoSnippet(
+      CUSTOMIZER_PREVIEW_SAMPLE,
+      {
+        ...previewSpreadProps,
+        segmentPosition,
+        color: previewColor,
+      }
+    );
+    return {
+      prismSpreadProps,
+      gradientDirection,
+      previewColor,
+      previewSpreadProps,
+      currentSampleSnippet,
+    };
+  }, [selected, pickedColor, groupColorMode]);
 
   return (
     <>
@@ -714,7 +723,7 @@ function ButtonCustomizerSection() {
                   asChild
                   {...previewSpreadProps}
                   segmentPosition={
-                    previewSpreadProps.gap === "none" ? "first" : undefined
+                    prismSpreadProps.gap === "none" ? "first" : undefined
                   }
                 />
               </div>
@@ -747,17 +756,17 @@ function ButtonCustomizerSection() {
                     groupColorMode === "unified"
                       ? applyCustomizerGradientDirection(
                           { ...pickedColor },
-                          spreadProps.gradientDirection
+                          gradientDirection
                         )
                       : applyCustomizerGradientDirection(
                           { palette: "default", swatchPrimary },
-                          spreadProps.gradientDirection
+                          gradientDirection
                         )
                   }
                   label={label}
                   icon={icon}
                   asChild
-                  {...spreadProps}
+                  {...prismSpreadProps}
                   segmentPosition={
                     selected.has("gapNone")
                       ? i === 0

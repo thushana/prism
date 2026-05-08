@@ -18,9 +18,16 @@ import {
   Smile,
   Utensils,
 } from "lucide-react";
-import { useCallback, useMemo, useState, type JSX } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type JSX,
+  type ReactNode,
+} from "react";
 import { PrismButton } from "./prism-button";
 import { PrismEmoji, type PrismEmojiStyle } from "./prism-emoji";
+import { PrismPickerPopover, usePickerPopupState } from "./prism-picker-popover";
 import { PrismTypography } from "./prism-typography";
 
 const DATA = emojiMartData as EmojiMartData;
@@ -65,6 +72,10 @@ export type PrismEmojiPickerPreview =
 
 export interface PrismEmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;
+  /** When set, the panel opens in a Radix popover anchored to this control. */
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   /** How grid cells render Noto vs native. Default `native` avoids loading many CDN assets at once. */
   defaultPreview?: PrismEmojiPickerPreview;
   className?: string;
@@ -118,16 +129,15 @@ function categoryTitle(categoryId: string): string {
   return cat[categoryId] ?? categoryId;
 }
 
-/**
- * Full emoji browser backed by **`@emoji-mart/data`** (Unicode / emoji-datasource derived;
- * upgrade the package for fresher emoji lists). Supports previewing **native**, **Google Noto
- * color (PNG)**, and **Google Noto animated (GIF)** in grid cells via {@link PrismEmoji}.
- */
-export function PrismEmojiPicker({
-  onEmojiSelect,
-  defaultPreview = "native",
+function PrismEmojiPickerPanel({
+  defaultPreview,
+  onPick,
   className,
-}: PrismEmojiPickerProps): JSX.Element {
+}: {
+  defaultPreview: PrismEmojiPickerPreview;
+  onPick: (emoji: string) => void;
+  className?: string;
+}): JSX.Element {
   const [preview, setPreview] =
     useState<PrismEmojiPickerPreview>(defaultPreview);
   const [search, setSearch] = useState("");
@@ -147,15 +157,16 @@ export function PrismEmojiPicker({
     const cat = DATA.categories.find((c) => c.id === activeCategoryId);
     return cat?.emojis ?? [];
   }, [search, activeCategoryId]);
+
   const handlePick = useCallback(
-    (emoji: string) => onEmojiSelect(emoji),
-    [onEmojiSelect]
+    (emoji: string) => onPick(emoji),
+    [onPick]
   );
 
   return (
     <div
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-hidden",
+        "flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-3 overflow-hidden",
         className
       )}
     >
@@ -185,7 +196,7 @@ export function PrismEmojiPicker({
         <PrismTypography role="overline" size="small" className="block">
           Preview as
         </PrismTypography>
-        <div className="flex min-w-0 flex-wrap gap-0">
+        <div className="flex min-w-0 w-full max-w-full flex-wrap gap-0">
           {PREVIEW_OPTIONS.map(({ id, label, icon: PreviewIcon }, index) => (
             <PrismButton
               key={id}
@@ -209,7 +220,11 @@ export function PrismEmojiPicker({
       </div>
 
       {search.trim() === "" ? (
-        <div className="flex min-w-0 shrink-0 flex-wrap gap-0">
+        <div
+          className="flex min-h-0 min-w-0 w-full max-w-full shrink-0 flex-nowrap gap-0 overflow-x-auto overscroll-x-contain pb-0.5"
+          role="toolbar"
+          aria-label="Emoji categories"
+        >
           {DATA.categories.map((c, index) => {
             const Icon = CATEGORY_ICONS[c.id] ?? Smile;
             const slot = segmentSlot(index, catCount);
@@ -220,6 +235,7 @@ export function PrismEmojiPicker({
                 label={categoryTitle(c.id)}
                 variant="icon"
                 icon={Icon}
+                iconOnly
                 line="none"
                 gap="none"
                 paint="backgroundNone"
@@ -228,7 +244,7 @@ export function PrismEmojiPicker({
                 color={{ palette: "default", swatchPrimary: "blue" }}
                 segmentPosition={slot}
                 toggled={activeCategoryId === c.id}
-                className="max-w-full shrink min-w-0 normal-case!"
+                className="shrink-0"
                 onClick={() => setActiveCategoryId(c.id)}
               />
             );
@@ -299,5 +315,53 @@ export function PrismEmojiPicker({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Full emoji browser backed by **`@emoji-mart/data`** (Unicode / emoji-datasource derived;
+ * upgrade the package for fresher emoji lists). Supports previewing **native**, **Google Noto
+ * color (PNG)**, and **Google Noto animated (GIF)** in grid cells via {@link PrismEmoji}.
+ *
+ * Pass **`trigger`** to open the browser in a floating popover; omit it for an inline panel.
+ */
+export function PrismEmojiPicker({
+  onEmojiSelect,
+  trigger,
+  open,
+  onOpenChange,
+  defaultPreview = "native",
+  className,
+}: PrismEmojiPickerProps): JSX.Element {
+  const popup = usePickerPopupState(trigger, open, onOpenChange);
+
+  const handlePick = useCallback(
+    (emoji: string) => {
+      onEmojiSelect(emoji);
+      if (popup.usePopover) popup.close();
+    },
+    [onEmojiSelect, popup]
+  );
+
+  const panel = (
+    <PrismEmojiPickerPanel
+      defaultPreview={defaultPreview}
+      onPick={handlePick}
+      className={className}
+    />
+  );
+
+  if (trigger == null) {
+    return panel;
+  }
+
+  return (
+    <PrismPickerPopover
+      trigger={trigger}
+      open={popup.open}
+      onOpenChange={popup.setOpen}
+    >
+      {panel}
+    </PrismPickerPopover>
   );
 }

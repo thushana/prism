@@ -613,7 +613,7 @@ function PrismCodeBlock({
         data-prism-palette={resolvedColor.palette}
         data-prism-swatch-primary={resolvedColor.primary}
         data-prism-cb={reactInstanceId}
-        className={cn("min-w-0 font-mono", className)}
+        className={cn("isolate min-w-0 font-mono", className)}
         style={{
           width:
             characterMaxWidth != null
