@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type SyntheticEvent,
 } from "react";
 import type { PrismSize } from "../source/prism-size";
 import {
@@ -83,6 +84,94 @@ function notoAssetUrl(key: string, ext: "png" | "gif"): string {
   return `${getNotoEmojiCdnBase()}/${key}/${NOTO_EMOJI_CDN_RASTER_PX}.${ext}`;
 }
 
+/** Outcome of a shared HEAD probe for a Noto GIF URL (deduped across grid cells). */
+type GifHeadProbeOutcome = "ok" | "missing" | "unknown";
+
+const GIF_HEAD_PROBE_CACHE_MAX = 600;
+const gifHeadProbeResults = new Map<string, GifHeadProbeOutcome>();
+const gifHeadProbeInflight = new Map<string, Promise<GifHeadProbeOutcome>>();
+
+function rememberGifHeadProbeResult(url: string, outcome: GifHeadProbeOutcome) {
+  gifHeadProbeResults.set(url, outcome);
+  // Prevent unbounded growth in long-lived sessions.
+  while (gifHeadProbeResults.size > GIF_HEAD_PROBE_CACHE_MAX) {
+    const firstKey = gifHeadProbeResults.keys().next().value as string | undefined;
+    if (!firstKey) break;
+    gifHeadProbeResults.delete(firstKey);
+  }
+}
+
+function getGifHeadProbeOutcome(url: string): Promise<GifHeadProbeOutcome> {
+  const settled = gifHeadProbeResults.get(url);
+  if (settled !== undefined) {
+    return Promise.resolve(settled);
+  }
+  let inflight = gifHeadProbeInflight.get(url);
+  if (!inflight) {
+    inflight = fetch(url, { method: "HEAD" })
+      .then((res) => {
+        const outcome: GifHeadProbeOutcome = res.ok
+          ? "ok"
+          : res.status === 404
+            ? "missing"
+            : "unknown";
+        rememberGifHeadProbeResult(url, outcome);
+        return outcome;
+      })
+      .catch(() => {
+        const outcome: GifHeadProbeOutcome = "unknown";
+        rememberGifHeadProbeResult(url, outcome);
+        return outcome;
+      })
+      .finally(() => {
+        gifHeadProbeInflight.delete(url);
+      });
+    gifHeadProbeInflight.set(url, inflight);
+  }
+  return inflight;
+}
+
+function renderSolidColorFilterDefs(
+  colorFilterId: string,
+  colorPaint: Extract<ResolvedColorPaint, { kind: "solid" }>,
+  colorDesaturate: boolean
+) {
+  const { rgb, shadowRgb, highlightRgb } = colorPaint;
+  const f = (n: number) => n.toFixed(5);
+  const useDuotone =
+    colorDesaturate !== false && shadowRgb !== null && highlightRgb !== null;
+  return (
+    <defs>
+      <filter id={colorFilterId} colorInterpolationFilters="sRGB">
+        {useDuotone ? (
+          <>
+            <feColorMatrix type="saturate" values="0" />
+            <feComponentTransfer>
+              <feFuncR
+                type="table"
+                tableValues={`${f(shadowRgb![0])} ${f(rgb[0])} ${f(highlightRgb![0])}`}
+              />
+              <feFuncG
+                type="table"
+                tableValues={`${f(shadowRgb![1])} ${f(rgb[1])} ${f(highlightRgb![1])}`}
+              />
+              <feFuncB
+                type="table"
+                tableValues={`${f(shadowRgb![2])} ${f(rgb[2])} ${f(highlightRgb![2])}`}
+              />
+            </feComponentTransfer>
+          </>
+        ) : (
+          <feColorMatrix
+            type="matrix"
+            values={buildColorizeMatrix(rgb[0], rgb[1], rgb[2], false)}
+          />
+        )}
+      </filter>
+    </defs>
+  );
+}
+
 function resolvePrismEmojiDisplayPx(
   size: PrismEmojiProps["size"] | undefined
 ): number {
@@ -132,7 +221,8 @@ export function normalizeCodepointSequenceKey(input: string): string | null {
   return parts.map((p) => p.toLowerCase()).join("_");
 }
 
-function codepointKeyToEmoji(key: string): string | null {
+/** Normalized underscore codepoint key → single Unicode string (for display / debug). */
+export function codepointKeyToEmoji(key: string): string | null {
   try {
     const nums = key.split("_").map((h) => parseInt(h, 16));
     if (nums.some((n) => Number.isNaN(n))) return null;
@@ -194,8 +284,9 @@ export interface PrismEmojiProps {
   animationMode?: PrismEmojiAnimationMode;
   /**
    * Same {@link PartialPrismColorSpec} shape as {@link PrismIconProps.color}.
-   * Raster is painted as a filtered `background-image` (when needed), then a multiply layer
-   * tinted with the PNG alpha mask so letterboxing stays clear. Ignored for `native`.
+   * For Noto rasters: filter / mask painting. For `native`, solid colours use the same SVG
+   * `feColorMatrix` filter on the glyph; gradients use `background-clip: text` (platform-dependent
+   * for colour emoji).
    */
   color?: PartialPrismColorSpec;
   /**
@@ -204,6 +295,11 @@ export interface PrismEmojiProps {
    * @default {@link PRISM_EMOJI_DEFAULTS.colorDesaturate}
    */
   colorDesaturate?: boolean;
+  /**
+   * With {@link emojiStyle} `googleNotoAnimated`, when the GIF is missing and we fall back
+   * to static PNG, apply a grayscale treatment (e.g. emoji picker “no animation” hint).
+   */
+  staticAnimatedFallbackMuted?: boolean;
   className?: string;
   title?: string;
   style?: CSSProperties;
@@ -321,6 +417,7 @@ export function PrismEmoji({
   animationMode = PRISM_EMOJI_DEFAULTS.animationMode,
   color,
   colorDesaturate = PRISM_EMOJI_DEFAULTS.colorDesaturate,
+  staticAnimatedFallbackMuted,
   className,
   title,
   style,
@@ -346,6 +443,15 @@ export function PrismEmoji({
   }, [emoji, key]);
 
   const [assetBroken, setAssetBroken] = useState(false);
+  /** GIF missing or 404 — keep Noto and show static PNG instead of falling back to native. */
+  const [gifUnavailable, setGifUnavailable] = useState(false);
+  /**
+   * When {@link staticAnimatedFallbackMuted}, HEAD-probe the GIF URL (same-origin proxy supports HEAD).
+   * `true` = 404, `false` = exists, `undefined` = unknown (pending or probe skipped / failed — rely on `<img>`).
+   */
+  const [gifProbeMissing, setGifProbeMissing] = useState<boolean | undefined>(
+    undefined
+  );
   const loadGenerationRef = useRef(0);
 
   const [burst, setBurst] = useState(false);
@@ -357,10 +463,50 @@ export function PrismEmoji({
   useEffect(() => {
     loadGenerationRef.current += 1;
     setAssetBroken(false);
+    setGifUnavailable(false);
+    setGifProbeMissing(undefined);
     return () => {
       loadGenerationRef.current += 1;
     };
   }, [key, emojiStyle, size]);
+
+  useEffect(() => {
+    if (
+      !staticAnimatedFallbackMuted ||
+      emojiStyle !== "googleNotoAnimated" ||
+      !key
+    ) {
+      setGifProbeMissing(undefined);
+      return;
+    }
+
+    const url = notoAssetUrl(key, "gif");
+    const cached = gifHeadProbeResults.get(url);
+    if (cached === "missing") {
+      setGifProbeMissing(true);
+      return;
+    }
+    if (cached === "ok") {
+      setGifProbeMissing(false);
+      return;
+    }
+    if (cached === "unknown") {
+      setGifProbeMissing(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    void getGifHeadProbeOutcome(url).then((outcome) => {
+      if (cancelled) return;
+      if (outcome === "missing") setGifProbeMissing(true);
+      else if (outcome === "ok") setGifProbeMissing(false);
+      else setGifProbeMissing(undefined);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [staticAnimatedFallbackMuted, emojiStyle, key]);
 
   useEffect(() => {
     animationEpochRef.current += 1;
@@ -404,15 +550,28 @@ export function PrismEmoji({
     };
   }, [animationMode, key, emojiStyle]);
 
-  const handleImgError = useCallback(() => {
-    const generationWhenError = loadGenerationRef.current;
-    queueMicrotask(() => {
-      if (loadGenerationRef.current !== generationWhenError) {
-        return;
-      }
-      setAssetBroken(true);
-    });
-  }, []);
+  const handleImgError = useCallback(
+    (event: SyntheticEvent<HTMLImageElement>) => {
+      const generationWhenError = loadGenerationRef.current;
+      const failedSrc =
+        event.currentTarget.currentSrc || event.currentTarget.src || "";
+      queueMicrotask(() => {
+        if (loadGenerationRef.current !== generationWhenError) {
+          return;
+        }
+        if (
+          emojiStyle === "googleNotoAnimated" &&
+          key &&
+          /\.gif(\?|$)/i.test(failedSrc)
+        ) {
+          setGifUnavailable(true);
+          return;
+        }
+        setAssetBroken(true);
+      });
+    },
+    [emojiStyle, key]
+  );
 
   const boxStyle = useMemo(
     () => ({
@@ -422,10 +581,7 @@ export function PrismEmoji({
     [size, style]
   );
 
-  const colorPaint = useMemo(
-    () => (emojiStyle !== "native" ? resolveColorPaint(color) : undefined),
-    [color, emojiStyle]
-  );
+  const colorPaint = useMemo(() => resolveColorPaint(color), [color]);
   const applyColor = Boolean(colorPaint);
   /** Stable SVG filter ID — colons in React's useId output are not valid XML IDs. */
   const rawFilterId = useId();
@@ -442,26 +598,95 @@ export function PrismEmoji({
 
   const pngUrl = key ? notoAssetUrl(key, "png") : "";
   const gifUrl = key ? notoAssetUrl(key, "gif") : "";
-  const rasterSrc = showGif ? gifUrl : pngUrl;
+  const useGifRaster =
+    showGif && !gifUnavailable && gifProbeMissing !== true;
+  const rasterSrc = useGifRaster ? gifUrl : pngUrl;
 
   const hoverHandlers = {
     onMouseEnter: () => { if (animationMode === "hover") setHover(true); },
     onMouseLeave: () => { if (animationMode === "hover") setHover(false); },
   };
 
-  if (emojiStyle === "native" || !key || assetBroken) {
-    return (
-      <span
-        className={cn("inline-block select-none leading-none", className)}
-        style={boxStyle}
-        title={title}
-        role={title ? "img" : undefined}
-        aria-label={title}
-        aria-hidden={title ? undefined : true}
-      >
-        {fallbackChar}
-      </span>
-    );
+  /** Animated preview on but this slot is showing static PNG (no GIF or GIF failed). */
+  const staticFallbackMutedVisual =
+    staticAnimatedFallbackMuted === true &&
+    emojiStyle === "googleNotoAnimated" &&
+    showGif &&
+    !useGifRaster;
+
+  const mutedFallbackStyle: CSSProperties | undefined =
+    staticFallbackMutedVisual
+      ? { filter: "grayscale(1)", opacity: 0.82 }
+      : undefined;
+
+  const nativePlainSpan = (
+    <span
+      className={cn("inline-block select-none leading-none", className)}
+      style={boxStyle}
+      title={title}
+      role={title ? "img" : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+    >
+      {fallbackChar}
+    </span>
+  );
+
+  if (emojiStyle === "native" && key && !assetBroken) {
+    if (applyColor && colorPaint) {
+      if (colorPaint.kind === "solid") {
+        return (
+          <span
+            className={cn("inline-block select-none leading-none", className)}
+            style={boxStyle}
+            title={title}
+            role={title ? "img" : undefined}
+            aria-label={title}
+            aria-hidden={title ? undefined : true}
+          >
+            <svg
+              width="0"
+              height="0"
+              aria-hidden
+              focusable="false"
+              style={{ position: "absolute" }}
+            >
+              {renderSolidColorFilterDefs(colorFilterId, colorPaint, colorDesaturate)}
+            </svg>
+            <span
+              className="inline-block select-none leading-none"
+              style={{ filter: `url(#${colorFilterId})` }}
+            >
+              {fallbackChar}
+            </span>
+          </span>
+        );
+      }
+      return (
+        <span
+          className={cn("inline-block select-none leading-none", className)}
+          style={{
+            ...boxStyle,
+            backgroundImage: colorPaint.css,
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            WebkitTextFillColor: "transparent",
+          }}
+          title={title}
+          role={title ? "img" : undefined}
+          aria-label={title}
+          aria-hidden={title ? undefined : true}
+        >
+          {fallbackChar}
+        </span>
+      );
+    }
+    return nativePlainSpan;
+  }
+
+  if (!key || assetBroken) {
+    return nativePlainSpan;
   }
 
   /**
@@ -475,15 +700,13 @@ export function PrismEmoji({
    */
   if (applyColor && colorPaint) {
     if (colorPaint.kind === "solid") {
-      const { rgb, shadowRgb, highlightRgb } = colorPaint;
-      const f = (n: number) => n.toFixed(5);
-      const useDuotone =
-        colorDesaturate !== false && shadowRgb !== null && highlightRgb !== null;
-
       return (
         <span
-          className={cn("relative inline-block shrink-0 overflow-hidden", className)}
-          style={boxStyle}
+          className={cn(
+            "relative inline-block shrink-0 overflow-hidden",
+            className
+          )}
+          style={{ ...boxStyle, ...mutedFallbackStyle }}
           title={title}
           role={title ? "img" : undefined}
           aria-label={title}
@@ -498,36 +721,7 @@ export function PrismEmoji({
             style={{ position: "absolute" }}
           >
             <defs>
-              <filter id={colorFilterId} colorInterpolationFilters="sRGB">
-                {useDuotone ? (
-                  <>
-                    {/* Desaturate to luminance then remap via palette-derived 3-stop table:
-                        luminance 0 → shade 800 (shadow), 0.5 → chosen shade, 1 → shade 100 (highlight).
-                        Keeps dark and light areas within the chosen palette family. */}
-                    <feColorMatrix type="saturate" values="0" />
-                    <feComponentTransfer>
-                      <feFuncR
-                        type="table"
-                        tableValues={`${f(shadowRgb![0])} ${f(rgb[0])} ${f(highlightRgb![0])}`}
-                      />
-                      <feFuncG
-                        type="table"
-                        tableValues={`${f(shadowRgb![1])} ${f(rgb[1])} ${f(highlightRgb![1])}`}
-                      />
-                      <feFuncB
-                        type="table"
-                        tableValues={`${f(shadowRgb![2])} ${f(rgb[2])} ${f(highlightRgb![2])}`}
-                      />
-                    </feComponentTransfer>
-                  </>
-                ) : (
-                  /* colorDesaturate={false}: simple per-channel multiply (no desaturation). */
-                  <feColorMatrix
-                    type="matrix"
-                    values={buildColorizeMatrix(rgb[0], rgb[1], rgb[2], false)}
-                  />
-                )}
-              </filter>
+              {renderSolidColorFilterDefs(colorFilterId, colorPaint, colorDesaturate)}
             </defs>
           </svg>
           <img
@@ -548,11 +742,15 @@ export function PrismEmoji({
     // Gradient fallback: mask approach — flat gradient silhouette.
     return (
       <span
-        className={cn("relative isolate inline-block shrink-0", className)}
+        className={cn(
+          "relative isolate inline-block shrink-0",
+          className
+        )}
         style={{
           ...boxStyle,
+          ...mutedFallbackStyle,
           backgroundImage: colorPaint.css,
-          ...(showGif ? undefined : maskStyleForPngUrl(pngUrl)),
+          ...(useGifRaster ? undefined : maskStyleForPngUrl(pngUrl)),
         }}
         title={title}
         role={title ? "img" : undefined}
@@ -577,8 +775,11 @@ export function PrismEmoji({
 
   return (
     <span
-      className={cn("relative isolate inline-block shrink-0 overflow-hidden", className)}
-      style={boxStyle}
+      className={cn(
+        "relative isolate inline-block shrink-0 overflow-hidden",
+        className
+      )}
+      style={{ ...boxStyle, ...mutedFallbackStyle }}
       title={title}
       role={title ? "img" : undefined}
       aria-label={title}

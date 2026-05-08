@@ -4,15 +4,51 @@ import { cn } from "@utilities";
 import type { EmojiMartData } from "@emoji-mart/data";
 import emojiMartData from "@emoji-mart/data";
 import emojiMartEn from "@emoji-mart/data/i18n/en.json";
+import type { LucideIcon } from "lucide-react";
+import {
+  Clapperboard,
+  Dumbbell,
+  Flag,
+  Leaf,
+  MapPin,
+  Package,
+  Palette,
+  Percent,
+  Smartphone,
+  Smile,
+  Utensils,
+} from "lucide-react";
 import { useCallback, useMemo, useState, type JSX } from "react";
+import { PrismButton } from "./prism-button";
 import { PrismEmoji, type PrismEmojiStyle } from "./prism-emoji";
 import { PrismTypography } from "./prism-typography";
 
 const DATA = emojiMartData as EmojiMartData;
 
 /** Larger than {@link PrismEmoji}’s `gigantic` (64px); numeric `size` is supported on {@link PrismEmoji}. */
-const PICKER_GRID_COLUMNS = 5;
-const PICKER_CELL_EMOJI_PX = 80;
+const PICKER_GRID_COLUMNS = 8;
+const PICKER_CELL_EMOJI_PX = 48;
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  people: Smile,
+  nature: Leaf,
+  foods: Utensils,
+  activity: Dumbbell,
+  places: MapPin,
+  objects: Package,
+  symbols: Percent,
+  flags: Flag,
+};
+
+function segmentSlot(
+  index: number,
+  total: number
+): "first" | "middle" | "last" | undefined {
+  if (total <= 1) return "first";
+  if (index === 0) return "first";
+  if (index === total - 1) return "last";
+  return "middle";
+}
 
 export type PrismEmojiPickerPreview =
   | "native"
@@ -66,11 +102,13 @@ function emojiIdMatchesQuery(data: EmojiMartData, id: string, query: string): bo
 const PREVIEW_OPTIONS: {
   id: PrismEmojiPickerPreview;
   label: string;
+  icon: LucideIcon;
 }[] = [
-  { id: "native", label: "native" },
-  { id: "googleNotoColor", label: "google · color" },
-  { id: "googleNotoAnimated", label: "google · animated" },
+  { id: "native", label: "native", icon: Smartphone },
+  { id: "googleNotoColor", label: "google · color", icon: Palette },
+  { id: "googleNotoAnimated", label: "google · animated", icon: Clapperboard },
 ];
+const PREVIEW_COUNT = PREVIEW_OPTIONS.length;
 
 function categoryTitle(categoryId: string): string {
   const cat = emojiMartEn.categories as Record<string, string>;
@@ -93,6 +131,7 @@ export function PrismEmojiPicker({
     () => DATA.categories[0]?.id ?? "people"
   );
   const emojiStyle = previewToEmojiStyle(preview);
+  const catCount = DATA.categories.length;
 
   const emojiIds = useMemo(() => {
     const q = search.trim();
@@ -121,11 +160,19 @@ export function PrismEmojiPicker({
     >
       <div className="shrink-0">
         <input
-          type="search"
+          type="text"
+          role="searchbox"
+          enterKeyHint="search"
+          autoComplete="off"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search name, keyword, or :shortcode:…"
-          className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(
+            "w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm",
+            "appearance-none outline-none transition-[color,box-shadow,border-color]",
+            "focus:border-ring focus:shadow-none focus:outline-none",
+            "focus-visible:border-ring focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          )}
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
@@ -137,42 +184,54 @@ export function PrismEmojiPicker({
         <PrismTypography role="overline" size="small" className="block">
           Preview as
         </PrismTypography>
-        <div className="flex flex-wrap gap-2">
-          {PREVIEW_OPTIONS.map(({ id, label }) => (
-            <button
+        <div className="flex min-w-0 flex-wrap gap-0">
+          {PREVIEW_OPTIONS.map(({ id, label, icon: PreviewIcon }, index) => (
+            <PrismButton
               key={id}
               type="button"
+              label={label}
+              variant="icon"
+              icon={PreviewIcon}
+              line="none"
+              gap="none"
+              paint="backgroundNone"
+              size="medium"
+              shape="rectangleRounded"
+              color="blue"
+              segmentPosition={segmentSlot(index, PREVIEW_COUNT)}
+              toggled={preview === id}
+              className="max-w-full shrink min-w-0 normal-case!"
               onClick={() => setPreview(id)}
-              className={cn(
-                "rounded-md border px-2 py-1 font-mono text-sm transition-colors",
-                preview === id
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border bg-background text-muted-foreground hover:bg-muted/50"
-              )}
-            >
-              {label}
-            </button>
+            />
           ))}
         </div>
       </div>
 
       {search.trim() === "" ? (
-        <div className="flex shrink-0 flex-wrap gap-2 border-b border-border pb-2">
-          {DATA.categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setActiveCategoryId(c.id)}
-              className={cn(
-                "shrink-0 rounded-md border px-2 py-1 font-mono text-xs transition-colors",
-                activeCategoryId === c.id
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-transparent text-muted-foreground hover:bg-muted/50"
-              )}
-            >
-              {categoryTitle(c.id)}
-            </button>
-          ))}
+        <div className="flex min-w-0 shrink-0 flex-wrap gap-0">
+          {DATA.categories.map((c, index) => {
+            const Icon = CATEGORY_ICONS[c.id] ?? Smile;
+            const slot = segmentSlot(index, catCount);
+            return (
+              <PrismButton
+                key={c.id}
+                type="button"
+                label={categoryTitle(c.id)}
+                variant="icon"
+                icon={Icon}
+                line="none"
+                gap="none"
+                paint="backgroundNone"
+                size="medium"
+                shape="rectangleRounded"
+                color="blue"
+                segmentPosition={slot}
+                toggled={activeCategoryId === c.id}
+                className="max-w-full shrink min-w-0 normal-case!"
+                onClick={() => setActiveCategoryId(c.id)}
+              />
+            );
+          })}
         </div>
       ) : (
         <PrismTypography
@@ -216,7 +275,7 @@ export function PrismEmojiPicker({
                   type="button"
                   role="gridcell"
                   title={DATA.emojis[emojiId]?.name ?? emojiId}
-                  className="flex aspect-square min-h-22 w-full items-center justify-center rounded-lg border border-transparent p-1.5 hover:border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex aspect-square min-h-14 w-full items-center justify-center rounded-lg border border-transparent p-1 hover:border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => handlePick(emojiId)}
                 >
                   {char ? (
@@ -225,6 +284,9 @@ export function PrismEmojiPicker({
                       emojiStyle={emojiStyle}
                       size={PICKER_CELL_EMOJI_PX}
                       animationMode="loop"
+                      staticAnimatedFallbackMuted={
+                        preview === "googleNotoAnimated"
+                      }
                     />
                   ) : null}
                 </button>
@@ -233,17 +295,6 @@ export function PrismEmojiPicker({
           </div>
         )}
       </div>
-
-      <PrismTypography
-        role="body"
-        size="small"
-        color={{ semanticText: "muted" }}
-        className="shrink-0"
-      >
-        Emoji list from{" "}
-        <span className="font-mono">@emoji-mart/data</span> (Emoji Mart / emoji-datasource).
-        Animated preview loads GIFs from the Noto CDN — use sparingly on slow networks.
-      </PrismTypography>
     </div>
   );
 }
