@@ -21,7 +21,8 @@
     "components/**/*.ts",
     "components/**/*.tsx",
     "source/**/*.ts",
-    "source/**/*.tsx"
+    "source/**/*.tsx",
+    "source/**/*.json"
   ],
   "exclude": ["node_modules"]
 }

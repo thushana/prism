@@ -248,6 +248,7 @@ packages/
 | ---------------------------- | --------------------------------------------------- | ------------------------------------------------------ |
 | Text / headings / labels     | `PrismTypography` (`@ui`)                           | raw HTML elements                                      |
 | Buttons (Prism design)       | `PrismButton` (`@ui`)                               | native `<button>` + Tailwind, or a local app primitive |
+| Emoji / icon browsing        | `PrismEmojiPicker`, `PrismIconPicker` (`@ui`)       | inline panel or **`trigger`** + Radix popover          |
 | Charts                       | `LineChart` / `BarChart` (`@charts`)                | Nivo directly                                          |
 | Admin page shell             | `AdminPageShell` (`@authentication`)                | custom `<main>`                                        |
 | Admin back-navigation        | `AdminBackLink` (`@authentication`)                 | raw `<Link>`                                           |
