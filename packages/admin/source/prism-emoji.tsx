@@ -15,13 +15,7 @@ import {
   type PrismEmojiStyle,
 } from "@ui";
 import { createPortal } from "react-dom";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type JSX,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 
 const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
   { value: "native", label: "native" },
@@ -29,13 +23,12 @@ const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
   { value: "googleNotoAnimated", label: "noto — animated" },
 ];
 
-const ANIMATION_OPTIONS: { value: PrismEmojiAnimationMode; label: string }[] =
-  [
-    { value: "loop", label: "loop" },
-    { value: "once", label: "once" },
-    { value: "hover", label: "hover" },
-    { value: "occasionally", label: "occasionally" },
-  ];
+const ANIMATION_OPTIONS: { value: PrismEmojiAnimationMode; label: string }[] = [
+  { value: "loop", label: "loop" },
+  { value: "once", label: "once" },
+  { value: "hover", label: "hover" },
+  { value: "occasionally", label: "occasionally" },
+];
 
 const SIZE_OPTIONS: PrismEmojiSize[] = [
   "small",
@@ -53,12 +46,7 @@ function escapeForJsxString(s: string): string {
 function formatEmojiSnippet(
   props: Pick<
     PrismEmojiProps,
-    | "emoji"
-    | "codepoint"
-    | "emojiStyle"
-    | "size"
-    | "animationMode"
-    | "color"
+    "emoji" | "codepoint" | "emojiStyle" | "size" | "animationMode" | "color"
   >
 ): string {
   const lines = ["<PrismEmoji"];
@@ -195,15 +183,10 @@ function PrismEmojiPickerOverlay({
   onClose: () => void;
   onSelect: (emoji: string) => void;
 }): JSX.Element | null {
-  const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open || !mounted) return;
+    if (!open || typeof document === "undefined") return;
     const prevFocus = document.activeElement as HTMLElement | null;
     const raf = requestAnimationFrame(() => {
       dialogRef.current?.focus({ preventScroll: true });
@@ -220,9 +203,9 @@ function PrismEmojiPickerOverlay({
       document.removeEventListener("keydown", onKeyDown);
       prevFocus?.focus?.({ preventScroll: true });
     };
-  }, [open, mounted, onClose]);
+  }, [open, onClose]);
 
-  if (!open || !mounted || typeof document === "undefined") {
+  if (!open || typeof document === "undefined") {
     return null;
   }
 
@@ -249,7 +232,7 @@ function PrismEmojiPickerOverlay({
           inset: 0,
           background: "rgba(0,0,0,0.4)",
           border: 0,
-          cursor: "default",
+          cursor: "pointer",
           padding: 0,
         }}
       />
@@ -273,10 +256,7 @@ function PrismEmojiPickerOverlay({
           boxSizing: "border-box",
         }}
       >
-        <PrismEmojiPicker
-          className="h-full min-h-0"
-          onEmojiSelect={onSelect}
-        />
+        <PrismEmojiPicker className="h-full min-h-0" onEmojiSelect={onSelect} />
       </div>
     </div>
   );
@@ -318,16 +298,12 @@ export function PrismEmojiDemo(): JSX.Element {
       base.color = emojiColor;
     }
     return base;
-  }, [
-    emojiTrim,
-    emojiStyle,
-    size,
-    animationMode,
-    colorEnabled,
-    emojiColor,
-  ]);
+  }, [emojiTrim, emojiStyle, size, animationMode, colorEnabled, emojiColor]);
 
-  const snippet = useMemo(() => formatEmojiSnippet(previewProps), [previewProps]);
+  const snippet = useMemo(
+    () => formatEmojiSnippet(previewProps),
+    [previewProps]
+  );
 
   const browseEmojiGlyph = useMemo(() => {
     if (emojiTrim !== "") return firstGraphemeCluster(emojiTrim);
@@ -383,7 +359,10 @@ export function PrismEmojiDemo(): JSX.Element {
               </PrismTypography>
             </legend>
             {STYLE_OPTIONS.map(({ value, label }) => (
-              <label key={value} className="flex cursor-pointer items-center gap-2">
+              <label
+                key={value}
+                className="flex cursor-pointer items-center gap-2"
+              >
                 <input
                   type="radio"
                   name="prism-emoji-style"
@@ -396,7 +375,9 @@ export function PrismEmojiDemo(): JSX.Element {
                   role="label"
                   size="medium"
                   font="mono"
-                  color={emojiStyle === value ? undefined : { semanticText: "muted" }}
+                  color={
+                    emojiStyle === value ? undefined : { semanticText: "muted" }
+                  }
                   className="wrap-break-word"
                 >
                   {label}
