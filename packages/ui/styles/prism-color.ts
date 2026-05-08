@@ -26,7 +26,7 @@ function warnPrismHexFallback(reason: string, detail?: unknown): void {
   }
 }
 
-/** Same order as {@link PRISM_DEFAULT_COLOR_LOOP} — camelCase for `ColorName` / button props. */
+/** Same order as {@link PRISM_DEFAULT_COLOR_LOOP} — camelCase `ColorName` keys; map to kebab-case for `swatchPrimary` on buttons. */
 export const PRISM_DEFAULT_COLOR_NAMES: readonly ColorName[] = [
   "red",
   "pink",

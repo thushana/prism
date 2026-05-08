@@ -78,7 +78,7 @@ import { PrismPathBar } from "@ui";
 
 ### PrismButton
 
-The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: Material **`color`** (`ColorName`), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`**, **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `medium` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
+The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: **`color`** as **`PartialPrismColorSpec`** (palette + **`swatchPrimary`** in kebab-case for the default Material ring, optional **`gradient`** with direction and optional swatch list), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`**, **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `medium` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
 
 Admin demo: **`/admin/prism/components/prism-button`** — **`PrismButtonDemo`** from **`@admin`** (packages/admin `prism-button.tsx`).
 
@@ -109,7 +109,11 @@ import {
     <p>Card content goes here</p>
   </PrismCardContent>
   <PrismCardFooter>
-    <PrismButton color="blue" label="Action" variant="plain" />
+    <PrismButton
+      color={{ palette: "default", swatchPrimary: "blue" }}
+      label="Action"
+      variant="plain"
+    />
   </PrismCardFooter>
 </PrismCard>
 ```
@@ -516,7 +520,11 @@ export default function MyPage() {
         <PrismCardTitle>Welcome</PrismCardTitle>
       </PrismCardHeader>
       <PrismCardContent>
-        <PrismButton color="blue" label="Get Started" variant="plain" />
+        <PrismButton
+          color={{ palette: "default", swatchPrimary: "blue" }}
+          label="Get Started"
+          variant="plain"
+        />
       </PrismCardContent>
     </PrismCard>
   );
@@ -672,7 +680,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 - **Boolean sprawl:** Mutually exclusive choices were modeled as parallel flags; callers could express invalid combinations.
 - **Inconsistent negation:** Mix of `noXxx`, `XxxNo`, and positive animation flags. Prism standardizes motion opt-outs on **`disableXxx`** (MUI-style).
-- **Name collisions (resolved):** `PrismButton` **`color`** is still **`ColorName`** (Material family). **`PrismTypography`** **`color`** is **`PartialPrismColorSpec`** (semantic + palette + gradient), aligned with **`PrismIcon`** / pickers.
+- **Name collisions (resolved):** Native **`color`** is omitted from underlying DOM props so **`PrismButton`** can take **`color: PartialPrismColorSpec`** without clashing with HTML. **`PrismTypography`** uses the same **`PartialPrismColorSpec`** shape (semantic roles, palette swatches, gradients), aligned with **`PrismIcon`** / pickers.
 - **Fragmented size vocabulary:** One shared **`PrismSize`** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`) applies to `PrismButton`, `PrismIcon` (named steps), and `PrismTypography` type scale. `normal` → `medium`; old `large2x` → `huge`. **`medium` stays size-only** — it does not appear on `PrismIcon` **`weight`** (avoids `size="medium" weight="medium"` confusion).
 
 ### Nine rules (cheat sheet)
@@ -682,7 +690,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 3. **Opt-outs:** `disableMotion`, `disableGrow`, … — not `noGrow` / `gapNo`.
 4. **camelCase** prop names; **lowercase or camelCase** literals per existing Prism tokens (`gap="none"`, `shape="rectangleRounded"`).
 5. **Shared `PrismSize`** everywhere Prism renders stepped scale (see `packages/ui/source/prism-size.ts`).
-6. **Palette vs semantic colour:** `PrismButton` **`color`** = `ColorName`; `PrismTypography` **`color`** = **`PartialPrismColorSpec`** (use **`semanticText`** for theme `text-*` roles, or swatches / gradient for brand paint).
+6. **Colour spec:** Both **`PrismButton`** and **`PrismTypography`** use **`color`** as **`PartialPrismColorSpec`**. Buttons typically use **`palette`** + **`swatchPrimary`** (kebab-case families, e.g. `blue-grey`); typography often uses **`semanticText`** (`muted`, `foreground`, …) or the same swatch fields.
 7. **Prefer `asChild`** (Radix `Slot`) over ad-hoc span wrappers for composition.
 8. **Admin + `@admin`** are the live JSX reference: `/admin/prism/components/[component]` drives **`PRISM_ADMIN_COMPONENT_REGISTRY`** (for example **`PrismButtonDemo`** in `packages/admin/source/prism-button.tsx`). Typography previews live in **`PrismTypographyDemo`** (`packages/admin/source/prism-typography.tsx`) — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
 9. **Docs stay canonical:** this section + per-component headings below; do not duplicate long prose in side files.
@@ -692,6 +700,8 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 ```tsx
 // Before (booleans + legacy names)
 <PrismButton
+  color="blueGrey"
+  label="Save"
   rectangleRounded
   lineNo
   gapNo
@@ -702,6 +712,8 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 // After (axes + Radix composition)
 <PrismButton
+  color={{ palette: "default", swatchPrimary: "blue-grey" }}
+  label="Save"
   shape="rectangleRounded"
   line="none"
   gap="none"
@@ -730,6 +742,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 | `tone="foreground"`                  | `color={{ semanticText: "foreground" }}`                             |
 | `tone="inherit"`                     | omit **`color`** or `color={{ semanticText: "inherit" }}`            |
 | `color` (on Typography)              | **`color={{ … }}`** as **`PartialPrismColorSpec`** (not `ColorName`) |
+| `color="blueGrey"` (Button, legacy)  | `color={{ palette: "default", swatchPrimary: "blue-grey" }}`         |
 | `colorVariant`, kebab paint literals | `paint` (camelCase union)                                            |
 | `lineNo` / `lineBottom` booleans     | `line="none"` \| `"bottom"` \| `"full"`                              |
 | `gapNo`                              | `gap="none"`                                                         |
