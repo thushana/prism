@@ -203,7 +203,9 @@ type IconNameSection = {
   iconNameList: string[];
 };
 
-function buildIconNameSections(iconNameList: string[]): IconNameSection[] {
+function buildIconNameSections(
+  iconNameList: readonly string[]
+): IconNameSection[] {
   const bucketBySortKey = new Map<string, string[]>();
   for (const iconName of iconNameList) {
     const sortKey = categorySortKeyForIconName(iconName);
