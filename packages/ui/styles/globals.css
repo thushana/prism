@@ -264,43 +264,58 @@
    * Scroll reveal (GSAP): zone .animationWhole | .animationLine | .animationWord | .animationCharacter
    * + type .animationFadeIn | .animationMoveIn
    */
-  /* Narrow viewports: 2.5rem. From `md` (768px, Tailwind default): 4rem — matches display scale elsewhere. */
+  /*
+   * Display role: smaller base sizes below Tailwind `md` (theme(--breakpoint-md)),
+   * full scale from `md` up — keeps hero/display copy from overflowing narrow viewports.
+   */
   .typography-display-small {
     font-family: var(--font-headline);
     font-size: 2.5rem;
     line-height: 1.1;
     font-weight: 500;
-    @media (min-width: 768px) {
+    @media (width >= theme(--breakpoint-md)) {
       font-size: 4rem;
     }
   }
   .typography-display-medium {
     font-family: var(--font-headline);
-    font-size: 5rem;
+    font-size: 3rem;
     line-height: 1.08;
     font-weight: 500;
     letter-spacing: -0.015625rem;
+    @media (width >= theme(--breakpoint-md)) {
+      font-size: 5rem;
+    }
   }
   .typography-display-large {
     font-family: var(--font-headline);
-    font-size: 6rem;
+    font-size: 3.5rem;
     line-height: 1.08;
     font-weight: 500;
     letter-spacing: -0.015625rem;
+    @media (width >= theme(--breakpoint-md)) {
+      font-size: 6rem;
+    }
   }
   .typography-display-huge {
     font-family: var(--font-headline);
-    font-size: 6.75rem;
+    font-size: 4rem;
     line-height: 1.06;
     font-weight: 500;
     letter-spacing: -0.015625rem;
+    @media (width >= theme(--breakpoint-md)) {
+      font-size: 6.75rem;
+    }
   }
   .typography-display-gigantic {
     font-family: var(--font-headline);
-    font-size: 7.5rem;
+    font-size: 4.5rem;
     line-height: 1.04;
     font-weight: 500;
     letter-spacing: -0.02rem;
+    @media (width >= theme(--breakpoint-md)) {
+      font-size: 7.5rem;
+    }
   }
   /* medium/small use 400 vs large 500 — lighter subheads under the primary headline. */
   .typography-headline-small {
