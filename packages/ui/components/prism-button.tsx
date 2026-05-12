@@ -211,7 +211,8 @@ export function PrismButton(
 
   const backgroundShade = paint === "backgroundDark" ? "dark" : "light";
 
-  const palette: PrismPaletteId = (color?.palette ?? "default") as PrismPaletteId;
+  const palette: PrismPaletteId = (color?.palette ??
+    "default") as PrismPaletteId;
   const primaryFamily: PrismSwatchKey = PrismColor.Loop.normalize(
     palette,
     color?.swatchPrimary ?? "blue-grey"
@@ -504,12 +505,11 @@ export function PrismButton(
     fontFamily,
     fontWeight: 800,
     fontSize: `${fontSizePx}px`,
-    color:
-      isBackgroundNo
-        ? foregroundValue
-        : shouldChangeColor && effectiveHovered
-          ? hoverForegroundValue
-          : foregroundValue,
+    color: isBackgroundNo
+      ? foregroundValue
+      : shouldChangeColor && effectiveHovered
+        ? hoverForegroundValue
+        : foregroundValue,
     cursor: asChild || disabled ? "default" : "pointer",
     textTransform:
       textCase === "uppercase"

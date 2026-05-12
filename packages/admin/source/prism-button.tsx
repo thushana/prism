@@ -620,7 +620,10 @@ function ButtonCustomizerSection() {
       spreadProps.gap === "none" ? ("first" as const) : undefined;
     const previewColor =
       groupColorMode === "unified"
-        ? applyCustomizerGradientDirection({ ...pickedColor }, gradientDirection)
+        ? applyCustomizerGradientDirection(
+            { ...pickedColor },
+            gradientDirection
+          )
         : applyCustomizerGradientDirection(
             { palette: "default", swatchPrimary: "deep-purple" },
             gradientDirection
@@ -709,7 +712,11 @@ function ButtonCustomizerSection() {
               ))}
             </div>
             <div className="mt-10 mb-8">
-              <PrismTypography role="overline" size="small" className="mb-2 block">
+              <PrismTypography
+                role="overline"
+                size="small"
+                className="mb-2 block"
+              >
                 Sample
               </PrismTypography>
               <div
@@ -1021,7 +1028,7 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='gradient: derived (horizontal)'>
+      <Row title="gradient: derived (horizontal)">
         {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
             key={swatchPrimary}
@@ -1037,7 +1044,7 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='gradient: derived (vertical)'>
+      <Row title="gradient: derived (vertical)">
         {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
             key={swatchPrimary}
@@ -1053,7 +1060,7 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='gradient: derived (angled)'>
+      <Row title="gradient: derived (angled)">
         {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
             key={swatchPrimary}

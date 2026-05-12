@@ -27,7 +27,10 @@ import {
 } from "react";
 import { PrismButton } from "./prism-button";
 import { PrismEmoji, type PrismEmojiStyle } from "./prism-emoji";
-import { PrismPickerPopover, usePickerPopupState } from "./prism-picker-popover";
+import {
+  PrismPickerPopover,
+  usePickerPopupState,
+} from "./prism-picker-popover";
 import { PrismTypography } from "./prism-typography";
 
 const DATA = emojiMartData as EmojiMartData;
@@ -158,10 +161,7 @@ function PrismEmojiPickerPanel({
     return cat?.emojis ?? [];
   }, [search, activeCategoryId]);
 
-  const handlePick = useCallback(
-    (emoji: string) => onPick(emoji),
-    [onPick]
-  );
+  const handlePick = useCallback((emoji: string) => onPick(emoji), [onPick]);
 
   return (
     <div
