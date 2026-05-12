@@ -264,11 +264,15 @@
    * Scroll reveal (GSAP): zone .animationWhole | .animationLine | .animationWord | .animationCharacter
    * + type .animationFadeIn | .animationMoveIn
    */
+  /* Narrow viewports: 2.5rem. From `md` (768px, Tailwind default): 4rem — matches display scale elsewhere. */
   .typography-display-small {
     font-family: var(--font-headline);
-    font-size: 4rem;
+    font-size: 2.5rem;
     line-height: 1.1;
     font-weight: 500;
+    @media (min-width: 768px) {
+      font-size: 4rem;
+    }
   }
   .typography-display-medium {
     font-family: var(--font-headline);
