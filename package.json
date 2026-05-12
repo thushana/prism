@@ -86,7 +86,7 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "16.2.6",
     "@eslint/compat": "^2.0.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
@@ -97,9 +97,17 @@
   "pnpm": {
     "overrides": {
       "esbuild": "^0.27.2",
-      "next": "16.2.4",
+      "next": "16.2.6",
       "react": "19.2.5",
-      "react-dom": "19.2.5"
+      "react-dom": "19.2.5",
+      "typescript-eslint": "^8.59.3",
+      "@typescript-eslint/eslint-plugin": "^8.59.3",
+      "@typescript-eslint/parser": "^8.59.3",
+      "@typescript-eslint/typescript-estree": "^8.59.3",
+      "@typescript-eslint/utils": "^8.59.3",
+      "@typescript-eslint/type-utils": "^8.59.3",
+      "@typescript-eslint/tsconfig-utils": "^8.59.3",
+      "@typescript-eslint/project-service": "^8.59.3"
     },
     "onlyBuiltDependencies": [
       "esbuild",
