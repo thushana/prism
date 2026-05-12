@@ -1,14 +1,24 @@
 "use client";
 
 import { cn } from "@utilities";
-import { useCallback, useMemo, useState, type JSX, type ReactNode } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type JSX,
+  type ReactNode,
+} from "react";
 import materialIconNames from "../source/material-icons-round-names.json";
 import { PrismIcon } from "./prism-icon";
-import { PrismPickerPopover, usePickerPopupState } from "./prism-picker-popover";
+import {
+  PrismPickerPopover,
+  usePickerPopupState,
+} from "./prism-picker-popover";
 import { PrismTypography } from "./prism-typography";
 
 /** All Material Symbols Rounded ligature names shipped for the icon picker. */
-export const PRISM_MATERIAL_ICONS_ROUND_NAMES = materialIconNames as readonly string[];
+export const PRISM_MATERIAL_ICONS_ROUND_NAMES =
+  materialIconNames as readonly string[];
 
 const PICKER_GRID_COLUMNS = 8;
 
