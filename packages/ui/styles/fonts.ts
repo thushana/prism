@@ -34,6 +34,8 @@ export const sentient = localFont({
   ],
   variable: "--font-sentient",
   display: "swap",
+  // Avoid Chrome “preloaded but not used” noise: body defaults to sans; serif loads on demand.
+  preload: false,
 });
 
 // Zodiak Variable Font
@@ -52,6 +54,7 @@ export const zodiak = localFont({
   ],
   variable: "--font-zodiak",
   display: "swap",
+  preload: false,
 });
 
 // Gambarino Font (Regular only)
