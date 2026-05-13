@@ -17,6 +17,6 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": "."
   },
-  "include": ["source/**/*"],
+  "include": ["source/**/*", "../ui/mapbox-gl-css.d.ts"],
   "exclude": ["node_modules"]
 }

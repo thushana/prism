@@ -1,5 +1,6 @@
 export * from "../components";
 export * from "../styles";
+export * from "./polyline-decode";
 export * from "./prism-meta-chip";
 export * from "./prism-size";
 export * from "./prism-button-presets";

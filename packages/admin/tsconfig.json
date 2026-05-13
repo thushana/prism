@@ -18,6 +18,11 @@
       "@utilities": ["../utilities/source"]
     }
   },
-  "include": ["source/**/*.ts", "source/**/*.tsx", "source/**/*.json"],
+  "include": [
+    "source/**/*.ts",
+    "source/**/*.tsx",
+    "source/**/*.json",
+    "../ui/mapbox-gl-css.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -22,7 +22,8 @@
     "components/**/*.tsx",
     "source/**/*.ts",
     "source/**/*.tsx",
-    "source/**/*.json"
+    "source/**/*.json",
+    "mapbox-gl-css.d.ts"
   ],
   "exclude": ["node_modules"]
 }

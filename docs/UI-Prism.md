@@ -118,6 +118,34 @@ import {
 </PrismCard>
 ```
 
+### PrismMap
+
+Dual-vendor map for **encoded overview polylines**: **Google Maps JavaScript API** or **Mapbox GL JS**. The public API is a **discriminated union** on **`vendor: "google" | "mapbox"`** — shared “peer” props sit at the top level; anything vendor-specific lives only under **`google`** or **`mapbox`** (see the file-level JSDoc in `packages/ui/components/prism-map.tsx`).
+
+**Peer props (both vendors):** **`routes`**: `PrismMapRoute[]` (`id`, `encodedPolyline`, `strokeColor`, optional `strokeOpacity`, `strokeWeight`, optional **`stackOrder`** for draw order — Google `zIndex`, Mapbox `line-sort-key`). **`autoFit`** (default on), **`shell`**: `"none"` \| `"card"`, **`title`**, **`headerAction`**, **`minHeightPx`**, **`loadingSlot`**, **`errorSlot`**, **`emptySlot`**, **`className`**, **`mapClassName`**.
+
+**Google:** **`loadGoogleMaps`**: `() => Promise<void>` — typically **`createFetchKeyGoogleMapsLoader(apiKeyJsonUrl)`** from **`prism-map-loaders.ts`** (fetches `{ apiKey }`, loads Maps script, resolves when `google.maps.Map` is ready; failed loads clear the cached promise so callers can retry). Optional **`google.mapOptions`**, **`google.styles`**; defaults include **`PRISM_MAP_GOOGLE_GRAYSCALE_STYLES`** / **`PRISM_MAP_GOOGLE_ROADMAP_BASE`** from **`prism-map-styles.ts`** (basemap labels off).
+
+**Mapbox:** **`mapboxAccessToken`**: string or `() => Promise<string>` — often **`createFetchMapboxTokenLoader(tokenUrl)`** against a same-origin route returning **`{ accessToken }`**. **`mapbox.style`** — default constant **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**. **`mapbox-gl`** is an **optional** `peerDependency`; the implementation **dynamic-imports** Mapbox inside **`PrismMapMapbox`** and imports **`mapbox-gl/dist/mapbox-gl.css`** once.
+
+**Polyline decoding:** **`decodeEncodedPolyline`** from **`@ui`** (`packages/ui/source/polyline-decode.ts`) — pure implementation, no Google Maps Geometry library.
+
+**Import:**
+
+```typescript
+import {
+  PrismMap,
+  createFetchKeyGoogleMapsLoader,
+  createFetchMapboxTokenLoader,
+  PRISM_MAP_MAPBOX_STYLE_DEFAULT,
+  decodeEncodedPolyline,
+  type PrismMapRoute,
+  type PrismMapVendor,
+} from "@ui";
+```
+
+Admin demo: **`/admin/prism/components/prism-map`** — **`PrismMapDemo`** in `packages/admin/source/prism-map.tsx`.
+
 ### Read-only metadata chips
 
 Small labels (timezone, commit SHA, etc.) use Tailwind bundles from **`source/prism-meta-chip.ts`**: **`PRISM_META_CHIP_OUTLINE_CLASS`**, **`PRISM_META_CHIP_SECONDARY_CLASS`**, and optional **`PRISM_META_CHIP_INTERACTIVE_CLASS`** when the chip sits inside `<a>`. Use **`PrismButton`** for actions—there is no separate badge component.
