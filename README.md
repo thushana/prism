@@ -393,7 +393,7 @@ Each app can be deployed independently from the same GitHub repository by settin
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in your environment variables. Never commit `.env.local` or any files containing secrets.
+Copy `.env.example` to `.env` and fill in your environment variables. Never commit `.env` or any files containing secrets. (In the TimeTraveler app, use the **repository root** `.env`; this file is for Prism-only checkouts.)
 
 Environment variables can be set per-app in Vercel or at the root level for all apps.
 
@@ -406,7 +406,7 @@ Configure log levels using environment variables:
 
 Valid log levels: `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`
 
-Example `.env.local`:
+Example `.env`:
 
 ```bash
 LOG_LEVEL=debug
