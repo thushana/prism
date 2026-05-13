@@ -8,6 +8,7 @@ import { PrismDividerDemo } from "./prism-divider";
 import { PrismEmojiDemo } from "./prism-emoji";
 import { PrismIconDemo } from "./prism-icon";
 import { PrismLayoutDemo } from "./prism-layout";
+import { PrismMapDemo } from "./prism-map";
 import { PrismPathBarDemo } from "./prism-path-bar";
 import { PrismTypographyDemo } from "./prism-typography";
 
@@ -21,6 +22,7 @@ export type PrismAdminComponentSlug =
   | "prism-emoji"
   | "prism-icon"
   | "prism-layout"
+  | "prism-map"
   | "prism-path-bar"
   | "prism-typography";
 
@@ -82,6 +84,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     title: "PrismLayout",
     description: "Layout: column widths and edge-to-edge bands.",
     Demo: PrismLayoutDemo,
+  },
+  "prism-map": {
+    title: "PrismMap",
+    description:
+      "Dual-vendor map (Google + Mapbox) with encoded-polyline routes.",
+    Demo: PrismMapDemo,
   },
   "prism-path-bar": {
     title: "PrismPathBar",

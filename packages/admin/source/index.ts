@@ -20,6 +20,7 @@ export { PrismDividerDemo } from "./prism-divider";
 export { PrismEmojiDemo } from "./prism-emoji";
 export { PrismIconDemo } from "./prism-icon";
 export { PrismLayoutDemo } from "./prism-layout";
+export { PrismMapDemo } from "./prism-map";
 export { PrismPathBarDemo } from "./prism-path-bar";
 export { PrismTypographyDemo } from "./prism-typography";
 
