@@ -13,3 +13,4 @@ export * from "./prism-color-picker-clipboard";
 export * from "./prism-color-picker-helpers";
 export * from "./prism-typography";
 export * from "./prism-path-bar";
+export * from "./prism-table";
