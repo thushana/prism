@@ -122,6 +122,8 @@ type PrismTableContextValue = {
   onHeaderSortClick: (columnId: string) => void;
   /** True when {@link PrismTableRootProps.tableBorderWeight} is set and not `none` (outer frame). */
   outerFrameBorderActive: boolean;
+  /** Mirrors {@link PrismTableRootProps.tableCorners} for child row groups. */
+  tableCorners: PrismTableCornerStyle;
   columnWidthStrategy: PrismTableColumnWidthStrategy;
 };
 
@@ -817,6 +819,7 @@ function PrismTable({
       unregisterHead,
       onHeaderSortClick,
       outerFrameBorderActive,
+      tableCorners,
       columnWidthStrategy,
     }),
     [
@@ -841,6 +844,7 @@ function PrismTable({
       unregisterHead,
       onHeaderSortClick,
       outerFrameBorderActive,
+      tableCorners,
       columnWidthStrategy,
     ]
   );
@@ -976,7 +980,11 @@ function PrismTableHeader({
   return (
     <thead
       data-slot="table-header"
-      className={cn(headerBottomClassName, className)}
+      className={cn(
+        headerBottomClassName,
+        table.tableCorners === "rounded" && "rounded-t-lg overflow-hidden",
+        className
+      )}
       style={mergedStyle}
       {...props}
     >
@@ -1304,6 +1312,7 @@ function PrismTableHead({
         type="button"
         className={cn(
           "-mx-1 inline-flex items-center gap-1 rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          table.tableCorners === "rounded" && "focus-visible:ring-inset",
           headerFill
             ? "hover:bg-black/10 dark:hover:bg-white/10"
             : "hover:bg-muted/60",
