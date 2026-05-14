@@ -31,7 +31,16 @@ Every piece of knowledge gets one authoritative home. If it's in code, don't rep
 
 ## Structure
 
-In this repository, Prism’s doc set lives under **`prism/docs/`**. In a consuming app that vendors Prism as a submodule, paths are usually `prism/docs/…` from the app root—same filenames, different prefix.
+Prism’s canonical docs live under **`prism/docs/`**. A host app that vendors Prism as a submodule usually exposes the same files at **`{project-root}/prism/docs/…`**—same names, different prefix. The host app also keeps its own runbooks under **`{project-root}/docs/`**.
+
+### Doc filenames (Prism vs project)
+
+| Layer | Path (typical) | Pattern | Meaning |
+| ----- | -------------- | ------- | ------- |
+| **Prism** | `prism/docs/` (or `…/prism/docs/` in a host repo) | **`{TOPIC}-Prism.md`** | Submodule-owned: philosophy, admin shell, UI usage, playground contract, etc. `TOPIC` is an uppercase slug (`DOCS`, `UI`, `ADMIN`, `PLAYGROUNDS`, …). |
+| **Host project** | `{project-root}/docs/` | **`{TOPIC}-{Project}.md`** | App-owned: architecture, conventions, deployment, glossary, sync, etc. `{Project}` is a short stable token for _that_ repository (pick it once and document it in **CONVENTIONS-{Project}.md**). |
+
+Use **`-Prism`** vs **`-{Project}`** so ownership is obvious at a glance and links do not collide when both trees appear in one workspace.
 
 ```
 {project-root}/
@@ -41,6 +50,7 @@ In this repository, Prism’s doc set lives under **`prism/docs/`**. In a consum
     ├── DOCS-Prism.md                      # This file (Prism submodule / template)
     ├── CONVENTIONS-{Project}.md           # Naming, URLs, quality commands, component hierarchy
     ├── ADMIN-Prism.md                     # Admin section pattern (auth, shell, routes)
+    ├── PLAYGROUNDS-Prism.md               # Prism hub demo layout (why / what; link to admin demos)
     ├── DATABASE-{Project}.md              # Drizzle / DB mental model (Prism)
     ├── DEPLOYMENT-{Project}.md            # Vercel / env (Prism)
     ├── FEATUREFLAGS-{Project}.md          # Feature flags package (Prism)
