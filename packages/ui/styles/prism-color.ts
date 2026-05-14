@@ -1058,3 +1058,24 @@ export function prismLabelOnFilledSurface(opts: {
   const neutral = palette === "tailwind" ? "zinc" : "grey";
   return PrismColor.hex({ palette, family: neutral, shade: 700 });
 }
+
+/**
+ * High-chroma ink for tables and pickers: same ramp as the active swatch, chosen from surface luminance.
+ * **Light faces** (zebra 50, pale mixes, light header fills) → **`swatchFamily` @ 800**; **dark faces** → **@ 50**
+ * (very light tint on the hue). Uses the same luma threshold as {@link prismLabelOnFilledSurface}.
+ */
+export function prismSwatchContrastInk(opts: {
+  palette: PrismPaletteId;
+  surfaceCss: string;
+  swatchFamily: PrismSwatchKey;
+}): string {
+  const palette = resolvePaletteId(opts.palette);
+  const family = PrismColor.Loop.normalize(palette, opts.swatchFamily);
+  if (
+    approximateRelativeLuminanceFromCssColor(opts.surfaceCss) <
+    PRISM_TINTED_SURFACE_MAX_LUMA
+  ) {
+    return PrismColor.hex({ palette, family, shade: 50 });
+  }
+  return PrismColor.hex({ palette, family, shade: 800 });
+}

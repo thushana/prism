@@ -10,6 +10,7 @@ import { PrismIconDemo } from "./prism-icon";
 import { PrismLayoutDemo } from "./prism-layout";
 import { PrismMapDemo } from "./prism-map";
 import { PrismPathBarDemo } from "./prism-path-bar";
+import { PrismTableDemo } from "./prism-table";
 import { PrismTypographyDemo } from "./prism-typography";
 
 export type PrismAdminComponentSlug =
@@ -24,6 +25,7 @@ export type PrismAdminComponentSlug =
   | "prism-layout"
   | "prism-map"
   | "prism-path-bar"
+  | "prism-table"
   | "prism-typography";
 
 /** Demos are static; the dynamic route renders them with no props. */
@@ -95,6 +97,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     title: "PrismPathBar",
     description: "Breadcrumbs: mapped path or fixed segments.",
     Demo: PrismPathBarDemo,
+  },
+  "prism-table": {
+    title: "PrismTable",
+    description:
+      "Composable table: Prism-tinted grid lines, zebra shading, sortable headers.",
+    Demo: PrismTableDemo,
   },
   "prism-typography": {
     title: "PrismTypography",

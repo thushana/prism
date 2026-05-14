@@ -15,10 +15,10 @@ In a consuming app, each entry in `PRISM_ADMIN_COMPONENT_REGISTRY` (`prism/packa
 
 Reference implementation: **`PrismEmojiDemo`** in `prism/packages/admin/source/prism-emoji.tsx` (e.g. `/admin/prism/components/prism-emoji`).
 
-| Block | Role |
-| ----- | ---- |
-| **Customize** | State + controls = the **API surface** readers touch first. |
-| **Example** | One **live preview** bound to that state. |
+| Block           | Role                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| **Customize**   | State + controls = the **API surface** readers touch first.                                     |
+| **Example**     | One **live preview** bound to that state.                                                       |
 | **Code sample** | A string fed to **`PrismCodeBlock`**, generated from the **same** state as Customize + Example. |
 
 **Why Customize is first:** props-before-output matches how people read on small screens (controls before scroll-heavy preview) and matches how authors reason about the component.
@@ -37,9 +37,9 @@ Intent only—**exact classes and prop lists live in** `prism/packages/admin/sou
 
 4. **Control groups** — **semantic grouping** (e.g. `fieldset` + `legend`) with a **small overline-style** group label; option text is **mono-flavoured** so values feel API-adjacent, and **inactive** options recede via **semantic muted** text, not custom colours.
 
-5. **Example runway** — a **low-contrast bordered panel** frames the live component as a **stage** separate from page chrome. See the reference file for the utility stack.
+5. **Example runway** — give the live preview a clear **stage** (spacing and/or a very light frame) so it reads separately from admin chrome. **Do not wrap previews in `PrismCard` (or other card / elevated surfaces)**—playgrounds are not marketing tiles; card chrome fights components that already draw their own edges (tables, maps, charts). For compact single widgets, a **low-contrast bordered panel** is fine (see `prism-emoji.tsx`). For **wide or grid-heavy** demos (e.g. `PrismTable`), prefer **`overflow-x-auto` + `min-w-0`** and light vertical padding only—let the component’s own border and zebra read as the surface.
 
-6. **Code sample** — a **card-mode** code panel with a **Prism colour spec** so syntax sits on a **tinted wash** (token-driven). Implementation: `prism/packages/ui/components/prism-code-block.tsx` and `PrismColor.syntax`.
+6. **Code sample** — a **card-mode** code panel with a **Prism colour spec** so syntax sits on a **tinted wash** (token-driven). Implementation: `prism/packages/ui/components/prism-code-block.tsx` and `PrismColor.syntax`. **Card mode applies to the code block only**, not to the live Example preview.
 
 ## Constraint (non-negotiable)
 
@@ -47,13 +47,13 @@ Intent only—**exact classes and prop lists live in** `prism/packages/admin/sou
 
 ## Where to look (authoritative files)
 
-| Question | File |
-| -------- | ---- |
-| Which demos exist and hub copy? | `prism/packages/admin/source/registry.ts` |
-| Reference layout (full spine + optional sections) | `prism/packages/admin/source/prism-emoji.tsx` |
-| Shorter spine-only examples | `prism/packages/admin/source/prism-color-picker.tsx`, `prism-table.tsx` |
-| Shell, path bar, sign-out | `prism/packages/authentication/source/admin-layout.tsx` |
-| Code panel fill and copy affordances | `prism/packages/ui/components/prism-code-block.tsx` |
+| Question                                          | File                                                                    |
+| ------------------------------------------------- | ----------------------------------------------------------------------- |
+| Which demos exist and hub copy?                   | `prism/packages/admin/source/registry.ts`                               |
+| Reference layout (full spine + optional sections) | `prism/packages/admin/source/prism-emoji.tsx`                           |
+| Shorter spine-only examples                       | `prism/packages/admin/source/prism-color-picker.tsx`, `prism-table.tsx` |
+| Shell, path bar, sign-out                         | `prism/packages/authentication/source/admin-layout.tsx`                 |
+| Code panel fill and copy affordances              | `prism/packages/ui/components/prism-code-block.tsx`                     |
 
 ## When to update this doc
 
