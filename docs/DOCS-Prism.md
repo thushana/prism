@@ -35,10 +35,10 @@ Prism’s canonical docs live under **`prism/docs/`**. A host app that vendors P
 
 ### Doc filenames (Prism vs project)
 
-| Layer | Path (typical) | Pattern | Meaning |
-| ----- | -------------- | ------- | ------- |
-| **Prism** | `prism/docs/` (or `…/prism/docs/` in a host repo) | **`{TOPIC}-Prism.md`** | Submodule-owned: philosophy, admin shell, UI usage, playground contract, etc. `TOPIC` is an uppercase slug (`DOCS`, `UI`, `ADMIN`, `PLAYGROUNDS`, …). |
-| **Host project** | `{project-root}/docs/` | **`{TOPIC}-{Project}.md`** | App-owned: architecture, conventions, deployment, glossary, sync, etc. `{Project}` is a short stable token for _that_ repository (pick it once and document it in **CONVENTIONS-{Project}.md**). |
+| Layer            | Path (typical)                                    | Pattern                    | Meaning                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Prism**        | `prism/docs/` (or `…/prism/docs/` in a host repo) | **`{TOPIC}-Prism.md`**     | Submodule-owned: philosophy, admin shell, UI usage, playground contract, etc. `TOPIC` is an uppercase slug (`DOCS`, `UI`, `ADMIN`, `PLAYGROUNDS`, …).                                            |
+| **Host project** | `{project-root}/docs/`                            | **`{TOPIC}-{Project}.md`** | App-owned: architecture, conventions, deployment, glossary, sync, etc. `{Project}` is a short stable token for _that_ repository (pick it once and document it in **CONVENTIONS-{Project}.md**). |
 
 Use **`-Prism`** vs **`-{Project}`** so ownership is obvious at a glance and links do not collide when both trees appear in one workspace.
 

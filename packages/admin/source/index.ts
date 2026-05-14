@@ -22,6 +22,7 @@ export { PrismIconDemo } from "./prism-icon";
 export { PrismLayoutDemo } from "./prism-layout";
 export { PrismMapDemo } from "./prism-map";
 export { PrismPathBarDemo } from "./prism-path-bar";
+export { PrismTableDemo } from "./prism-table";
 export { PrismTypographyDemo } from "./prism-typography";
 
 export {
