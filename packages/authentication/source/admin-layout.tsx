@@ -50,7 +50,7 @@ export type AdminPageShellProps = {
   children: React.ReactNode;
   /**
    * Page title string; used as the path bar leaf when `prismPathBarTitleByPathPrefix` is set.
-   * When `titleSlot` is set, this is still used for the path bar (and metadata) while `titleSlot` replaces the gradient heading.
+   * When `titleSlot` is set, this is still used for the path bar leaf while `titleSlot` replaces the gradient heading.
    */
   title?: string;
   /**
