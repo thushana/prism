@@ -5,10 +5,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@utilities";
 
+import type { PrismSpacing } from "../source/prism-spacing";
+import {
+  resolvePrismSwatchLineCss,
+  resolvePrismSwatchLineMuted100Css,
+} from "../source/prism-swatch-line";
+import type { PartialPrismColorSpec } from "../styles/prism-color";
 import {
   PrismIcon,
   PRISM_ICON_DEFAULTS,
   type PrismIconProps,
+  type PrismIconWeightName,
 } from "./prism-icon";
 import { PrismTypography } from "./prism-typography";
 
@@ -17,9 +24,11 @@ const prismDividerRootVariants = cva(
   {
     variants: {
       spacing: {
-        none: "py-0",
-        compact: "py-6",
+        tight: "py-0",
+        compact: "py-3",
+        regular: "py-6",
         comfortable: "py-10",
+        airy: "py-14",
       },
     },
     defaultVariants: {
@@ -32,16 +41,20 @@ const prismDividerBarVariants = cva(
   "pointer-events-none absolute left-0 right-0 top-1/2 z-[1] w-full min-w-0 -translate-y-1/2",
   {
     variants: {
+      /** Same named ladder as {@link PrismIconProps.weight} (`light` … `heavy`). */
       lineWeight: {
-        hairline: "h-px",
+        light: "h-px",
         thin: "h-0.5",
-        medium: "h-1",
-        thick: "h-1.5",
+        regular: "h-1",
+        bold: "h-1.5",
+        heavy: "h-2",
       },
       tone: {
-        default: "bg-foreground/18",
+        white: "bg-[rgb(255_255_255/0.92)]",
         muted: "bg-muted-foreground/45",
-        primary: "bg-primary",
+        default: "bg-foreground/18",
+        rich: "bg-primary",
+        black: "bg-foreground/88",
       },
       roundedBar: {
         true: "rounded-full",
@@ -56,15 +69,12 @@ const prismDividerBarVariants = cva(
   }
 );
 
-export type PrismDividerLineWeight = NonNullable<
-  VariantProps<typeof prismDividerBarVariants>["lineWeight"]
->;
+/** Rule stroke thickness: same tokens as {@link PrismIconWeightName}. */
+export type PrismDividerLineWeight = PrismIconWeightName;
 export type PrismDividerTone = NonNullable<
   VariantProps<typeof prismDividerBarVariants>["tone"]
 >;
-export type PrismDividerSpacing = NonNullable<
-  VariantProps<typeof prismDividerRootVariants>["spacing"]
->;
+export type PrismDividerSpacing = PrismSpacing;
 
 export type PrismDividerProps = Omit<
   React.ComponentProps<"div">,
@@ -73,6 +83,11 @@ export type PrismDividerProps = Omit<
   spacing?: PrismDividerSpacing;
   lineWeight?: PrismDividerLineWeight;
   tone?: PrismDividerTone;
+  /**
+   * When set, **`tone`** `default` / `muted` use the picker swatch (current shade vs **100** tint)
+   * instead of neutral theme strokes.
+   */
+  prismColor?: PartialPrismColorSpec;
   /** When true, the rule uses a fixed pill radius (`rounded-full`). */
   roundedBar?: boolean;
   /** Extra classes on the bar (e.g. gradient utilities); use with `lineStyle` for full control. */
@@ -134,6 +149,7 @@ function PrismDivider({
   roundedBar = false,
   lineClassName,
   lineStyle,
+  prismColor,
   surfaceClassName,
   emblem,
   letter,
@@ -157,6 +173,22 @@ function PrismDivider({
   const rootRole =
     role ?? (ariaLabel !== undefined ? "separator" : "presentation");
 
+  const effectiveTone = tone ?? "default";
+  const barStyle = React.useMemo((): React.CSSProperties => {
+    const base: React.CSSProperties = { ...(lineStyle ?? {}) };
+    if (
+      prismColor &&
+      (effectiveTone === "default" || effectiveTone === "muted")
+    ) {
+      const css =
+        effectiveTone === "muted"
+          ? resolvePrismSwatchLineMuted100Css(prismColor)
+          : resolvePrismSwatchLineCss(prismColor);
+      if (css) base.backgroundColor = css;
+    }
+    return base;
+  }, [lineStyle, prismColor, effectiveTone]);
+
   return (
     <div
       data-slot="divider"
@@ -175,7 +207,7 @@ function PrismDivider({
           }),
           lineClassName
         )}
-        style={lineStyle}
+        style={barStyle}
       />
       {center ? (
         <div

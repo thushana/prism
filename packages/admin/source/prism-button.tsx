@@ -12,6 +12,7 @@ import type {
   PartialPrismColorSpec,
   PrismButtonPaint,
   PrismButtonSize,
+  PrismButtonSpacing,
   PrismSwatchKey,
 } from "@ui";
 import {
@@ -145,8 +146,11 @@ type AppearanceKey =
   | "lineFull"
   | "lineBottom"
   | "lineNone"
-  | "spacingNormal"
   | "spacingTight"
+  | "spacingCompact"
+  | "spacingRegular"
+  | "spacingComfortable"
+  | "spacingAiry"
   | "gapNormal"
   | "gapNone"
   | "paintBackground"
@@ -159,7 +163,7 @@ type AppearanceKey =
   | "gradientVertical"
   | "gradientAngled"
   | "sizeSmall"
-  | "sizeMedium"
+  | "sizeRegular"
   | "sizeLarge"
   | "sizeHuge"
   | "sizeGigantic"
@@ -188,8 +192,11 @@ const OPTION_PROP_LABEL: Record<AppearanceKey, string> = {
   lineFull: "full",
   lineBottom: "bottom",
   lineNone: "none",
-  spacingNormal: "normal",
   spacingTight: "tight",
+  spacingCompact: "compact",
+  spacingRegular: "regular",
+  spacingComfortable: "comfortable",
+  spacingAiry: "airy",
   gapNormal: "normal",
   gapNone: "none",
   paintBackground: "background",
@@ -202,7 +209,7 @@ const OPTION_PROP_LABEL: Record<AppearanceKey, string> = {
   gradientVertical: "gradientVertical",
   gradientAngled: "gradientAngled",
   sizeSmall: "small",
-  sizeMedium: "medium",
+  sizeRegular: "regular",
   sizeLarge: "large",
   sizeHuge: "huge",
   sizeGigantic: "gigantic",
@@ -219,7 +226,13 @@ const CUSTOMIZER_EXCLUSIVE_GROUPS: AppearanceKey[][] = [
   ["textCaseDefault", "textCaseUppercase", "textCaseLowercase"],
   ["shapePill", "shapeRectangle", "shapeRectangleRounded"],
   ["lineFull", "lineBottom", "lineNone"],
-  ["spacingNormal", "spacingTight"],
+  [
+    "spacingTight",
+    "spacingCompact",
+    "spacingRegular",
+    "spacingComfortable",
+    "spacingAiry",
+  ],
   ["gapNormal", "gapNone"],
   [
     "paintBackground",
@@ -230,7 +243,7 @@ const CUSTOMIZER_EXCLUSIVE_GROUPS: AppearanceKey[][] = [
     "paintMonochrome",
   ],
   ["gradientHorizontal", "gradientVertical", "gradientAngled"],
-  ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
+  ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   ["fontSans", "fontSerif", "fontMono"],
 ];
 
@@ -256,8 +269,16 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
       "lineFull",
       "lineBottom",
       "lineNone",
-      "spacingNormal",
+    ],
+  },
+  {
+    heading: "Spacing",
+    keys: [
       "spacingTight",
+      "spacingCompact",
+      "spacingRegular",
+      "spacingComfortable",
+      "spacingAiry",
     ],
   },
   {
@@ -280,7 +301,7 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
   },
   {
     heading: "Size",
-    keys: ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
+    keys: ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   },
   {
     heading: "Animation",
@@ -398,7 +419,7 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   iconPosition: "left" | "right";
   shape?: "pill" | "rectangle" | "rectangleRounded";
   line?: "full" | "bottom" | "none";
-  spacing?: "normal" | "tight";
+  spacing?: PrismButtonSpacing;
   gap?: "normal" | "none";
   textCase?: "default" | "uppercase" | "lowercase";
   paint?: PrismButtonPaint;
@@ -421,8 +442,8 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
         ? "large"
         : selected.has("sizeSmall")
           ? "small"
-          : selected.has("sizeMedium")
-            ? "medium"
+          : selected.has("sizeRegular")
+            ? "regular"
             : undefined;
   const needsIcon =
     selected.has("icon") ||
@@ -451,11 +472,17 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
       : selected.has("lineFull")
         ? "full"
         : undefined;
-  const spacing: "normal" | "tight" | undefined = selected.has("spacingTight")
+  const spacing: PrismButtonSpacing | undefined = selected.has("spacingTight")
     ? "tight"
-    : selected.has("spacingNormal")
-      ? "normal"
-      : undefined;
+    : selected.has("spacingCompact")
+      ? "compact"
+      : selected.has("spacingComfortable")
+        ? "comfortable"
+        : selected.has("spacingAiry")
+          ? "airy"
+          : selected.has("spacingRegular")
+            ? "regular"
+            : undefined;
   const gap: "normal" | "none" | undefined = selected.has("gapNone")
     ? "none"
     : selected.has("gapNormal")
@@ -495,7 +522,7 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
     iconPosition,
     shape: shape && shape !== "pill" ? shape : undefined,
     line: line && line !== "full" ? line : undefined,
-    spacing: spacing && spacing !== "normal" ? spacing : undefined,
+    spacing: spacing && spacing !== "regular" ? spacing : undefined,
     gap: gap && gap !== "normal" ? gap : undefined,
     textCase: textCase && textCase !== "default" ? textCase : undefined,
     paint,
@@ -521,7 +548,7 @@ function formatPrismButtonDemoSnippet(
     iconPosition: "left" | "right";
     shape?: "pill" | "rectangle" | "rectangleRounded";
     line?: "full" | "bottom" | "none";
-    spacing?: "normal" | "tight";
+    spacing?: PrismButtonSpacing;
     gap?: "normal" | "none";
     textCase?: "default" | "uppercase" | "lowercase";
     paint?: PrismButtonPaint;
@@ -655,7 +682,7 @@ function ButtonCustomizerSection() {
         <h3 className="mb-2">Customize</h3>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           className="text-muted-foreground mb-4"
         >
           Toggle options to preview them on the action strip below.{" "}
@@ -700,7 +727,7 @@ function ButtonCustomizerSection() {
                       />
                       <PrismTypography
                         role="label"
-                        size="medium"
+                        size="regular"
                         color={{ semanticText: "muted" }}
                         font="mono"
                       >
@@ -1076,15 +1103,23 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='spacing="tight" (50% padding)'>
-        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
+      <Row title='spacing ladder (same names as PrismDivider: tight → airy)'>
+        {(
+          [
+            "tight",
+            "compact",
+            "regular",
+            "comfortable",
+            "airy",
+          ] as const
+        ).map((s) => (
           <PrismButton
-            key={swatchPrimary}
-            color={{ palette: "default", swatchPrimary }}
-            label={label}
+            key={s}
+            color={{ palette: "default", swatchPrimary: "blue-grey" }}
+            label={s}
             variant="icon"
-            icon={icon}
-            spacing="tight"
+            icon={Gem}
+            spacing={s}
             asChild
           />
         ))}
@@ -1126,7 +1161,7 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='size="medium" (100%)'>
+      <Row title='size="regular" (100%)'>
         {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
           <PrismButton
             key={swatchPrimary}
@@ -1134,7 +1169,7 @@ function ButtonVariantsMatrix({
             label={label}
             variant="icon"
             icon={icon}
-            size="medium"
+            size="regular"
             asChild
           />
         ))}

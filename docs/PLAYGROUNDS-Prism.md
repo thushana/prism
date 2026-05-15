@@ -1,7 +1,5 @@
 # Prism playgrounds (admin component demos)
 
-This file sits next to **[DOCS-Prism.md](./DOCS-Prism.md)** and follows the same rule: **code is truth for how; docs explain why, what, and where.** Class names, grid recipes, and `PrismCodeBlock` props live in source; here we only pin the **mental model** and **constraints** so new demos stay consistent without duplicating an encyclopedia.
-
 **Related docs**
 
 - **[ADMIN-Prism.md](./ADMIN-Prism.md)** — auth, `AdminPageShell`, `/admin` route tree, and how hub pages gate with `requireAdminPage`.
@@ -15,11 +13,13 @@ In a consuming app, each entry in `PRISM_ADMIN_COMPONENT_REGISTRY` (`prism/packa
 
 Reference implementation: **`PrismEmojiDemo`** in `prism/packages/admin/source/prism-emoji.tsx` (e.g. `/admin/prism/components/prism-emoji`).
 
+
 | Block           | Role                                                                                            |
 | --------------- | ----------------------------------------------------------------------------------------------- |
 | **Customize**   | State + controls = the **API surface** readers touch first.                                     |
 | **Example**     | One **live preview** bound to that state.                                                       |
 | **Code sample** | A string fed to **`PrismCodeBlock`**, generated from the **same** state as Customize + Example. |
+
 
 **Why Customize is first:** props-before-output matches how people read on small screens (controls before scroll-heavy preview) and matches how authors reason about the component.
 
@@ -30,22 +30,91 @@ After the spine, demos may add optional sections (compare grids, inline labs, pr
 Intent only—**exact classes and prop lists live in** `prism/packages/admin/source/prism-emoji.tsx` (and peers). At a glance:
 
 1. **Demo root** — one wrapper with **consistent vertical rhythm** between major blocks so Customize, Example, and Code read as separate beats without one-off margins.
-
 2. **Major sections** — each is a **`section`** with **tight internal rhythm** so the heading, any helper copy, and the body stay one visual unit.
-
 3. **Section titles** (“Customize”, “Example”, …) — **sans title scale** on an **`h2`**, not monospace; that is the playground **segment header** voice.
+4. **Control groups** — **semantic grouping** (e.g. `fieldset` + `legend`) with a **small overline-style** group label; option text is **mono-flavored** so values feel API-adjacent, and **inactive** options recede via **semantic muted** text, not custom colors.
+5. **Example runway** — give the live preview a clear **stage** (spacing and/or a very light frame) so it reads separately from admin chrome. **Do not wrap previews in `PrismCard` (or other card / elevated surfaces)**—playgrounds are not marketing tiles; card chrome fights components that already draw their own edges (tables, maps, charts). For compact single widgets, a **low-contrast bordered panel** is fine (see `prism-emoji.tsx`). For **wide or grid-heavy** demos (e.g. `PrismTable`), prefer **`overflow-x-auto`** + **`min-w-0`** and light vertical padding only—let the component’s own border and zebra read as the surface.
+6. **Code sample** — a **card-mode** code panel with a **Prism color spec** so syntax sits on a **tinted wash** (token-driven). Implementation: `prism/packages/ui/components/prism-code-block.tsx` and `PrismColor.syntax`. **Card mode applies to the code block only**, not to the live Example preview.
 
-4. **Control groups** — **semantic grouping** (e.g. `fieldset` + `legend`) with a **small overline-style** group label; option text is **mono-flavoured** so values feel API-adjacent, and **inactive** options recede via **semantic muted** text, not custom colours.
+## Common control vocabulary (cross-demo settings)
 
-5. **Example runway** — give the live preview a clear **stage** (spacing and/or a very light frame) so it reads separately from admin chrome. **Do not wrap previews in `PrismCard` (or other card / elevated surfaces)**—playgrounds are not marketing tiles; card chrome fights components that already draw their own edges (tables, maps, charts). For compact single widgets, a **low-contrast bordered panel** is fine (see `prism-emoji.tsx`). For **wide or grid-heavy** demos (e.g. `PrismTable`), prefer **`overflow-x-auto` + `min-w-0`** and light vertical padding only—let the component’s own border and zebra read as the surface.
+Playgrounds should reuse the **same column or group titles** for the same prop meaning across demos. 
 
-6. **Code sample** — a **card-mode** code panel with a **Prism colour spec** so syntax sits on a **tinted wash** (token-driven). Implementation: `prism/packages/ui/components/prism-code-block.tsx` and `PrismColor.syntax`. **Card mode applies to the code block only**, not to the live Example preview.
+### Size
+
+`prism/packages/ui/source/prism-size.ts`
+
+
+| Option     | Description                                           |
+| ---------- | ----------------------------------------------------- |
+| `small`    | Dense UI; smallest named step                         |
+| `regular`  | Default balance for controls and icons                |
+| `large`    | Step up for emphasis without jumping to display scale |
+| `huge`     | Prominent controls and larger glyphs                  |
+| `gigantic` | Largest named step on the ladder                      |
+
+
+### Stroke weight (line + icon + font)
+
+Same five names for **divider / table rule thickness** (`lineWeight`), **Material symbol stroke** (`PrismIcon` `weight`), and **`PrismTypography` `fontWeight`** presets (`PrismTypographyFontWeightPreset` = `PrismIconWeightName`). Numeric column is the shared ladder (symbol axis / CSS `font-weight`).
+
+
+| Option    | Line (rule / border bar) `PrismDividerLineWeight` | Icon (symbol stroke) | Font (`fontWeight`) |
+| --------- | ------------------------------------------------- | -------------------- | --------------------- |
+| `light`   | `h-px`—finest bar                                 | Axis **100**         | **100**               |
+| `thin`    | `h-0.5`; divider default                          | Axis **200**         | **200**               |
+| `regular` | `h-1`                                             | Axis **400** (default) | **400** (default)   |
+| `bold`    | `h-1.5`                                           | Axis **600**         | **600**               |
+| `heavy`   | `h-2`—heaviest bar                                | Axis **700**         | **700**               |
+
+
+### Spacing
+
+Shared type **`PrismSpacing`** (`prism/packages/ui/source/prism-spacing.ts`).
+
+
+| Option        | `PrismButton`        | `PrismDivider`             |
+| ------------- | -------------------- | -------------------------- |
+| `tight`       | Smallest inner pad.  | `py-0` around the track.   |
+| `compact`     | Step up from tight.  | `py-3`.                    |
+| `regular`     | Baseline pad recipe. | `py-6`.                    |
+| `comfortable` | Roomier pad.         | `py-10` (divider default). |
+| `airy`        | Largest pad step.    | `py-14`.                   |
+
+
+### Alignment
+
+
+| Option    | Description                                 |
+| --------- | ------------------------------------------- |
+| `left`    | Start-aligned text block.                   |
+| `center`  | Centered text block.                        |
+| `right`   | End-aligned text block.                     |
+| `justify` | Justified text (last line follows browser). |
+
+
+### Tone
+
+
+| Option    | Description                                                                     |
+| --------- | ------------------------------------------------------------------------------- |
+| `white`   | High-key stroke (e.g. rules on tinted or dark surfaces).                        |
+| `muted`   | **100** tint of the picker family (softer than **`default`**).                  |
+| `default` | Active **`prismColor`** swatch + shade (the color from **`PrismColorPicker`**). |
+| `rich`    | Saturated accent stroke (theme **`primary`**).                                  |
+| `black`   | Strong dark stroke (e.g. emphasis on light surfaces).                           |
+
+
+### Type ramp captions
+
+Read-only copy: **`role · size`** or **`role · size · font`** (middle dots). See `TYPE_SCALE_ITEMS` / `INLINE_TYPE_DEMOS` in admin source—not slash-separated `role/size`.
 
 ## Constraint (non-negotiable)
 
 **Snippet string and preview must share one source of truth** (typically `useMemo` from the same state object). If they drift, the doc philosophy in [DOCS-Prism.md](./DOCS-Prism.md) is violated: readers cannot trust the playground as documentation.
 
 ## Where to look (authoritative files)
+
 
 | Question                                          | File                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -55,6 +124,7 @@ Intent only—**exact classes and prop lists live in** `prism/packages/admin/sou
 | Shell, path bar, sign-out                         | `prism/packages/authentication/source/admin-layout.tsx`                 |
 | Code panel fill and copy affordances              | `prism/packages/ui/components/prism-code-block.tsx`                     |
 
+
 ## When to update this doc
 
-Update when the **playground contract** changes (e.g. we rename the spine, change the mandatory Demo shape, or move the hub route). Do **not** update for every new toggle on a single demo—that belongs in code and JSDoc per [DOCS-Prism.md](./DOCS-Prism.md).
+Update when the **playground contract** changes (e.g. we rename the spine, change the mandatory Demo shape, move the hub route, or add/rename **shared** control vocabulary used across multiple demos). Do **not** update for every new toggle on a single demo—that belongs in code and JSDoc per [DOCS-Prism.md](./DOCS-Prism.md).

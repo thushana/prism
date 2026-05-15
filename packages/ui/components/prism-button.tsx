@@ -17,6 +17,10 @@ import {
   type PrismSwatchKey,
 } from "../styles/prism-color";
 import type { PrismSize } from "../source/prism-size";
+import {
+  PRISM_BUTTON_SPACING_MULTIPLIER,
+  type PrismSpacing,
+} from "../source/prism-spacing";
 import { resolvePrismButtonPreset } from "../source/prism-button-presets";
 
 /** camelCase → kebab-case for data-* attributes (DOM convention). */
@@ -50,7 +54,7 @@ export type PrismButtonPaint =
 
 export type PrismButtonShape = "pill" | "rectangle" | "rectangleRounded";
 export type PrismButtonLine = "full" | "bottom" | "none";
-export type PrismButtonSpacing = "normal" | "tight";
+export type PrismButtonSpacing = PrismSpacing;
 export type PrismButtonGap = "normal" | "none";
 export type PrismButtonTextCase = "default" | "uppercase" | "lowercase";
 
@@ -58,7 +62,7 @@ export type { PrismSize as PrismButtonSize } from "../source/prism-size";
 
 const SIZE_SCALE: Record<PrismSize, number> = {
   small: 0.75,
-  medium: 1,
+  regular: 1,
   large: 1.5,
   huge: 2,
   gigantic: 2.5,
@@ -146,12 +150,12 @@ export function PrismButton(
     iconOnly = false,
     shape = "pill",
     line = "full",
-    spacing = "normal",
+    spacing = "regular",
     gap = "normal",
     textCase = "default",
     paint = "background",
     segmentPosition,
-    size = "medium",
+    size = "regular",
     font = "sans",
     disableMotion = false,
     disableGrow = false,
@@ -173,7 +177,7 @@ export function PrismButton(
   const lineBottom = line === "bottom";
   const lineNo = line === "none";
   const gapNone = gap === "none";
-  const tight = spacing === "tight";
+  const spacingMultiplier = PRISM_BUTTON_SPACING_MULTIPLIER[spacing];
 
   const shouldGrow =
     !disableMotion && !disableGrow && !lineBottom && !toggled && !gapNone;
@@ -322,12 +326,11 @@ export function PrismButton(
   }, [shouldDrawIcon]);
 
   const scaleFactor = SIZE_SCALE[size];
-  const tightMultiplier = tight ? 0.5 : 1;
   const paddingV = Math.round(
-    BASE_PADDING_VERTICAL * scaleFactor * tightMultiplier
+    BASE_PADDING_VERTICAL * scaleFactor * spacingMultiplier
   );
   const paddingH = Math.round(
-    BASE_PADDING_HORIZONTAL * scaleFactor * tightMultiplier
+    BASE_PADDING_HORIZONTAL * scaleFactor * spacingMultiplier
   );
   const fontSizePx = Math.round(BASE_FONT_SIZE * scaleFactor);
   const iconPx = Math.round(BASE_ICON_SIZE * scaleFactor);
@@ -581,7 +584,7 @@ export function PrismButton(
     iconOnly: iconOnly || undefined,
     shape: shape !== "pill" ? shape : undefined,
     line: line !== "full" ? line : undefined,
-    spacing: spacing !== "normal" ? spacing : undefined,
+    spacing: spacing !== "regular" ? spacing : undefined,
     gap: gap !== "normal" ? gap : undefined,
     textCase: textCase !== "default" ? textCase : undefined,
     paint,

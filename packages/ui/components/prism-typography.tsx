@@ -6,7 +6,7 @@
  * **Zone:** `animationZone` — `whole` | `line` | `word` | `character` | `none`.
  * **Kind:** `animationKind` — `fadeIn` | `moveIn` | `none`. If zone is set and kind is `none`, fade-in is used (same as legacy “zone without type”).
  *
- * **Colour:** {@link PartialPrismColorSpec} via **`color`** only — resolved by {@link prismColorSpecToTypographyPaint}
+ * **Color:** {@link PartialPrismColorSpec} via **`color`** only — resolved by {@link prismColorSpecToTypographyPaint}
  * (semantic `text-*` roles, palette hex, or gradient + background-clip). Omit **`color`** to inherit the cascade.
  * Gradient text disables line/word/character split animations (plain whole-text motion only if configured).
  */
@@ -25,6 +25,10 @@ import {
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { cn } from "@utilities";
+import {
+  PRISM_ICON_WEIGHT_NAME_TO_VALUE,
+  type PrismIconWeightName,
+} from "./prism-icon";
 import type { PrismSize } from "../source/prism-size";
 import {
   prismColorSpecToTypographyPaint,
@@ -47,7 +51,7 @@ export const PRISM_TYPOGRAPHY_ROLES = [
 
 export const PRISM_TYPOGRAPHY_SIZES = [
   "small",
-  "medium",
+  "regular",
   "large",
   "huge",
   "gigantic",
@@ -58,8 +62,8 @@ export type PrismTypographySize = PrismSize;
 
 export type PrismTypographyFont = "sans" | "serif" | "mono";
 
-/** Named weight steps for {@link PrismTypographyProps.fontWeight} (maps to CSS numeric weight). */
-export type PrismTypographyFontWeightPreset = "thin" | "bold" | "black";
+/** Named weight presets: same five steps as {@link PrismIconWeightName} / {@link PrismDividerLineWeight}. */
+export type PrismTypographyFontWeightPreset = PrismIconWeightName;
 
 export type PrismTypographyAnimationZone =
   | "whole"
@@ -86,42 +90,42 @@ const DEFAULT_ELEMENT: Record<
 > = {
   display: {
     large: "h1",
-    medium: "h2",
+    regular: "h2",
     small: "h3",
     huge: "h1",
     gigantic: "h1",
   },
   headline: {
     large: "h2",
-    medium: "h3",
+    regular: "h3",
     small: "h4",
     huge: "h2",
     gigantic: "h1",
   },
   title: {
     large: "h4",
-    medium: "h5",
+    regular: "h5",
     small: "h6",
     huge: "h3",
     gigantic: "h2",
   },
   body: {
     large: "p",
-    medium: "p",
+    regular: "p",
     small: "p",
     huge: "p",
     gigantic: "p",
   },
   label: {
     large: "span",
-    medium: "span",
+    regular: "span",
     small: "span",
     huge: "span",
     gigantic: "span",
   },
   overline: {
     large: "span",
-    medium: "span",
+    regular: "span",
     small: "span",
     huge: "span",
     gigantic: "span",
@@ -248,10 +252,7 @@ function resolveTypographyFontWeight(
 ): number | undefined {
   if (w === undefined) return undefined;
   if (typeof w === "number") return w;
-  if (w === "thin") return 200;
-  if (w === "bold") return 700;
-  if (w === "black") return 900;
-  return undefined;
+  return PRISM_ICON_WEIGHT_NAME_TO_VALUE[w];
 }
 
 function yForZone(
@@ -277,13 +278,13 @@ export type PrismTypographyProps = {
   role: PrismTypographyRole;
   size?: PrismTypographySize;
   /**
-   * Prism colour spec — semantic roles, palette hex, or gradient (see {@link prismColorSpecToTypographyPaint}).
-   * Omit to inherit surrounding text colour.
+   * Prism color spec — semantic roles, palette hex, or gradient (see {@link prismColorSpecToTypographyPaint}).
+   * Omit to inherit surrounding text color.
    */
   color?: PartialPrismColorSpec;
   font?: PrismTypographyFont;
   fontFamily?: string;
-  /** Overrides the role’s default weight from the type scale (and overline caps accent when set). */
+  /** Overrides the role’s default weight from the type scale (and overline caps accent when set). Same named ladder as icon / line weight (`light` … `heavy` → CSS **100–700**). */
   fontWeight?: PrismTypographyFontWeightPreset | number;
   italic?: boolean;
   /**
@@ -325,7 +326,7 @@ export function PrismTypography({
   animationKind: animationKindProp,
   ...rest
 }: PrismTypographyProps): ReactElement {
-  const size = sizeProp ?? "medium";
+  const size = sizeProp ?? "regular";
   const Comp = (as ?? DEFAULT_ELEMENT[role][size]) as ElementType;
 
   const displayChildren =

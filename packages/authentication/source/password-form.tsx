@@ -50,12 +50,12 @@ export function PasswordForm({ error }: PasswordFormProps) {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <PrismTypography role="headline" size="medium" as="h1">
+          <PrismTypography role="headline" size="regular" as="h1">
             Authentication Required
           </PrismTypography>
           <PrismTypography
             role="body"
-            size="medium"
+            size="regular"
             color={{ semanticText: "muted" }}
             className="mt-2"
           >
@@ -66,7 +66,7 @@ export function PasswordForm({ error }: PasswordFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="password" className="mb-2 block cursor-pointer">
-              <PrismTypography role="label" size="medium" as="span">
+              <PrismTypography role="label" size="regular" as="span">
                 Password
               </PrismTypography>
             </label>

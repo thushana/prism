@@ -38,24 +38,24 @@ export function PrismMapDemo(): React.JSX.Element {
     <div className="mx-auto flex max-w-4xl flex-col gap-10 pb-16">
       <PrismTypography
         role="body"
-        size="medium"
+        size="regular"
         color={{ semanticText: "muted" }}
         as="p"
       >
         Live journey pages embed{" "}
-        <PrismTypography role="body" size="medium" as="span" font="mono">
+        <PrismTypography role="body" size="regular" as="span" font="mono">
           JourneyRoutesMap
         </PrismTypography>{" "}
         (SWR + sampling). Below: standalone{" "}
-        <PrismTypography role="body" size="medium" as="span" font="mono">
+        <PrismTypography role="body" size="regular" as="span" font="mono">
           PrismMap
         </PrismTypography>{" "}
         with mock polylines. Requires{" "}
-        <PrismTypography role="body" size="medium" as="span" font="mono">
+        <PrismTypography role="body" size="regular" as="span" font="mono">
           GOOGLE_MAPS_WEB_KEY
         </PrismTypography>{" "}
         /{" "}
-        <PrismTypography role="body" size="medium" as="span" font="mono">
+        <PrismTypography role="body" size="regular" as="span" font="mono">
           MAPBOX_ACCESS_TOKEN
         </PrismTypography>{" "}
         for previews.

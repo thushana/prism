@@ -2,8 +2,10 @@
 
 import {
   PrismCodeBlock,
+  PrismColorPicker,
   PrismDivider,
   PrismTypography,
+  type PartialPrismColorSpec,
   type PrismDividerLineWeight,
   type PrismDividerSpacing,
   type PrismDividerTone,
@@ -13,16 +15,21 @@ import {
 import { useMemo, useState } from "react";
 
 type DividerOptionKey =
-  | "lwHairline"
+  | "lwLight"
   | "lwThin"
-  | "lwMedium"
-  | "lwThick"
-  | "toneDefault"
+  | "lwRegular"
+  | "lwBold"
+  | "lwHeavy"
+  | "toneWhite"
   | "toneMuted"
-  | "tonePrimary"
-  | "spNone"
+  | "toneDefault"
+  | "toneRich"
+  | "toneBlack"
+  | "spTight"
   | "spCompact"
+  | "spRegular"
   | "spComfortable"
+  | "spAiry"
   | "emblemNone"
   | "emblemLetter"
   | "emblemIcon"
@@ -31,16 +38,21 @@ type DividerOptionKey =
   | "surfaceCard";
 
 const OPTION_PROP_LABEL: Record<DividerOptionKey, string> = {
-  lwHairline: "hairline",
+  lwLight: "light",
   lwThin: "thin",
-  lwMedium: "medium",
-  lwThick: "thick",
-  toneDefault: "default",
+  lwRegular: "regular",
+  lwBold: "bold",
+  lwHeavy: "heavy",
+  toneWhite: "white",
   toneMuted: "muted",
-  tonePrimary: "primary",
-  spNone: "none",
+  toneDefault: "default",
+  toneRich: "rich",
+  toneBlack: "black",
+  spTight: "tight",
   spCompact: "compact",
+  spRegular: "regular",
   spComfortable: "comfortable",
+  spAiry: "airy",
   emblemNone: "none",
   emblemLetter: "letter",
   emblemIcon: "icon",
@@ -50,19 +62,31 @@ const OPTION_PROP_LABEL: Record<DividerOptionKey, string> = {
 };
 
 const EXCLUSIVE_GROUPS: DividerOptionKey[][] = [
-  ["lwHairline", "lwThin", "lwMedium", "lwThick"],
-  ["toneDefault", "toneMuted", "tonePrimary"],
-  ["spNone", "spCompact", "spComfortable"],
+  ["lwLight", "lwThin", "lwRegular", "lwBold", "lwHeavy"],
+  ["toneWhite", "toneMuted", "toneDefault", "toneRich", "toneBlack"],
+  ["spTight", "spCompact", "spRegular", "spComfortable", "spAiry"],
   ["emblemNone", "emblemLetter", "emblemIcon"],
 ];
 
 const CUSTOMIZER_COLUMNS: { heading: string; keys: DividerOptionKey[] }[] = [
   {
     heading: "Line weight",
-    keys: ["lwHairline", "lwThin", "lwMedium", "lwThick"],
+    keys: ["lwLight", "lwThin", "lwRegular", "lwBold", "lwHeavy"],
   },
-  { heading: "Tone", keys: ["toneDefault", "toneMuted", "tonePrimary"] },
-  { heading: "Spacing", keys: ["spNone", "spCompact", "spComfortable"] },
+  {
+    heading: "Tone",
+    keys: [
+      "toneWhite",
+      "toneMuted",
+      "toneDefault",
+      "toneRich",
+      "toneBlack",
+    ],
+  },
+  {
+    heading: "Spacing",
+    keys: ["spTight", "spCompact", "spRegular", "spComfortable", "spAiry"],
+  },
   { heading: "Emblem", keys: ["emblemNone", "emblemLetter", "emblemIcon"] },
   {
     heading: "Flags",
@@ -82,28 +106,39 @@ type DividerPreviewProps = {
   iconWeight?: PrismIconProps["weight"];
   iconFill?: PrismIconProps["fill"];
   surfaceClassName?: string;
+  prismColor?: PartialPrismColorSpec;
 };
 
 function selectedToDividerProps(
   selected: Set<DividerOptionKey>
 ): DividerPreviewProps {
-  const lineWeight: PrismDividerLineWeight = selected.has("lwHairline")
-    ? "hairline"
-    : selected.has("lwMedium")
-      ? "medium"
-      : selected.has("lwThick")
-        ? "thick"
-        : "thin";
-  const tone: PrismDividerTone = selected.has("toneMuted")
-    ? "muted"
-    : selected.has("tonePrimary")
-      ? "primary"
-      : "default";
-  const spacing: PrismDividerSpacing = selected.has("spNone")
-    ? "none"
-    : selected.has("spCompact")
-      ? "compact"
-      : "comfortable";
+  const lineWeight: PrismDividerLineWeight = selected.has("lwHeavy")
+    ? "heavy"
+    : selected.has("lwBold")
+      ? "bold"
+      : selected.has("lwRegular")
+        ? "regular"
+        : selected.has("lwThin")
+          ? "thin"
+          : "light";
+  const tone: PrismDividerTone = selected.has("toneBlack")
+    ? "black"
+    : selected.has("toneRich")
+      ? "rich"
+      : selected.has("toneMuted")
+        ? "muted"
+        : selected.has("toneWhite")
+          ? "white"
+          : "default";
+  const spacing: PrismDividerSpacing = selected.has("spAiry")
+    ? "airy"
+    : selected.has("spComfortable")
+      ? "comfortable"
+      : selected.has("spRegular")
+        ? "regular"
+        : selected.has("spCompact")
+          ? "compact"
+          : "tight";
   const roundedBar = selected.has("roundedBar");
   const gradientLine = selected.has("gradientLine");
   const lineClassName = gradientLine
@@ -127,7 +162,7 @@ function selectedToDividerProps(
     return {
       ...base,
       iconName: "deployed_code",
-      iconSize: "medium",
+      iconSize: "regular",
       iconWeight: "regular",
       iconFill: "off",
     };
@@ -159,6 +194,27 @@ function formatDividerSnippet(p: DividerPreviewProps): string {
   }
   if (p.surfaceClassName)
     parts.push(`  surfaceClassName="${p.surfaceClassName}"`);
+  const pc = p.prismColor;
+  if (
+    pc &&
+    (pc.swatchPrimary ||
+      pc.palette !== undefined ||
+      pc.shade !== undefined)
+  ) {
+    parts.push(`  prismColor={{`);
+    if (pc.palette !== undefined)
+      parts.push(`    palette: "${pc.palette}",`);
+    if (pc.swatchPrimary)
+      parts.push(`    swatchPrimary: "${pc.swatchPrimary}",`);
+    if (pc.shade !== undefined) {
+      parts.push(
+        typeof pc.shade === "number"
+          ? `    shade: ${pc.shade},`
+          : `    shade: "${String(pc.shade)}",`
+      );
+    }
+    parts.push(`  }}`);
+  }
   parts.push("/>");
   return `${parts.join("\n")}\n`;
 }
@@ -179,11 +235,16 @@ export function PrismDividerDemo(): React.JSX.Element {
   );
   const [letter, setLetter] = useState("P");
   const [iconName, setIconName] = useState("deployed_code");
-  const [iconSize, setIconSize] = useState<PrismSize>("medium");
+  const [iconSize, setIconSize] = useState<PrismSize>("regular");
   const [iconWeight, setIconWeight] =
     useState<NonNullable<PrismIconProps["weight"]>>("regular");
   const [iconFill, setIconFill] =
     useState<NonNullable<PrismIconProps["fill"]>>("off");
+  const [prismColor, setPrismColor] = useState<PartialPrismColorSpec>({
+    palette: "default",
+    swatchPrimary: "indigo",
+    shade: 500,
+  });
 
   const toggle = (key: DividerOptionKey) => {
     setSelected((prev) => {
@@ -209,7 +270,7 @@ export function PrismDividerDemo(): React.JSX.Element {
   };
 
   const dividerProps = useMemo(() => {
-    const base = selectedToDividerProps(selected);
+    const base = { ...selectedToDividerProps(selected), prismColor };
     if (selected.has("emblemLetter")) {
       return { ...base, letter: letter.slice(0, 8) };
     }
@@ -223,7 +284,15 @@ export function PrismDividerDemo(): React.JSX.Element {
       };
     }
     return { ...base, letter: undefined, iconName: undefined };
-  }, [iconFill, iconName, iconSize, iconWeight, letter, selected]);
+  }, [
+    iconFill,
+    iconName,
+    iconSize,
+    iconWeight,
+    letter,
+    prismColor,
+    selected,
+  ]);
 
   const snippet = useMemo(
     () => formatDividerSnippet(dividerProps),
@@ -236,13 +305,19 @@ export function PrismDividerDemo(): React.JSX.Element {
         <h3 className="mb-2">Customize</h3>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           className="mb-4 text-muted-foreground"
         >
           Toggle options (same pattern as PrismButton). Preview updates below;
           copy JSX from the snippet block.
         </PrismTypography>
         <div className="space-y-6">
+          <div className="min-w-0 space-y-2">
+            <PrismTypography role="overline" size="small">
+              Color (drives tone default / muted)
+            </PrismTypography>
+            <PrismColorPicker color={prismColor} onColorChange={setPrismColor} />
+          </div>
           <div>
             <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
               {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
@@ -263,7 +338,7 @@ export function PrismDividerDemo(): React.JSX.Element {
                       />
                       <PrismTypography
                         role="label"
-                        size="medium"
+                        size="regular"
                         color={{ semanticText: "muted" }}
                         font="mono"
                       >
@@ -325,7 +400,7 @@ export function PrismDividerDemo(): React.JSX.Element {
                       value={iconSize}
                       onChange={(e) => setIconSize(e.target.value as PrismSize)}
                     >
-                      {(["small", "medium", "large"] as const).map((s) => (
+                      {(["small", "regular", "large"] as const).map((s) => (
                         <option key={s} value={s}>
                           {s}
                         </option>
@@ -411,7 +486,7 @@ export function PrismDividerDemo(): React.JSX.Element {
         >
           <PrismTypography
             role="body"
-            size="medium"
+            size="regular"
             color={{ semanticText: "muted" }}
           >
             Content above
@@ -420,6 +495,7 @@ export function PrismDividerDemo(): React.JSX.Element {
             spacing={dividerProps.spacing}
             lineWeight={dividerProps.lineWeight}
             tone={dividerProps.tone}
+            prismColor={dividerProps.prismColor}
             roundedBar={dividerProps.roundedBar}
             lineClassName={dividerProps.lineClassName}
             letter={dividerProps.letter}
@@ -431,7 +507,7 @@ export function PrismDividerDemo(): React.JSX.Element {
           />
           <PrismTypography
             role="body"
-            size="medium"
+            size="regular"
             color={{ semanticText: "muted" }}
           >
             Content below

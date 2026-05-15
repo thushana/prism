@@ -18,7 +18,7 @@ export function PrismPathBarDemo(): JSX.Element {
   return (
     <div className="space-y-10">
       <section className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-        <PrismTypography role="title" size="medium" font="sans" as="h2">
+        <PrismTypography role="title" size="regular" font="sans" as="h2">
           Auto mode
         </PrismTypography>
         <p className="text-sm text-muted-foreground">
@@ -36,7 +36,7 @@ export function PrismPathBarDemo(): JSX.Element {
       </section>
 
       <section className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-        <PrismTypography role="title" size="medium" font="sans" as="h2">
+        <PrismTypography role="title" size="regular" font="sans" as="h2">
           Explicit segments
         </PrismTypography>
         <PrismPathBar

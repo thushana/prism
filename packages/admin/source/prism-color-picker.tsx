@@ -105,7 +105,7 @@ export function PrismColorPickerDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -121,7 +121,7 @@ export function PrismColorPickerDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -137,7 +137,7 @@ export function PrismColorPickerDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >

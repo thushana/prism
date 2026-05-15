@@ -141,7 +141,7 @@ const eslintConfig = defineConfig([
           selector:
             "JSXOpeningElement[name.name='PrismButton'] JSXAttribute[name.name='size'] Literal[value='normal']",
           message:
-            'PrismButton size uses PrismSize; use size="medium" instead of "normal".',
+            'PrismButton size uses PrismSize; use size="regular" instead of "normal".',
         },
       ],
     },

@@ -9,7 +9,8 @@ import {
 export type PrismIconSizeName = PrismSize;
 
 /**
- * Named weight steps map to the Material Symbols **wght** axis (100–700).
+ * Named weight steps map to the Material Symbols **stroke thickness** axis (numeric ladder **100–700**).
+ * In variable-font tables that axis is often tagged **`wght`** next to weight-like axes; we still call it **stroke** in UI copy so it is not confused with CSS **font-weight** on text.
  * These five names are a curated ladder; pass a number for any other axis value.
  */
 export type PrismIconWeightName =
@@ -28,7 +29,7 @@ export const PRISM_ICON_DEFAULTS: {
   weight: PrismIconWeightName;
   fill: PrismIconFillMode;
 } = {
-  size: "medium",
+  size: "regular",
   weight: "regular",
   fill: "off",
 };
@@ -38,11 +39,11 @@ export interface PrismIconProps {
   className?: string;
   /**
    * Named step or raw pixel size for layout-driven cases (still clamps **opsz** to 20–48).
-   * @default {@link PRISM_ICON_DEFAULTS.size} (`"medium"`)
+   * @default {@link PRISM_ICON_DEFAULTS.size} (`"regular"`)
    */
   size?: PrismIconSizeName | number;
   /**
-   * Named step (`light` … `heavy` → wght 100 / 200 / 400 / 600 / 700) or any **wght** integer **100–700**
+   * Named step (`light` … `heavy` → **100 / 200 / 400 / 600 / 700** on the symbol stroke axis) or any integer **100–700**
    * (use a number for steps between named values, e.g. **300**).
    * @default {@link PRISM_ICON_DEFAULTS.weight} (`"regular"`)
    */
@@ -62,13 +63,14 @@ export interface PrismIconProps {
 
 const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
   small: 20,
-  medium: 24,
+  regular: 24,
   large: 28,
   huge: 48,
   gigantic: 64,
 };
 
-const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<PrismIconWeightName, number> = {
+/** Same numeric ladder as {@link PrismTypographyProps.fontWeight} named presets. */
+export const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<PrismIconWeightName, number> = {
   light: 100,
   thin: 200,
   regular: 400,
