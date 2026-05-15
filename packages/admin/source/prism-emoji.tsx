@@ -16,6 +16,7 @@ import {
 } from "@ui";
 import { Smile } from "lucide-react";
 import { useEffect, useMemo, useState, type JSX } from "react";
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
 
 const STYLE_OPTIONS: { value: PrismEmojiStyle; label: string }[] = [
   { value: "native", label: "native" },
@@ -257,17 +258,12 @@ export function PrismEmojiDemo(): JSX.Element {
                   onChange={() => setEmojiStyle(value)}
                   className="border-input"
                 />
-                <PrismTypography
-                  role="label"
-                  size="regular"
-                  font="mono"
-                  color={
-                    emojiStyle === value ? undefined : { semanticText: "muted" }
-                  }
+                <PrismPlaygroundOptionLabel
+                  active={emojiStyle === value}
                   className="wrap-break-word"
                 >
                   {label}
-                </PrismTypography>
+                </PrismPlaygroundOptionLabel>
               </label>
             ))}
           </fieldset>
@@ -292,15 +288,12 @@ export function PrismEmojiDemo(): JSX.Element {
                   onChange={() => setSize(value)}
                   className="border-input"
                 />
-                <PrismTypography
-                  role="label"
-                  size="regular"
-                  font="mono"
-                  color={size === value ? undefined : { semanticText: "muted" }}
+                <PrismPlaygroundOptionLabel
+                  active={size === value}
                   className="wrap-break-word"
                 >
                   {String(value)}
-                </PrismTypography>
+                </PrismPlaygroundOptionLabel>
               </label>
             ))}
           </fieldset>
@@ -319,15 +312,12 @@ export function PrismEmojiDemo(): JSX.Element {
                 onChange={() => setColorEnabled((v) => !v)}
                 className="rounded border-input"
               />
-              <PrismTypography
-                role="label"
-                size="regular"
-                font="mono"
-                color={colorEnabled ? undefined : { semanticText: "muted" }}
+              <PrismPlaygroundOptionLabel
+                active={colorEnabled}
                 className="wrap-break-word"
               >
                 enable (duotone)
-              </PrismTypography>
+              </PrismPlaygroundOptionLabel>
             </label>
             {colorEnabled ? (
               <div className="pt-1">
@@ -371,19 +361,12 @@ export function PrismEmojiDemo(): JSX.Element {
                   disabled={animationDisabled}
                   className="border-input"
                 />
-                <PrismTypography
-                  role="label"
-                  size="regular"
-                  font="mono"
-                  color={
-                    animationMode === value && !animationDisabled
-                      ? undefined
-                      : { semanticText: "muted" }
-                  }
+                <PrismPlaygroundOptionLabel
+                  active={animationMode === value && !animationDisabled}
                   className="wrap-break-word"
                 >
                   {label}
-                </PrismTypography>
+                </PrismPlaygroundOptionLabel>
               </label>
             ))}
           </fieldset>

@@ -30,6 +30,7 @@ import {
   Pencil,
   Play,
   Plus,
+  RefreshCw,
   RotateCcw,
   Save,
   Search,
@@ -40,6 +41,10 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  PrismPlaygroundOptionColumn,
+  PrismPlaygroundOptionLabel,
+} from "./playground-option-label";
 
 const ACTION_BUTTONS: {
   swatchPrimary: PrismSwatchKey;
@@ -159,9 +164,6 @@ type AppearanceKey =
   | "paintBackgroundSolid"
   | "paintBackgroundNone"
   | "paintMonochrome"
-  | "gradientHorizontal"
-  | "gradientVertical"
-  | "gradientAngled"
   | "sizeSmall"
   | "sizeRegular"
   | "sizeLarge"
@@ -205,9 +207,6 @@ const OPTION_PROP_LABEL: Record<AppearanceKey, string> = {
   paintBackgroundSolid: "backgroundSolid",
   paintBackgroundNone: "backgroundNone",
   paintMonochrome: "monochrome",
-  gradientHorizontal: "gradientHorizontal",
-  gradientVertical: "gradientVertical",
-  gradientAngled: "gradientAngled",
   sizeSmall: "small",
   sizeRegular: "regular",
   sizeLarge: "large",
@@ -242,7 +241,6 @@ const CUSTOMIZER_EXCLUSIVE_GROUPS: AppearanceKey[][] = [
     "paintBackgroundNone",
     "paintMonochrome",
   ],
-  ["gradientHorizontal", "gradientVertical", "gradientAngled"],
   ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   ["fontSans", "fontSerif", "fontMono"],
 ];
@@ -294,9 +292,6 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: AppearanceKey[] }[] = [
       "paintBackgroundSolid",
       "paintBackgroundNone",
       "paintMonochrome",
-      "gradientHorizontal",
-      "gradientVertical",
-      "gradientAngled",
     ],
   },
   {
@@ -398,20 +393,6 @@ function formatColorPropSpec(spec: PartialPrismColorSpec): string[] {
   return lines;
 }
 
-function applyCustomizerGradientDirection(
-  base: PartialPrismColorSpec,
-  direction?: "horizontal" | "vertical" | "angled"
-): PartialPrismColorSpec {
-  if (!direction) return { ...base };
-  return {
-    ...base,
-    gradient: {
-      ...base.gradient,
-      direction,
-    },
-  };
-}
-
 /** Spread props for `PrismButton` from customize checkboxes (single source for preview + JSX snippet). */
 function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   variant: "plain" | "icon";
@@ -425,7 +406,6 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   paint?: PrismButtonPaint;
   size?: PrismButtonSize;
   font?: "sans" | "serif" | "mono";
-  gradientDirection?: "horizontal" | "vertical" | "angled";
   disableMotion?: boolean;
   disableGrow?: boolean;
   disableColorChange?: boolean;
@@ -504,15 +484,6 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
   else if (selected.has("paintBackgroundLight")) paint = "backgroundLight";
   else if (selected.has("paintBackground")) paint = "background";
 
-  const gradientDirection: "horizontal" | "vertical" | "angled" | undefined =
-    selected.has("gradientAngled")
-      ? "angled"
-      : selected.has("gradientVertical")
-        ? "vertical"
-        : selected.has("gradientHorizontal")
-          ? "horizontal"
-          : undefined;
-
   const iconPosition: "left" | "right" = selected.has("iconRight")
     ? "right"
     : "left";
@@ -528,7 +499,6 @@ function buildButtonDemoSpreadProps(selected: Set<AppearanceKey>): {
     paint,
     size,
     font,
-    gradientDirection,
     disableMotion: selected.has("disableMotion") || undefined,
     disableGrow: selected.has("disableGrow") || undefined,
     disableColorChange: selected.has("disableColorChange") || undefined,
@@ -635,26 +605,17 @@ function ButtonCustomizerSection() {
 
   const {
     prismSpreadProps,
-    gradientDirection,
     previewColor,
     previewSpreadProps,
     currentSampleSnippet,
   } = useMemo(() => {
-    const spreadProps = buildButtonDemoSpreadProps(selected);
-    /** Not a PrismButton prop — only drives `color.gradient.direction` via {@link applyCustomizerGradientDirection}. */
-    const { gradientDirection, ...prismSpreadProps } = spreadProps;
+    const prismSpreadProps = buildButtonDemoSpreadProps(selected);
     const segmentPosition =
-      spreadProps.gap === "none" ? ("first" as const) : undefined;
+      prismSpreadProps.gap === "none" ? ("first" as const) : undefined;
     const previewColor =
       groupColorMode === "unified"
-        ? applyCustomizerGradientDirection(
-            { ...pickedColor },
-            gradientDirection
-          )
-        : applyCustomizerGradientDirection(
-            { palette: "default", swatchPrimary: "deep-purple" },
-            gradientDirection
-          );
+        ? { ...pickedColor }
+        : { palette: "default" as const, swatchPrimary: "deep-purple" as const };
     const previewSpreadProps = {
       ...prismSpreadProps,
       variant: "icon" as const,
@@ -669,7 +630,6 @@ function ButtonCustomizerSection() {
     );
     return {
       prismSpreadProps,
-      gradientDirection,
       previewColor,
       previewSpreadProps,
       currentSampleSnippet,
@@ -677,94 +637,92 @@ function ButtonCustomizerSection() {
   }, [selected, pickedColor, groupColorMode]);
 
   return (
-    <>
-      <div className="mb-8">
-        <h3 className="mb-2">Customize</h3>
-        <PrismTypography
-          role="body"
-          size="regular"
-          className="text-muted-foreground mb-4"
-        >
-          Toggle options to preview them on the action strip below.{" "}
-          <button
-            type="button"
-            onClick={replayAnimations}
-            className="text-sm text-muted-foreground hover:text-foreground hover:underline font-medium"
-          >
-            Replay animations
-          </button>
+    <div className="relative isolate space-y-10">
+      <section className="space-y-4">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          Customize
         </PrismTypography>
-        <div className="space-y-6">
-          <div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-0">
-              <div className="space-y-1">
-                <PrismTypography role="overline" size="small">
-                  COLOR
-                </PrismTypography>
-                <PrismColorPicker
-                  color={pickedColor}
-                  onColorChange={(next) => {
-                    setPickedColor(next);
-                    setGroupColorMode("unified");
-                  }}
-                />
-              </div>
-              {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
-                <div key={heading} className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    {heading}
-                  </PrismTypography>
-                  {keys.map((key) => (
-                    <label
-                      key={key}
-                      className="flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected.has(key)}
-                        onChange={() => toggle(key)}
-                        className="rounded border-input"
-                      />
-                      <PrismTypography
-                        role="label"
-                        size="regular"
-                        color={{ semanticText: "muted" }}
-                        font="mono"
-                      >
-                        {OPTION_PROP_LABEL[key]}
-                      </PrismTypography>
-                    </label>
-                  ))}
-                </div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+          <div className="space-y-1">
+            <PrismTypography role="overline" size="small">
+              COLOR
+            </PrismTypography>
+            <PrismColorPicker
+              color={pickedColor}
+              onColorChange={(next) => {
+                setPickedColor(next);
+                setGroupColorMode("unified");
+              }}
+            />
+          </div>
+          {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
+            <PrismPlaygroundOptionColumn key={heading} title={heading}>
+              {keys.map((key) => (
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-center gap-1.5"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.has(key)}
+                    onChange={() => toggle(key)}
+                    className="rounded border-input"
+                  />
+                  <PrismPlaygroundOptionLabel active={selected.has(key)}>
+                    {OPTION_PROP_LABEL[key]}
+                  </PrismPlaygroundOptionLabel>
+                </label>
               ))}
+            </PrismPlaygroundOptionColumn>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <PrismTypography role="title" size="large" font="sans" as="h2">
+            Example
+          </PrismTypography>
+          <PrismButton
+            type="button"
+            color={{ palette: "default", swatchPrimary: "grey" }}
+            label="Replay animations"
+            variant="icon"
+            icon={RefreshCw}
+            iconOnly
+            line="none"
+            paint="backgroundNone"
+            size="small"
+            onClick={replayAnimations}
+            title="Replay animations"
+            aria-label="Replay animations"
+          />
+        </div>
+        <div className="space-y-8 rounded-lg border border-border bg-muted/20 px-6 py-6">
+          <div className="space-y-2">
+            <PrismTypography role="overline" size="small" className="block">
+              Single button
+            </PrismTypography>
+            <div
+              className={`flex min-h-12 flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
+            >
+              <PrismButton
+                key={`preview-${animationKey}`}
+                color={previewColor}
+                label={CUSTOMIZER_PREVIEW_SAMPLE.label}
+                icon={CUSTOMIZER_PREVIEW_SAMPLE.icon}
+                asChild
+                {...previewSpreadProps}
+                segmentPosition={
+                  prismSpreadProps.gap === "none" ? "first" : undefined
+                }
+              />
             </div>
-            <div className="mt-10 mb-8">
-              <PrismTypography
-                role="overline"
-                size="small"
-                className="mb-2 block"
-              >
-                Sample
-              </PrismTypography>
-              <div
-                className={`flex flex-wrap items-center ${selected.has("gapNone") ? "gap-0" : "gap-3"}`}
-              >
-                <PrismButton
-                  key={`preview-${animationKey}`}
-                  color={previewColor}
-                  label={CUSTOMIZER_PREVIEW_SAMPLE.label}
-                  icon={CUSTOMIZER_PREVIEW_SAMPLE.icon}
-                  asChild
-                  {...previewSpreadProps}
-                  segmentPosition={
-                    prismSpreadProps.gap === "none" ? "first" : undefined
-                  }
-                />
-              </div>
-            </div>
-            <div className="mt-10 mb-2 flex flex-wrap items-center gap-2">
+          </div>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               <PrismTypography role="overline" size="small" className="mr-auto">
-                Group Buttons
+                Group buttons
               </PrismTypography>
               <PrismButton
                 type="button"
@@ -788,14 +746,8 @@ function ButtonCustomizerSection() {
                   key={`${swatchPrimary}-${animationKey}`}
                   color={
                     groupColorMode === "unified"
-                      ? applyCustomizerGradientDirection(
-                          { ...pickedColor },
-                          gradientDirection
-                        )
-                      : applyCustomizerGradientDirection(
-                          { palette: "default", swatchPrimary },
-                          gradientDirection
-                        )
+                      ? { ...pickedColor }
+                      : { palette: "default", swatchPrimary }
                   }
                   label={label}
                   icon={icon}
@@ -813,26 +765,26 @@ function ButtonCustomizerSection() {
                 />
               ))}
             </div>
-            <section className="mt-12 pt-6 space-y-4">
-              <PrismTypography role="title" size="large" font="sans" as="h2">
-                Code sample
-              </PrismTypography>
-              <PrismCodeBlock
-                className="font-mono"
-                mode="card"
-                language="tsx"
-                disableLineNumbers={false}
-                disableLanguageLabel={false}
-                color={{ palette: "default", swatchPrimary: "grey" }}
-              >
-                {currentSampleSnippet}
-              </PrismCodeBlock>
-            </section>
-            <hr className="mt-6 border-border" />
           </div>
         </div>
-      </div>
-    </>
+      </section>
+
+      <section className="space-y-4">
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          Code sample
+        </PrismTypography>
+        <PrismCodeBlock
+          className="font-mono"
+          mode="card"
+          language="tsx"
+          disableLineNumbers={false}
+          disableLanguageLabel={false}
+          color={{ palette: "default", swatchPrimary: "grey" }}
+        >
+          {currentSampleSnippet}
+        </PrismCodeBlock>
+      </section>
+    </div>
   );
 }
 
@@ -1055,54 +1007,6 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title="gradient: derived (horizontal)">
-        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
-          <PrismButton
-            key={swatchPrimary}
-            color={{
-              palette: "default",
-              swatchPrimary,
-              gradient: { direction: "horizontal" },
-            }}
-            label={label}
-            variant="icon"
-            icon={icon}
-            asChild
-          />
-        ))}
-      </Row>
-      <Row title="gradient: derived (vertical)">
-        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
-          <PrismButton
-            key={swatchPrimary}
-            color={{
-              palette: "default",
-              swatchPrimary,
-              gradient: { direction: "vertical" },
-            }}
-            label={label}
-            variant="icon"
-            icon={icon}
-            asChild
-          />
-        ))}
-      </Row>
-      <Row title="gradient: derived (angled)">
-        {ACTION_BUTTONS.map(({ swatchPrimary, label, icon }) => (
-          <PrismButton
-            key={swatchPrimary}
-            color={{
-              palette: "default",
-              swatchPrimary,
-              gradient: { direction: "angled" },
-            }}
-            label={label}
-            variant="icon"
-            icon={icon}
-            asChild
-          />
-        ))}
-      </Row>
       <Row title='spacing ladder (same names as PrismDivider: tight → airy)'>
         {(
           [
@@ -1310,9 +1214,9 @@ function ButtonVariantsMatrix({
 /** Preset controls plus full variant matrix for PrismButton (admin + `/sheets/buttons`). */
 export function PrismButtonDemo() {
   return (
-    <>
+    <div className="space-y-10">
       <ButtonCustomizerSection />
       <ButtonVariantsMatrix />
-    </>
+    </div>
   );
 }

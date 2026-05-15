@@ -169,7 +169,7 @@ export function AdminPageShell({
                           shade: 700,
                         },
                       }}
-                      fontWeight="heavy"
+                      fontWeight={900}
                       textWrap="wrap"
                     >
                       {title}

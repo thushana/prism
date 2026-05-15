@@ -21,6 +21,7 @@ import { LayoutGrid } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
 import { createPortal } from "react-dom";
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
 
 /** Checkbox keys for the icon admin demo (mutually exclusive within each group). */
 type IconDemoAppearanceKey =
@@ -435,9 +436,9 @@ export function PrismIconDemo(): JSX.Element {
                     {...iconProps}
                     color={iconColor}
                   />
-                  <PrismTypography role="label" size="regular" font="mono">
+                  <PrismPlaygroundOptionLabel active>
                     {lastSelectedIconName}
-                  </PrismTypography>
+                  </PrismPlaygroundOptionLabel>
                 </div>
               ) : null}
               <PrismIconPicker
@@ -486,14 +487,11 @@ export function PrismIconDemo(): JSX.Element {
                         }
                         className="rounded border-input"
                       />
-                      <PrismTypography
-                        role="label"
-                        size="regular"
-                        color={{ semanticText: "muted" }}
-                        font="mono"
+                      <PrismPlaygroundOptionLabel
+                        active={selectedAppearanceKeys.has(appearanceKey)}
                       >
                         {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
-                      </PrismTypography>
+                      </PrismPlaygroundOptionLabel>
                     </label>
                   ))}
                 </div>
@@ -556,16 +554,13 @@ export function PrismIconDemo(): JSX.Element {
             className="w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Filter Icon Options grid"
           />
-          <PrismTypography
-            role="label"
-            size="regular"
-            color={{ semanticText: "muted" }}
+          <PrismPlaygroundOptionLabel
+            active={false}
             className="block uppercase"
-            font="mono"
           >
             Showing {filteredGridIconNames.length.toLocaleString()} of{" "}
             {PRISM_MATERIAL_ICONS_ROUND_NAMES.length.toLocaleString()}
-          </PrismTypography>
+          </PrismPlaygroundOptionLabel>
           <div className="space-y-10">
             {iconNameSections.map(
               ({ categorySortKey, categorySectionHeading, iconNameList }) => (

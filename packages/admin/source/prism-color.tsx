@@ -15,6 +15,7 @@ import {
 import { cn } from "@utilities";
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
 
 function colorLoopChips(
   palette: PrismPaletteId,
@@ -174,14 +175,9 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setShowColorCode((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={showColorCode}>
               showColorCode
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -190,14 +186,9 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setShowCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={showCopyButton}>
               showCopyButton
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -206,14 +197,9 @@ export function PrismColorDemo(): JSX.Element {
               onChange={() => setDisabled((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={disabled}>
               disabled
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
         </div>
         <div key={palette} className="relative min-w-0">
