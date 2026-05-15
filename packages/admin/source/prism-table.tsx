@@ -3,6 +3,8 @@
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
 
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
+
 import {
   PrismCodeBlock,
   PrismColorPicker,
@@ -471,19 +473,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setBodyTextTone(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        bodyTextTone === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={bodyTextTone === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -518,19 +513,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setHeaderRowSurface(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        headerRowSurface === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={headerRowSurface === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -554,19 +542,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setHeaderRowLabelTone(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        headerRowLabelTone === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={headerRowLabelTone === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -601,19 +582,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setRowLineWeight(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        rowLineWeight === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={rowLineWeight === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -637,19 +611,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setRowLineTone(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        rowLineTone === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={rowLineTone === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -673,19 +640,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setRowLineVisual(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        rowLineVisual === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={rowLineVisual === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -709,19 +669,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setRowShading(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        rowShading === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={rowShading === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -750,21 +703,14 @@ export function PrismTableDemo(): JSX.Element {
                       disabled={shadeStrengthDisabled}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        shadeStrengthDisabled
-                          ? { semanticText: "muted" }
-                          : rowShadeStrength === value
-                            ? undefined
-                            : { semanticText: "muted" }
+                    <PrismPlaygroundOptionLabel
+                      active={
+                        !shadeStrengthDisabled && rowShadeStrength === value
                       }
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -801,19 +747,12 @@ export function PrismTableDemo(): JSX.Element {
                       }
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        columnLineWeight === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={columnLineWeight === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -837,19 +776,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setColumnLineTone(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        columnLineTone === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={columnLineTone === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -873,19 +805,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setColumnWidthStrategy(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        columnWidthStrategy === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={columnWidthStrategy === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
                 {columnWidthStrategy === "stretchRemainder" ? (
@@ -932,19 +857,12 @@ export function PrismTableDemo(): JSX.Element {
                       }
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        tableBorderWeight === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={tableBorderWeight === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -969,21 +887,15 @@ export function PrismTableDemo(): JSX.Element {
                       disabled={tableBorderWeight === "none"}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        tableBorderWeight === "none"
-                          ? { semanticText: "muted" }
-                          : tableBorderTone === value
-                            ? undefined
-                            : { semanticText: "muted" }
+                    <PrismPlaygroundOptionLabel
+                      active={
+                        tableBorderWeight !== "none" &&
+                        tableBorderTone === value
                       }
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>
@@ -1007,19 +919,12 @@ export function PrismTableDemo(): JSX.Element {
                       onChange={() => setTableCorners(value)}
                       className="border-input"
                     />
-                    <PrismTypography
-                      role="label"
-                      size="regular"
-                      font="mono"
-                      color={
-                        tableCorners === value
-                          ? undefined
-                          : { semanticText: "muted" }
-                      }
+                    <PrismPlaygroundOptionLabel
+                      active={tableCorners === value}
                       className="wrap-break-word"
                     >
                       {label}
-                    </PrismTypography>
+                    </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
               </fieldset>

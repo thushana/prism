@@ -9,6 +9,7 @@ import {
   PrismTypography,
 } from "@ui";
 import { useLayoutEffect, useMemo, useState } from "react";
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
 
 const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "(none — plain)" },
@@ -358,14 +359,9 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLineNumbers((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={disableLineNumbers}>
               disableLineNumbers
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -374,14 +370,9 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableLanguageLabel((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={disableLanguageLabel}>
               disableLanguageLabel
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -390,14 +381,9 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
               onChange={() => setDisableCopyButton((v) => !v)}
               className="rounded border-input"
             />
-            <PrismTypography
-              role="label"
-              size="regular"
-              color={{ semanticText: "muted" }}
-              font="mono"
-            >
+            <PrismPlaygroundOptionLabel active={disableCopyButton}>
               disableCopyButton
-            </PrismTypography>
+            </PrismPlaygroundOptionLabel>
           </label>
         </div>
 

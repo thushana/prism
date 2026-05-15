@@ -20,6 +20,7 @@ import type {
   PrismTypographySize,
 } from "@ui";
 import { RefreshCw } from "lucide-react";
+import { PrismPlaygroundOptionLabel } from "./playground-option-label";
 
 interface TypefaceOption {
   id: "satoshi" | "sentient" | "zodiak" | "geistMono";
@@ -910,14 +911,11 @@ export function TypeScalePreview({
                         onChange={() => toggleOption(key)}
                         className="rounded border-input"
                       />
-                      <PrismTypography
-                        role="label"
-                        size="regular"
-                        color={{ semanticText: "muted" }}
-                        font="mono"
+                      <PrismPlaygroundOptionLabel
+                        active={selectedOptions.has(key)}
                       >
                         {TYPOGRAPHY_OPTION_LABEL[key]}
-                      </PrismTypography>
+                      </PrismPlaygroundOptionLabel>
                     </label>
                   ))}
                 </div>

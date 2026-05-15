@@ -13,6 +13,10 @@ import {
   type PrismSize,
 } from "@ui";
 import { useMemo, useState } from "react";
+import {
+  PrismPlaygroundOptionColumn,
+  PrismPlaygroundOptionLabel,
+} from "./playground-option-label";
 
 type DividerOptionKey =
   | "lwLight"
@@ -302,7 +306,9 @@ export function PrismDividerDemo(): React.JSX.Element {
   return (
     <>
       <div className="mb-8">
-        <h3 className="mb-2">Customize</h3>
+        <PrismTypography role="title" size="large" font="sans" as="h2">
+          Customize
+        </PrismTypography>
         <PrismTypography
           role="body"
           size="regular"
@@ -321,10 +327,7 @@ export function PrismDividerDemo(): React.JSX.Element {
           <div>
             <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
               {CUSTOMIZER_COLUMNS.map(({ heading, keys }) => (
-                <div key={heading} className="space-y-1">
-                  <PrismTypography role="overline" size="small">
-                    {heading}
-                  </PrismTypography>
+                <PrismPlaygroundOptionColumn key={heading} title={heading}>
                   {keys.map((key) => (
                     <label
                       key={key}
@@ -336,17 +339,12 @@ export function PrismDividerDemo(): React.JSX.Element {
                         onChange={() => toggle(key)}
                         className="rounded border-input"
                       />
-                      <PrismTypography
-                        role="label"
-                        size="regular"
-                        color={{ semanticText: "muted" }}
-                        font="mono"
-                      >
+                      <PrismPlaygroundOptionLabel active={selected.has(key)}>
                         {OPTION_PROP_LABEL[key]}
-                      </PrismTypography>
+                      </PrismPlaygroundOptionLabel>
                     </label>
                   ))}
-                </div>
+                </PrismPlaygroundOptionColumn>
               ))}
             </div>
 
