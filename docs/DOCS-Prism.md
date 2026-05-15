@@ -50,7 +50,7 @@ Use **`-Prism`** vs **`-{Project}`** so ownership is obvious at a glance and lin
     ├── DOCS-Prism.md                      # This file (Prism submodule / template)
     ├── CONVENTIONS-{Project}.md           # Naming, URLs, quality commands, component hierarchy
     ├── ADMIN-Prism.md                     # Admin section pattern (auth, shell, routes)
-    ├── PLAYGROUNDS-Prism.md               # Prism hub demo layout (why / what; link to admin demos)
+    ├── PLAYGROUNDS-Prism.md               # Prism hub demo page structure (spine, staging); token tables in UI-Prism.md
     ├── DATABASE-{Project}.md              # Drizzle / DB mental model (Prism)
     ├── DEPLOYMENT-{Project}.md            # Vercel / env (Prism)
     ├── FEATUREFLAGS-{Project}.md          # Feature flags package (Prism)

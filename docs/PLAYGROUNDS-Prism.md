@@ -3,7 +3,7 @@
 **Related docs**
 
 - **[ADMIN-Prism.md](./ADMIN-Prism.md)** — auth, `AdminPageShell`, `/admin` route tree, and how hub pages gate with `requireAdminPage`.
-- **[UI-Prism.md](./UI-Prism.md)** — deliberate `@ui` usage reference when you need prop-level examples (keep long snippets there or in JSDoc, not here).
+- **[UI-Prism.md](./UI-Prism.md)** — deliberate `@ui` usage reference, prop-level examples, and **canonical token tables** (size, spacing, stroke weights, etc.).
 
 ## What a “playground” is
 
@@ -38,76 +38,9 @@ Intent only—**exact classes and prop lists live in** `prism/packages/admin/sou
 
 ## Common control vocabulary (cross-demo settings)
 
-Playgrounds should reuse the **same column or group titles** for the same prop meaning across demos. 
+Playgrounds should reuse the **same column or group titles** for the same prop meaning across demos.
 
-### Size
-
-`prism/packages/ui/source/prism-size.ts`
-
-
-| Option     | Description                                           |
-| ---------- | ----------------------------------------------------- |
-| `small`    | Dense UI; smallest named step                         |
-| `regular`  | Default balance for controls and icons                |
-| `large`    | Step up for emphasis without jumping to display scale |
-| `huge`     | Prominent controls and larger glyphs                  |
-| `gigantic` | Largest named step on the ladder                      |
-
-
-### Stroke weight (line + icon + font)
-
-Same five names for **divider / table rule thickness** (`lineWeight`), **Material symbol stroke** (`PrismIcon` `weight`), and **`PrismTypography` `fontWeight`** presets (`PrismTypographyFontWeightPreset` = `PrismIconWeightName`). Numeric column is the shared ladder (symbol axis / CSS `font-weight`).
-
-
-| Option    | Line (rule / border bar) `PrismDividerLineWeight` | Icon (symbol stroke) | Font (`fontWeight`) |
-| --------- | ------------------------------------------------- | -------------------- | --------------------- |
-| `light`   | `h-px`—finest bar                                 | Axis **100**         | **100**               |
-| `thin`    | `h-0.5`; divider default                          | Axis **200**         | **200**               |
-| `regular` | `h-1`                                             | Axis **400** (default) | **400** (default)   |
-| `bold`    | `h-1.5`                                           | Axis **600**         | **600**               |
-| `heavy`   | `h-2`—heaviest bar                                | Axis **700**         | **700**               |
-
-
-### Spacing
-
-Shared type **`PrismSpacing`** (`prism/packages/ui/source/prism-spacing.ts`).
-
-
-| Option        | `PrismButton`        | `PrismDivider`             |
-| ------------- | -------------------- | -------------------------- |
-| `tight`       | Smallest inner pad.  | `py-0` around the track.   |
-| `compact`     | Step up from tight.  | `py-3`.                    |
-| `regular`     | Baseline pad recipe. | `py-6`.                    |
-| `comfortable` | Roomier pad.         | `py-10` (divider default). |
-| `airy`        | Largest pad step.    | `py-14`.                   |
-
-
-### Alignment
-
-
-| Option    | Description                                 |
-| --------- | ------------------------------------------- |
-| `left`    | Start-aligned text block.                   |
-| `center`  | Centered text block.                        |
-| `right`   | End-aligned text block.                     |
-| `justify` | Justified text (last line follows browser). |
-
-
-### Tone
-
-
-| Option    | Description                                                                     |
-| --------- | ------------------------------------------------------------------------------- |
-| `white`   | High-key stroke (e.g. rules on tinted or dark surfaces).                        |
-| `muted`   | **100** tint of the picker family (softer than **`default`**).                  |
-| `default` | Active **`prismColor`** swatch + shade (the color from **`PrismColorPicker`**). |
-| `rich`    | Saturated accent stroke (theme **`primary`**).                                  |
-| `black`   | Strong dark stroke (e.g. emphasis on light surfaces).                           |
-
-
-### Type ramp captions
-
-Read-only copy: **`role · size`** or **`role · size · font`** (middle dots). See `TYPE_SCALE_ITEMS` / `INLINE_TYPE_DEMOS` in admin source—not slash-separated `role/size`.
+**Size, stroke, spacing, alignment, tone, and type-ramp label rules** are defined once in **[UI-Prism.md → Shared tokens and control vocabulary](./UI-Prism.md#shared-tokens-and-control-vocabulary)**. Edit those tables only there so `@ui`, admin demos, and docs stay aligned.
 
 ## Constraint (non-negotiable)
 
@@ -127,4 +60,4 @@ Read-only copy: **`role · size`** or **`role · size · font`** (middle dots). 
 
 ## When to update this doc
 
-Update when the **playground contract** changes (e.g. we rename the spine, change the mandatory Demo shape, move the hub route, or add/rename **shared** control vocabulary used across multiple demos). Do **not** update for every new toggle on a single demo—that belongs in code and JSDoc per [DOCS-Prism.md](./DOCS-Prism.md).
+Update when the **playground contract** changes (e.g. we rename the spine, change the mandatory Demo shape, move the hub route, or change **page-level** layout rules). **Renaming a shared token** (size step, spacing word, line weight, …) is a **[UI-Prism.md](./UI-Prism.md)** change first, then align demo labels in code. Do **not** update for every new toggle on a single demo—that belongs in code and JSDoc per [DOCS-Prism.md](./DOCS-Prism.md).
