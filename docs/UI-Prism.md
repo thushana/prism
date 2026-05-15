@@ -78,7 +78,7 @@ import { PrismPathBar } from "@ui";
 
 ### PrismButton
 
-The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: **`color`** as **`PartialPrismColorSpec`** (palette + **`swatchPrimary`** in kebab-case for the default Material ring, optional **`gradient`** with direction and optional swatch list), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`**, **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `medium` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
+The shared **`PrismButton`** (`packages/ui/components/prism-button.tsx`) is the **only** first-class button in `@ui`: **`color`** as **`PartialPrismColorSpec`** (palette + **`swatchPrimary`** in kebab-case for the default Material ring, optional **`gradient`** with direction and optional swatch list), Lucide icons, optional GSAP motion, and variant axes **`shape`**, **`line`**, **`spacing`** (**`PrismSpacing`**: `tight` \| `compact` \| `regular` \| `comfortable` \| `airy`—shared with **`PrismDivider`**; see [PLAYGROUNDS-Prism.md](./PLAYGROUNDS-Prism.md)), **`gap`**, **`textCase`**, **`paint`**, plus **`segmentPosition`** for segmented rows. Motion opt-outs: **`disableMotion`**, **`disableGrow`**, **`disableColorChange`**, **`disableIconMotion`**. It requires **`color`** and **`label`**. Sizes use shared **`PrismSize`**: `small` \| `regular` \| `large` \| `huge` \| `gigantic`. Use **`asChild`** (Radix `Slot`) when the styled root must not be a native `<button>`. For thin native actions use `<button className="…">` with Tailwind tokens, or wrap with Radix/shadcn locally—there is no separate generic `Button` export.
 
 Admin demo: **`/admin/prism/components/prism-button`** — **`PrismButtonDemo`** from **`@admin`** (packages/admin `prism-button.tsx`).
 
@@ -168,7 +168,7 @@ import {
 
 ### PrismDivider
 
-Horizontal section rule for **flex-safe** layouts (full-width bar `div`, not `<hr>`, so it behaves under **`PrismLayoutMain`** / `.content-main`). **Variant axes** (see [Prop Ergonomics](#prop-ergonomics--variant-axes)): **`lineWeight`**, **`tone`**, **`spacing`**; **`roundedBar`** is a boolean (pill bar when `true`). Semantic line colour uses **`tone`** (not **`color`** / `ColorName`). Optional **`lineClassName`** / **`lineStyle`** for gradients or overrides. Center content: **`emblem`** (React node) wins, else **`letter`** (first character via **`PrismTypography`**), else **`iconName`** with **`iconSize`**, **`iconWeight`**, **`iconFill`** matching **`PrismIcon`**. **`surfaceClassName`** defaults to **`bg-background`** so the emblem disc visually cuts the line—use **`bg-card`** when the parent surface is a card.
+Horizontal section rule for **flex-safe** layouts (full-width bar `div`, not `<hr>`, so it behaves under **`PrismLayoutMain`** / `.content-main`). **Variant axes** (see [Prop Ergonomics](#prop-ergonomics--variant-axes)): **`lineWeight`**, **`tone`** (`white` \| `muted` \| `default` \| `rich` \| `black`), **`spacing`** (**`PrismSpacing`**); optional **`prismColor`** tints **`default`** / **`muted`** bars like table lines. **`roundedBar`** is a boolean (pill bar when `true`). Semantic line color uses **`tone`** (not **`color`** / `ColorName`). Optional **`lineClassName`** / **`lineStyle`** for gradients or overrides. Center content: **`emblem`** (React node) wins, else **`letter`** (first character via **`PrismTypography`**), else **`iconName`** with **`iconSize`**, **`iconWeight`**, **`iconFill`** matching **`PrismIcon`**. **`surfaceClassName`** defaults to **`bg-background`** so the emblem disc visually cuts the line—use **`bg-card`** when the parent surface is a card.
 
 **Import:**
 
@@ -181,8 +181,8 @@ import { PrismDivider } from "@ui";
 ```tsx
 <PrismDivider spacing="comfortable" lineWeight="thin" tone="default" />
 <PrismDivider
-  lineWeight="medium"
-  tone="primary"
+  lineWeight="regular"
+  tone="rich"
   roundedBar
   letter="G"
 />
@@ -194,7 +194,7 @@ Admin demo: **`/admin/prism/components/prism-divider`** — **`PrismDividerDemo`
 
 ### PrismCodeBlock
 
-Read-only code panel: language chip **inside** top-right, copy **inside** bottom-right (optional via **`disableCopyButton`**), optional line-number gutter, and syntax hint coloring for seven languages. Pass a Material **family name** (no shade) as **`color`** (e.g. **`purple`**). Keywords, tags, and braces use that family’s shade ramp; **string** uses the ring family at **+1**, **property** at **−1**, **number** at **−2** (e.g. **purple → deep-purple, pink, red**) so accents sit as **tonal neighbours** on the ordered hue list. Every color resolves to **`var(--color-{family}-{n})`** in **`colors.css`**. When **`mode="card"`**, the panel wash uses the same family at **50** (light, with a half-`white` veil) and **900** (dark). **`mode="transparent"`** skips the panel fill. Unknown family strings fall back to **`blue`**.
+Read-only code panel: language chip **inside** top-right, copy **inside** bottom-right (optional via **`disableCopyButton`**), optional line-number gutter, and syntax hint coloring for seven languages. Pass a Material **family name** (no shade) as **`color`** (e.g. **`purple`**). Keywords, tags, and braces use that family’s shade ramp; **string** uses the ring family at **+1**, **property** at **−1**, **number** at **−2** (e.g. **purple → deep-purple, pink, red**) so accents sit as **tonal neighbors** on the ordered hue list. Every color resolves to **`var(--color-{family}-{n})`** in **`colors.css`**. When **`mode="card"`**, the panel wash uses the same family at **50** (light, with a half-`white` veil) and **900** (dark). **`mode="transparent"`** skips the panel fill. Unknown family strings fall back to **`blue`**.
 
 **`children: string` is a deliberate constraint** — content between tags only (template literal or variable). This keeps the data model unambiguous: the string is both what is rendered and what is copied to the clipboard.
 
@@ -275,7 +275,7 @@ import { PrismCodeBlock } from "@ui";
 | `disableCopyButton`    | `boolean`                   | `false`  | When **`true`**, the copy control is not rendered                                                                                                                                                                                                                                       |
 | `className`            | `string`                    | —        | Root wrapper                                                                                                                                                                                                                                                                            |
 
-**Syntax token → color roles** (accent families are **ring neighbours**: +1 / −1 / −2 from **`color`**; comments and punctuation use fixed neutrals):
+**Syntax token → color roles** (accent families are **ring neighbors**: +1 / −1 / −2 from **`color`**; comments and punctuation use fixed neutrals):
 
 | Token category       | Role                          | Used for                         |
 | -------------------- | ----------------------------- | -------------------------------- |
@@ -301,7 +301,7 @@ Admin demo: **`/admin/prism/components/prism-code-block`** — **`PrismCodeBlock
 
 ### PrismIcon
 
-Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same **`PrismSize`** named steps as **PrismButton** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`; maps to pixel heights in the component, with **opsz** clamped 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"light"` \| `"thin"` \| `"regular"` \| `"bold"` \| `"heavy"` (named steps map to **wght** 100 / 200 / 400 / 600 / 700) or any raw **wght** integer **`100`–`700`** — use a number when you need a step not covered by the five names (for example **300** between thin and regular). **`fill`** is `"on"` \| `"off"` (FILL axis). The **GRAD** axis is fixed at `0` (no `grade` prop).
+Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same **`PrismSize`** named steps as **PrismButton** (`small` \| `regular` \| `large` \| `huge` \| `gigantic`; maps to pixel heights in the component, with **opsz** clamped 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"light"` \| `"thin"` \| `"regular"` \| `"bold"` \| `"heavy"` (named steps map to **wght** 100 / 200 / 400 / 600 / 700) or any raw **wght** integer **`100`–`700`** — use a number when you need a step not covered by the five names (for example **300** between thin and regular). **`fill`** is `"on"` \| `"off"` (FILL axis). The **GRAD** axis is fixed at `0` (no `grade` prop).
 
 **Import:**
 
@@ -314,7 +314,7 @@ import { PrismIcon } from "@ui";
 **Example:**
 
 ```tsx
-<PrismIcon name="home" size="medium" weight="regular" fill="off" />
+<PrismIcon name="home" size="regular" weight="regular" fill="off" />
 <PrismIcon
   name="settings"
   size="large"
@@ -322,7 +322,7 @@ import { PrismIcon } from "@ui";
   fill="off"
   color={{ swatchPrimary: "indigo", shade: 500 }}
 />
-<PrismIcon name="favorite" size="medium" weight="regular" fill="on" />
+<PrismIcon name="favorite" size="regular" weight="regular" fill="on" />
 <PrismIcon name="star" size="large" weight="light" fill="off" />
 ```
 
@@ -451,7 +451,7 @@ Use on any element to set `font-family` to the bound Prism variable.
 
 **Type scale classes** (implementation layer — prefer the component below in app code):
 
-- `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `small` | `medium` | `large` | `huge` | `gigantic` (30 rules total).
+- `.typography-{role}-{size}` for each combination of `role` ∈ `display` | `headline` | `title` | `body` | `label` | `overline` and `size` ∈ `small` | `regular` | `large` | `huge` | `gigantic` (30 rules total).
 
 ### PrismTypography component
 
@@ -462,11 +462,11 @@ Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc 
 **Props (`PrismTypographyProps`):**
 
 - `role` (required): `display` | `headline` | `title` | `body` | `label` | `overline`
-- `size` (optional): `small` | `medium` | `large` | `huge` | `gigantic` — defaults to `medium`
-- `color` (optional): **`PartialPrismColorSpec`** — resolved by **`prismColorSpecToTypographyPaint`** in `prism-color.ts` (semantic `text-*` classes, solid hex, or gradient). Omitted → inherit surrounding text colour
+- `size` (optional): `small` | `regular` | `large` | `huge` | `gigantic` — defaults to `regular`
+- `color` (optional): **`PartialPrismColorSpec`** — resolved by **`prismColorSpecToTypographyPaint`** in `prism-color.ts` (semantic `text-*` classes, solid hex, or gradient). Omitted → inherit surrounding text color
 - `font` (optional): `sans` (default) | `serif` | `mono` — maps to `.font-serif` / `.font-mono`
 - `fontFamily` (optional): inline CSS stack; when set, `font` classes are not applied
-- `fontWeight` (optional): `thin` | `bold` | `black` (preset weights) or a numeric CSS weight
+- `fontWeight` (optional): named presets `light` \| `thin` \| `regular` \| `bold` \| `heavy` (same ladder as icon / line weight → CSS **100 / 200 / 400 / 600 / 700**) or any numeric CSS `font-weight`
 - `italic` (optional): boolean — toggles italic style on the text axis
 - `textTransform` (optional): CSS values `uppercase` \| `capitalize` \| `lowercase`, or **`sentenceCase`** — for plain string / number **`children`**, formats identifiers with **`prismTypographySentenceCaseFromIdentifier`** (camelCase → sentence case); use with **`role="overline"`** so built-in uppercase yields ALL CAPS labels from names like `textAlign`
 - `textAlign` (optional): `left` | `center` | `right` | `justify`
@@ -482,7 +482,7 @@ Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc 
 import { PrismTypography } from "@ui";
 
 <PrismTypography role="headline" size="large">Heading 1</PrismTypography>
-<PrismTypography role="body" size="medium" color={{ semanticText: "muted" }}>
+<PrismTypography role="body" size="regular" color={{ semanticText: "muted" }}>
   Body text
 </PrismTypography>
 <PrismTypography role="overline" size="small" color={{ semanticText: "muted" }}>
@@ -718,7 +718,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 - **Boolean sprawl:** Mutually exclusive choices were modeled as parallel flags; callers could express invalid combinations.
 - **Inconsistent negation:** Mix of `noXxx`, `XxxNo`, and positive animation flags. Prism standardizes motion opt-outs on **`disableXxx`** (MUI-style).
 - **Name collisions (resolved):** Native **`color`** is omitted from underlying DOM props so **`PrismButton`** can take **`color: PartialPrismColorSpec`** without clashing with HTML. **`PrismTypography`** uses the same **`PartialPrismColorSpec`** shape (semantic roles, palette swatches, gradients), aligned with **`PrismIcon`** / pickers.
-- **Fragmented size vocabulary:** One shared **`PrismSize`** (`small` \| `medium` \| `large` \| `huge` \| `gigantic`) applies to `PrismButton`, `PrismIcon` (named steps), and `PrismTypography` type scale. `normal` → `medium`; old `large2x` → `huge`. **`medium` stays size-only** — it does not appear on `PrismIcon` **`weight`** (avoids `size="medium" weight="medium"` confusion).
+- **Fragmented size vocabulary:** One shared **`PrismSize`** (`small` \| `regular` \| `large` \| `huge` \| `gigantic`) applies to `PrismButton`, `PrismIcon` (named steps), and `PrismTypography` type scale. Legacy `normal` → **`regular`**; old `large2x` → **`huge`**. **`PrismSize`** **`regular`** and **`PrismIcon` `weight`** **`regular`** reuse the same word but are **different props** (stepped layout size vs symbol stroke).
 
 ### Nine rules (cheat sheet)
 
@@ -727,7 +727,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 3. **Opt-outs:** `disableMotion`, `disableGrow`, … — not `noGrow` / `gapNo`.
 4. **camelCase** prop names; **lowercase or camelCase** literals per existing Prism tokens (`gap="none"`, `shape="rectangleRounded"`).
 5. **Shared `PrismSize`** everywhere Prism renders stepped scale (see `packages/ui/source/prism-size.ts`).
-6. **Colour spec:** Both **`PrismButton`** and **`PrismTypography`** use **`color`** as **`PartialPrismColorSpec`**. Buttons typically use **`palette`** + **`swatchPrimary`** (kebab-case families, e.g. `blue-grey`); typography often uses **`semanticText`** (`muted`, `foreground`, …) or the same swatch fields.
+6. **Color spec:** Both **`PrismButton`** and **`PrismTypography`** use **`color`** as **`PartialPrismColorSpec`**. Buttons typically use **`palette`** + **`swatchPrimary`** (kebab-case families, e.g. `blue-grey`); typography often uses **`semanticText`** (`muted`, `foreground`, …) or the same swatch fields.
 7. **Prefer `asChild`** (Radix `Slot`) over ad-hoc span wrappers for composition.
 8. **Admin + `@admin`** are the live JSX reference: `/admin/prism/components/[component]` drives **`PRISM_ADMIN_COMPONENT_REGISTRY`** (for example **`PrismButtonDemo`** in `packages/admin/source/prism-button.tsx`). Typography previews live in **`PrismTypographyDemo`** (`packages/admin/source/prism-typography.tsx`) — not on **`SystemSheetPage`** (the system sheet stays env/apps/components only).
 9. **Docs stay canonical:** this section + per-component headings below; do not duplicate long prose in side files.
@@ -762,7 +762,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 
 ```tsx
 // PrismTypography: PrismColor + animation axes
-<PrismTypography role="body" size="medium" color={{ semanticText: "muted" }} />
+<PrismTypography role="body" size="regular" color={{ semanticText: "muted" }} />
 <PrismTypography
   role="headline"
   size="large"
@@ -787,7 +787,8 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 | `typeUppercase` / `typeLowercase`    | `textCase="uppercase"` \| `"lowercase"`                              |
 | `noGrow`, `noMotion`, …              | `disableGrow`, `disableMotion`, …                                    |
 | `asSpan`                             | `asChild`                                                            |
-| `size="normal"`, `large2x`           | `size="medium"`, `size="huge"`                                       |
+| `size="normal"`, `large2x`           | `size="regular"`, `size="huge"`                                       |
+| PrismSize **`medium`** (legacy)      | **`regular`**                                                        |
 | `PrismIcon` `weight="medium"`        | `weight="regular"` or numeric                                        |
 | `explicitModeSegmentList`            | `mode="explicit"` + `segments`                                       |
 | `PrismColorPicker` `isDisabled`      | `disabled`                                                           |

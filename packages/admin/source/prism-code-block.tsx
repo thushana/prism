@@ -210,7 +210,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
         </PrismTypography>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           font="sans"
           className="mb-4 text-muted-foreground"
         >
@@ -218,7 +218,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
         </PrismTypography>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           font="sans"
           className="mb-4 text-muted-foreground"
         >
@@ -232,7 +232,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
           <span className="font-mono text-foreground">deep-purple</span>,{" "}
           <span className="font-mono text-foreground">pink</span>,{" "}
           <span className="font-mono text-foreground">red</span>) so accents
-          read as tonal neighbours, not a single flat hue. Every swatch resolves
+          read as tonal neighbors, not a single flat hue. Every swatch resolves
           to <span className="font-mono text-foreground">var(--color-…)</span>{" "}
           in <span className="font-mono text-foreground">colors.css</span>. Card
           wash uses the same family at 50 / 900. Copy uses the literal language
@@ -360,7 +360,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -376,7 +376,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -392,7 +392,7 @@ export function PrismCodeBlockDemo(): React.JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >

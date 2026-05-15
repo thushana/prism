@@ -62,7 +62,7 @@ export function getNotoEmojiCdnBase(): string {
 
 const PRISM_EMOJI_SIZE_NAME_TO_PX: Record<PrismSize, number> = {
   small: 20,
-  medium: 24,
+  regular: 24,
   large: 28,
   huge: 48,
   gigantic: 64,
@@ -186,7 +186,7 @@ function resolvePrismEmojiDisplayPx(
   size: PrismEmojiProps["size"] | undefined
 ): number {
   if (size === undefined || size === "inherit") {
-    return PRISM_EMOJI_SIZE_NAME_TO_PX.medium;
+    return PRISM_EMOJI_SIZE_NAME_TO_PX.regular;
   }
   if (typeof size === "number") return size;
   return PRISM_EMOJI_SIZE_NAME_TO_PX[size];
@@ -293,9 +293,9 @@ export interface PrismEmojiProps {
   animationMode?: PrismEmojiAnimationMode;
   /**
    * Same {@link PartialPrismColorSpec} shape as {@link PrismIconProps.color}.
-   * For Noto rasters: filter / mask painting. For `native`, solid colours use the same SVG
+   * For Noto rasters: filter / mask painting. For `native`, solid colors use the same SVG
    * `feColorMatrix` filter on the glyph; gradients use `background-clip: text` (platform-dependent
-   * for colour emoji).
+   * for color emoji).
    */
   color?: PartialPrismColorSpec;
   /**
@@ -341,7 +341,7 @@ type ResolvedColorPaint =
       rgb: [number, number, number];
       /**
        * Shade 800 of the same palette family — used as the duotone shadow stop so
-       * dark emoji areas map to a proper dark palette colour rather than muddy near-black.
+       * dark emoji areas map to a proper dark palette color rather than muddy near-black.
        */
       shadowRgb: [number, number, number] | null;
       /**
@@ -368,7 +368,7 @@ function resolveColorPaint(
 
 /**
  * Builds a single 4×5 SVG `feColorMatrix` values string that desaturates a
- * pixel then maps its luminance to the target colour — in one matrix pass.
+ * pixel then maps its luminance to the target color — in one matrix pass.
  * Alpha is preserved so transparent pixels (letterbox) stay transparent.
  */
 function buildColorizeMatrix(
@@ -379,7 +379,7 @@ function buildColorizeMatrix(
 ): string {
   const f = (n: number) => n.toFixed(5);
   if (desaturate) {
-    // Combined: luminance-weight channels then scale by target colour.
+    // Combined: luminance-weight channels then scale by target color.
     return [
       `${f(r * 0.2126)} ${f(r * 0.7152)} ${f(r * 0.0722)} 0 0`,
       `${f(g * 0.2126)} ${f(g * 0.7152)} ${f(g * 0.0722)} 0 0`,
@@ -732,12 +732,12 @@ export function PrismEmoji({
   }
 
   /**
-   * Color branch — solid colours use an inline SVG `feColorMatrix` filter applied
+   * Color branch — solid colors use an inline SVG `feColorMatrix` filter applied
    * directly to the `<img>`.  The matrix desaturates then remaps to the target hue,
    * operating per pixel including animated GIF frames.  Transparent letterbox pixels
    * remain transparent — no overlay, no backdrop, no mask needed.
    *
-   * Gradient colours fall back to a `mask-image` silhouette (PNG only; GIF without
+   * Gradient colors fall back to a `mask-image` silhouette (PNG only; GIF without
    * mask so animation is not clipped, accepting a small tint halo).
    */
   if (applyColor && colorPaint) {

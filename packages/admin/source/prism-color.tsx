@@ -148,7 +148,7 @@ export function PrismColorDemo(): JSX.Element {
         </PrismTypography>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           color={{ semanticText: "muted" }}
         >
           Use a single{" "}
@@ -176,7 +176,7 @@ export function PrismColorDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -192,7 +192,7 @@ export function PrismColorDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >
@@ -208,7 +208,7 @@ export function PrismColorDemo(): JSX.Element {
             />
             <PrismTypography
               role="label"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
               font="mono"
             >

@@ -22,7 +22,7 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
       swatchPrimary: "blue",
       gradient: { direction: "horizontal" },
     },
-    size: "medium",
+    size: "regular",
   },
   pillMonochrome: {
     variant: "icon",
@@ -30,7 +30,7 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
     iconOnly: true,
     paint: "monochrome",
     gap: "none",
-    size: "medium",
+    size: "regular",
   },
   boxButtons: {
     variant: "icon",
@@ -38,7 +38,7 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
     iconPosition: "left",
     shape: "rectangle",
     line: "none",
-    size: "medium",
+    size: "regular",
   },
   boxButtonsUnderlined: {
     variant: "icon",
@@ -46,7 +46,7 @@ const DEFAULT_PRISM_BUTTON_PRESETS: Record<string, PrismButtonPresetProps> = {
     iconPosition: "left",
     shape: "rectangle",
     line: "bottom",
-    size: "medium",
+    size: "regular",
   },
 };
 

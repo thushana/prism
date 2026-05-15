@@ -58,10 +58,10 @@ const DEMO_ROWS: DemoRow[] = [
   },
   {
     id: "c",
-    item: "Zinc · hairline",
+    item: "Zinc · light",
     category: "Column lines",
     qty: "400",
-    sortItem: "zinc · hairline",
+    sortItem: "zinc · light",
     sortCategory: "column lines",
     sortQty: "400",
   },
@@ -247,22 +247,24 @@ const AXIS_LINE_WEIGHT_OPTIONS: {
   label: string;
 }[] = [
   { value: "none", label: "none" },
-  { value: "hairline", label: "hairline" },
+  { value: "light", label: "light" },
   { value: "thin", label: "thin" },
-  { value: "medium", label: "medium" },
-  { value: "thick", label: "thick" },
+  { value: "regular", label: "regular" },
+  { value: "bold", label: "bold" },
+  { value: "heavy", label: "heavy" },
 ];
 
 /** 0-based column index for `stretchRemainder` in this demo (last column in the sample table). */
 const DEMO_STRETCH_COLUMN_INDEX = 2;
 
-/** Playground labels: `color` → API `swatch`, `monotone` → `default` (neutral rule). */
+/** Playground order: shared tone ladder; `swatch` = table-only palette line. */
 const PLAYGROUND_LINE_TONES: { value: PrismTableLineTone; label: string }[] = [
-  { value: "swatch", label: "color" },
-  { value: "muted", label: "muted" },
-  { value: "default", label: "monotone" },
-  { value: "primary", label: "primary" },
   { value: "white", label: "white" },
+  { value: "muted", label: "muted" },
+  { value: "default", label: "default" },
+  { value: "rich", label: "rich" },
+  { value: "black", label: "black" },
+  { value: "swatch", label: "swatch" },
 ];
 
 const ZEBRA_AXIS_OPTIONS: { value: "even" | "odd" | "off"; label: string }[] = [
@@ -337,10 +339,10 @@ export function PrismTableDemo(): JSX.Element {
   const [rowLineWeight, setRowLineWeight] =
     useState<PrismTableRowLineWeight>("thin");
   const [columnLineWeight, setColumnLineWeight] =
-    useState<PrismTableColumnLineWeight>("hairline");
-  const [rowLineTone, setRowLineTone] = useState<PrismTableLineTone>("swatch");
+    useState<PrismTableColumnLineWeight>("light");
+  const [rowLineTone, setRowLineTone] = useState<PrismTableLineTone>("default");
   const [columnLineTone, setColumnLineTone] =
-    useState<PrismTableLineTone>("swatch");
+    useState<PrismTableLineTone>("default");
   const [rowShading, setRowShading] = useState<"even" | "odd" | "off">("even");
   const [rowShadeStrength, setRowShadeStrength] = useState<"full" | "soft">(
     "soft"
@@ -356,7 +358,7 @@ export function PrismTableDemo(): JSX.Element {
   const [tableBorderWeight, setTableBorderWeight] =
     useState<PrismTableOuterLineWeight>("none");
   const [tableBorderTone, setTableBorderTone] =
-    useState<PrismTableLineTone>("swatch");
+    useState<PrismTableLineTone>("default");
   const [tableCorners, setTableCorners] =
     useState<PrismTableCornerStyle>("square");
   const [columnWidthStrategy, setColumnWidthStrategy] =
@@ -432,7 +434,7 @@ export function PrismTableDemo(): JSX.Element {
           <div className="min-w-0 space-y-3">
             <PrismTypography
               role="overline"
-              size="medium"
+              size="regular"
               className="block tracking-[0.14em] text-neutral-950 dark:text-neutral-50"
             >
               Color
@@ -471,7 +473,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         bodyTextTone === value
@@ -491,7 +493,7 @@ export function PrismTableDemo(): JSX.Element {
           <div className="min-w-0 space-y-3">
             <PrismTypography
               role="overline"
-              size="medium"
+              size="regular"
               className="block tracking-[0.14em] text-neutral-950 dark:text-neutral-50"
             >
               Header
@@ -518,7 +520,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         headerRowSurface === value
@@ -554,7 +556,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         headerRowLabelTone === value
@@ -574,7 +576,7 @@ export function PrismTableDemo(): JSX.Element {
           <div className="min-w-0 space-y-3">
             <PrismTypography
               role="overline"
-              size="medium"
+              size="regular"
               className="block tracking-[0.14em] text-neutral-950 dark:text-neutral-50"
             >
               Rows
@@ -601,7 +603,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         rowLineWeight === value
@@ -637,7 +639,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         rowLineTone === value
@@ -673,7 +675,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         rowLineVisual === value
@@ -709,7 +711,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         rowShading === value
@@ -750,7 +752,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         shadeStrengthDisabled
@@ -772,7 +774,7 @@ export function PrismTableDemo(): JSX.Element {
           <div className="min-w-0 space-y-3">
             <PrismTypography
               role="overline"
-              size="medium"
+              size="regular"
               className="block tracking-[0.14em] text-neutral-950 dark:text-neutral-50"
             >
               Columns
@@ -801,7 +803,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         columnLineWeight === value
@@ -837,7 +839,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         columnLineTone === value
@@ -873,7 +875,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         columnWidthStrategy === value
@@ -903,7 +905,7 @@ export function PrismTableDemo(): JSX.Element {
           <div className="min-w-0 space-y-3">
             <PrismTypography
               role="overline"
-              size="medium"
+              size="regular"
               className="block tracking-[0.14em] text-neutral-950 dark:text-neutral-50"
             >
               Table border
@@ -932,7 +934,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         tableBorderWeight === value
@@ -969,7 +971,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         tableBorderWeight === "none"
@@ -1007,7 +1009,7 @@ export function PrismTableDemo(): JSX.Element {
                     />
                     <PrismTypography
                       role="label"
-                      size="medium"
+                      size="regular"
                       font="mono"
                       color={
                         tableCorners === value

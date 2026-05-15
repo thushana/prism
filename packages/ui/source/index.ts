@@ -3,5 +3,7 @@ export * from "../styles";
 export * from "./polyline-decode";
 export * from "./prism-meta-chip";
 export * from "./prism-size";
+export * from "./prism-spacing";
+export * from "./prism-swatch-line";
 export * from "./prism-button-presets";
 export { gsap } from "gsap";

@@ -9,18 +9,22 @@ import {
   prismColorSpecToHex,
   prismSwatchContrastInk,
   PrismColor,
-  type NormalizedPrismColorSpec,
   type PartialPrismColorSpec,
   type PrismPaletteId,
 } from "../styles/prism-color";
+import {
+  resolvePrismSwatchLineCss,
+  resolvePrismSwatchLineMuted100Css,
+} from "../source/prism-swatch-line";
 import type { PrismDividerLineWeight, PrismDividerTone } from "./prism-divider";
 import { PrismTypography } from "./prism-typography";
 
 /**
- * Divider-aligned neutrals plus `swatch` (Prism hue via `--prism-table-line`) and `white`
- * for high-key rules on tinted surfaces.
+ * Line tones match {@link PrismDivider}: **`default`** = active **`prismColor`** swatch + shade;
+ * **`muted`** = that family’s **100** tint; **`rich`** = theme primary; **`white`** / **`black`** fixed.
+ * **`swatch`** is a legacy alias of **`default`** (same paint).
  */
-export type PrismTableLineTone = PrismDividerTone | "swatch" | "white";
+export type PrismTableLineTone = PrismDividerTone | "swatch";
 
 /** Column rules: `none` removes vertical borders between cells. */
 export type PrismTableColumnLineWeight = PrismDividerLineWeight | "none";
@@ -46,21 +50,23 @@ export type PrismTableLineVisual = "solid" | "gradient";
 const prismTableRowBorderVariants = cva("", {
   variants: {
     lineWeight: {
-      hairline: "border-b",
+      light: "border-b",
       thin: "border-b-2",
-      medium: "border-b-[3px]",
-      thick: "border-b-4",
+      regular: "border-b-[3px]",
+      bold: "border-b-4",
+      heavy: "border-b-[6px]",
     },
     lineTone: {
-      default: "border-foreground/18",
-      muted: "[border-bottom-color:var(--prism-table-muted-line)]",
-      primary: "border-primary",
-      swatch: "[border-bottom-color:var(--prism-table-line)]",
       white: "[border-bottom-color:rgb(255_255_255/0.92)]",
+      muted: "[border-bottom-color:var(--prism-table-muted-line)]",
+      default: "[border-bottom-color:var(--prism-table-line)]",
+      rich: "border-primary",
+      black: "[border-bottom-color:rgb(0_0_0/0.82)]",
+      swatch: "[border-bottom-color:var(--prism-table-line)]",
     },
   },
   defaultVariants: {
-    lineWeight: "hairline",
+    lineWeight: "light",
     lineTone: "default",
   },
 });
@@ -280,83 +286,27 @@ function buildColgroupPercents(
   return null;
 }
 
-const TAILWIND_SWATCH_SHADES = [
-  50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950,
-] as const;
-
-function snapToNearestTailwindShade(n: number): number {
-  let best: number = 500;
-  let bestDist = Infinity;
-  for (const s of TAILWIND_SWATCH_SHADES) {
-    const d = Math.abs(s - n);
-    if (d < bestDist) {
-      bestDist = d;
-      best = s;
-    }
-  }
-  return best;
-}
-
-/**
- * Resolved `--color-*` token for the active swatch + shade (picker), or Tailwind `PrismColor.var`.
- */
-function resolveSwatchBaseCss(
-  normalized: NormalizedPrismColorSpec
-): string | undefined {
-  const family = normalized.swatchPrimary;
-  if (!family) return undefined;
-  const { palette, shade } = normalized;
-
-  if (palette === "tailwind") {
-    const n =
-      typeof shade === "number" ? snapToNearestTailwindShade(shade) : 500;
-    return PrismColor.var({ palette: "tailwind", family, shade: n });
-  }
-
-  const shadeKey = typeof shade === "number" ? String(shade) : shade;
-  return `var(--color-${family}-${shadeKey})`;
-}
-
-function resolveSwatchLineCss(
-  prismColor: PartialPrismColorSpec
-): string | undefined {
-  try {
-    return resolveSwatchBaseCss(normalizePrismColorSpec(prismColor));
-  } catch {
-    return undefined;
-  }
-}
-
-/** Softer rule color derived from the active swatch (not neutral gray). */
-function resolveMutedSwatchLineCss(
-  prismColor: PartialPrismColorSpec
-): string | undefined {
-  try {
-    const normalized = normalizePrismColorSpec(prismColor);
-    const base = resolveSwatchBaseCss(normalized);
-    if (!base) return undefined;
-    return `color-mix(in srgb, ${base} 34%, var(--background))`;
-  } catch {
-    return undefined;
-  }
-}
-
 function resolveTableLineToneCss(
   tone: PrismTableLineTone | undefined,
   prismColor: PartialPrismColorSpec
 ): string {
   switch (tone ?? "default") {
     case "swatch":
-      return resolveSwatchLineCss(prismColor) ?? "hsl(var(--primary))";
+    case "default":
+      return (
+        resolvePrismSwatchLineCss(prismColor) ?? "hsl(var(--foreground) / 0.18)"
+      );
     case "muted":
       return (
-        resolveMutedSwatchLineCss(prismColor) ??
+        resolvePrismSwatchLineMuted100Css(prismColor) ??
         "hsl(var(--muted-foreground) / 0.45)"
       );
-    case "primary":
+    case "rich":
       return "hsl(var(--primary))";
     case "white":
       return "rgb(255 255 255 / 0.92)";
+    case "black":
+      return "rgb(0 0 0 / 0.82)";
     default:
       return "hsl(var(--foreground) / 0.18)";
   }
@@ -385,15 +335,17 @@ function lineWeightToPx(
   weight: PrismDividerLineWeight | PrismTableRowLineWeight | undefined
 ): number {
   if (weight === "none") return 0;
-  switch (weight ?? "hairline") {
-    case "hairline":
+  switch (weight ?? "light") {
+    case "light":
       return 1;
     case "thin":
       return 2;
-    case "medium":
+    case "regular":
       return 3;
-    case "thick":
+    case "bold":
       return 4;
+    case "heavy":
+      return 6;
     default:
       return 1;
   }
@@ -746,24 +698,11 @@ function PrismTable({
       columnWidthStrategy === "stretchRemainder") &&
     Boolean(colgroupPercents && colgroupPercents.length > 0);
 
-  const swatchLineCss =
-    rowLineTone === "swatch" ||
-    columnLineTone === "swatch" ||
-    (tableBorderWeight !== undefined &&
-      tableBorderWeight !== "none" &&
-      tableBorderTone === "swatch")
-      ? (resolveSwatchLineCss(prismColor) ?? "hsl(var(--primary))")
-      : undefined;
-
-  const mutedLineCss =
-    rowLineTone === "muted" ||
-    columnLineTone === "muted" ||
-    (tableBorderWeight !== undefined &&
-      tableBorderWeight !== "none" &&
-      tableBorderTone === "muted")
-      ? (resolveMutedSwatchLineCss(prismColor) ??
-        "hsl(var(--muted-foreground) / 0.45)")
-      : undefined;
+  const pickerTableLineCss =
+    resolvePrismSwatchLineCss(prismColor) ?? "hsl(var(--foreground) / 0.18)";
+  const pickerMuted100LineCss =
+    resolvePrismSwatchLineMuted100Css(prismColor) ??
+    "hsl(var(--muted-foreground) / 0.45)";
 
   const rowShadeBackgroundCss =
     rowShading !== undefined
@@ -851,16 +790,10 @@ function PrismTable({
 
   const rootStyle = React.useMemo((): React.CSSProperties => {
     const merged: React.CSSProperties = { ...(style ?? {}) };
-    if (swatchLineCss) {
-      Object.assign(merged, {
-        "--prism-table-line": swatchLineCss,
-      } as React.CSSProperties);
-    }
-    if (mutedLineCss) {
-      Object.assign(merged, {
-        "--prism-table-muted-line": mutedLineCss,
-      } as React.CSSProperties);
-    }
+    Object.assign(merged, {
+      "--prism-table-line": pickerTableLineCss,
+      "--prism-table-muted-line": pickerMuted100LineCss,
+    } as React.CSSProperties);
     const outerActive =
       tableBorderWeight !== undefined && tableBorderWeight !== "none";
     if (outerActive) {
@@ -874,8 +807,8 @@ function PrismTable({
     return merged;
   }, [
     style,
-    swatchLineCss,
-    mutedLineCss,
+    pickerTableLineCss,
+    pickerMuted100LineCss,
     prismColor,
     tableBorderWeight,
     tableBorderTone,
@@ -957,7 +890,7 @@ function PrismTableHeader({
   } else if (table.rowLineVisual === "gradient" && table.rowLineGradientCss) {
     headerBottomClassName = "";
     const bw = lineWeightToPx(
-      (table.rowLineWeight ?? "hairline") as PrismDividerLineWeight
+      (table.rowLineWeight ?? "light") as PrismDividerLineWeight
     );
     Object.assign(mergedStyle, {
       backgroundImage: table.rowLineGradientCss,
@@ -1262,9 +1195,9 @@ function PrismTableHead({
     ) : (
       <PrismTypography
         role="label"
-        size="medium"
+        size="regular"
         as="span"
-        fontWeight="black"
+        fontWeight="heavy"
         textTransform="uppercase"
         textWrap="nowrap"
         color={labelStyle ? undefined : { semanticText: "foreground" }}
@@ -1364,7 +1297,7 @@ function PrismTableCell({
     columnRuleAfter && table.columnLineWeight !== "none"
       ? {
           boxShadow: `inset -${lineWeightToPx(
-            (table.columnLineWeight ?? "hairline") as PrismDividerLineWeight
+            (table.columnLineWeight ?? "light") as PrismDividerLineWeight
           )}px 0 0 0 ${resolveTableLineToneCss(
             table.columnLineTone,
             table.prismColor

@@ -25,7 +25,7 @@ import { createPortal } from "react-dom";
 /** Checkbox keys for the icon admin demo (mutually exclusive within each group). */
 type IconDemoAppearanceKey =
   | "sizeSmall"
-  | "sizeMedium"
+  | "sizeRegular"
   | "sizeLarge"
   | "sizeHuge"
   | "sizeGigantic"
@@ -38,7 +38,7 @@ type IconDemoAppearanceKey =
   | "fillTrue";
 
 const ICON_DEMO_EXCLUSIVE_KEY_GROUPS: IconDemoAppearanceKey[][] = [
-  ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
+  ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   ["weightLight", "weightThin", "weightRegular", "weightBold", "weightHeavy"],
   ["fillFalse", "fillTrue"],
 ];
@@ -46,7 +46,7 @@ const ICON_DEMO_EXCLUSIVE_KEY_GROUPS: IconDemoAppearanceKey[][] = [
 /** Checkbox labels next to each option (matches string tokens in `PrismIcon` props). */
 const ICON_DEMO_DISPLAY_LABEL: Record<IconDemoAppearanceKey, string> = {
   sizeSmall: "small",
-  sizeMedium: "medium",
+  sizeRegular: "regular",
   sizeLarge: "large",
   sizeHuge: "huge",
   sizeGigantic: "gigantic",
@@ -65,7 +65,7 @@ const ICON_DEMO_OPTION_COLUMNS: {
 }[] = [
   {
     heading: "Size",
-    keys: ["sizeSmall", "sizeMedium", "sizeLarge", "sizeHuge", "sizeGigantic"],
+    keys: ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   },
   {
     heading: "Weight",
@@ -82,7 +82,7 @@ const ICON_DEMO_OPTION_COLUMNS: {
 
 function initialIconDemoSelection(): Set<IconDemoAppearanceKey> {
   return new Set([
-    "sizeMedium",
+    "sizeRegular",
     "weightRegular",
     "fillFalse",
   ] as IconDemoAppearanceKey[]);
@@ -99,7 +99,7 @@ function resolveIconDemoProps(
         ? "large"
         : selected.has("sizeSmall")
           ? "small"
-          : "medium";
+          : "regular";
   const weight: PrismIconWeightName = selected.has("weightHeavy")
     ? "heavy"
     : selected.has("weightBold")
@@ -124,7 +124,7 @@ function fillModeForSnippet(fill: PrismIconProps["fill"] | undefined): string {
 function formatSizeAttributeForSnippet(
   size: PrismIconProps["size"] | undefined
 ): string {
-  if (size === undefined) return 'size="medium"';
+  if (size === undefined) return 'size="regular"';
   if (typeof size === "number") return "size={" + size + "}";
   return 'size="' + size + '"';
 }
@@ -396,7 +396,7 @@ export function PrismIconDemo(): JSX.Element {
               pointerEvents: "none",
             }}
           >
-            <PrismTypography role="label" size="medium" className="block">
+            <PrismTypography role="label" size="regular" className="block">
               {copyToast.title}
             </PrismTypography>
             {copyToast.detail ? (
@@ -435,7 +435,7 @@ export function PrismIconDemo(): JSX.Element {
                     {...iconProps}
                     color={iconColor}
                   />
-                  <PrismTypography role="label" size="medium" font="mono">
+                  <PrismTypography role="label" size="regular" font="mono">
                     {lastSelectedIconName}
                   </PrismTypography>
                 </div>
@@ -488,7 +488,7 @@ export function PrismIconDemo(): JSX.Element {
                       />
                       <PrismTypography
                         role="label"
-                        size="medium"
+                        size="regular"
                         color={{ semanticText: "muted" }}
                         font="mono"
                       >
@@ -509,7 +509,7 @@ export function PrismIconDemo(): JSX.Element {
           {exampleIconNames.length === 0 ? (
             <PrismTypography
               role="body"
-              size="medium"
+              size="regular"
               color={{ semanticText: "muted" }}
             >
               Use Browse icons to add examples.
@@ -558,7 +558,7 @@ export function PrismIconDemo(): JSX.Element {
           />
           <PrismTypography
             role="label"
-            size="medium"
+            size="regular"
             color={{ semanticText: "muted" }}
             className="block uppercase"
             font="mono"

@@ -36,9 +36,11 @@ interface TypeScalePreviewProps {
 }
 
 type TypographyOptionKey =
+  | "styleLight"
   | "styleThin"
+  | "styleRegular"
   | "styleBold"
-  | "styleBlack"
+  | "styleHeavy"
   | "styleItalic"
   | "uppercase"
   | "lowercase"
@@ -62,22 +64,22 @@ const TYPE_SCALE_ITEMS: ReadonlyArray<{
   label: string;
 }> = [
   { role: "display", size: "large", label: "display · large" },
-  { role: "display", size: "medium", label: "display · medium" },
+  { role: "display", size: "regular", label: "display · regular" },
   { role: "display", size: "small", label: "display · small" },
   { role: "headline", size: "large", label: "headline · large" },
-  { role: "headline", size: "medium", label: "headline · medium" },
+  { role: "headline", size: "regular", label: "headline · regular" },
   { role: "headline", size: "small", label: "headline · small" },
   { role: "title", size: "large", label: "title · large" },
-  { role: "title", size: "medium", label: "title · medium" },
+  { role: "title", size: "regular", label: "title · regular" },
   { role: "title", size: "small", label: "title · small" },
   { role: "body", size: "large", label: "body · large" },
-  { role: "body", size: "medium", label: "body · medium" },
+  { role: "body", size: "regular", label: "body · regular" },
   { role: "body", size: "small", label: "body · small" },
   { role: "label", size: "large", label: "label · large" },
-  { role: "label", size: "medium", label: "label · medium" },
+  { role: "label", size: "regular", label: "label · regular" },
   { role: "label", size: "small", label: "label · small" },
   { role: "overline", size: "large", label: "overline · large" },
-  { role: "overline", size: "medium", label: "overline · medium" },
+  { role: "overline", size: "regular", label: "overline · regular" },
   { role: "overline", size: "small", label: "overline · small" },
 ];
 
@@ -278,7 +280,14 @@ const TYPOGRAPHY_PREVIEW_COLUMNS: {
     groups: [
       {
         overlineId: "fontWeight",
-        keys: ["styleThin", "styleBold", "styleBlack", "styleItalic"],
+        keys: [
+          "styleLight",
+          "styleThin",
+          "styleRegular",
+          "styleBold",
+          "styleHeavy",
+          "styleItalic",
+        ],
       },
       {
         overlineId: "textTransform",
@@ -321,9 +330,11 @@ const TYPOGRAPHY_PREVIEW_COLUMNS: {
 
 /** Checkbox labels — case rows show each label in its own casing convention. */
 const TYPOGRAPHY_OPTION_LABEL: Record<TypographyOptionKey, string> = {
+  styleLight: "light",
   styleThin: "thin",
+  styleRegular: "regular",
   styleBold: "bold",
-  styleBlack: "black",
+  styleHeavy: "heavy",
   styleItalic: "italic",
   lowercase: "lower case",
   capitalize: "Title Case",
@@ -369,9 +380,11 @@ const CASE_STYLE_KEYS = [
 ] as const satisfies readonly TypographyOptionKey[];
 
 const WEIGHT_STYLE_KEYS = [
+  "styleLight",
   "styleThin",
+  "styleRegular",
   "styleBold",
-  "styleBlack",
+  "styleHeavy",
 ] as const satisfies readonly TypographyOptionKey[];
 
 function buildTypeScaleTypographySnippet(opts: {
@@ -434,7 +447,7 @@ function bodyParagraphStackGapClass(size: PrismTypographySize): string {
   if (size === "large" || size === "huge" || size === "gigantic") {
     return "space-y-8";
   }
-  if (size === "medium") {
+  if (size === "regular") {
     return "space-y-4";
   }
   return "space-y-3";
@@ -449,12 +462,12 @@ function getSampleLabel(
     item.role === "display"
       ? item.size === "large"
         ? 0
-        : item.size === "medium"
+        : item.size === "regular"
           ? 1
           : 2
       : item.size === "large"
         ? 3
-        : item.size === "medium"
+        : item.size === "regular"
           ? 4
           : 5;
 
@@ -465,7 +478,7 @@ function getSampleLabel(
   }
 
   const triadSlotIndex =
-    item.size === "large" ? 0 : item.size === "medium" ? 1 : 2;
+    item.size === "large" ? 0 : item.size === "regular" ? 1 : 2;
 
   if (item.role === "title") {
     return pools.titles[
@@ -624,13 +637,17 @@ export function TypeScalePreview({
   };
 
   const fontWeightPreset: PrismTypographyFontWeightPreset | undefined =
-    selectedOptions.has("styleBlack")
-      ? "black"
+    selectedOptions.has("styleHeavy")
+      ? "heavy"
       : selectedOptions.has("styleBold")
         ? "bold"
-        : selectedOptions.has("styleThin")
-          ? "thin"
-          : undefined;
+        : selectedOptions.has("styleRegular")
+          ? "regular"
+          : selectedOptions.has("styleThin")
+            ? "thin"
+            : selectedOptions.has("styleLight")
+              ? "light"
+              : undefined;
   const customTextTransform:
     | NonNullable<PrismTypographyProps["textTransform"]>
     | undefined = selectedOptions.has("sentenceCase")
@@ -895,7 +912,7 @@ export function TypeScalePreview({
                       />
                       <PrismTypography
                         role="label"
-                        size="medium"
+                        size="regular"
                         color={{ semanticText: "muted" }}
                         font="mono"
                       >

@@ -29,7 +29,7 @@ export function PrismCardDemo(): JSX.Element {
         <PrismCardContent className="space-y-2">
           <PrismTypography
             role="body"
-            size="medium"
+            size="regular"
             color={{ semanticText: "muted" }}
           >
             Body content uses card padding from the content region. Use this

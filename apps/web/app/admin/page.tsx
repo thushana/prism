@@ -38,7 +38,7 @@ export default async function AdminHomePage(): Promise<React.JSX.Element> {
             <div className="mt-2">
               <PrismTypography
                 role="body"
-                size="medium"
+                size="regular"
                 color={{ semanticText: "muted" }}
               >
                 {section.description}

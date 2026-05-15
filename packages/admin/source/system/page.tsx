@@ -38,7 +38,7 @@ function GitRepoDetail({ git }: { git: SystemSheetGitRepoInfo }) {
             </PrismTypography>
             <PrismTypography
               role="body"
-              size="medium"
+              size="regular"
               font="mono"
               className="block w-full text-muted-foreground wrap-break-word"
             >
@@ -229,7 +229,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
         </PrismTypography>
         <PrismTypography
           role="body"
-          size="medium"
+          size="regular"
           className="text-muted-foreground"
         >
           Make sure your app has an{" "}
@@ -262,7 +262,7 @@ export function SystemSheetPage({ data, config = {} }: SystemSheetPageProps) {
                   />
                   <PrismTypography
                     role="title"
-                    size="medium"
+                    size="regular"
                     as="p"
                     className="inline"
                   >

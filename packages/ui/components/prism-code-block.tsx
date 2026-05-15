@@ -40,7 +40,7 @@ export type PrismCodeBlockProps = {
   characterMaxWidth?: number | null;
   /**
    * PrismColor spec: `swatchPrimary`, optional `palette`, optional `colorLoop`
-   * (`range` caps ring offsets; omit for full ±2 behaviour).
+   * (`range` caps ring offsets; omit for full ±2 behavior).
    */
   color?: PartialPrismColorSpec;
   /** When set, the copy control is not rendered. */

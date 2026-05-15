@@ -207,7 +207,7 @@ function PrismEmojiPickerPanel({
               line="none"
               gap="none"
               paint="backgroundNone"
-              size="medium"
+              size="regular"
               shape="rectangleRounded"
               color={{ palette: "default", swatchPrimary: "blue" }}
               segmentPosition={segmentSlot(index, PREVIEW_COUNT)}
@@ -239,7 +239,7 @@ function PrismEmojiPickerPanel({
                 line="none"
                 gap="none"
                 paint="backgroundNone"
-                size="medium"
+                size="regular"
                 shape="rectangleRounded"
                 color={{ palette: "default", swatchPrimary: "blue" }}
                 segmentPosition={slot}

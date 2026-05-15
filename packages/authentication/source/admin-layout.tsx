@@ -90,7 +90,7 @@ export type AdminPageShellProps = {
  * Consistent outer shell for all admin pages.
  *
  * Provides:
- *  - Full-viewport padding and a centred {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
+ *  - Full-viewport padding and a centered {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
  *  - An optional back link (pass backHref when not using {@link PrismPathBar})
  *  - Optional {@link PrismPathBar} (`explicitPrismPathBarSegments` or `prismPathBarTitleByPathPrefix` + `title`)
  *  - An optional page title + description header
@@ -169,7 +169,7 @@ export function AdminPageShell({
                           shade: 700,
                         },
                       }}
-                      fontWeight="black"
+                      fontWeight="heavy"
                       textWrap="wrap"
                     >
                       {title}
@@ -178,7 +178,7 @@ export function AdminPageShell({
                   {description ? (
                     <PrismTypography
                       role="body"
-                      size="medium"
+                      size="regular"
                       color={{ semanticText: "muted" }}
                     >
                       {description}

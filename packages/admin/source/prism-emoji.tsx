@@ -32,7 +32,7 @@ const ANIMATION_OPTIONS: { value: PrismEmojiAnimationMode; label: string }[] = [
 
 const SIZE_OPTIONS: PrismEmojiSize[] = [
   "small",
-  "medium",
+  "regular",
   "large",
   "huge",
   "gigantic",
@@ -111,11 +111,11 @@ const INLINE_DEMO_PHRASES = [
 /** Showcase {@link PrismEmoji} inline across fonts and type scale steps. */
 const INLINE_TYPE_DEMOS = [
   {
-    id: "body-md-sans",
-    caption: "Body · medium · sans",
+    id: "body-regular-sans",
+    caption: "Body · regular · sans",
     font: "sans",
     role: "body",
-    size: "medium",
+    size: "regular",
   },
   {
     id: "body-lg-serif",
@@ -132,11 +132,11 @@ const INLINE_TYPE_DEMOS = [
     size: "small",
   },
   {
-    id: "title-md-sans",
-    caption: "Title · medium · sans",
+    id: "title-regular-sans",
+    caption: "Title · regular · sans",
     font: "sans",
     role: "title",
-    size: "medium",
+    size: "regular",
   },
   {
     id: "headline-sm-serif",
@@ -259,7 +259,7 @@ export function PrismEmojiDemo(): JSX.Element {
                 />
                 <PrismTypography
                   role="label"
-                  size="medium"
+                  size="regular"
                   font="mono"
                   color={
                     emojiStyle === value ? undefined : { semanticText: "muted" }
@@ -294,7 +294,7 @@ export function PrismEmojiDemo(): JSX.Element {
                 />
                 <PrismTypography
                   role="label"
-                  size="medium"
+                  size="regular"
                   font="mono"
                   color={size === value ? undefined : { semanticText: "muted" }}
                   className="wrap-break-word"
@@ -321,7 +321,7 @@ export function PrismEmojiDemo(): JSX.Element {
               />
               <PrismTypography
                 role="label"
-                size="medium"
+                size="regular"
                 font="mono"
                 color={colorEnabled ? undefined : { semanticText: "muted" }}
                 className="wrap-break-word"
@@ -373,7 +373,7 @@ export function PrismEmojiDemo(): JSX.Element {
                 />
                 <PrismTypography
                   role="label"
-                  size="medium"
+                  size="regular"
                   font="mono"
                   color={
                     animationMode === value && !animationDisabled

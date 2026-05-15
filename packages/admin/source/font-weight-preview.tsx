@@ -187,7 +187,7 @@ function CategoryColumn({
       </select>
       <PrismTypography
         role="body"
-        size="medium"
+        size="regular"
         className="text-muted-foreground"
       >
         {activeFamily.subtitle}

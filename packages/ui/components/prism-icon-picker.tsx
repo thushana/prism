@@ -113,7 +113,7 @@ function PrismIconPickerPanel({
                 className="flex aspect-square min-h-14 w-full items-center justify-center rounded-lg border border-transparent p-1 hover:border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => onPick(name)}
               >
-                <PrismIcon name={name} size="medium" />
+                <PrismIcon name={name} size="regular" />
               </button>
             ))}
           </div>
