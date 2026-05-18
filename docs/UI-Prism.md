@@ -318,7 +318,7 @@ Admin demo: **`/admin/prism/components/prism-code-block`** — **`PrismCodeBlock
 
 ### PrismIcon
 
-Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home"`, `"cable_car"`) from the Material Symbols name set. **`size`** uses the same **`PrismSize`** named steps as **PrismButton** (`small` \| `regular` \| `large` \| `huge` \| `gigantic`; maps to pixel heights in the component, with **opsz** clamped 20–48) or a **raw pixel number** for layout-driven sizing. **`weight`** is `"light"` \| `"thin"` \| `"regular"` \| `"bold"` \| `"heavy"` (named steps map to **wght** 100 / 200 / 400 / 600 / 700) or any raw **wght** integer **`100`–`700`** — use a number when you need a step not covered by the five names (for example **300** between thin and regular). **`fill`** is `"on"` \| `"off"` (FILL axis). The **GRAD** axis is fixed at `0` (no `grade` prop).
+Icon wrapper with two libraries via **`iconStyle`**: **`"material"`** (default) renders Material Symbols Rounded; **`"lucide"`** renders a Lucide SVG. **`name`** is always the native id for the active library — Material ligature (e.g. `"home"`, `"diamond"`) or Lucide id (kebab-case or PascalCase, e.g. `"gem"`, `"layout-grid"`). **`size`** uses the same **`PrismSize`** named steps as **PrismButton** (`small` \| `regular` \| `large` \| `huge` \| `gigantic`; maps to pixel heights in the component, with **opsz** clamped 20–48 on Material) or a **raw pixel number** for layout-driven sizing. **`weight`** is the shared [stroke weight](#stroke-weight-line-icon-and-font) ladder (`"light"` \| `"thin"` \| `"regular"` \| `"bold"` \| `"heavy"` → **wght** 100 / 200 / 400 / 600 / 700 on Material, same ladder → Lucide **`strokeWidth`**). Use the prop name **`weight`**, not **`lineWeight`** (**`lineWeight`** is for **`PrismDivider`** / **`PrismSpinner`**). **`fill`** is `"on"` \| `"off"` (Material **FILL** axis only). The Material **GRAD** axis is fixed at `0` (no `grade` prop). **`motion.draw: "stroke"`** animates Lucide path strokes and applies only when **`iconStyle="lucide"`**.
 
 **Import:**
 
@@ -326,7 +326,7 @@ Material Symbols Rounded glyph wrapper. `name` is the ligature name (e.g. `"home
 import { PrismIcon } from "@ui";
 ```
 
-**Props (`PrismIconProps`):** `name`, `size`, `weight`, `fill`, optional **`color`** (`PartialPrismColorSpec` — solid via **`prismColorSpecToHex`**; **`gradient.swatches`** via **`prismColorSpecToIconGlyphPaint`** + background-clip text because `color` cannot be a gradient), `className`. Omitting **`color`** leaves the glyph unpainted inline so it **inherits** the surrounding CSS `color` (e.g. `text-foreground`), not a hardcoded black.
+**Props (`PrismIconProps`):** `name`, optional **`iconStyle`** (`"material"` \| `"lucide"`), `size`, `weight`, `fill`, optional **`color`** (`PartialPrismColorSpec` — solid via **`prismColorSpecToHex`**; **`gradient.swatches`** via **`prismColorSpecToIconGlyphPaint`** + background-clip text because `color` cannot be a gradient), optional **`motion`**, `className`. Omitting **`color`** leaves the glyph unpainted inline so it **inherits** the surrounding CSS `color` (e.g. `text-foreground`), not a hardcoded black.
 
 **Example:**
 
@@ -341,11 +341,12 @@ import { PrismIcon } from "@ui";
 />
 <PrismIcon name="favorite" size="regular" weight="regular" fill="on" />
 <PrismIcon name="star" size="large" weight="light" fill="off" />
+<PrismIcon name="gem" iconStyle="lucide" size="regular" weight="regular" fill="off" />
 ```
 
 **Shared vocabulary:** **`PrismSize`**, icon stroke / divider line / typography **`fontWeight`** steps, **`PrismSpacing`**, and related tables are defined under [Shared tokens and control vocabulary](#shared-tokens-and-control-vocabulary). **PrismIcon** and **PrismButton** share **`PrismSize`** literals; **PrismTypography** uses the same size tokens for the type scale.
 
-Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** adds icons only via **`Browse icons`** (**`PrismIconPicker`** **`trigger`** — same **`PrismButton`** pattern as the emoji demo), shows the last selection beside the button, includes **`PrismColorPicker`** for **`color`**, toggles **size** / **weight** / **fill**, then **Example** (accumulated picks), **Code sample** (**last picked** icon + emitted `color` block), and **Icon Options** (grid filter; click a cell to copy JSX, toast feedback).
+Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** from **`@admin`**. **Customize** uses **`Browse icons`** (**`PrismIconPicker`**, full Material catalog or Lucide-filtered grid per **`iconStyle`**), **`iconStyle`** (material / lucide), **`PrismColorPicker`** for **`color`**, **size** / **weight** / **fill** (fill material-only), motion (**`draw`** / lines when lucide + motion on), then **Example**, **Code sample**, and **Icon Options** (Material ligature grid; click to copy JSX for the active **`iconStyle`**).
 
 ### PrismEmojiPicker / PrismIconPicker
 

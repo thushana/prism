@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { gsap } from "gsap";
 
 import { cn } from "@utilities";
@@ -23,6 +23,11 @@ import {
   prismColorSpecToIconGlyphPaint,
   type PartialPrismColorSpec,
 } from "../styles/prism-color";
+import { resolveLucideIconByName } from "../source/prism-icon-lucide-resolve";
+
+export type PrismIconStyle = "material" | "lucide";
+
+export { resolveLucideIconByName } from "../source/prism-icon-lucide-resolve";
 
 /** Named size steps map to pixel `fontSize` / clamped `opsz` (20–48); aligns with `PrismButton` `size`. */
 export type PrismIconSizeName = PrismSize;
@@ -51,16 +56,23 @@ export type {
 
 /** Single source of truth for {@link PrismIcon} when optional props are omitted. */
 export const PRISM_ICON_DEFAULTS: {
+  iconStyle: PrismIconStyle;
   size: PrismIconSizeName;
   weight: PrismIconWeightName;
   fill: PrismIconFillMode;
 } = {
+  iconStyle: "material",
   size: "regular",
   weight: "regular",
   fill: "off",
 };
 
 export interface PrismIconProps {
+  /**
+   * Icon library for `name`: Material Symbols ligature (`material`) or Lucide id (`lucide`, kebab-case or PascalCase).
+   * @default {@link PRISM_ICON_DEFAULTS.iconStyle} (`"material"`)
+   */
+  iconStyle?: PrismIconStyle;
   name: string;
   className?: string;
   /**
@@ -85,13 +97,8 @@ export interface PrismIconProps {
    * from CSS (typically the parent text color, e.g. `text-foreground`), not a fixed black hex.
    */
   color?: PartialPrismColorSpec;
-  /** GSAP motion (Material glyph, or Lucide stroke-dash when `motion.draw` is `"stroke"`). */
+  /** GSAP motion on the icon root; `draw: "stroke"` applies only when {@link iconStyle} is `"lucide"`. */
   motion?: PrismIconMotionProps;
-  /**
-   * Lucide icon used when `motion.draw === "stroke"` for path draw-in (same idea as Lucide on
-   * `PrismButton`). If omitted while `draw` is set, Material glyph motion is used instead.
-   */
-  lucideStrokeIcon?: LucideIcon;
 }
 
 const DRAW_SVG_SELECTOR =
@@ -131,6 +138,22 @@ function resolvePrismIconWeightValue(weight: PrismIconProps["weight"]): number {
     return Math.min(700, Math.max(100, Math.round(weight)));
   }
   return PRISM_ICON_WEIGHT_NAME_TO_VALUE[weight];
+}
+
+/**
+ * Lucide `strokeWidth` in SVG user units. Ladder matches Material **wght** (regular ≈ 2.5 at
+ * {@link PRISM_ICON_SIZE_NAME_TO_PX.regular}). Scaled by `sizePx` so the same `weight` reads
+ * equally on screen at every named size — without this, Lucide strokes grow with `size` and
+ * `light` on `huge` looks much heavier than `light` on `small`.
+ */
+export function resolvePrismIconLucideStrokeWidth(
+  weight: PrismIconProps["weight"] | undefined,
+  sizePx: number = PRISM_ICON_SIZE_NAME_TO_PX.regular
+): number {
+  const wght = resolvePrismIconWeightValue(weight);
+  const strokeAtRegular = 1.65 + ((wght - 100) / 600) * 1.85;
+  if (sizePx <= 0) return strokeAtRegular;
+  return strokeAtRegular * (PRISM_ICON_SIZE_NAME_TO_PX.regular / sizePx);
 }
 
 function resolvePrismIconFill(fill: PrismIconProps["fill"]): boolean {
@@ -177,12 +200,6 @@ function resolveRotateInDeg(m: PrismIconMotionProps): number {
   const preset: PrismIconEntranceRotatePreset = m.entranceRotate ?? "none";
   return PRISM_ICON_ENTRANCE_ROTATE_DEG[preset];
 }
-
-/**
- * Lucide outline weight on `PrismButton` icons — keep stroke-draw visuals aligned there.
- * @see PrismButton `IconComponent size={iconPx} strokeWidth={2.5}`
- */
-const PRISM_ICON_LUCIDE_STROKE_DRAW_WIDTH = 2.5;
 
 /**
  * Match {@link PrismButton} Lucide stroke-draw: measure every matched geometry node, set dash,
@@ -258,15 +275,30 @@ function runIconEntranceFromTo(
 export function PrismIcon({
   name,
   className,
+  iconStyle = PRISM_ICON_DEFAULTS.iconStyle,
   size = PRISM_ICON_DEFAULTS.size,
   weight = PRISM_ICON_DEFAULTS.weight,
   fill = PRISM_ICON_DEFAULTS.fill,
   color: colorSpec,
   motion: motionProp,
-  lucideStrokeIcon: LucideStrokeIcon,
 }: PrismIconProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
   const epochRef = useRef(0);
+
+  const useLucide = iconStyle === "lucide";
+
+  const LucideIconComponent = useMemo(() => {
+    if (!useLucide) return null;
+    return resolveLucideIconByName(name);
+  }, [useLucide, name]);
+
+  const strokeDraw = Boolean(
+    useLucide &&
+      LucideIconComponent &&
+      motionProp &&
+      !motionProp.disabled &&
+      motionProp.draw === "stroke"
+  );
 
   const sizePx = resolvePrismIconSizePx(size);
   const weightValue = resolvePrismIconWeightValue(weight);
@@ -300,8 +332,6 @@ export function PrismIcon({
     const m = motionProp;
     const el = rootRef.current;
     if (!m || m.disabled || !el) return;
-
-    const strokeDraw = Boolean(LucideStrokeIcon && m.draw === "stroke");
 
     if (prefersReducedMotion()) {
       gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
@@ -494,27 +524,33 @@ export function PrismIcon({
       if (strokeDraw) cancelAnimationFrame(rafId);
       innerCleanup?.();
     };
-  }, [name, motionProp, LucideStrokeIcon]);
+  }, [name, motionProp, strokeDraw, LucideIconComponent]);
 
-  const useLucideStroke =
-    Boolean(
-      LucideStrokeIcon &&
-        motionProp &&
-        !motionProp.disabled &&
-        motionProp.draw === "stroke"
-    );
+  if (useLucide && !LucideIconComponent) {
+    const nodeEnv = (
+      globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } }
+    ).process?.env?.NODE_ENV;
+    if (nodeEnv !== "production") {
+      console.warn(
+        `[PrismIcon] No Lucide icon for name "${name}". Use a Lucide id (e.g. gem, layout-grid).`
+      );
+    }
+    return null;
+  }
+
+  const StrokeIcon = LucideIconComponent;
 
   return (
     <span
       ref={rootRef}
       className={cn(
-        useLucideStroke
+        useLucide
           ? "inline-flex items-center justify-center"
           : "material-symbols-rounded",
         className
       )}
       style={{
-        ...(useLucideStroke
+        ...(useLucide
           ? { transformOrigin: "center" }
           : {
               fontSize: `${sizePx}px`,
@@ -526,11 +562,11 @@ export function PrismIcon({
             }),
       }}
     >
-      {useLucideStroke && LucideStrokeIcon ? (
+      {useLucide && StrokeIcon ? (
         <span style={{ display: "inline-flex", color: "inherit" }}>
-          <LucideStrokeIcon
+          <StrokeIcon
             size={sizePx}
-            strokeWidth={PRISM_ICON_LUCIDE_STROKE_DRAW_WIDTH}
+            strokeWidth={resolvePrismIconLucideStrokeWidth(weight, sizePx)}
             fill={filled ? "currentColor" : "none"}
             className={cn(
               "shrink-0",

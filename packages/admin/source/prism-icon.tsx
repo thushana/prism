@@ -9,6 +9,7 @@ import {
   PrismTypography,
   PRISM_MATERIAL_ICONS_ROUND_NAMES,
   prismColorPickerClipboardColorProp,
+  resolveLucideIdByName,
 } from "@ui";
 import type {
   PartialPrismColorSpec,
@@ -19,38 +20,20 @@ import type {
   PrismIconMotionPreset,
   PrismIconProps,
   PrismIconSizeName,
+  PrismIconStyle,
   PrismIconWeightName,
   PrismMotionDurationName,
   PrismMotionEasePreset,
   PrismMotionPlaybackMode,
 } from "@ui";
-import {
-  Calendar,
-  Camera,
-  Car,
-  Cake,
-  Coffee,
-  Compass,
-  Gem,
-  Globe,
-  Heart,
-  Home,
-  LayoutGrid,
-  Mail,
-  Menu,
-  Music,
-  Search,
-  Settings,
-  Sparkles,
-  Sun,
-  Train,
-  User,
-  type LucideIcon,
-} from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
 import { createPortal } from "react-dom";
-import { PrismPlaygroundOptionLabel } from "./playground-option-label";
+import {
+  PlaygroundPropLegend,
+  PrismPlaygroundOptionLabel,
+} from "./playground-option-label";
 
 const ICON_MOTION_PLAYBACK_OPTIONS: {
   value: PrismMotionPlaybackMode;
@@ -62,11 +45,12 @@ const ICON_MOTION_PLAYBACK_OPTIONS: {
   { value: "occasionally", label: "occasionally" },
 ];
 
-const ICON_ANIMATION_OPTIONS: {
+/** `null` = omit the `motion` prop entirely (not a `playback` value). */
+const ICON_PLAYBACK_OPTIONS: {
   value: PrismMotionPlaybackMode | null;
   label: string;
 }[] = [
-  { value: null, label: "none" },
+  { value: null, label: "(no motion)" },
   ...ICON_MOTION_PLAYBACK_OPTIONS,
 ];
 
@@ -80,22 +64,23 @@ const ICON_MOTION_EASE_OPTIONS: {
   { value: "bounce", label: "bounce" },
 ];
 
-const ICON_MOTION_DURATION_OPTIONS: {
-  value: PrismMotionDurationName;
-  label: string;
-}[] = [
-  { value: "glacial", label: "glacial (5s)" },
-  { value: "slow", label: "slow (2s)" },
-  { value: "regular", label: "regular (1s)" },
-  { value: "fast", label: "fast (0.5s)" },
-  { value: "speedy", label: "speedy (0.25s)" },
-];
+const ICON_MOTION_DURATION_NAMES = [
+  "glacial",
+  "slow",
+  "regular",
+  "fast",
+  "speedy",
+] as const satisfies readonly PrismMotionDurationName[];
 
-const ICON_ENTRANCE_OPTIONS: {
+const ICON_MOTION_DURATION_OPTIONS = ICON_MOTION_DURATION_NAMES.map(
+  (value) => ({ value, label: value })
+);
+
+const ICON_PRESET_IN_OPTIONS: {
   value: PrismIconMotionPreset;
   label: string;
 }[] = [
-  { value: "fadeScale", label: "fade on" },
+  { value: "fadeScale", label: "fadeScale" },
   { value: "none", label: "none" },
 ];
 
@@ -120,56 +105,25 @@ const ICON_ENTRANCE_ROTATE_OPTIONS: {
   { value: "full", label: "full", rangeLabel: "360°" },
 ];
 
-const PRISM_ICON_PLAYGROUND_DEFAULT_ICON = "diamond";
+const PRISM_ICON_PLAYGROUND_DEFAULT_MATERIAL = "diamond";
+const PRISM_ICON_PLAYGROUND_DEFAULT_LUCIDE = "gem";
 
-/**
- * Material ligature name → closest **multi-path** Lucide stroke icon (playground + snippet names).
- * Prefer icons with multiple geometry nodes so the staggered stroke-dash draw reads (a single
- * closed path like Lucide `Diamond` traces as one continuous line — looks like just an outline
- * appearing, not "lines drawing in").
- */
-const LUCIDE_STROKE_BY_MATERIAL: Record<
-  string,
-  { Icon: LucideIcon; importName: string }
-> = {
-  diamond: { Icon: Gem, importName: "Gem" },
-  favorite: { Icon: Heart, importName: "Heart" },
-  home: { Icon: Home, importName: "Home" },
-  mail: { Icon: Mail, importName: "Mail" },
-  menu: { Icon: Menu, importName: "Menu" },
-  search: { Icon: Search, importName: "Search" },
-  settings: { Icon: Settings, importName: "Settings" },
-  star: { Icon: Sparkles, importName: "Sparkles" },
-  person: { Icon: User, importName: "User" },
-  calendar_today: { Icon: Calendar, importName: "Calendar" },
-  camera_alt: { Icon: Camera, importName: "Camera" },
-  directions_car: { Icon: Car, importName: "Car" },
-  cake: { Icon: Cake, importName: "Cake" },
-  local_cafe: { Icon: Coffee, importName: "Coffee" },
-  explore: { Icon: Compass, importName: "Compass" },
-  public: { Icon: Globe, importName: "Globe" },
-  dashboard: { Icon: LayoutGrid, importName: "LayoutGrid" },
-  music_note: { Icon: Music, importName: "Music" },
-  wb_sunny: { Icon: Sun, importName: "Sun" },
-  train: { Icon: Train, importName: "Train" },
-};
+const ICON_STYLE_OPTIONS: {
+  value: PrismIconStyle;
+  label: string;
+}[] = [
+  { value: "material", label: "material" },
+  { value: "lucide", label: "lucide" },
+];
 
-/** Fallback Lucide icon for Material names we don't have a hand-picked mapping for. */
-const LUCIDE_STROKE_FALLBACK: { Icon: LucideIcon; importName: string } = {
-  Icon: Sparkles,
-  importName: "Sparkles",
-};
+const ICON_FILL_OPTIONS: {
+  appearanceKey: "fillFalse" | "fillTrue";
+  label: string;
+}[] = [
+  { appearanceKey: "fillFalse", label: "off" },
+  { appearanceKey: "fillTrue", label: "on" },
+];
 
-function lucideStrokeIconForMaterialName(name: string): LucideIcon {
-  return LUCIDE_STROKE_BY_MATERIAL[name]?.Icon ?? LUCIDE_STROKE_FALLBACK.Icon;
-}
-
-function lucideStrokeImportNameForMaterial(name: string): string {
-  return (
-    LUCIDE_STROKE_BY_MATERIAL[name]?.importName ??
-    LUCIDE_STROKE_FALLBACK.importName
-  );
-}
 type IconDemoAppearanceKey =
   | "sizeSmall"
   | "sizeRegular"
@@ -206,16 +160,28 @@ const ICON_DEMO_DISPLAY_LABEL: Record<IconDemoAppearanceKey, string> = {
   fillTrue: "on",
 };
 
+/** Playground labels; `lines` maps to `motion.draw: "stroke"`. */
+type IconMotionDrawMode = "glyph" | "lines";
+
+const ICON_DRAW_MODE_OPTIONS: {
+  value: IconMotionDrawMode;
+  label: string;
+}[] = [
+  { value: "glyph", label: "glyph" },
+  { value: "lines", label: "lines" },
+];
+
 const ICON_DEMO_OPTION_COLUMNS: {
-  heading: string;
+  /** Matches {@link PrismIconProps} prop name. */
+  prop: keyof Pick<PrismIconProps, "size" | "weight">;
   keys: IconDemoAppearanceKey[];
 }[] = [
   {
-    heading: "Size",
+    prop: "size",
     keys: ["sizeSmall", "sizeRegular", "sizeLarge", "sizeHuge", "sizeGigantic"],
   },
   {
-    heading: "Weight",
+    prop: "weight",
     keys: [
       "weightLight",
       "weightThin",
@@ -224,7 +190,6 @@ const ICON_DEMO_OPTION_COLUMNS: {
       "weightHeavy",
     ],
   },
-  { heading: "Fill", keys: ["fillFalse", "fillTrue"] },
 ];
 
 function initialIconDemoSelection(): Set<IconDemoAppearanceKey> {
@@ -251,21 +216,19 @@ function resolveIconDemoProps(
     ? "heavy"
     : selected.has("weightBold")
       ? "bold"
-      : selected.has("weightThin")
-        ? "thin"
-        : selected.has("weightLight")
-          ? "light"
-          : "regular";
+      : selected.has("weightRegular")
+        ? "regular"
+        : selected.has("weightThin")
+          ? "thin"
+          : selected.has("weightLight")
+            ? "light"
+            : "regular";
   const fill: PrismIconFillMode = selected.has("fillTrue") ? "on" : "off";
   return { size, weight, fill };
 }
 
 function escapeIconNameForJsxAttribute(iconName: string): string {
   return iconName.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-function fillModeForSnippet(fill: PrismIconProps["fill"] | undefined): string {
-  return fill === "on" ? "on" : "off";
 }
 
 function formatSizeAttributeForSnippet(
@@ -282,6 +245,10 @@ function formatWeightAttributeForSnippet(
   if (weight === undefined) return 'weight="regular"';
   if (typeof weight === "number") return "weight={" + weight + "}";
   return 'weight="' + weight + '"';
+}
+
+function fillModeForSnippet(fill: PrismIconProps["fill"] | undefined): string {
+  return fill === "on" ? "on" : "off";
 }
 
 function formatDurationInSnippet(
@@ -384,7 +351,20 @@ function trimIconMotionForSnippet(
  * Stable fragment for React `key`s on motion previews: remount when tuning GSAP-driving props.
  * Inline transforms / opacity survive prop updates unless the node resets.
  */
-function playgroundMotionPreviewKey(m: PrismIconMotionProps | undefined): string {
+function playgroundPreviewKey(
+  iconStyle: PrismIconStyle,
+  name: string,
+  fill: PrismIconFillMode,
+  m: PrismIconMotionProps | undefined,
+  drawMode: IconMotionDrawMode
+): string {
+  return `${iconStyle}:${name}:${fill}:${playgroundMotionPreviewKey(m, drawMode)}`;
+}
+
+function playgroundMotionPreviewKey(
+  m: PrismIconMotionProps | undefined,
+  drawMode: IconMotionDrawMode
+): string {
   if (!m) return "static";
   return JSON.stringify({
     playback: m.playback,
@@ -399,30 +379,31 @@ function playgroundMotionPreviewKey(m: PrismIconMotionProps | undefined): string
     scalePeakPercent: m.scalePeakPercent,
     rotateInDeg: m.rotateInDeg,
     draw: m.draw,
+    drawMode,
     disabled: m.disabled,
   });
 }
 
 function formatPrismIconSnippet(
   name: string,
+  iconStyle: PrismIconStyle,
   props: Pick<PrismIconProps, "size" | "weight" | "fill">,
   color?: PartialPrismColorSpec,
-  motion?: PrismIconMotionProps,
-  lucideStrokeImportName?: string
+  motion?: PrismIconMotionProps
 ): string {
-  const preamble =
-    motion?.draw === "stroke" && lucideStrokeImportName
-      ? `// import { ${lucideStrokeImportName} } from "lucide-react"\n\n`
-      : "";
   const lines = [
     "<PrismIcon",
     `  name="${escapeIconNameForJsxAttribute(name)}"`,
-    `  ${formatSizeAttributeForSnippet(props.size)}`,
-    `  ${formatWeightAttributeForSnippet(props.weight)}`,
-    `  fill="${fillModeForSnippet(props.fill)}"`,
   ];
-  if (motion?.draw === "stroke" && lucideStrokeImportName) {
-    lines.push(`  lucideStrokeIcon={${lucideStrokeImportName}}`);
+  if (iconStyle === "lucide") {
+    lines.push('  iconStyle="lucide"');
+  }
+  lines.push(
+    `  ${formatSizeAttributeForSnippet(props.size)}`,
+    `  ${formatWeightAttributeForSnippet(props.weight)}`
+  );
+  if (iconStyle === "material") {
+    lines.push(`  fill="${fillModeForSnippet(props.fill)}"`);
   }
   if (color && Object.keys(color).length > 0) {
     for (const line of prismColorPickerClipboardColorProp(color).split("\n")) {
@@ -436,7 +417,7 @@ function formatPrismIconSnippet(
     lines.push(motionBlock);
   }
   lines.push("/>", "");
-  return preamble + lines.join("\n");
+  return lines.join("\n");
 }
 
 /**
@@ -508,27 +489,32 @@ function buildIconNameSections(
 }
 
 const IconCell = memo(function IconCell({
-  name,
+  pickerName,
+  iconStyle,
   iconProps,
   iconColor,
-  iconMotion,
   onCopied,
 }: {
-  name: string;
+  /** Material ligature from the options grid. */
+  pickerName: string;
+  iconStyle: PrismIconStyle;
   iconProps: Pick<PrismIconProps, "size" | "weight" | "fill">;
   iconColor?: PartialPrismColorSpec;
-  iconMotion?: PrismIconMotionProps;
   onCopied: (snippet: string) => void;
 }) {
+  const lucideId = resolveLucideIdByName(pickerName);
+  const previewName =
+    iconStyle === "lucide" ? (lucideId ?? null) : pickerName;
+  const snippetName =
+    iconStyle === "lucide" ? lucideId : pickerName;
+
   const handleCopyIconSnippet = useCallback(async () => {
+    if (!snippetName) return;
     const snippet = formatPrismIconSnippet(
-      name,
+      snippetName,
+      iconStyle,
       iconProps,
-      iconColor,
-      iconMotion,
-      iconMotion?.draw === "stroke"
-        ? lucideStrokeImportNameForMaterial(name)
-        : undefined
+      iconColor
     );
     try {
       await navigator.clipboard.writeText(snippet);
@@ -536,39 +522,52 @@ const IconCell = memo(function IconCell({
     } catch {
       onCopied("");
     }
-  }, [name, iconProps, iconColor, iconMotion, onCopied]);
+  }, [snippetName, iconStyle, iconProps, iconColor, onCopied]);
+
+  if (!previewName) return null;
 
   return (
     <button
       type="button"
       onClick={handleCopyIconSnippet}
-      title={name + " \u2014 click to copy JSX"}
+      title={previewName + " \u2014 click to copy JSX"}
       className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent text-foreground hover:border-border hover:bg-muted/60"
     >
       {/*
         Icon Options is every Material name (~2k cells). Passing `motion` here used to rerun GSAP on
         every control change and stuttered the whole page — motion is shown in Customize + Example.
       */}
-      <PrismIcon name={name} {...iconProps} color={iconColor} />
+      <PrismIcon
+        name={previewName}
+        iconStyle={iconStyle}
+        {...iconProps}
+        color={iconColor}
+      />
     </button>
   );
 });
 
 /**
- * Interactive icon demo + full Material Symbols Rounded name grid (ligature names for
- * {@link PrismIcon}). Served from `/admin/prism/components/prism-icon`.
- * Section layout: Customize (browse icons, color, axes) → Example → Code sample → Icon Options.
+ * Interactive {@link PrismIcon} demo (Material + Lucide). Served from
+ * `/admin/prism/components/prism-icon`.
  */
 export function PrismIconDemo(): JSX.Element {
   const [selectedAppearanceKeys, setSelectedAppearanceKeys] = useState(
     initialIconDemoSelection
   );
-  const [exampleIconNames, setExampleIconNames] = useState<string[]>([
-    PRISM_ICON_PLAYGROUND_DEFAULT_ICON,
+  const [iconStyle, setIconStyle] = useState<PrismIconStyle>("material");
+  const [materialIconName, setMaterialIconName] = useState(
+    PRISM_ICON_PLAYGROUND_DEFAULT_MATERIAL
+  );
+  const [lucideIconName, setLucideIconName] = useState(
+    PRISM_ICON_PLAYGROUND_DEFAULT_LUCIDE
+  );
+  const [exampleMaterialNames, setExampleMaterialNames] = useState<string[]>([
+    PRISM_ICON_PLAYGROUND_DEFAULT_MATERIAL,
   ]);
-  const [lastSelectedIconName, setLastSelectedIconName] = useState<
-    string | null
-  >(PRISM_ICON_PLAYGROUND_DEFAULT_ICON);
+  const [exampleLucideNames, setExampleLucideNames] = useState<string[]>([
+    PRISM_ICON_PLAYGROUND_DEFAULT_LUCIDE,
+  ]);
   const [gridFilterQuery, setGridFilterQuery] = useState("");
   const [iconColor, setIconColor] = useState<PartialPrismColorSpec>({
     palette: "default",
@@ -587,9 +586,8 @@ export function PrismIconDemo(): JSX.Element {
     useState<PrismIconEntranceRotatePreset>("none");
   const [motionEaseIn, setMotionEaseIn] =
     useState<PrismMotionEasePreset>("out");
-  const [iconMotionDraw, setIconMotionDraw] = useState<"glyph" | "stroke">(
-    "glyph"
-  );
+  const [motionDrawMode, setMotionDrawMode] =
+    useState<IconMotionDrawMode>("glyph");
   const [copyToast, setCopyToast] = useState<{
     title: string;
     detail?: string;
@@ -640,7 +638,7 @@ export function PrismIconDemo(): JSX.Element {
     if (motionPresetIn === "fadeScale") {
       motion.entranceRotate = motionEntranceRotate;
     }
-    if (iconMotionDraw === "stroke") {
+    if (motionDrawMode === "lines" && iconStyle === "lucide") {
       motion.draw = "stroke";
     }
     return motion;
@@ -651,29 +649,31 @@ export function PrismIconDemo(): JSX.Element {
     motionEaseIn,
     motionGrow,
     motionEntranceRotate,
-    iconMotionDraw,
+    motionDrawMode,
+    iconStyle,
   ]);
 
   const motionOn = motionPlaybackOrOff !== null;
+  const lucideStyleOn = iconStyle === "lucide";
   const entranceTuningOn = motionOn && motionPresetIn === "fadeScale";
 
-  /** Code sample reflects the last icon picked from Browse icons. */
-  const snippetSourceName = lastSelectedIconName;
+  const previewIconName =
+    iconStyle === "material"
+      ? materialIconName || PRISM_ICON_PLAYGROUND_DEFAULT_MATERIAL
+      : lucideIconName || PRISM_ICON_PLAYGROUND_DEFAULT_LUCIDE;
+
+  const exampleIconNames =
+    iconStyle === "material" ? exampleMaterialNames : exampleLucideNames;
 
   const currentSampleSnippet = useMemo(() => {
-    if (!snippetSourceName) {
-      return "// Pick an icon with Browse icons above.";
-    }
     return formatPrismIconSnippet(
-      snippetSourceName,
+      previewIconName,
+      iconStyle,
       iconProps,
       iconColor,
-      iconMotion,
-      iconMotion?.draw === "stroke"
-        ? lucideStrokeImportNameForMaterial(snippetSourceName)
-        : undefined
+      iconMotion
     );
-  }, [snippetSourceName, iconProps, iconColor, iconMotion]);
+  }, [previewIconName, iconStyle, iconProps, iconColor, iconMotion]);
 
   const filteredGridIconNames = useMemo(() => {
     const query = gridFilterQuery.trim().toLowerCase();
@@ -688,17 +688,49 @@ export function PrismIconDemo(): JSX.Element {
     [filteredGridIconNames]
   );
 
-  const addIconByName = useCallback(
-    (match: string) => {
-      if (!PRISM_MATERIAL_ICONS_ROUND_NAMES.includes(match)) return;
-      setLastSelectedIconName(match);
-      setExampleIconNames((prev) =>
-        prev.includes(match) ? prev : [...prev, match]
+  const handleIconPicked = useCallback(
+    (pickedLigature: string) => {
+      if (!PRISM_MATERIAL_ICONS_ROUND_NAMES.includes(pickedLigature)) return;
+
+      if (iconStyle === "material") {
+        setMaterialIconName(pickedLigature);
+        setExampleMaterialNames((prev) =>
+          prev.includes(pickedLigature) ? prev : [...prev, pickedLigature]
+        );
+        showTransientToast("Added to preview", pickedLigature);
+        return;
+      }
+
+      const lucideId = resolveLucideIdByName(pickedLigature);
+      if (!lucideId) {
+        showTransientToast(
+          "No Lucide match",
+          `${pickedLigature} has no Lucide equivalent in this picker`
+        );
+        return;
+      }
+      setLucideIconName(lucideId);
+      setExampleLucideNames((prev) =>
+        prev.includes(lucideId) ? prev : [...prev, lucideId]
       );
-      showTransientToast("Added to preview", match);
+      showTransientToast("Added to preview", lucideId);
     },
-    [showTransientToast]
+    [iconStyle, showTransientToast]
   );
+
+  const handleIconStyleChange = useCallback((style: PrismIconStyle) => {
+    setIconStyle(style);
+  }, []);
+
+  const handleSelectFill = useCallback((appearanceKey: "fillFalse" | "fillTrue") => {
+    setSelectedAppearanceKeys((previous) => {
+      const next = new Set(previous);
+      next.delete("fillFalse");
+      next.delete("fillTrue");
+      next.add(appearanceKey);
+      return next;
+    });
+  }, []);
 
   const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
     setSelectedAppearanceKeys((previous) => {
@@ -777,12 +809,11 @@ export function PrismIconDemo(): JSX.Element {
             onSubmit={(e) => e.preventDefault()}
           >
             <div className="grid w-full min-w-0 grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-5">
-            <div className="min-w-0 space-y-1.5">
-              <PrismTypography role="overline" size="small" className="block">
-                Icon picker
-              </PrismTypography>
-              <div className="flex min-w-0 flex-col items-start gap-2">
+              <div className="min-w-0 space-y-1.5">
+                <PlaygroundPropLegend prop="name" />
+                <div className="flex min-w-0 flex-col items-start gap-2">
                 <PrismIconPicker
+                  iconStyle={iconStyle}
                   trigger={
                     <PrismButton
                       type="button"
@@ -792,47 +823,45 @@ export function PrismIconDemo(): JSX.Element {
                       color={{ palette: "default", swatchPrimary: "indigo" }}
                     />
                   }
-                  onIconSelect={(name) => addIconByName(name)}
+                  onIconSelect={handleIconPicked}
                 />
-                {lastSelectedIconName ? (
-                  <div className="flex min-w-0 w-full items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                    <PrismIcon
-                      key={`motion-preview:${lastSelectedIconName}:${playgroundMotionPreviewKey(iconMotion)}`}
-                      name={lastSelectedIconName}
-                      {...iconProps}
-                      color={iconColor}
-                      motion={iconMotion}
-                      lucideStrokeIcon={
-                        iconMotion?.draw === "stroke"
-                          ? lucideStrokeIconForMaterialName(lastSelectedIconName)
-                          : undefined
-                      }
-                    />
-                    <PrismPlaygroundOptionLabel active className="min-w-0 truncate">
-                      {lastSelectedIconName}
-                    </PrismPlaygroundOptionLabel>
-                  </div>
-                ) : null}
+                <div className="flex max-w-full items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <PrismIcon
+                    key={playgroundPreviewKey(
+                      iconStyle,
+                      previewIconName,
+                      iconProps.fill ?? "off",
+                      iconMotion,
+                      motionDrawMode
+                    )}
+                    name={previewIconName}
+                    iconStyle={iconStyle}
+                    {...iconProps}
+                    color={iconColor}
+                    motion={iconMotion}
+                  />
+                  <PrismPlaygroundOptionLabel active className="min-w-0 truncate">
+                    {previewIconName}
+                  </PrismPlaygroundOptionLabel>
+                </div>
               </div>
-            </div>
+              </div>
 
-            <div className="min-w-0 space-y-1.5">
-              <PrismTypography role="overline" size="small" className="block">
-                Icon color
-              </PrismTypography>
-              <PrismColorPicker
-                color={iconColor}
-                onColorChange={setIconColor}
-                showCopyButton={false}
-              />
-            </div>
+              <div className="min-w-0 space-y-1.5">
+                <PlaygroundPropLegend prop="color" />
+                <PrismColorPicker
+                  color={iconColor}
+                  onColorChange={setIconColor}
+                  showCopyButton={false}
+                />
+              </div>
 
-            {ICON_DEMO_OPTION_COLUMNS.map(({ heading, keys }) => (
-              <div key={heading} className="min-w-0 space-y-1.5">
-                <PrismTypography role="overline" size="small" className="block">
-                  {heading}
-                </PrismTypography>
-                {keys.map((appearanceKey) => (
+              {ICON_DEMO_OPTION_COLUMNS.map(({ prop, keys }) => (
+                <fieldset key={prop} className="min-w-0 space-y-1.5">
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop={prop} />
+                  </legend>
+                  {keys.map((appearanceKey) => (
                   <label
                     key={appearanceKey}
                     className="flex cursor-pointer items-center gap-2"
@@ -850,28 +879,93 @@ export function PrismIconDemo(): JSX.Element {
                     </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
-              </div>
-            ))}
+                </fieldset>
+              ))}
 
+              <div className="min-w-0 space-y-6">
+                <fieldset className="min-w-0 space-y-1.5">
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="iconStyle" />
+                  </legend>
+                  {ICON_STYLE_OPTIONS.map(({ value, label }) => (
+                    <label
+                      key={value}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <input
+                        type="radio"
+                        name="prism-icon-style"
+                        value={value}
+                        checked={iconStyle === value}
+                        onChange={() => handleIconStyleChange(value)}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel active={iconStyle === value}>
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
+
+                <fieldset
+                  className={
+                    lucideStyleOn
+                      ? "min-w-0 space-y-1.5 opacity-40"
+                      : "min-w-0 space-y-1.5"
+                  }
+                >
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="fill" />
+                  </legend>
+                  {ICON_FILL_OPTIONS.map(({ appearanceKey, label }) => (
+                    <label
+                      key={appearanceKey}
+                      className={
+                        lucideStyleOn
+                          ? "flex cursor-not-allowed items-center gap-2"
+                          : "flex cursor-pointer items-center gap-2"
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name="prism-icon-fill"
+                        value={appearanceKey}
+                        checked={selectedAppearanceKeys.has(appearanceKey)}
+                        onChange={() => handleSelectFill(appearanceKey)}
+                        disabled={lucideStyleOn}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={
+                          selectedAppearanceKeys.has(appearanceKey) &&
+                          !lucideStyleOn
+                        }
+                      >
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
+              </div>
             </div>
 
             <div className="border-t border-border" aria-hidden />
 
-            <div className="grid w-full min-w-0 grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-5">
-            <fieldset className="min-w-0 space-y-1.5">
-              <legend className="mb-2">
-                <PrismTypography role="overline" size="small">
-                  Animation
-                </PrismTypography>
-              </legend>
-              {ICON_ANIMATION_OPTIONS.map(({ value, label }) => (
+            <div className="min-w-0 space-y-4">
+              <PlaygroundPropLegend prop="motion" className="mb-2" />
+              <div className="grid w-full min-w-0 grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-5">
+                <fieldset className="min-w-0 space-y-1.5">
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="playback" />
+                  </legend>
+                  {ICON_PLAYBACK_OPTIONS.map(({ value, label }) => (
                 <label
-                  key={value === null ? "off" : value}
+                  key={value === null ? "no-motion" : value}
                   className="flex cursor-pointer items-center gap-2"
                 >
                   <input
                     type="radio"
-                    name="prism-icon-animation"
+                    name="prism-icon-playback"
                     value={value === null ? "none" : value}
                     checked={
                       value === null
@@ -892,47 +986,44 @@ export function PrismIconDemo(): JSX.Element {
                   </PrismPlaygroundOptionLabel>
                 </label>
               ))}
-              {motionOn ? (
-                <div className="mt-4 space-y-1.5 border-t border-border pt-4">
-                  <PrismTypography
-                    role="overline"
-                    size="small"
-                    className="block"
+            </fieldset>
+
+            <fieldset className="min-w-0 space-y-1.5" disabled={!motionOn}>
+              <legend className="mb-2">
+                <PlaygroundPropLegend prop="draw" />
+              </legend>
+              {ICON_DRAW_MODE_OPTIONS.map(({ value, label }) => {
+                const optionDisabled =
+                  !motionOn || (value === "lines" && !lucideStyleOn);
+                return (
+                  <label
+                    key={value}
+                    className={
+                      optionDisabled
+                        ? "flex cursor-not-allowed items-center gap-2"
+                        : "flex cursor-pointer items-center gap-2"
+                    }
                   >
-                    Draw
-                  </PrismTypography>
-                  <label className="flex cursor-pointer items-center gap-2">
                     <input
                       type="radio"
                       name="prism-icon-motion-draw"
-                      value="glyph"
-                      checked={iconMotionDraw === "glyph"}
-                      onChange={() => setIconMotionDraw("glyph")}
+                      value={value}
+                      checked={motionDrawMode === value}
+                      onChange={() => setMotionDrawMode(value)}
+                      disabled={optionDisabled}
                       className="border-input"
                     />
                     <PrismPlaygroundOptionLabel
-                      active={iconMotionDraw === "glyph"}
+                      active={motionDrawMode === value}
+                      color={
+                        optionDisabled ? { semanticText: "muted" } : undefined
+                      }
                     >
-                      glyph
+                      {label}
                     </PrismPlaygroundOptionLabel>
                   </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="prism-icon-motion-draw"
-                      value="stroke"
-                      checked={iconMotionDraw === "stroke"}
-                      onChange={() => setIconMotionDraw("stroke")}
-                      className="border-input"
-                    />
-                    <PrismPlaygroundOptionLabel
-                      active={iconMotionDraw === "stroke"}
-                    >
-                      lines
-                    </PrismPlaygroundOptionLabel>
-                  </label>
-                </div>
-              ) : null}
+                );
+              })}
             </fieldset>
 
             <fieldset
@@ -941,9 +1032,7 @@ export function PrismIconDemo(): JSX.Element {
               }
             >
               <legend className="mb-2">
-                <PrismTypography role="overline" size="small">
-                  Duration in
-                </PrismTypography>
+                <PlaygroundPropLegend prop="durationIn" />
               </legend>
               {ICON_MOTION_DURATION_OPTIONS.map(({ value, label }) => (
                 <label
@@ -978,9 +1067,7 @@ export function PrismIconDemo(): JSX.Element {
               }
             >
               <legend className="mb-2">
-                <PrismTypography role="overline" size="small">
-                  Ease
-                </PrismTypography>
+                <PlaygroundPropLegend prop="easeIn" />
               </legend>
               {ICON_MOTION_EASE_OPTIONS.map(({ value, label }) => (
                 <label
@@ -1017,11 +1104,9 @@ export function PrismIconDemo(): JSX.Element {
               }
             >
               <legend className="mb-2">
-                <PrismTypography role="overline" size="small">
-                  Fade
-                </PrismTypography>
+                <PlaygroundPropLegend prop="presetIn" />
               </legend>
-              {ICON_ENTRANCE_OPTIONS.map(({ value, label }) => (
+              {ICON_PRESET_IN_OPTIONS.map(({ value, label }) => (
                 <label
                   key={value}
                   className={
@@ -1032,7 +1117,7 @@ export function PrismIconDemo(): JSX.Element {
                 >
                   <input
                     type="radio"
-                    name="prism-icon-motion-entrance"
+                    name="prism-icon-preset-in"
                     value={value}
                     checked={motionPresetIn === value}
                     onChange={() => setMotionPresetIn(value)}
@@ -1051,16 +1136,13 @@ export function PrismIconDemo(): JSX.Element {
             <fieldset
               className={
                 motionOn
-                  ? "min-w-0 space-y-4"
-                  : "min-w-0 space-y-4 opacity-40"
+                  ? "min-w-0 space-y-1.5"
+                  : "min-w-0 space-y-1.5 opacity-40"
               }
             >
-              <div className="space-y-1.5">
-                <legend>
-                  <PrismTypography role="overline" size="small" className="block">
-                    Grow
-                  </PrismTypography>
-                </legend>
+              <legend className="mb-2">
+                <PlaygroundPropLegend prop="grow" />
+              </legend>
                 {ICON_GROW_OPTIONS.map(({ value, label, rangeLabel }) => (
                   <label
                     key={value}
@@ -1087,12 +1169,18 @@ export function PrismIconDemo(): JSX.Element {
                     </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
-              </div>
+            </fieldset>
 
-              <div className="space-y-1.5">
-                <PrismTypography role="overline" size="small" className="block">
-                  Rotate
-                </PrismTypography>
+            <fieldset
+              className={
+                entranceTuningOn
+                  ? "min-w-0 space-y-1.5"
+                  : "min-w-0 space-y-1.5 opacity-40"
+              }
+            >
+              <legend className="mb-2">
+                <PlaygroundPropLegend prop="entranceRotate" />
+              </legend>
                 {ICON_ENTRANCE_ROTATE_OPTIONS.map(({ value, label, rangeLabel }) => (
                   <label
                     key={value}
@@ -1104,7 +1192,7 @@ export function PrismIconDemo(): JSX.Element {
                   >
                     <input
                       type="radio"
-                      name="prism-icon-motion-rotate"
+                      name="prism-icon-entrance-rotate"
                       value={value}
                       checked={motionEntranceRotate === value}
                       onChange={() => setMotionEntranceRotate(value)}
@@ -1119,8 +1207,8 @@ export function PrismIconDemo(): JSX.Element {
                     </PrismPlaygroundOptionLabel>
                   </label>
                 ))}
-              </div>
             </fieldset>
+              </div>
             </div>
           </form>
         </section>
@@ -1141,16 +1229,18 @@ export function PrismIconDemo(): JSX.Element {
             <div className="flex flex-wrap gap-6">
               {exampleIconNames.map((previewName) => (
                 <PrismIcon
-                  key={`motion-preview:${previewName}:${playgroundMotionPreviewKey(iconMotion)}`}
+                  key={playgroundPreviewKey(
+                    iconStyle,
+                    previewName,
+                    iconProps.fill ?? "off",
+                    iconMotion,
+                    motionDrawMode
+                  )}
                   name={previewName}
+                  iconStyle={iconStyle}
                   {...iconProps}
                   color={iconColor}
                   motion={iconMotion}
-                  lucideStrokeIcon={
-                    iconMotion?.draw === "stroke"
-                      ? lucideStrokeIconForMaterialName(previewName)
-                      : undefined
-                  }
                 />
               ))}
             </div>
@@ -1207,10 +1297,10 @@ export function PrismIconDemo(): JSX.Element {
                     {iconNameList.map((iconName) => (
                       <IconCell
                         key={iconName}
-                        name={iconName}
+                        pickerName={iconName}
+                        iconStyle={iconStyle}
                         iconProps={iconProps}
                         iconColor={iconColor}
-                        iconMotion={iconMotion}
                         onCopied={handleIconCopied}
                       />
                     ))}
