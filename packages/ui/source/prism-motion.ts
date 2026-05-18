@@ -1,6 +1,6 @@
 /**
- * Shared motion vocabulary for Prism UI: playback modes (aligned with {@link PrismEmoji} / admin
- * “ANIMATION” fieldsets) and named GSAP/CSS duration steps.
+ * Shared motion vocabulary for Prism UI: {@link PrismIconMotionProps.playback} modes,
+ * {@link PrismEmoji} `animationMode`, and named GSAP/CSS duration steps (`durationIn`, …).
  */
 
 export type PrismMotionPlaybackMode =
@@ -106,9 +106,8 @@ export type PrismIconMotionProps = {
    */
   presetIn?: PrismIconMotionPreset;
   /**
-   * `"stroke"` — animate Lucide path outlines in with stroke-dashoffset (same idea as Lucide on
-   * {@link PrismButton}). Requires `lucideStrokeIcon` on `PrismIcon`; if omitted, Material glyph motion
-   * is used.
+   * `"stroke"` — animate Lucide path outlines in with stroke-dashoffset. Only applies when
+   * {@link PrismIcon} `iconStyle` is `"lucide"` (use a Lucide `name`, e.g. `gem`).
    */
   draw?: "stroke";
   /**

@@ -109,9 +109,8 @@ export interface PrismButtonProps {
   variant?: PrismButtonVariant;
   icon?: LucideIcon;
   /**
-   * Material Symbols glyph (passed to {@link PrismIcon `name`}). When set, wins over `icon`
-   * and uses glyph motion — not Lucide stroke-draw (`PrismIcon` can do Lucide stroke-draw via
-   * `motion.draw` + `lucideStrokeIcon` when you need that on a glyph-named icon).
+   * Material Symbols glyph (passed to {@link PrismIcon `name`} with default `iconStyle="material"`).
+   * When set, wins over `icon`. Lucide stroke-draw on buttons uses `icon` + `iconStyle="lucide"` on {@link PrismIcon} instead.
    */
   materialSymbol?: string;
   /** Forwarded to {@link PrismIcon} when `materialSymbol` is set; ignored for Lucide `icon`. */
