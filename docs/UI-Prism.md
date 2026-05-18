@@ -13,6 +13,7 @@ packages/ui/
 │   ├── prism-code-block.tsx
 │   ├── prism-card.tsx
 │   ├── prism-icon.tsx
+│   ├── prism-spinner.tsx
 │   ├── prism-layout.tsx
 │   ├── prism-button.tsx
 │   └── index.ts
@@ -23,6 +24,7 @@ packages/ui/
 ├── styles/             # Font configurations and global CSS
 │   ├── fonts.ts        # Next.js font configurations
 │   ├── globals.css     # Global styles and theme
+│   ├── prism-spinner.css
 │   └── index.ts        # Style exports
 └── fonts/              # Font files (.woff2)
     ├── Satoshi-Variable.woff2
@@ -145,6 +147,21 @@ import {
 ```
 
 Admin demo: **`/admin/prism/components/prism-map`** — **`PrismMapDemo`** in `packages/admin/source/prism-map.tsx`.
+
+### PrismSpinner
+
+Small **indeterminate** circular loader: `color` as **`PartialPrismColorSpec`** (resolved with **`prismColorSpecToHex`** for SVG `stroke`), **`lineWeight`** on the same named / numeric ladder as **`PrismIcon`** `weight`, **`size`** as **`PrismSize`** or raw pixel width/height (diameter steps are smaller than **`PrismIcon`** at the same name — tuned for inline loading). Omits **`color`** → **`currentColor`** with **`text-muted-foreground`**. Rotation is SVG-native **`<animateTransform>`** on the arc group (no CSS keyframes). Forward **`aria-hidden`** when a parent or sibling provides the status text.
+
+```tsx
+import { PrismSpinner } from "@ui";
+
+<PrismSpinner
+  color={{ palette: "default", swatchPrimary: "indigo", shade: 500 }}
+  lineWeight="thin"
+  size="small"
+  aria-hidden
+/>
+```
 
 ### Read-only metadata chips
 
@@ -471,7 +488,7 @@ Use `<PrismTypography>` from `@ui` instead of applying `typography-*` or ad-hoc 
 - `textTransform` (optional): CSS values `uppercase` \| `capitalize` \| `lowercase`, or **`sentenceCase`** — for plain string / number **`children`**, formats identifiers with **`prismTypographySentenceCaseFromIdentifier`** (camelCase → sentence case); use with **`role="overline"`** so built-in uppercase yields ALL CAPS labels from names like `textAlign`
 - `textAlign` (optional): `left` | `center` | `right` | `justify` ([text alignment](#text-alignment))
 - `textWrap` (optional): `balance` | `wrap` — when omitted, the component still merges layout defaults (including balance where the scale specifies it)
-- `animationZone` / `animationKind` (optional): scroll-reveal via GSAP (`SplitText`); see source for defaults when a zone is set without a kind
+- `animationZone` / `animationKind` (optional): scroll-reveal via GSAP (`SplitText`); see source for defaults when a zone is set without a kind. There is **no animate-out** when copy changes—only a one-shot **in** when the element intersects. To swap text with an exit, fade/slide a **parent** wrapper out, remount **`PrismTypography`** with a new **`key`**, then **`moveIn`** (or **`fadeIn`**) runs on the new instance.
 - `as` (optional): override the rendered element for semantics or layout
 
 **Default element per role × size:** `display` / `headline` → `h1`–`h3` by size; `title` → `h4`–`h6` by size; `body` → `p`; `label` / `overline` → `span`. **Overline** styles (uppercase, semibold, letter-spacing, block) live in `.typography-overline-*`. Use `className` (e.g. `inline`) if you need non-block overlines.

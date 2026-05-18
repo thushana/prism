@@ -15,6 +15,10 @@ export type PrismMapRoute = {
    * Use for hover / selection so the active route stays visually on top.
    */
   stackOrder?: number;
+  /**
+   * Chart-aligned clock key `HH:MM` (24h) for app-driven selection / labels; ignored by map rendering.
+   */
+  chartSlotLabel?: string;
 };
 
 export type PrismMapShell = "none" | "card";

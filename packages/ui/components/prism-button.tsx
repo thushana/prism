@@ -22,6 +22,18 @@ import {
   type PrismSpacing,
 } from "../source/prism-spacing";
 import { resolvePrismButtonPreset } from "../source/prism-button-presets";
+import {
+  resolvePrismMotionDurationSeconds,
+  type PrismIconMotionProps,
+} from "../source/prism-motion";
+import { PrismIcon } from "./prism-icon";
+
+/** Stable default for {@link PrismIcon} when `materialSymbol` is set and `iconMotion` is omitted. */
+const PRISM_BUTTON_DEFAULT_MATERIAL_MOTION: PrismIconMotionProps = {
+  playback: "once",
+  durationIn: "regular",
+  presetIn: "fadeScale",
+};
 
 /** camelCase → kebab-case for data-* attributes (DOM convention). */
 function camelToKebab(s: string): string {
@@ -96,6 +108,14 @@ export interface PrismButtonProps {
   label: string;
   variant?: PrismButtonVariant;
   icon?: LucideIcon;
+  /**
+   * Material Symbols glyph (passed to {@link PrismIcon `name`}). When set, wins over `icon`
+   * and uses glyph motion — not Lucide stroke-draw (`PrismIcon` can do Lucide stroke-draw via
+   * `motion.draw` + `lucideStrokeIcon` when you need that on a glyph-named icon).
+   */
+  materialSymbol?: string;
+  /** Forwarded to {@link PrismIcon} when `materialSymbol` is set; ignored for Lucide `icon`. */
+  iconMotion?: PrismIconMotionProps;
   iconPosition?: "left" | "right";
   iconOnly?: boolean;
   shape?: PrismButtonShape;
@@ -146,6 +166,8 @@ export function PrismButton(
     label,
     variant = "icon",
     icon: IconComponent,
+    materialSymbol,
+    iconMotion,
     iconPosition = "left",
     iconOnly = false,
     shape = "pill",
@@ -192,14 +214,14 @@ export function PrismButton(
     if (effectiveHovered) {
       gsap.to(el, {
         scale: 1.1,
-        duration: 0.3,
+        duration: resolvePrismMotionDurationSeconds(0.3),
         ease: "back.out(1.56)",
         overwrite: true,
       });
     } else {
       gsap.to(el, {
         scale: 1,
-        duration: 0.25,
+        duration: resolvePrismMotionDurationSeconds("speedy"),
         ease: "power2.out",
         overwrite: true,
       });
@@ -292,9 +314,14 @@ export function PrismButton(
   const hoverForegroundValue =
     inverted && !isGradient ? baseHoverBackground : baseHoverForeground;
 
-  const showIcon = (variant === "icon" && IconComponent) || iconOnly;
-
-  const shouldDrawIcon = showIcon && !disableMotion && !disableIconMotion;
+  const showPrismGlyph =
+    Boolean(materialSymbol) && (variant === "icon" || iconOnly);
+  const showLucideGlyph =
+    Boolean(IconComponent) &&
+    !materialSymbol &&
+    (variant === "icon" || iconOnly);
+  const shouldDrawIcon =
+    showLucideGlyph && !disableMotion && !disableIconMotion;
   React.useEffect(() => {
     if (!shouldDrawIcon || !rootRef.current || iconDrawDoneRef.current) return;
     const el = rootRef.current;
@@ -310,7 +337,7 @@ export function PrismButton(
       });
       gsap.to(elements, {
         strokeDashoffset: 0,
-        duration: 1,
+        duration: resolvePrismMotionDurationSeconds("regular"),
         stagger: 0.03,
         ease: "power2.out",
         overwrite: true,
@@ -323,6 +350,10 @@ export function PrismButton(
         el.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
       gsap.killTweensOf(elements);
     };
+  }, [shouldDrawIcon]);
+
+  React.useEffect(() => {
+    if (!shouldDrawIcon) iconDrawDoneRef.current = false;
   }, [shouldDrawIcon]);
 
   const scaleFactor = SIZE_SCALE[size];
@@ -532,8 +563,21 @@ export function PrismButton(
     }),
   };
 
+  const prismIconMotionResolved: PrismIconMotionProps | undefined =
+    showPrismGlyph && !disableMotion && !disableIconMotion
+      ? (iconMotion ?? PRISM_BUTTON_DEFAULT_MATERIAL_MOTION)
+      : undefined;
+
   const iconNode =
-    showIcon && IconComponent ? (
+    showPrismGlyph && materialSymbol ? (
+      <span style={{ display: "inline-flex", color: "inherit" }}>
+        <PrismIcon
+          name={materialSymbol}
+          size={iconPx}
+          motion={prismIconMotionResolved}
+        />
+      </span>
+    ) : showLucideGlyph && IconComponent ? (
       <span style={{ display: "inline-flex", color: "inherit" }}>
         <IconComponent size={iconPx} strokeWidth={2.5} />
       </span>
@@ -594,7 +638,7 @@ export function PrismButton(
     disableGrow: disableGrow || undefined,
     disableColorChange: disableColorChange || undefined,
     disableIconMotion: disableIconMotion || undefined,
-    drawIcon: showIcon && !disableIconMotion ? true : undefined,
+    drawIcon: showLucideGlyph && !disableIconMotion ? true : undefined,
     inverted: inverted || undefined,
     disabled: disabled || undefined,
     toggled: toggled || undefined,
