@@ -4,6 +4,7 @@
 @import "./tailwind-colors.css" layer(theme);
 @import "./background-utilities.css";
 @import "./layout-wrappers.css";
+@import "./prism-spinner.css";
 
 /* Scan UI package components and source */
 @source "../components/**/*.{ts,tsx}";

@@ -1,5 +1,24 @@
+"use client";
+
+import type { LucideIcon } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+
 import { cn } from "@utilities";
 import type { PrismSize } from "../source/prism-size";
+import {
+  PRISM_ICON_ENTRANCE_ROTATE_DEG,
+  PRISM_ICON_GROW_PRESET_SCALES,
+  PRISM_ICON_OCCASIONAL_JITTER_MS,
+  PRISM_ICON_OCCASIONAL_MIN_MS,
+  type PrismIconEntranceRotatePreset,
+  type PrismIconGrowPreset,
+  type PrismIconMotionPreset,
+  type PrismIconMotionProps,
+  prefersReducedMotion,
+  resolvePrismMotionDurationSeconds,
+  resolvePrismMotionEaseGsap,
+} from "../source/prism-motion";
 import {
   prismColorSpecToIconGlyphPaint,
   type PartialPrismColorSpec,
@@ -22,6 +41,13 @@ export type PrismIconWeightName =
 
 /** Filled variant: **FILL** axis `1` when `"on"`. */
 export type PrismIconFillMode = "on" | "off";
+
+export type {
+  PrismIconEntranceRotatePreset,
+  PrismIconGrowPreset,
+  PrismIconMotionProps,
+  PrismIconMotionPreset,
+};
 
 /** Single source of truth for {@link PrismIcon} when optional props are omitted. */
 export const PRISM_ICON_DEFAULTS: {
@@ -59,7 +85,17 @@ export interface PrismIconProps {
    * from CSS (typically the parent text color, e.g. `text-foreground`), not a fixed black hex.
    */
   color?: PartialPrismColorSpec;
+  /** GSAP motion (Material glyph, or Lucide stroke-dash when `motion.draw` is `"stroke"`). */
+  motion?: PrismIconMotionProps;
+  /**
+   * Lucide icon used when `motion.draw === "stroke"` for path draw-in (same idea as Lucide on
+   * `PrismButton`). If omitted while `draw` is set, Material glyph motion is used instead.
+   */
+  lucideStrokeIcon?: LucideIcon;
 }
+
+const DRAW_SVG_SELECTOR =
+  "svg path, svg line, svg polyline, svg polygon, svg circle, svg ellipse, svg rect";
 
 const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
   small: 20,
@@ -70,7 +106,10 @@ const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
 };
 
 /** Same numeric ladder as {@link PrismTypographyProps.fontWeight} named presets. */
-export const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<PrismIconWeightName, number> = {
+export const PRISM_ICON_WEIGHT_NAME_TO_VALUE: Record<
+  PrismIconWeightName,
+  number
+> = {
   light: 100,
   thin: 200,
   regular: 400,
@@ -99,6 +138,123 @@ function resolvePrismIconFill(fill: PrismIconProps["fill"]): boolean {
   return fill === "on";
 }
 
+function defaultScaleInFrom(preset: PrismIconMotionPreset): number {
+  return preset === "fadeScale" ? 0.92 : 1;
+}
+
+function resolveEntranceScale0(
+  preset: PrismIconMotionPreset,
+  m: PrismIconMotionProps
+): number {
+  if (preset === "none") return 1;
+  if (m.scaleInFromPercent !== undefined) {
+    return Math.max(0.05, m.scaleInFromPercent / 100);
+  }
+  if (m.grow !== undefined) {
+    return Math.max(
+      0.05,
+      PRISM_ICON_GROW_PRESET_SCALES[m.grow].scaleInFromPercent / 100
+    );
+  }
+  return defaultScaleInFrom(preset);
+}
+
+function resolvePeakScale(m: PrismIconMotionProps): number {
+  if (m.scalePeakPercent !== undefined) {
+    return Math.max(0.05, m.scalePeakPercent / 100);
+  }
+  if (m.grow !== undefined) {
+    return Math.max(
+      0.05,
+      PRISM_ICON_GROW_PRESET_SCALES[m.grow].scalePeakPercent / 100
+    );
+  }
+  return 1.06;
+}
+
+function resolveRotateInDeg(m: PrismIconMotionProps): number {
+  if (m.rotateInDeg !== undefined) return m.rotateInDeg;
+  const preset: PrismIconEntranceRotatePreset = m.entranceRotate ?? "none";
+  return PRISM_ICON_ENTRANCE_ROTATE_DEG[preset];
+}
+
+/**
+ * Lucide outline weight on `PrismButton` icons — keep stroke-draw visuals aligned there.
+ * @see PrismButton `IconComponent size={iconPx} strokeWidth={2.5}`
+ */
+const PRISM_ICON_LUCIDE_STROKE_DRAW_WIDTH = 2.5;
+
+/**
+ * Match {@link PrismButton} Lucide stroke-draw: measure every matched geometry node, set dash,
+ * then tween — not embedded in a parent timeline (reliable with nested `svg` paths).
+ */
+function runStrokeDrawGsap(
+  root: HTMLElement,
+  durationSec: number,
+  ease: string,
+  /** Fires after the last staggered segment finishes (or immediately if there are no paths). */
+  onComplete?: () => void
+): void {
+  const elements =
+    root.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
+  if (elements.length === 0) {
+    onComplete?.();
+    return;
+  }
+
+  elements.forEach((node) => {
+    const len = node.getTotalLength();
+    node.style.strokeDasharray = String(len);
+    node.style.strokeDashoffset = String(len);
+  });
+
+  gsap.to(elements, {
+    strokeDashoffset: 0,
+    duration: durationSec,
+    stagger: 0.03,
+    ease,
+    overwrite: true,
+    onComplete,
+  });
+}
+
+function resetStrokeDashInline(root: HTMLElement): void {
+  root.querySelectorAll(DRAW_SVG_SELECTOR).forEach((node) => {
+    if (!(node instanceof SVGGeometryElement)) return;
+    node.style.strokeDasharray = "";
+    node.style.strokeDashoffset = "";
+  });
+}
+
+function runIconEntranceFromTo(
+  el: HTMLElement,
+  presetIn: PrismIconMotionPreset,
+  durationSec: number,
+  m: PrismIconMotionProps,
+  onComplete?: () => void
+): void {
+  const easeGsap = resolvePrismMotionEaseGsap(m.easeIn);
+  if (presetIn === "none") {
+    gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+    onComplete?.();
+    return;
+  }
+  const scale0 = resolveEntranceScale0(presetIn, m);
+  const rotate0 = resolveRotateInDeg(m);
+  gsap.fromTo(
+    el,
+    { opacity: 0, scale: scale0, rotation: rotate0 },
+    {
+      opacity: 1,
+      scale: 1,
+      rotation: 0,
+      duration: durationSec,
+      ease: easeGsap,
+      onComplete,
+    }
+  );
+}
+
 export function PrismIcon({
   name,
   className,
@@ -106,7 +262,12 @@ export function PrismIcon({
   weight = PRISM_ICON_DEFAULTS.weight,
   fill = PRISM_ICON_DEFAULTS.fill,
   color: colorSpec,
+  motion: motionProp,
+  lucideStrokeIcon: LucideStrokeIcon,
 }: PrismIconProps) {
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const epochRef = useRef(0);
+
   const sizePx = resolvePrismIconSizePx(size);
   const weightValue = resolvePrismIconWeightValue(weight);
   const filled = resolvePrismIconFill(fill);
@@ -135,18 +296,257 @@ export function PrismIcon({
   const solidStyle =
     glyphPaint && "solid" in glyphPaint ? { color: glyphPaint.solid } : {};
 
+  useEffect(() => {
+    const m = motionProp;
+    const el = rootRef.current;
+    if (!m || m.disabled || !el) return;
+
+    const strokeDraw = Boolean(LucideStrokeIcon && m.draw === "stroke");
+
+    if (prefersReducedMotion()) {
+      gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+      if (strokeDraw) resetStrokeDashInline(el);
+      return;
+    }
+
+    epochRef.current += 1;
+    const epoch = epochRef.current;
+    const done = () => epochRef.current !== epoch;
+
+    const killAllTweens = () => {
+      gsap.killTweensOf(el);
+      if (strokeDraw) {
+        const stroked = el.querySelectorAll<SVGGeometryElement>(
+          DRAW_SVG_SELECTOR
+        );
+        gsap.killTweensOf(stroked);
+      }
+    };
+
+    let cancelled = false;
+    let innerCleanup: (() => void) | undefined;
+
+    const run = () => {
+      if (cancelled || done()) return;
+      killAllTweens();
+
+      const playback = m.playback ?? "once";
+      const presetIn = m.presetIn ?? "fadeScale";
+      const durIn = resolvePrismMotionDurationSeconds(m.durationIn ?? "regular");
+      const easeIn = resolvePrismMotionEaseGsap(m.easeIn);
+
+      if (playback === "once") {
+        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
+        runIconEntranceFromTo(el, presetIn, durIn, m);
+        innerCleanup = () => {
+          if (done()) return;
+          if (m.presetOut === "fadeScale") {
+            const outDur = resolvePrismMotionDurationSeconds(
+              m.durationOut ?? "speedy"
+            );
+            killAllTweens();
+            gsap.to(el, {
+              opacity: 0,
+              duration: outDur,
+              ease: resolvePrismMotionEaseGsap(m.easeIn),
+            });
+          } else {
+            killAllTweens();
+          }
+        };
+        return;
+      }
+
+      if (playback === "loop") {
+        const pulseDur = Math.max(
+          0.15,
+          resolvePrismMotionDurationSeconds(m.durationIn ?? "regular") * 0.35
+        );
+        const peak = resolvePeakScale(m);
+        const startPulse = () => {
+          if (done()) return;
+          gsap.to(el, {
+            scale: peak,
+            duration: pulseDur,
+            yoyo: true,
+            repeat: -1,
+            ease: "sine.inOut",
+          });
+        };
+        if (presetIn !== "none") {
+          let entranceDone = false;
+          let strokeDone = !strokeDraw;
+          const tryStartPulse = () => {
+            if (done() || !entranceDone || !strokeDone) return;
+            startPulse();
+          };
+          if (strokeDraw) {
+            runStrokeDrawGsap(el, durIn, easeIn, () => {
+              strokeDone = true;
+              tryStartPulse();
+            });
+          }
+          runIconEntranceFromTo(el, presetIn, durIn, m, () => {
+            entranceDone = true;
+            tryStartPulse();
+          });
+        } else {
+          gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+          if (strokeDraw) {
+            runStrokeDrawGsap(el, durIn, easeIn, () => {
+              if (done()) return;
+              startPulse();
+            });
+          } else {
+            startPulse();
+          }
+        }
+        innerCleanup = () => {
+          killAllTweens();
+        };
+        return;
+      }
+
+      if (playback === "hover") {
+        gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
+        if (presetIn !== "none") {
+          runIconEntranceFromTo(el, presetIn, durIn, m);
+        }
+        const durHover = resolvePrismMotionDurationSeconds(m.durationIn ?? "fast");
+        const peak = resolvePeakScale(m);
+        const hoverEase = resolvePrismMotionEaseGsap(m.easeIn);
+        const onEnter = () => {
+          gsap.to(el, {
+            scale: peak,
+            duration: durHover,
+            ease: hoverEase,
+            overwrite: true,
+          });
+        };
+        const onLeave = () => {
+          gsap.to(el, {
+            scale: 1,
+            duration: resolvePrismMotionDurationSeconds("speedy"),
+            ease: hoverEase,
+            overwrite: true,
+          });
+        };
+        el.addEventListener("pointerenter", onEnter);
+        el.addEventListener("pointerleave", onLeave);
+        innerCleanup = () => {
+          el.removeEventListener("pointerenter", onEnter);
+          el.removeEventListener("pointerleave", onLeave);
+          killAllTweens();
+        };
+        return;
+      }
+
+      if (playback === "occasionally") {
+        gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
+        if (presetIn !== "none") {
+          runIconEntranceFromTo(el, presetIn, durIn, m);
+        }
+        let timeoutId: number | undefined;
+        const peak = resolvePeakScale(m);
+        const burstEase = resolvePrismMotionEaseGsap(m.easeIn);
+        const burst = () => {
+          if (done()) return;
+          gsap
+            .timeline()
+            .to(el, { scale: peak, duration: 0.12, ease: burstEase })
+            .to(el, { scale: 1, duration: 0.2, ease: burstEase });
+        };
+        const schedule = () => {
+          if (done()) return;
+          const delay =
+            PRISM_ICON_OCCASIONAL_MIN_MS +
+            Math.random() * PRISM_ICON_OCCASIONAL_JITTER_MS;
+          timeoutId = window.setTimeout(() => {
+            if (done()) return;
+            burst();
+            schedule();
+          }, delay);
+        };
+        schedule();
+        innerCleanup = () => {
+          if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+          killAllTweens();
+        };
+        return;
+      }
+
+      innerCleanup = () => {
+        killAllTweens();
+      };
+    };
+
+    let rafId = 0;
+    if (strokeDraw) {
+      rafId = requestAnimationFrame(run);
+    } else {
+      run();
+    }
+
+    return () => {
+      cancelled = true;
+      if (strokeDraw) cancelAnimationFrame(rafId);
+      innerCleanup?.();
+    };
+  }, [name, motionProp, LucideStrokeIcon]);
+
+  const useLucideStroke =
+    Boolean(
+      LucideStrokeIcon &&
+        motionProp &&
+        !motionProp.disabled &&
+        motionProp.draw === "stroke"
+    );
+
   return (
     <span
-      className={cn("material-symbols-rounded", className)}
+      ref={rootRef}
+      className={cn(
+        useLucideStroke
+          ? "inline-flex items-center justify-center"
+          : "material-symbols-rounded",
+        className
+      )}
       style={{
-        fontSize: `${sizePx}px`,
-        fontFeatureSettings: '"liga" 1',
-        fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' ${weightValue}, 'GRAD' 0, 'opsz' ${opsz}`,
-        ...solidStyle,
-        ...gradientClipStyle,
+        ...(useLucideStroke
+          ? { transformOrigin: "center" }
+          : {
+              fontSize: `${sizePx}px`,
+              fontFeatureSettings: '"liga" 1',
+              fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' ${weightValue}, 'GRAD' 0, 'opsz' ${opsz}`,
+              transformOrigin: "center",
+              ...solidStyle,
+              ...gradientClipStyle,
+            }),
       }}
     >
-      {name}
+      {useLucideStroke && LucideStrokeIcon ? (
+        <span style={{ display: "inline-flex", color: "inherit" }}>
+          <LucideStrokeIcon
+            size={sizePx}
+            strokeWidth={PRISM_ICON_LUCIDE_STROKE_DRAW_WIDTH}
+            fill={filled ? "currentColor" : "none"}
+            className={cn(
+              "shrink-0",
+              !(glyphPaint && "solid" in glyphPaint)
+                ? "text-foreground"
+                : undefined
+            )}
+            {...(glyphPaint && "solid" in glyphPaint
+              ? { color: glyphPaint.solid }
+              : {})}
+            aria-hidden
+          />
+        </span>
+      ) : (
+        name
+      )}
     </span>
   );
 }

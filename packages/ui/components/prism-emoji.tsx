@@ -14,27 +14,20 @@ import {
   type SyntheticEvent,
 } from "react";
 import type { PrismSize } from "../source/prism-size";
+import type { PrismEmojiAnimationMode } from "../source/prism-motion";
 import {
   prismColorSpecToHex,
   prismColorSpecToIconGlyphPaint,
   type PartialPrismColorSpec,
 } from "../styles/prism-color";
 
+export type { PrismEmojiAnimationMode } from "../source/prism-motion";
+
 /** Named size steps match {@link PRISM_ICON_SIZE_NAME_TO_PX} in `prism-icon.tsx` (20 / 24 / 28 / 48 / 64). */
 export type PrismEmojiStyle =
   | "native"
   | "googleNotoColor"
   | "googleNotoAnimated";
-
-/**
- * GIF rasters cannot be frame-scrubbed in `<img>`. Non-`loop` modes swap between
- * static **PNG** (idle) and **GIF** (motion) to approximate the behavior.
- */
-export type PrismEmojiAnimationMode =
-  | "loop"
-  | "once"
-  | "hover"
-  | "occasionally";
 
 /**
  * Base URL without trailing slash. In TimeTraveler, default

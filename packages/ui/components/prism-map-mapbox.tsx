@@ -22,6 +22,7 @@ type RouteFeatureCollection = {
       strokeOpacity: number;
       strokeWeight: number;
       stackOrder: number;
+      routeId: string;
     };
     geometry: { type: "LineString"; coordinates: [number, number][] };
   }>;
@@ -44,6 +45,7 @@ function buildRouteFeatureCollection(
         strokeOpacity: r.strokeOpacity ?? 0.2,
         strokeWeight: r.strokeWeight ?? 3,
         stackOrder: r.stackOrder ?? 0,
+        routeId: r.id,
       },
       geometry: { type: "LineString", coordinates: coords },
     });
@@ -94,6 +96,7 @@ export type PrismMapMapboxProps = {
   mapboxAccessToken: string | (() => Promise<string>);
   style?: string | object;
   mapboxExtra?: { projection?: object };
+  onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
 };
 
 function routesGeometrySignature(routes: PrismMapRoute[]): string {
@@ -107,10 +110,14 @@ export function PrismMapMapbox({
   mapboxAccessToken,
   style = PRISM_MAP_MAPBOX_STYLE_DEFAULT,
   mapboxExtra,
+  onRouteSelectionChange,
 }: PrismMapMapboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapboxglRef = useRef<MapboxModule | null>(null);
   const routesRef = useRef(routes);
+  const routesByIdRef = useRef(new Map<string, PrismMapRoute>());
+  const onRouteSelectionRef = useRef(onRouteSelectionChange);
+  onRouteSelectionRef.current = onRouteSelectionChange;
   const autoFitRef = useRef(autoFit);
   const lastGeometrySigRef = useRef<string>("");
   routesRef.current = routes;
@@ -154,6 +161,10 @@ export function PrismMapMapbox({
           map.remove();
           return;
         }
+        routesByIdRef.current.clear();
+        for (const r of routesRef.current) {
+          routesByIdRef.current.set(r.id, r);
+        }
         const data = buildRouteFeatureCollection(routesRef.current);
         map.addSource("prism-map-routes", {
           type: "geojson",
@@ -171,6 +182,21 @@ export function PrismMapMapbox({
             "line-opacity": ["get", "strokeOpacity"],
             "line-width": ["get", "strokeWeight"],
           },
+        });
+        map.on("click", (e) => {
+          const feats = map.queryRenderedFeatures(e.point, {
+            layers: ["prism-map-routes-line"],
+          });
+          if (feats.length === 0) {
+            onRouteSelectionRef.current?.(null);
+            return;
+          }
+          const feat = feats[0]!;
+          const routeId = (feat.properties as { routeId?: string } | null)
+            ?.routeId;
+          if (routeId === undefined) return;
+          const r = routesByIdRef.current.get(routeId);
+          if (r) onRouteSelectionRef.current?.(r);
         });
         applyFitAndBounds(map, mapboxgl, routesRef.current, autoFitRef.current);
         lastGeometrySigRef.current = routesGeometrySignature(routesRef.current);
@@ -197,6 +223,11 @@ export function PrismMapMapbox({
       | import("mapbox-gl").GeoJSONSource
       | undefined;
     if (!src) return;
+
+    routesByIdRef.current.clear();
+    for (const r of routes) {
+      routesByIdRef.current.set(r.id, r);
+    }
 
     src.setData(buildRouteFeatureCollection(routes));
 

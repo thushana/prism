@@ -45,6 +45,10 @@ type PeerProps = {
   loadingSlot?: ReactNode;
   errorSlot?: ReactNode;
   emptySlot?: ReactNode;
+  /**
+   * Fired when the user selects a route polyline, or `null` when the map background is clicked.
+   */
+  onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
 };
 
 export type PrismMapProps =
@@ -85,6 +89,7 @@ export function PrismMap(props: PrismMapProps) {
     loadingSlot,
     errorSlot,
     emptySlot,
+    onRouteSelectionChange,
   } = props;
 
   const showHeader = Boolean(title || headerAction);
@@ -104,6 +109,7 @@ export function PrismMap(props: PrismMapProps) {
         loadGoogleMaps={props.loadGoogleMaps}
         mapOptions={props.google?.mapOptions}
         styles={props.google?.styles}
+        onRouteSelectionChange={onRouteSelectionChange}
       />
     ) : (
       <PrismMapMapbox
@@ -113,6 +119,7 @@ export function PrismMap(props: PrismMapProps) {
         mapboxAccessToken={props.mapboxAccessToken}
         style={props.mapbox.style}
         mapboxExtra={props.mapboxExtra}
+        onRouteSelectionChange={onRouteSelectionChange}
       />
     );
 

@@ -44,6 +44,7 @@ export type PrismMapGoogleProps = {
   loadGoogleMaps: () => Promise<void>;
   mapOptions?: google.maps.MapOptions;
   styles?: google.maps.MapTypeStyle[];
+  onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
 };
 
 export function PrismMapGoogle({
@@ -52,12 +53,16 @@ export function PrismMapGoogle({
   loadGoogleMaps,
   mapOptions,
   styles,
+  onRouteSelectionChange,
 }: PrismMapGoogleProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const polylineByRouteIdRef = useRef<Map<string, google.maps.Polyline>>(
     new Map()
   );
+  const routesByIdRef = useRef<Map<string, PrismMapRoute>>(new Map());
+  const onRouteSelectionRef = useRef(onRouteSelectionChange);
+  onRouteSelectionRef.current = onRouteSelectionChange;
   const lastGeometrySigRef = useRef<string>("");
   const [mapReady, setMapReady] = useState(false);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
@@ -80,6 +85,9 @@ export function PrismMapGoogle({
             ...PRISM_MAP_GOOGLE_ROADMAP_BASE,
             styles: styles ?? PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
             ...mapOptions,
+          });
+          mapRef.current.addListener("click", () => {
+            onRouteSelectionRef.current?.(null);
           });
         } else {
           mapRef.current.setOptions({
@@ -131,6 +139,11 @@ export function PrismMapGoogle({
     const polys = polylineByRouteIdRef.current;
     const nextIds = new Set<string>();
 
+    routesByIdRef.current.clear();
+    for (const r of routes) {
+      routesByIdRef.current.set(r.id, r);
+    }
+
     for (const route of routes) {
       const path = decodeEncodedPolyline(route.encodedPolyline).map(
         ({ lat, lng }) => new google.maps.LatLng(lat, lng)
@@ -148,7 +161,13 @@ export function PrismMapGoogle({
           strokeWeight: route.strokeWeight ?? 3,
           geodesic: true,
           zIndex: z,
+          clickable: true,
           map,
+        });
+        const routeId = route.id;
+        poly.addListener("click", () => {
+          const picked = routesByIdRef.current.get(routeId);
+          if (picked) onRouteSelectionRef.current?.(picked);
         });
         polys.set(route.id, poly);
       } else {
