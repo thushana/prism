@@ -49,6 +49,8 @@ type PeerProps = {
    * Fired when the user selects a route polyline, or `null` when the map background is clicked.
    */
   onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
+  /** Mapbox only: style/tile load failure (e.g. invalid token or URL restriction). */
+  onMapboxLoadError?: (message: string) => void;
 };
 
 export type PrismMapProps =
@@ -90,6 +92,7 @@ export function PrismMap(props: PrismMapProps) {
     errorSlot,
     emptySlot,
     onRouteSelectionChange,
+    onMapboxLoadError,
   } = props;
 
   const showHeader = Boolean(title || headerAction);
@@ -120,6 +123,7 @@ export function PrismMap(props: PrismMapProps) {
         style={props.mapbox.style}
         mapboxExtra={props.mapboxExtra}
         onRouteSelectionChange={onRouteSelectionChange}
+        onMapLoadError={onMapboxLoadError}
       />
     );
 

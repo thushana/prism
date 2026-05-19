@@ -97,6 +97,8 @@ export type PrismMapMapboxProps = {
   style?: string | object;
   mapboxExtra?: { projection?: object };
   onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
+  /** Fired when Mapbox GL fails to load the style or tiles (e.g. 403 token / URL restriction). */
+  onMapLoadError?: (message: string) => void;
 };
 
 function routesGeometrySignature(routes: PrismMapRoute[]): string {
@@ -111,6 +113,7 @@ export function PrismMapMapbox({
   style = PRISM_MAP_MAPBOX_STYLE_DEFAULT,
   mapboxExtra,
   onRouteSelectionChange,
+  onMapLoadError,
 }: PrismMapMapboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapboxglRef = useRef<MapboxModule | null>(null);
@@ -118,6 +121,9 @@ export function PrismMapMapbox({
   const routesByIdRef = useRef(new Map<string, PrismMapRoute>());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   onRouteSelectionRef.current = onRouteSelectionChange;
+  const onMapLoadErrorRef = useRef(onMapLoadError);
+  onMapLoadErrorRef.current = onMapLoadError;
+  const mapLoadErrorReportedRef = useRef(false);
   const autoFitRef = useRef(autoFit);
   const lastGeometrySigRef = useRef<string>("");
   routesRef.current = routes;
@@ -154,6 +160,19 @@ export function PrismMapMapbox({
           | import("mapbox-gl").ProjectionSpecification
           | undefined,
         attributionControl: false,
+      });
+
+      map.on("error", (event) => {
+        if (cancelled || mapLoadErrorReportedRef.current) return;
+        const err = event.error;
+        const message =
+          err instanceof Error
+            ? err.message
+            : typeof err === "string"
+              ? err
+              : "Mapbox map failed to load";
+        mapLoadErrorReportedRef.current = true;
+        onMapLoadErrorRef.current?.(message);
       });
 
       map.on("load", () => {
@@ -206,6 +225,7 @@ export function PrismMapMapbox({
 
     return () => {
       cancelled = true;
+      mapLoadErrorReportedRef.current = false;
       lastGeometrySigRef.current = "";
       setMapInstance((prev) => {
         prev?.remove();
