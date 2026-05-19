@@ -19,6 +19,10 @@ export type PrismMapRoute = {
    * Chart-aligned clock key `HH:MM` (24h) for app-driven selection / labels; ignored by map rendering.
    */
   chartSlotLabel?: string;
+  /**
+   * When false, skip start/end markers for this route. Default: show S/E dots at polyline ends.
+   */
+  showEndpoints?: boolean;
 };
 
 export type PrismMapShell = "none" | "card";
