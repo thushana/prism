@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 import { decodeEncodedPolyline } from "../source/polyline-decode";
 import { PRISM_MAP_MAPBOX_STYLE_DEFAULT } from "./prism-map-styles";
+import { buildRouteEndpointFeatureCollection } from "./prism-map-endpoints";
 import type { PrismMapRoute } from "./prism-map-types";
 
 type MapboxModule = typeof import("mapbox-gl").default;
@@ -202,6 +203,41 @@ export function PrismMapMapbox({
             "line-width": ["get", "strokeWeight"],
           },
         });
+        map.addSource("prism-map-endpoints", {
+          type: "geojson",
+          data: buildRouteEndpointFeatureCollection(routesRef.current),
+        });
+        map.addLayer({
+          id: "prism-map-endpoints-circle",
+          type: "circle",
+          source: "prism-map-endpoints",
+          layout: {
+            "circle-sort-key": ["to-number", ["get", "stackOrder"]],
+          },
+          paint: {
+            "circle-color": ["get", "fillColor"],
+            "circle-opacity": ["get", "fillOpacity"],
+            "circle-radius": 7,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff",
+          },
+        });
+        map.addLayer({
+          id: "prism-map-endpoints-label",
+          type: "symbol",
+          source: "prism-map-endpoints",
+          layout: {
+            "symbol-sort-key": ["to-number", ["get", "stackOrder"]],
+            "text-field": ["get", "label"],
+            "text-size": 11,
+            "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true,
+          },
+          paint: {
+            "text-color": "#ffffff",
+          },
+        });
         map.on("click", (e) => {
           const feats = map.queryRenderedFeatures(e.point, {
             layers: ["prism-map-routes-line"],
@@ -250,6 +286,11 @@ export function PrismMapMapbox({
     }
 
     src.setData(buildRouteFeatureCollection(routes));
+
+    const endpointSrc = mapInstance.getSource("prism-map-endpoints") as
+      | import("mapbox-gl").GeoJSONSource
+      | undefined;
+    endpointSrc?.setData(buildRouteEndpointFeatureCollection(routes));
 
     if (routes.length === 0) {
       lastGeometrySigRef.current = "";

@@ -16,7 +16,25 @@ import {
   PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
   PRISM_MAP_GOOGLE_ROADMAP_BASE,
 } from "./prism-map-styles";
+import {
+  ROUTE_ENDPOINT_LABEL,
+  collectMapEndpointMarkers,
+} from "./prism-map-endpoints";
 import type { PrismMapRoute } from "./prism-map-types";
+
+function googleEndpointMarkerIcon(
+  color: string,
+  opacity: number
+): google.maps.Symbol {
+  return {
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: 7,
+    fillColor: color,
+    fillOpacity: opacity,
+    strokeColor: "#ffffff",
+    strokeWeight: 2,
+  };
+}
 
 function padLatLngBounds(
   bounds: google.maps.LatLngBounds,
@@ -60,6 +78,7 @@ export function PrismMapGoogle({
   const polylineByRouteIdRef = useRef<Map<string, google.maps.Polyline>>(
     new Map()
   );
+  const markerByKeyRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const routesByIdRef = useRef<Map<string, PrismMapRoute>>(new Map());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   onRouteSelectionRef.current = onRouteSelectionChange;
@@ -120,6 +139,9 @@ export function PrismMapGoogle({
       const polys = polylineByRouteIdRef.current;
       polys.forEach((p) => p.setMap(null));
       polys.clear();
+      const markers = markerByKeyRef.current;
+      markers.forEach((m) => m.setMap(null));
+      markers.clear();
       lastGeometrySigRef.current = "";
       const map = mapRef.current;
       mapRef.current = null;
@@ -137,7 +159,9 @@ export function PrismMapGoogle({
     if (!map) return;
 
     const polys = polylineByRouteIdRef.current;
+    const markers = markerByKeyRef.current;
     const nextIds = new Set<string>();
+    const nextMarkerKeys = new Set<string>();
 
     routesByIdRef.current.clear();
     for (const r of routes) {
@@ -194,6 +218,57 @@ export function PrismMapGoogle({
         if (!samePoints) {
           poly.setPath(path);
         }
+      }
+    }
+
+    for (const endpoint of collectMapEndpointMarkers(routes)) {
+      nextMarkerKeys.add(endpoint.id);
+      let marker = markers.get(endpoint.id);
+      const label = ROUTE_ENDPOINT_LABEL[endpoint.kind];
+      const position = {
+        lat: endpoint.position.lat,
+        lng: endpoint.position.lng,
+      };
+      if (!marker) {
+        marker = new google.maps.Marker({
+          position,
+          map,
+          clickable: false,
+          zIndex: endpoint.stackOrder,
+          label: {
+            text: label,
+            color: "#ffffff",
+            fontSize: "11px",
+            fontWeight: "700",
+          },
+          icon: googleEndpointMarkerIcon(
+            endpoint.fillColor,
+            endpoint.fillOpacity
+          ),
+        });
+        markers.set(endpoint.id, marker);
+      } else {
+        marker.setPosition(position);
+        marker.setOptions({
+          zIndex: endpoint.stackOrder,
+          label: {
+            text: label,
+            color: "#ffffff",
+            fontSize: "11px",
+            fontWeight: "700",
+          },
+          icon: googleEndpointMarkerIcon(
+            endpoint.fillColor,
+            endpoint.fillOpacity
+          ),
+        });
+      }
+    }
+
+    for (const [key, marker] of [...markers.entries()]) {
+      if (!nextMarkerKeys.has(key)) {
+        marker.setMap(null);
+        markers.delete(key);
       }
     }
 
