@@ -24,6 +24,11 @@ import {
   type PartialPrismColorSpec,
 } from "../styles/prism-color";
 import { resolveLucideIconByName } from "../source/prism-icon-lucide-resolve";
+import {
+  PRISM_LUCIDE_DRAW_SVG_SELECTOR,
+  prismLucideStrokeDraw,
+  prismLucideStrokeDrawReset,
+} from "../source/prism-lucide-stroke-draw";
 
 export type PrismIconStyle = "material" | "lucide";
 
@@ -100,9 +105,6 @@ export interface PrismIconProps {
   /** GSAP motion on the icon root; `draw: "stroke"` applies only when {@link iconStyle} is `"lucide"`. */
   motion?: PrismIconMotionProps;
 }
-
-const DRAW_SVG_SELECTOR =
-  "svg path, svg line, svg polyline, svg polygon, svg circle, svg ellipse, svg rect";
 
 const PRISM_ICON_SIZE_NAME_TO_PX: Record<PrismIconSizeName, number> = {
   small: 20,
@@ -212,35 +214,16 @@ function runStrokeDrawGsap(
   /** Fires after the last staggered segment finishes (or immediately if there are no paths). */
   onComplete?: () => void
 ): void {
-  const elements =
-    root.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
-  if (elements.length === 0) {
-    onComplete?.();
-    return;
-  }
-
-  elements.forEach((node) => {
-    const len = node.getTotalLength();
-    node.style.strokeDasharray = String(len);
-    node.style.strokeDashoffset = String(len);
-  });
-
-  gsap.to(elements, {
-    strokeDashoffset: 0,
-    duration: durationSec,
-    stagger: 0.03,
+  const result = prismLucideStrokeDraw(root, {
+    durationSec,
     ease,
-    overwrite: true,
     onComplete,
   });
+  if (result === "none") onComplete?.();
 }
 
 function resetStrokeDashInline(root: HTMLElement): void {
-  root.querySelectorAll(DRAW_SVG_SELECTOR).forEach((node) => {
-    if (!(node instanceof SVGGeometryElement)) return;
-    node.style.strokeDasharray = "";
-    node.style.strokeDashoffset = "";
-  });
+  prismLucideStrokeDrawReset(root);
 }
 
 function runIconEntranceFromTo(
@@ -347,7 +330,7 @@ export function PrismIcon({
       gsap.killTweensOf(el);
       if (strokeDraw) {
         const stroked = el.querySelectorAll<SVGGeometryElement>(
-          DRAW_SVG_SELECTOR
+          PRISM_LUCIDE_DRAW_SVG_SELECTOR
         );
         gsap.killTweensOf(stroked);
       }

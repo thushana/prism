@@ -23,6 +23,10 @@ import {
 } from "../source/prism-spacing";
 import { resolvePrismButtonPreset } from "../source/prism-button-presets";
 import {
+  PRISM_LUCIDE_DRAW_SVG_SELECTOR,
+  prismLucideStrokeDraw,
+} from "../source/prism-lucide-stroke-draw";
+import {
   resolvePrismMotionDurationSeconds,
   type PrismIconMotionProps,
 } from "../source/prism-motion";
@@ -85,8 +89,8 @@ const BASE_PADDING_HORIZONTAL = 14;
 const BASE_FONT_SIZE = 14;
 const BASE_ICON_SIZE = 18;
 
-const DRAW_SVG_SELECTOR =
-  "svg path, svg line, svg polyline, svg polygon, svg circle, svg ellipse, svg rect";
+/** Max rAF attempts while Lucide SVG is in DOM but not yet measurable (collapsed toolbar, etc.). */
+const LUCIDE_DRAW_MAX_ATTEMPTS = 120;
 
 export interface PrismButtonProps {
   /**
@@ -322,31 +326,50 @@ export function PrismButton(
   const shouldDrawIcon =
     showLucideGlyph && !disableMotion && !disableIconMotion;
   React.useEffect(() => {
-    if (!shouldDrawIcon || !rootRef.current || iconDrawDoneRef.current) return;
+    if (!shouldDrawIcon || !rootRef.current) return;
     const el = rootRef.current;
+    let cancelled = false;
+    let frameId = 0;
+    let attempts = 0;
+
     const run = () => {
-      const elements =
-        el.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
-      if (elements.length === 0) return;
-      iconDrawDoneRef.current = true;
-      elements.forEach((node) => {
-        const len = node.getTotalLength();
-        node.style.strokeDasharray = String(len);
-        node.style.strokeDashoffset = String(len);
+      if (cancelled || iconDrawDoneRef.current) return;
+      const result = prismLucideStrokeDraw(el, {
+        durationSec: resolvePrismMotionDurationSeconds("regular"),
       });
-      gsap.to(elements, {
-        strokeDashoffset: 0,
-        duration: resolvePrismMotionDurationSeconds("regular"),
-        stagger: 0.03,
-        ease: "power2.out",
-        overwrite: true,
-      });
+      if (result === "drawn") {
+        iconDrawDoneRef.current = true;
+        return;
+      }
+      if (result === "retry" && attempts++ < LUCIDE_DRAW_MAX_ATTEMPTS) {
+        frameId = requestAnimationFrame(run);
+      }
     };
-    const id = requestAnimationFrame(run);
+
+    frameId = requestAnimationFrame(run);
+
+    let observer: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver((entries) => {
+        if (
+          !entries.some((e) => e.isIntersecting && e.intersectionRatio > 0)
+        ) {
+          return;
+        }
+        if (iconDrawDoneRef.current) return;
+        attempts = 0;
+        frameId = requestAnimationFrame(run);
+      });
+      observer.observe(el);
+    }
+
     return () => {
-      cancelAnimationFrame(id);
-      const elements =
-        el.querySelectorAll<SVGGeometryElement>(DRAW_SVG_SELECTOR);
+      cancelled = true;
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+      const elements = el.querySelectorAll<SVGGeometryElement>(
+        PRISM_LUCIDE_DRAW_SVG_SELECTOR
+      );
       gsap.killTweensOf(elements);
     };
   }, [shouldDrawIcon]);
