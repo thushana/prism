@@ -142,6 +142,12 @@ export interface PrismButtonProps {
    * **full-strength** label/icon color (~800), not a faint foreground wash.
    */
   toggled?: boolean;
+  /**
+   * Animate the label out (max-width + opacity → 0) while keeping the icon visible.
+   * Used by segmented controls to collapse non-selected buttons to icon-only on narrow viewports.
+   * The label stays in the DOM so the CSS transition plays both ways.
+   */
+  labelHidden?: boolean;
   /** Merge props onto a single inner span (display-only / style-guide); not a native `<button>`. */
   asChild?: boolean;
   className?: string;
@@ -189,6 +195,7 @@ export function PrismButton(
     inverted = false,
     disabled = false,
     toggled,
+    labelHidden = false,
     asChild = false,
     className = "",
     ...rest
@@ -604,22 +611,44 @@ export function PrismButton(
         <IconComponent size={iconPx} strokeWidth={2.5} />
       </span>
     ) : null;
+  const labelNode = !iconOnly && (
+    <span
+      style={{
+        display: "inline-block",
+        overflow: "hidden",
+        maxWidth: labelHidden ? 0 : "12rem",
+        opacity: labelHidden ? 0 : 1,
+        // Slower collapse on hide; slightly quicker expand when selected.
+        transition: disableMotion
+          ? "none"
+          : labelHidden
+            ? "max-width 320ms cubic-bezier(0.4,0,0.2,1), opacity 280ms cubic-bezier(0.4,0,0.2,1)"
+            : "max-width 280ms cubic-bezier(0,0,0.2,1), opacity 240ms cubic-bezier(0,0,0.2,1)",
+        whiteSpace: "nowrap",
+        verticalAlign: "middle",
+      }}
+      aria-hidden={labelHidden}
+    >
+      {label}
+    </span>
+  );
+
   const content = iconOnly ? (
     <>{iconNode}</>
   ) : iconPosition === "right" ? (
     <>
-      <span>{label}</span>
+      {labelNode}
       {iconNode}
     </>
   ) : (
     <>
       {iconNode}
-      <span>{label}</span>
+      {labelNode}
     </>
   );
 
-  const ariaLabel = iconOnly ? label : undefined;
-  const title = iconOnly ? label : undefined;
+  const ariaLabel = iconOnly || labelHidden ? label : undefined;
+  const title = iconOnly || labelHidden ? label : undefined;
 
   const restSpan = rest as React.ComponentProps<"span">;
   const restButton = rest as React.ComponentProps<"button">;
