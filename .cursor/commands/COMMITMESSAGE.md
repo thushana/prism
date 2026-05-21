@@ -9,7 +9,6 @@ Write a commit message for the changes on disk
 - One line only
 - Cover all unstaged changes in the commit holistically
 - Format: **Emoji** + **ALL CAPS** slug + dash + brief description
-- If repository has submodules, commit submodules first (deepest first), then main repo
 - Do not add Co-authored-by or tag collaborators on commits
 
 ```
@@ -33,4 +32,28 @@ Write a commit message for the changes on disk
 
 Return it as a copyable Markdown block
 
-Ask the user if they'd like to have it committed for them. If so, commit the submodules with the deepest first (to establish their commit hashes), then commit this repository so the submodule references can be updated. Once commited, push the code.
+## Commit and push (repos with a `prism/` submodule)
+
+**TimeTraveler** (and similar apps): `.cursor/commands` is symlinked to `prism/.cursor/commands`; this file applies to both.
+
+### Commit order
+
+1. **Inside `prism/`** — stage, commit, verify clean (no `-dirty` on the submodule).
+2. **Parent repo root** — stage app changes **and** the updated `prism` submodule pointer, then commit.
+
+If only the parent changed (no edits under `prism/`), skip step 1.
+
+### Push order (required)
+
+**Always push `prism` before the parent** so the parent’s submodule SHA already exists on the Prism remote.
+
+1. `cd prism && git push` (from parent: `git -C prism push`)
+2. `git push` from the **parent repo root**
+
+If only `prism/` was committed, push step 1 only. If only the parent was committed (submodule pointer unchanged), push step 2 only.
+
+Never push the parent first when the commit updates the `prism` submodule reference — clones and CI will point at a missing SHA.
+
+---
+
+Ask the user if they'd like you to commit. If yes, follow the commit and push order above.
