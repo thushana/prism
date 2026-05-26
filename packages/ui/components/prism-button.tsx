@@ -110,6 +110,8 @@ export interface PrismButtonProps {
   color: PartialPrismColorSpec;
   /** Button label (hidden when iconOnly; used for aria-label/title) */
   label: string;
+  /** Optional node before icon/label (e.g. Noto emoji). */
+  leadingSlot?: React.ReactNode;
   variant?: PrismButtonVariant;
   icon?: LucideIcon;
   /**
@@ -173,6 +175,7 @@ export function PrismButton(
   const {
     color,
     label,
+    leadingSlot,
     variant = "icon",
     icon: IconComponent,
     materialSymbol,
@@ -634,14 +637,19 @@ export function PrismButton(
   );
 
   const content = iconOnly ? (
-    <>{iconNode}</>
+    <>
+      {leadingSlot}
+      {iconNode}
+    </>
   ) : iconPosition === "right" ? (
     <>
+      {leadingSlot}
       {labelNode}
       {iconNode}
     </>
   ) : (
     <>
+      {leadingSlot}
       {iconNode}
       {labelNode}
     </>
