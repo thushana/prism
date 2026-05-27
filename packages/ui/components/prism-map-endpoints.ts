@@ -60,7 +60,9 @@ function averagePosition(points: LatLng[]): LatLng {
 
 type EndpointCandidate = Omit<MapEndpointMarker, "id"> & { routeId: string };
 
-function endpointCandidatesFromRoute(route: PrismMapRoute): EndpointCandidate[] {
+function endpointCandidatesFromRoute(
+  route: PrismMapRoute
+): EndpointCandidate[] {
   const path = decodeEncodedPolyline(route.encodedPolyline);
   if (path.length === 0) return [];
 
@@ -85,7 +87,9 @@ function endpointCandidatesFromRoute(route: PrismMapRoute): EndpointCandidate[] 
   ];
 }
 
-function clusterCandidates(candidates: EndpointCandidate[]): EndpointCandidate[] {
+function clusterCandidates(
+  candidates: EndpointCandidate[]
+): EndpointCandidate[] {
   const clusters: EndpointCandidate[][] = [];
 
   for (const candidate of candidates) {

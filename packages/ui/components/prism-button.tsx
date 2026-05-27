@@ -361,9 +361,7 @@ export function PrismButton(
     let observer: IntersectionObserver | undefined;
     if (typeof IntersectionObserver !== "undefined") {
       observer = new IntersectionObserver((entries) => {
-        if (
-          !entries.some((e) => e.isIntersecting && e.intersectionRatio > 0)
-        ) {
+        if (!entries.some((e) => e.isIntersecting && e.intersectionRatio > 0)) {
           return;
         }
         if (iconDrawDoneRef.current) return;

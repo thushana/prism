@@ -13,13 +13,11 @@ In a consuming app, each entry in `PRISM_ADMIN_COMPONENT_REGISTRY` (`prism/packa
 
 Reference implementation: **`PrismEmojiDemo`** in `prism/packages/admin/source/prism-emoji.tsx` (e.g. `/admin/prism/components/prism-emoji`).
 
-
 | Block           | Role                                                                                            |
 | --------------- | ----------------------------------------------------------------------------------------------- |
 | **Customize**   | State + controls = the **API surface** readers touch first.                                     |
 | **Example**     | One **live preview** bound to that state.                                                       |
 | **Code sample** | A string fed to **`PrismCodeBlock`**, generated from the **same** state as Customize + Example. |
-
 
 **Why Customize is first:** props-before-output matches how people read on small screens (controls before scroll-heavy preview) and matches how authors reason about the component.
 
@@ -48,7 +46,6 @@ Playgrounds should reuse the **same column or group titles** for the same prop m
 
 ## Where to look (authoritative files)
 
-
 | Question                                          | File                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------- |
 | Which demos exist and hub copy?                   | `prism/packages/admin/source/registry.ts`                               |
@@ -56,7 +53,6 @@ Playgrounds should reuse the **same column or group titles** for the same prop m
 | Shorter spine-only examples                       | `prism/packages/admin/source/prism-color-picker.tsx`, `prism-table.tsx` |
 | Shell, path bar, sign-out                         | `prism/packages/authentication/source/admin-layout.tsx`                 |
 | Code panel fill and copy affordances              | `prism/packages/ui/components/prism-code-block.tsx`                     |
-
 
 ## When to update this doc
 

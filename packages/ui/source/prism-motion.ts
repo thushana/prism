@@ -22,14 +22,16 @@ export type PrismMotionDurationName =
   | "fast"
   | "speedy";
 
-export const PRISM_MOTION_DURATION_SEC: Record<PrismMotionDurationName, number> =
-  {
-    glacial: 5,
-    slow: 2,
-    regular: 1,
-    fast: 0.5,
-    speedy: 0.25,
-  };
+export const PRISM_MOTION_DURATION_SEC: Record<
+  PrismMotionDurationName,
+  number
+> = {
+  glacial: 5,
+  slow: 2,
+  regular: 1,
+  fast: 0.5,
+  speedy: 0.25,
+};
 
 export function resolvePrismMotionDurationSeconds(
   value: PrismMotionDurationName | number | undefined,

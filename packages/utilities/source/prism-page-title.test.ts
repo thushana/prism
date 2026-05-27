@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  DEFAULT_BROWSER_APP_NAME,
-  PrismPageTitle,
-} from "./prism-page-title";
+import { DEFAULT_BROWSER_APP_NAME, PrismPageTitle } from "./prism-page-title";
 
 describe("PrismPageTitle", () => {
   it("app joins page and app name", () => {

@@ -615,7 +615,10 @@ function ButtonCustomizerSection() {
     const previewColor =
       groupColorMode === "unified"
         ? { ...pickedColor }
-        : { palette: "default" as const, swatchPrimary: "deep-purple" as const };
+        : {
+            palette: "default" as const,
+            swatchPrimary: "deep-purple" as const,
+          };
     const previewSpreadProps = {
       ...prismSpreadProps,
       variant: "icon" as const,
@@ -1007,26 +1010,20 @@ function ButtonVariantsMatrix({
           />
         ))}
       </Row>
-      <Row title='spacing ladder (same names as PrismDivider: tight → airy)'>
-        {(
-          [
-            "tight",
-            "compact",
-            "regular",
-            "comfortable",
-            "airy",
-          ] as const
-        ).map((s) => (
-          <PrismButton
-            key={s}
-            color={{ palette: "default", swatchPrimary: "blue-grey" }}
-            label={s}
-            variant="icon"
-            icon={Gem}
-            spacing={s}
-            asChild
-          />
-        ))}
+      <Row title="spacing ladder (same names as PrismDivider: tight → airy)">
+        {(["tight", "compact", "regular", "comfortable", "airy"] as const).map(
+          (s) => (
+            <PrismButton
+              key={s}
+              color={{ palette: "default", swatchPrimary: "blue-grey" }}
+              label={s}
+              variant="icon"
+              icon={Gem}
+              spacing={s}
+              asChild
+            />
+          )
+        )}
       </Row>
       <Row
         title='gap="none" (segment radius: first / middle / last)'

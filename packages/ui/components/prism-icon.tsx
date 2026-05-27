@@ -277,10 +277,10 @@ export function PrismIcon({
 
   const strokeDraw = Boolean(
     useLucide &&
-      LucideIconComponent &&
-      motionProp &&
-      !motionProp.disabled &&
-      motionProp.draw === "stroke"
+    LucideIconComponent &&
+    motionProp &&
+    !motionProp.disabled &&
+    motionProp.draw === "stroke"
   );
 
   const sizePx = resolvePrismIconSizePx(size);
@@ -345,7 +345,9 @@ export function PrismIcon({
 
       const playback = m.playback ?? "once";
       const presetIn = m.presetIn ?? "fadeScale";
-      const durIn = resolvePrismMotionDurationSeconds(m.durationIn ?? "regular");
+      const durIn = resolvePrismMotionDurationSeconds(
+        m.durationIn ?? "regular"
+      );
       const easeIn = resolvePrismMotionEaseGsap(m.easeIn);
 
       if (playback === "once") {
@@ -426,7 +428,9 @@ export function PrismIcon({
         if (presetIn !== "none") {
           runIconEntranceFromTo(el, presetIn, durIn, m);
         }
-        const durHover = resolvePrismMotionDurationSeconds(m.durationIn ?? "fast");
+        const durHover = resolvePrismMotionDurationSeconds(
+          m.durationIn ?? "fast"
+        );
         const peak = resolvePeakScale(m);
         const hoverEase = resolvePrismMotionEaseGsap(m.easeIn);
         const onEnter = () => {

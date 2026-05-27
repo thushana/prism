@@ -160,7 +160,7 @@ import { PrismSpinner } from "@ui";
   lineWeight="thin"
   size="small"
   aria-hidden
-/>
+/>;
 ```
 
 ### Read-only metadata chips
@@ -546,13 +546,13 @@ Source types live under `packages/ui/source/` (e.g. `prism-size.ts`, `prism-spac
 
 Shared stepped scale for **`PrismButton`**, **`PrismIcon`** (named steps), **`PrismTypography`** `size`, and anywhere else the type is **`PrismSize`**. Defined in `packages/ui/source/prism-size.ts`.
 
-| Option     | Description                                            |
-| ---------- | ------------------------------------------------------ |
-| `small`    | Dense UI; smallest named step                          |
-| `regular`  | Default balance for controls, icons, and body type     |
-| `large`    | Step up for emphasis without jumping to display scale  |
-| `huge`     | Prominent controls and larger glyphs                   |
-| `gigantic` | Largest named step on the ladder                       |
+| Option     | Description                                           |
+| ---------- | ----------------------------------------------------- |
+| `small`    | Dense UI; smallest named step                         |
+| `regular`  | Default balance for controls, icons, and body type    |
+| `large`    | Step up for emphasis without jumping to display scale |
+| `huge`     | Prominent controls and larger glyphs                  |
+| `gigantic` | Largest named step on the ladder                      |
 
 ### Stroke weight (line, icon, and font)
 
@@ -582,11 +582,11 @@ Inner padding / vertical rhythm shared by **`PrismButton`** and **`PrismDivider`
 
 Values for **`PrismTypography`** `textAlign` (and the same words in playground copy where alignment is demonstrated).
 
-| Option    | Description                                  |
-| --------- | -------------------------------------------- |
-| `left`    | Start-aligned text block.                    |
-| `center`  | Centered text block.                         |
-| `right`   | End-aligned text block.                      |
+| Option    | Description                                 |
+| --------- | ------------------------------------------- |
+| `left`    | Start-aligned text block.                   |
+| `center`  | Centered text block.                        |
+| `right`   | End-aligned text block.                     |
 | `justify` | Justified text (last line follows browser). |
 
 ### Divider tone
@@ -595,11 +595,11 @@ Values for **`PrismTypography`** `textAlign` (and the same words in playground c
 
 | Option    | Description                                                                     |
 | --------- | ------------------------------------------------------------------------------- |
-| `white`   | High-key stroke (e.g. rules on tinted or dark surfaces).                       |
-| `muted`   | **100** tint of the picker family (softer than **`default`**).                 |
+| `white`   | High-key stroke (e.g. rules on tinted or dark surfaces).                        |
+| `muted`   | **100** tint of the picker family (softer than **`default`**).                  |
 | `default` | Active **`prismColor`** swatch + shade (the color from **`PrismColorPicker`**). |
-| `rich`    | Saturated accent stroke (theme **`primary`**).                                 |
-| `black`   | Strong dark stroke (e.g. emphasis on light surfaces).                         |
+| `rich`    | Saturated accent stroke (theme **`primary`**).                                  |
+| `black`   | Strong dark stroke (e.g. emphasis on light surfaces).                           |
 
 ### Type ramp captions (playgrounds)
 
@@ -874,7 +874,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 | `typeUppercase` / `typeLowercase`    | `textCase="uppercase"` \| `"lowercase"`                              |
 | `noGrow`, `noMotion`, …              | `disableGrow`, `disableMotion`, …                                    |
 | `asSpan`                             | `asChild`                                                            |
-| `size="normal"`, `large2x`           | `size="regular"`, `size="huge"`                                       |
+| `size="normal"`, `large2x`           | `size="regular"`, `size="huge"`                                      |
 | PrismSize **`medium`** (legacy)      | **`regular`**                                                        |
 | `PrismIcon` `weight="medium"`        | `weight="regular"` or numeric                                        |
 | `explicitModeSegmentList`            | `mode="explicit"` + `segments`                                       |
