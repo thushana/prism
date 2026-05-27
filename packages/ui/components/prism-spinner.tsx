@@ -22,7 +22,9 @@ const PRISM_SPINNER_DIAMETER_PX: Record<PrismSize, number> = {
   gigantic: 40,
 };
 
-function strokeWidthForWeight(lineWeight: PrismIconWeightName | number): number {
+function strokeWidthForWeight(
+  lineWeight: PrismIconWeightName | number
+): number {
   const v =
     typeof lineWeight === "number"
       ? Math.min(700, Math.max(100, Math.round(lineWeight)))
@@ -54,8 +56,7 @@ export function PrismSpinner({
   className,
   ...rest
 }: PrismSpinnerProps) {
-  const px =
-    typeof size === "number" ? size : PRISM_SPINNER_DIAMETER_PX[size];
+  const px = typeof size === "number" ? size : PRISM_SPINNER_DIAMETER_PX[size];
   const strokeW = strokeWidthForWeight(lineWeight);
   const hasSpec = colorSpec != null && Object.keys(colorSpec).length > 0;
   const stroke = hasSpec ? prismColorSpecToHex(colorSpec) : "currentColor";
@@ -66,11 +67,7 @@ export function PrismSpinner({
       width={px}
       height={px}
       viewBox={`0 0 ${VIEW_BOX} ${VIEW_BOX}`}
-      className={cn(
-        "shrink-0",
-        !hasSpec && "text-muted-foreground",
-        className
-      )}
+      className={cn("shrink-0", !hasSpec && "text-muted-foreground", className)}
       {...rest}
     >
       <g>

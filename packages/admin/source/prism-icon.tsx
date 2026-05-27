@@ -49,10 +49,7 @@ const ICON_MOTION_PLAYBACK_OPTIONS: {
 const ICON_PLAYBACK_OPTIONS: {
   value: PrismMotionPlaybackMode | null;
   label: string;
-}[] = [
-  { value: null, label: "(no motion)" },
-  ...ICON_MOTION_PLAYBACK_OPTIONS,
-];
+}[] = [{ value: null, label: "(no motion)" }, ...ICON_MOTION_PLAYBACK_OPTIONS];
 
 const ICON_MOTION_EASE_OPTIONS: {
   value: PrismMotionEasePreset;
@@ -320,16 +317,16 @@ function trimIconMotionForSnippet(
     presetOut: m.presetOut,
     disabled: m.disabled,
   };
-  if (m.easeIn !== undefined && m.easeIn !== ICON_MOTION_SNIPPET_DEFAULTS.easeIn) {
+  if (
+    m.easeIn !== undefined &&
+    m.easeIn !== ICON_MOTION_SNIPPET_DEFAULTS.easeIn
+  ) {
     out.easeIn = m.easeIn;
   }
   if (m.grow !== undefined) {
     out.grow = m.grow;
   }
-  if (
-    m.entranceRotate !== undefined &&
-    m.entranceRotate !== "none"
-  ) {
+  if (m.entranceRotate !== undefined && m.entranceRotate !== "none") {
     out.entranceRotate = m.entranceRotate;
   }
   if (m.scaleInFromPercent !== undefined) {
@@ -503,10 +500,8 @@ const IconCell = memo(function IconCell({
   onCopied: (snippet: string) => void;
 }) {
   const lucideId = resolveLucideIdByName(pickerName);
-  const previewName =
-    iconStyle === "lucide" ? (lucideId ?? null) : pickerName;
-  const snippetName =
-    iconStyle === "lucide" ? lucideId : pickerName;
+  const previewName = iconStyle === "lucide" ? (lucideId ?? null) : pickerName;
+  const snippetName = iconStyle === "lucide" ? lucideId : pickerName;
 
   const handleCopyIconSnippet = useCallback(async () => {
     if (!snippetName) return;
@@ -574,9 +569,8 @@ export function PrismIconDemo(): JSX.Element {
     swatchPrimary: "indigo",
     shade: 500,
   });
-  const [motionPlaybackOrOff, setMotionPlaybackOrOff] = useState<
-    PrismMotionPlaybackMode | null
-  >("once");
+  const [motionPlaybackOrOff, setMotionPlaybackOrOff] =
+    useState<PrismMotionPlaybackMode | null>("once");
   const [motionDurationIn, setMotionDurationIn] =
     useState<PrismMotionDurationName>("regular");
   const [motionPresetIn, setMotionPresetIn] =
@@ -722,15 +716,18 @@ export function PrismIconDemo(): JSX.Element {
     setIconStyle(style);
   }, []);
 
-  const handleSelectFill = useCallback((appearanceKey: "fillFalse" | "fillTrue") => {
-    setSelectedAppearanceKeys((previous) => {
-      const next = new Set(previous);
-      next.delete("fillFalse");
-      next.delete("fillTrue");
-      next.add(appearanceKey);
-      return next;
-    });
-  }, []);
+  const handleSelectFill = useCallback(
+    (appearanceKey: "fillFalse" | "fillTrue") => {
+      setSelectedAppearanceKeys((previous) => {
+        const next = new Set(previous);
+        next.delete("fillFalse");
+        next.delete("fillTrue");
+        next.add(appearanceKey);
+        return next;
+      });
+    },
+    []
+  );
 
   const handleToggleAppearanceKey = (key: IconDemoAppearanceKey) => {
     setSelectedAppearanceKeys((previous) => {
@@ -812,39 +809,42 @@ export function PrismIconDemo(): JSX.Element {
               <div className="min-w-0 space-y-1.5">
                 <PlaygroundPropLegend prop="name" />
                 <div className="flex min-w-0 flex-col items-start gap-2">
-                <PrismIconPicker
-                  iconStyle={iconStyle}
-                  trigger={
-                    <PrismButton
-                      type="button"
-                      variant="icon"
-                      icon={LayoutGrid}
-                      label="Browse icons"
-                      color={{ palette: "default", swatchPrimary: "indigo" }}
-                    />
-                  }
-                  onIconSelect={handleIconPicked}
-                />
-                <div className="flex max-w-full items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                  <PrismIcon
-                    key={playgroundPreviewKey(
-                      iconStyle,
-                      previewIconName,
-                      iconProps.fill ?? "off",
-                      iconMotion,
-                      motionDrawMode
-                    )}
-                    name={previewIconName}
+                  <PrismIconPicker
                     iconStyle={iconStyle}
-                    {...iconProps}
-                    color={iconColor}
-                    motion={iconMotion}
+                    trigger={
+                      <PrismButton
+                        type="button"
+                        variant="icon"
+                        icon={LayoutGrid}
+                        label="Browse icons"
+                        color={{ palette: "default", swatchPrimary: "indigo" }}
+                      />
+                    }
+                    onIconSelect={handleIconPicked}
                   />
-                  <PrismPlaygroundOptionLabel active className="min-w-0 truncate">
-                    {previewIconName}
-                  </PrismPlaygroundOptionLabel>
+                  <div className="flex max-w-full items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                    <PrismIcon
+                      key={playgroundPreviewKey(
+                        iconStyle,
+                        previewIconName,
+                        iconProps.fill ?? "off",
+                        iconMotion,
+                        motionDrawMode
+                      )}
+                      name={previewIconName}
+                      iconStyle={iconStyle}
+                      {...iconProps}
+                      color={iconColor}
+                      motion={iconMotion}
+                    />
+                    <PrismPlaygroundOptionLabel
+                      active
+                      className="min-w-0 truncate"
+                    >
+                      {previewIconName}
+                    </PrismPlaygroundOptionLabel>
+                  </div>
                 </div>
-              </div>
               </div>
 
               <div className="min-w-0 space-y-1.5">
@@ -862,23 +862,25 @@ export function PrismIconDemo(): JSX.Element {
                     <PlaygroundPropLegend prop={prop} />
                   </legend>
                   {keys.map((appearanceKey) => (
-                  <label
-                    key={appearanceKey}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedAppearanceKeys.has(appearanceKey)}
-                      onChange={() => handleToggleAppearanceKey(appearanceKey)}
-                      className="rounded border-input"
-                    />
-                    <PrismPlaygroundOptionLabel
-                      active={selectedAppearanceKeys.has(appearanceKey)}
+                    <label
+                      key={appearanceKey}
+                      className="flex cursor-pointer items-center gap-2"
                     >
-                      {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
-                    </PrismPlaygroundOptionLabel>
-                  </label>
-                ))}
+                      <input
+                        type="checkbox"
+                        checked={selectedAppearanceKeys.has(appearanceKey)}
+                        onChange={() =>
+                          handleToggleAppearanceKey(appearanceKey)
+                        }
+                        className="rounded border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={selectedAppearanceKeys.has(appearanceKey)}
+                      >
+                        {ICON_DEMO_DISPLAY_LABEL[appearanceKey]}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
                 </fieldset>
               ))}
 
@@ -959,255 +961,269 @@ export function PrismIconDemo(): JSX.Element {
                     <PlaygroundPropLegend prop="playback" />
                   </legend>
                   {ICON_PLAYBACK_OPTIONS.map(({ value, label }) => (
-                <label
-                  key={value === null ? "no-motion" : value}
-                  className="flex cursor-pointer items-center gap-2"
-                >
-                  <input
-                    type="radio"
-                    name="prism-icon-playback"
-                    value={value === null ? "none" : value}
-                    checked={
-                      value === null
-                        ? motionPlaybackOrOff === null
-                        : motionPlaybackOrOff === value
-                    }
-                    onChange={() => setMotionPlaybackOrOff(value)}
-                    className="border-input"
-                  />
-                  <PrismPlaygroundOptionLabel
-                    active={
-                      value === null
-                        ? motionPlaybackOrOff === null
-                        : motionPlaybackOrOff === value
-                    }
-                  >
-                    {label}
-                  </PrismPlaygroundOptionLabel>
-                </label>
-              ))}
-            </fieldset>
+                    <label
+                      key={value === null ? "no-motion" : value}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <input
+                        type="radio"
+                        name="prism-icon-playback"
+                        value={value === null ? "none" : value}
+                        checked={
+                          value === null
+                            ? motionPlaybackOrOff === null
+                            : motionPlaybackOrOff === value
+                        }
+                        onChange={() => setMotionPlaybackOrOff(value)}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={
+                          value === null
+                            ? motionPlaybackOrOff === null
+                            : motionPlaybackOrOff === value
+                        }
+                      >
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
 
-            <fieldset className="min-w-0 space-y-1.5" disabled={!motionOn}>
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="draw" />
-              </legend>
-              {ICON_DRAW_MODE_OPTIONS.map(({ value, label }) => {
-                const optionDisabled =
-                  !motionOn || (value === "lines" && !lucideStyleOn);
-                return (
-                  <label
-                    key={value}
-                    className={
-                      optionDisabled
-                        ? "flex cursor-not-allowed items-center gap-2"
-                        : "flex cursor-pointer items-center gap-2"
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="prism-icon-motion-draw"
-                      value={value}
-                      checked={motionDrawMode === value}
-                      onChange={() => setMotionDrawMode(value)}
-                      disabled={optionDisabled}
-                      className="border-input"
-                    />
-                    <PrismPlaygroundOptionLabel
-                      active={motionDrawMode === value}
-                      color={
-                        optionDisabled ? { semanticText: "muted" } : undefined
+                <fieldset className="min-w-0 space-y-1.5" disabled={!motionOn}>
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="draw" />
+                  </legend>
+                  {ICON_DRAW_MODE_OPTIONS.map(({ value, label }) => {
+                    const optionDisabled =
+                      !motionOn || (value === "lines" && !lucideStyleOn);
+                    return (
+                      <label
+                        key={value}
+                        className={
+                          optionDisabled
+                            ? "flex cursor-not-allowed items-center gap-2"
+                            : "flex cursor-pointer items-center gap-2"
+                        }
+                      >
+                        <input
+                          type="radio"
+                          name="prism-icon-motion-draw"
+                          value={value}
+                          checked={motionDrawMode === value}
+                          onChange={() => setMotionDrawMode(value)}
+                          disabled={optionDisabled}
+                          className="border-input"
+                        />
+                        <PrismPlaygroundOptionLabel
+                          active={motionDrawMode === value}
+                          color={
+                            optionDisabled
+                              ? { semanticText: "muted" }
+                              : undefined
+                          }
+                        >
+                          {label}
+                        </PrismPlaygroundOptionLabel>
+                      </label>
+                    );
+                  })}
+                </fieldset>
+
+                <fieldset
+                  className={
+                    motionOn
+                      ? "min-w-0 space-y-1.5"
+                      : "min-w-0 space-y-1.5 opacity-40"
+                  }
+                >
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="durationIn" />
+                  </legend>
+                  {ICON_MOTION_DURATION_OPTIONS.map(({ value, label }) => (
+                    <label
+                      key={value}
+                      className={
+                        motionOn
+                          ? "flex cursor-pointer items-center gap-2"
+                          : "flex cursor-not-allowed items-center gap-2"
                       }
                     >
-                      {label}
-                    </PrismPlaygroundOptionLabel>
-                  </label>
-                );
-              })}
-            </fieldset>
+                      <input
+                        type="radio"
+                        name="prism-icon-motion-duration-in"
+                        value={value}
+                        checked={motionDurationIn === value}
+                        onChange={() => setMotionDurationIn(value)}
+                        disabled={!motionOn}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={motionDurationIn === value && motionOn}
+                      >
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
 
-            <fieldset
-              className={
-                motionOn ? "min-w-0 space-y-1.5" : "min-w-0 space-y-1.5 opacity-40"
-              }
-            >
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="durationIn" />
-              </legend>
-              {ICON_MOTION_DURATION_OPTIONS.map(({ value, label }) => (
-                <label
-                  key={value}
+                <fieldset
                   className={
                     motionOn
-                      ? "flex cursor-pointer items-center gap-2"
-                      : "flex cursor-not-allowed items-center gap-2"
+                      ? "min-w-0 space-y-1.5"
+                      : "min-w-0 space-y-1.5 opacity-40"
                   }
                 >
-                  <input
-                    type="radio"
-                    name="prism-icon-motion-duration-in"
-                    value={value}
-                    checked={motionDurationIn === value}
-                    onChange={() => setMotionDurationIn(value)}
-                    disabled={!motionOn}
-                    className="border-input"
-                  />
-                  <PrismPlaygroundOptionLabel
-                    active={motionDurationIn === value && motionOn}
-                  >
-                    {label}
-                  </PrismPlaygroundOptionLabel>
-                </label>
-              ))}
-            </fieldset>
-
-            <fieldset
-              className={
-                motionOn ? "min-w-0 space-y-1.5" : "min-w-0 space-y-1.5 opacity-40"
-              }
-            >
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="easeIn" />
-              </legend>
-              {ICON_MOTION_EASE_OPTIONS.map(({ value, label }) => (
-                <label
-                  key={value}
-                  className={
-                    motionOn
-                      ? "flex cursor-pointer items-center gap-2"
-                      : "flex cursor-not-allowed items-center gap-2"
-                  }
-                >
-                  <input
-                    type="radio"
-                    name="prism-icon-motion-ease-in"
-                    value={value}
-                    checked={motionEaseIn === value}
-                    onChange={() => setMotionEaseIn(value)}
-                    disabled={!motionOn}
-                    className="border-input"
-                  />
-                  <PrismPlaygroundOptionLabel
-                    active={motionEaseIn === value && motionOn}
-                  >
-                    {label}
-                  </PrismPlaygroundOptionLabel>
-                </label>
-              ))}
-            </fieldset>
-
-            <fieldset
-              className={
-                motionOn
-                  ? "min-w-0 space-y-1.5"
-                  : "min-w-0 space-y-1.5 opacity-40"
-              }
-            >
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="presetIn" />
-              </legend>
-              {ICON_PRESET_IN_OPTIONS.map(({ value, label }) => (
-                <label
-                  key={value}
-                  className={
-                    motionOn
-                      ? "flex cursor-pointer items-center gap-2"
-                      : "flex cursor-not-allowed items-center gap-2"
-                  }
-                >
-                  <input
-                    type="radio"
-                    name="prism-icon-preset-in"
-                    value={value}
-                    checked={motionPresetIn === value}
-                    onChange={() => setMotionPresetIn(value)}
-                    disabled={!motionOn}
-                    className="border-input"
-                  />
-                  <PrismPlaygroundOptionLabel
-                    active={motionPresetIn === value && motionOn}
-                  >
-                    {label}
-                  </PrismPlaygroundOptionLabel>
-                </label>
-              ))}
-            </fieldset>
-
-            <fieldset
-              className={
-                motionOn
-                  ? "min-w-0 space-y-1.5"
-                  : "min-w-0 space-y-1.5 opacity-40"
-              }
-            >
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="grow" />
-              </legend>
-                {ICON_GROW_OPTIONS.map(({ value, label, rangeLabel }) => (
-                  <label
-                    key={value}
-                    className={
-                      motionOn
-                        ? "flex cursor-pointer items-center gap-2"
-                        : "flex cursor-not-allowed items-center gap-2"
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="prism-icon-motion-grow"
-                      value={value}
-                      checked={motionGrow === value}
-                      onChange={() => setMotionGrow(value)}
-                      disabled={!motionOn}
-                      className="border-input"
-                    />
-                    <PrismPlaygroundOptionLabel
-                      active={motionGrow === value && motionOn}
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="easeIn" />
+                  </legend>
+                  {ICON_MOTION_EASE_OPTIONS.map(({ value, label }) => (
+                    <label
+                      key={value}
+                      className={
+                        motionOn
+                          ? "flex cursor-pointer items-center gap-2"
+                          : "flex cursor-not-allowed items-center gap-2"
+                      }
                     >
-                      {label}{" "}
-                      <span className="font-mono font-normal">({rangeLabel})</span>
-                    </PrismPlaygroundOptionLabel>
-                  </label>
-                ))}
-            </fieldset>
+                      <input
+                        type="radio"
+                        name="prism-icon-motion-ease-in"
+                        value={value}
+                        checked={motionEaseIn === value}
+                        onChange={() => setMotionEaseIn(value)}
+                        disabled={!motionOn}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={motionEaseIn === value && motionOn}
+                      >
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
 
-            <fieldset
-              className={
-                entranceTuningOn
-                  ? "min-w-0 space-y-1.5"
-                  : "min-w-0 space-y-1.5 opacity-40"
-              }
-            >
-              <legend className="mb-2">
-                <PlaygroundPropLegend prop="entranceRotate" />
-              </legend>
-                {ICON_ENTRANCE_ROTATE_OPTIONS.map(({ value, label, rangeLabel }) => (
-                  <label
-                    key={value}
-                    className={
-                      entranceTuningOn
-                        ? "flex cursor-pointer items-center gap-2"
-                        : "flex cursor-not-allowed items-center gap-2"
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="prism-icon-entrance-rotate"
-                      value={value}
-                      checked={motionEntranceRotate === value}
-                      onChange={() => setMotionEntranceRotate(value)}
-                      disabled={!entranceTuningOn}
-                      className="border-input"
-                    />
-                    <PrismPlaygroundOptionLabel
-                      active={motionEntranceRotate === value && entranceTuningOn}
+                <fieldset
+                  className={
+                    motionOn
+                      ? "min-w-0 space-y-1.5"
+                      : "min-w-0 space-y-1.5 opacity-40"
+                  }
+                >
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="presetIn" />
+                  </legend>
+                  {ICON_PRESET_IN_OPTIONS.map(({ value, label }) => (
+                    <label
+                      key={value}
+                      className={
+                        motionOn
+                          ? "flex cursor-pointer items-center gap-2"
+                          : "flex cursor-not-allowed items-center gap-2"
+                      }
                     >
-                      {label}{" "}
-                      <span className="font-mono font-normal">({rangeLabel})</span>
-                    </PrismPlaygroundOptionLabel>
-                  </label>
-                ))}
-            </fieldset>
+                      <input
+                        type="radio"
+                        name="prism-icon-preset-in"
+                        value={value}
+                        checked={motionPresetIn === value}
+                        onChange={() => setMotionPresetIn(value)}
+                        disabled={!motionOn}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={motionPresetIn === value && motionOn}
+                      >
+                        {label}
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
+
+                <fieldset
+                  className={
+                    motionOn
+                      ? "min-w-0 space-y-1.5"
+                      : "min-w-0 space-y-1.5 opacity-40"
+                  }
+                >
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="grow" />
+                  </legend>
+                  {ICON_GROW_OPTIONS.map(({ value, label, rangeLabel }) => (
+                    <label
+                      key={value}
+                      className={
+                        motionOn
+                          ? "flex cursor-pointer items-center gap-2"
+                          : "flex cursor-not-allowed items-center gap-2"
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name="prism-icon-motion-grow"
+                        value={value}
+                        checked={motionGrow === value}
+                        onChange={() => setMotionGrow(value)}
+                        disabled={!motionOn}
+                        className="border-input"
+                      />
+                      <PrismPlaygroundOptionLabel
+                        active={motionGrow === value && motionOn}
+                      >
+                        {label}{" "}
+                        <span className="font-mono font-normal">
+                          ({rangeLabel})
+                        </span>
+                      </PrismPlaygroundOptionLabel>
+                    </label>
+                  ))}
+                </fieldset>
+
+                <fieldset
+                  className={
+                    entranceTuningOn
+                      ? "min-w-0 space-y-1.5"
+                      : "min-w-0 space-y-1.5 opacity-40"
+                  }
+                >
+                  <legend className="mb-2">
+                    <PlaygroundPropLegend prop="entranceRotate" />
+                  </legend>
+                  {ICON_ENTRANCE_ROTATE_OPTIONS.map(
+                    ({ value, label, rangeLabel }) => (
+                      <label
+                        key={value}
+                        className={
+                          entranceTuningOn
+                            ? "flex cursor-pointer items-center gap-2"
+                            : "flex cursor-not-allowed items-center gap-2"
+                        }
+                      >
+                        <input
+                          type="radio"
+                          name="prism-icon-entrance-rotate"
+                          value={value}
+                          checked={motionEntranceRotate === value}
+                          onChange={() => setMotionEntranceRotate(value)}
+                          disabled={!entranceTuningOn}
+                          className="border-input"
+                        />
+                        <PrismPlaygroundOptionLabel
+                          active={
+                            motionEntranceRotate === value && entranceTuningOn
+                          }
+                        >
+                          {label}{" "}
+                          <span className="font-mono font-normal">
+                            ({rangeLabel})
+                          </span>
+                        </PrismPlaygroundOptionLabel>
+                      </label>
+                    )
+                  )}
+                </fieldset>
               </div>
             </div>
           </form>

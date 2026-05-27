@@ -79,13 +79,7 @@ const CUSTOMIZER_COLUMNS: { heading: string; keys: DividerOptionKey[] }[] = [
   },
   {
     heading: "Tone",
-    keys: [
-      "toneWhite",
-      "toneMuted",
-      "toneDefault",
-      "toneRich",
-      "toneBlack",
-    ],
+    keys: ["toneWhite", "toneMuted", "toneDefault", "toneRich", "toneBlack"],
   },
   {
     heading: "Spacing",
@@ -201,13 +195,10 @@ function formatDividerSnippet(p: DividerPreviewProps): string {
   const pc = p.prismColor;
   if (
     pc &&
-    (pc.swatchPrimary ||
-      pc.palette !== undefined ||
-      pc.shade !== undefined)
+    (pc.swatchPrimary || pc.palette !== undefined || pc.shade !== undefined)
   ) {
     parts.push(`  prismColor={{`);
-    if (pc.palette !== undefined)
-      parts.push(`    palette: "${pc.palette}",`);
+    if (pc.palette !== undefined) parts.push(`    palette: "${pc.palette}",`);
     if (pc.swatchPrimary)
       parts.push(`    swatchPrimary: "${pc.swatchPrimary}",`);
     if (pc.shade !== undefined) {
@@ -288,15 +279,7 @@ export function PrismDividerDemo(): React.JSX.Element {
       };
     }
     return { ...base, letter: undefined, iconName: undefined };
-  }, [
-    iconFill,
-    iconName,
-    iconSize,
-    iconWeight,
-    letter,
-    prismColor,
-    selected,
-  ]);
+  }, [iconFill, iconName, iconSize, iconWeight, letter, prismColor, selected]);
 
   const snippet = useMemo(
     () => formatDividerSnippet(dividerProps),
@@ -322,7 +305,10 @@ export function PrismDividerDemo(): React.JSX.Element {
             <PrismTypography role="overline" size="small">
               Color (drives tone default / muted)
             </PrismTypography>
-            <PrismColorPicker color={prismColor} onColorChange={setPrismColor} />
+            <PrismColorPicker
+              color={prismColor}
+              onColorChange={setPrismColor}
+            />
           </div>
           <div>
             <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">

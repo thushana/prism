@@ -18,7 +18,10 @@ function joinTitle(parts: Array<string | null | undefined>): string {
  */
 export const PrismPageTitle = {
   /** e.g. `Settings • MyApp` */
-  app(pageTitle?: string | null, appName: string = DEFAULT_BROWSER_APP_NAME): string {
+  app(
+    pageTitle?: string | null,
+    appName: string = DEFAULT_BROWSER_APP_NAME
+  ): string {
     return joinTitle([pageTitle, appName]);
   },
 
