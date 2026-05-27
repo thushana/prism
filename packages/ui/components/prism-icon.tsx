@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 import { cn } from "@utilities";
@@ -255,6 +255,41 @@ function runIconEntranceFromTo(
   );
 }
 
+type PrismLucideIconGlyphProps = {
+  icon: LucideIcon;
+  sizePx: number;
+  weight: PrismIconProps["weight"];
+  filled: boolean;
+  glyphPaint: ReturnType<typeof prismColorSpecToIconGlyphPaint> | undefined;
+};
+
+/** Renders a resolved Lucide icon; keeps lookup out of {@link PrismIcon} JSX (static-components). */
+function PrismLucideIconGlyph({
+  icon: Icon,
+  sizePx,
+  weight,
+  filled,
+  glyphPaint,
+}: PrismLucideIconGlyphProps) {
+  return (
+    <span style={{ display: "inline-flex", color: "inherit" }}>
+      <Icon
+        size={sizePx}
+        strokeWidth={resolvePrismIconLucideStrokeWidth(weight, sizePx)}
+        fill={filled ? "currentColor" : "none"}
+        className={cn(
+          "shrink-0",
+          !(glyphPaint && "solid" in glyphPaint) ? "text-foreground" : undefined
+        )}
+        {...(glyphPaint && "solid" in glyphPaint
+          ? { color: glyphPaint.solid }
+          : {})}
+        aria-hidden
+      />
+    </span>
+  );
+}
+
 export function PrismIcon({
   name,
   className,
@@ -270,14 +305,11 @@ export function PrismIcon({
 
   const useLucide = iconStyle === "lucide";
 
-  const LucideIconComponent = useMemo(() => {
-    if (!useLucide) return null;
-    return resolveLucideIconByName(name);
-  }, [useLucide, name]);
+  const lucideIcon = useLucide ? resolveLucideIconByName(name) : null;
 
   const strokeDraw = Boolean(
     useLucide &&
-    LucideIconComponent &&
+    lucideIcon &&
     motionProp &&
     !motionProp.disabled &&
     motionProp.draw === "stroke"
@@ -511,9 +543,9 @@ export function PrismIcon({
       if (strokeDraw) cancelAnimationFrame(rafId);
       innerCleanup?.();
     };
-  }, [name, motionProp, strokeDraw, LucideIconComponent]);
+  }, [name, motionProp, strokeDraw, lucideIcon]);
 
-  if (useLucide && !LucideIconComponent) {
+  if (useLucide && !lucideIcon) {
     const nodeEnv = (
       globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } }
     ).process?.env?.NODE_ENV;
@@ -524,8 +556,6 @@ export function PrismIcon({
     }
     return null;
   }
-
-  const StrokeIcon = LucideIconComponent;
 
   return (
     <span
@@ -549,24 +579,14 @@ export function PrismIcon({
             }),
       }}
     >
-      {useLucide && StrokeIcon ? (
-        <span style={{ display: "inline-flex", color: "inherit" }}>
-          <StrokeIcon
-            size={sizePx}
-            strokeWidth={resolvePrismIconLucideStrokeWidth(weight, sizePx)}
-            fill={filled ? "currentColor" : "none"}
-            className={cn(
-              "shrink-0",
-              !(glyphPaint && "solid" in glyphPaint)
-                ? "text-foreground"
-                : undefined
-            )}
-            {...(glyphPaint && "solid" in glyphPaint
-              ? { color: glyphPaint.solid }
-              : {})}
-            aria-hidden
-          />
-        </span>
+      {useLucide && lucideIcon ? (
+        <PrismLucideIconGlyph
+          icon={lucideIcon}
+          sizePx={sizePx}
+          weight={weight}
+          filled={filled}
+          glyphPaint={glyphPaint}
+        />
       ) : (
         name
       )}

@@ -135,10 +135,11 @@ export function PrismMapGoogle({
 
     return () => {
       cancelled = true;
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- read latest polyline Map at unmount (not a DOM ref)
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- read latest Maps at unmount (not DOM refs)
       const polys = polylineByRouteIdRef.current;
       polys.forEach((p) => p.setMap(null));
       polys.clear();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- read latest marker Map at unmount
       const markers = markerByKeyRef.current;
       markers.forEach((m) => m.setMap(null));
       markers.clear();
