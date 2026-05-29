@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Run quality checks (format → lint → typecheck → test) in current project and related project.
+ * Run quality checks (format → lint → typecheck → [knip if configured] → test) in current project and related project.
  * Single source of truth: edit here; apps using prism run this via "tsx prism/scripts/quality.ts".
  * Works from both:
  * - Inside prism repo: runs quality in parent (if exists), then prism
@@ -30,12 +30,26 @@ if (isInPrism) {
   PRISM_DIR = path.join(PARENT_OR_APP_DIR, "prism");
 }
 
-const QUALITY_CMD =
-  "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run test:run";
+const BASE_QUALITY_CMD =
+  "pnpm run format && pnpm run lint && pnpm run typecheck";
+
+function qualityCmd(cwd: string): string {
+  const packageJsonPath = path.join(cwd, "package.json");
+  if (!fs.existsSync(packageJsonPath)) {
+    return `${BASE_QUALITY_CMD} && pnpm run test:run`;
+  }
+
+  const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
+    scripts?: Record<string, string>;
+  };
+  const knipStep = pkg.scripts?.knip ? " && pnpm run knip" : "";
+
+  return `${BASE_QUALITY_CMD}${knipStep} && pnpm run test:run`;
+}
 
 function runQualityChecks(cwd: string, _projectName: string): void {
   try {
-    execSync(QUALITY_CMD, {
+    execSync(qualityCmd(cwd), {
       cwd,
       stdio: "inherit",
     });
