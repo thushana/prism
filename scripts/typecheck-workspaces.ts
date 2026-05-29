@@ -38,7 +38,6 @@ for (const workspace of expanded) {
   const tsconfigPath = path.join(dir, "tsconfig.json");
   if (!fs.existsSync(tsconfigPath)) continue;
 
-  const name = path.basename(dir);
   try {
     execSync("pnpm exec tsc --noEmit", { cwd: dir, stdio: "inherit" });
   } catch {

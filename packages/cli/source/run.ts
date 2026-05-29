@@ -185,7 +185,7 @@ function openBrowser(url: string): void {
  */
 function startDevServer(
   appRoot: string,
-  isChildApp: boolean,
+  _isChildApp: boolean,
   port: string = "3000"
 ): void {
   log.info(`     ${chalk.bold("🚀 STARTING")} - Dev server on port ${port}...`);

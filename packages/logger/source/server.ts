@@ -80,29 +80,6 @@ function formatMetadata(meta: Record<string, unknown>): string {
   }
 }
 
-/**
- * Custom Winston format with timestamps and emojis (default mode)
- * Reserved for future use when switching from inline printf.
- */
-const _customFormat = winston.format.printf(
-  ({ level, message, timestamp, emoji, ...meta }) => {
-    const emojiPrefix =
-      emoji || contextEmojiMap[level as keyof typeof contextEmojiMap] || "";
-    const metaStr = formatMetadata(meta as Record<string, unknown>);
-    return `${timestamp} ${emojiPrefix} [${level.toUpperCase()}] ${message}${metaStr}`;
-  }
-);
-
-/**
- * Clean CLI format without timestamps and log levels (CLI mode)
- * Reserved for future use when switching from inline printf.
- */
-const _cliFormat = winston.format.printf(({ message, emoji, ...meta }) => {
-  const emojiPrefix = emoji || "";
-  const metaStr = formatMetadata(meta as Record<string, unknown>);
-  return `${emojiPrefix}${emojiPrefix ? " " : ""}${message}${metaStr}`;
-});
-
 // Track CLI mode state
 let isCLIMode = false;
 
