@@ -9,6 +9,9 @@ minimumReleaseAge: false
 
 overrides:
   esbuild: ^0.27.2
+  flatted: ">=3.4.2"
+  lodash: ^4.17.24
+  vite: 8.0.5
   next: 16.2.7
   lucide-react: 1.17.0
   react: 19.2.7
