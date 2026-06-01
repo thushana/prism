@@ -2,3 +2,27 @@ packages:
   - "apps/*"
   - "packages/*"
   - "tools"
+
+shamefullyHoist: true
+strictPeerDependencies: false
+minimumReleaseAge: false
+
+overrides:
+  esbuild: ^0.27.2
+  next: 16.2.6
+  lucide-react: 1.17.0
+  react: 19.2.6
+  react-dom: 19.2.6
+  typescript-eslint: ^8.59.3
+  "@typescript-eslint/eslint-plugin": ^8.59.3
+  "@typescript-eslint/parser": ^8.59.3
+  "@typescript-eslint/typescript-estree": ^8.59.3
+  "@typescript-eslint/utils": ^8.59.3
+  "@typescript-eslint/type-utils": ^8.59.3
+  "@typescript-eslint/tsconfig-utils": ^8.59.3
+  "@typescript-eslint/project-service": ^8.59.3
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
