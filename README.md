@@ -193,36 +193,30 @@ pnpm run database:studio
 
 Apps in separate repositories can import Prism Core as a dependency. The generator handles this automatically:
 
-**Option 1: Git Submodule (Recommended - One Deployable Repo)**
+**Option 1: Submodule + `apps/web` (recommended — Porch Scope / TimeTraveler style)**
 
 ```bash
-# Direct mode (recommended after pnpm run setup)
 prism generate my-app --path ../my-app
-
-# Or via package.json script
-pnpm run prism generate my-app --path ../my-app
 ```
 
-This automatically:
+This creates:
 
-- Adds Prism as a git submodule inside your app at `./prism`
-- Uses `file:./prism/packages/...` dependencies for fast iteration
-- Creates a single deployable repo (your app + Prism submodule)
-- Allows committing Prism changes from within your app
+- **`../my-app/prism/`** — git submodule
+- **`../my-app/apps/web/`** — Next.js app (edit here; **not** at repo root)
+- **`../my-app/package.json`** — run `pnpm install` and `pnpm run dev` from **repo root**
+- **`../my-app/README.md`** — setup cheat sheet
 
-After updating the submodule, run `pnpm run prism:sync` from your app root to align scripts, Cursor commands, and shared dependency ranges. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
+Vercel **Root Directory**: `apps/web`. Full guide: [GENERATE-Prism.md](./docs/GENERATE-Prism.md).
 
-**Option 2: Git Dependency (Alternative for Deployment)**
+After updating the submodule, run `pnpm run prism:sync` from your app repo root. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
+
+**Option 2: Legacy flat layout + git dependency (deploy-only)**
 
 ```bash
-# Direct mode (recommended after pnpm run setup)
 prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-
-# Or via package.json script
-pnpm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 
-This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process. Note: You won't be able to commit Prism changes from within your app with this approach.
+App files at **repo root** (`app/`, not `apps/web/`). Prefer Option 1 for new projects.
 
 **Import in your app:**
 

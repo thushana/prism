@@ -265,11 +265,17 @@ The `*` version means "use the local workspace version" during development. Each
 
 ### Using Prism as a Package
 
-Prism is intended to be consumed as a dependency when building new apps:
+Prism is intended to be consumed when building apps **outside** this monorepo (e.g. Porch Scope, TimeTraveler):
+
+| Layout | Generate command | Next.js location | When |
+| --- | --- | --- | --- |
+| **Workspace** (default) | `prism generate <name> --path <dir>` | `<dir>/apps/web/` | Submodule at `<dir>/prism/` — **use for all new consumer apps** |
+| **Prism monorepo** | `prism generate <name>` from Prism root | `prism/apps/<name>/` | Developing inside the Prism repo |
+| **Flat** (legacy) | `… --path <dir> --prism-repo <git url>` | `<dir>/app/` at repo root | Deploy-only; no submodule iteration |
 
 **For Standalone Apps (Outside Monorepo):**
 
-1. **Git Submodule** (recommended - one deployable repo):
+1. **Git Submodule + `apps/web`** (recommended — one deployable repo):
 
    ```bash
    # Generate app (automatically adds Prism as submodule at ./prism)
