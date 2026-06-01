@@ -32,6 +32,7 @@
     "next": "16.2.7",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "server-only": "^0.0.1",
     "ui": "workspace:*"
   },
   "devDependencies": {
@@ -45,6 +46,7 @@
     "eslint-config-next": "16.2.7",
     "lightningcss": "^1.32.0",
     "postcss-import": "^16.1.1",
+    "postcss-load-config": "^6.0.1",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.22.4",
