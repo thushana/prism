@@ -117,6 +117,21 @@ function writeTemplateFile(
   fs.writeFileSync(fullPath, renderTemplate(template, vars), "utf-8");
 }
 
+/** `packageManager` from Prism root so CI `pnpm/action-setup` matches local Corepack. */
+function readPrismPackageManager(prismRoot: string | null): string | undefined {
+  if (!prismRoot) {
+    return undefined;
+  }
+  try {
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(prismRoot, "package.json"), "utf-8")
+    ) as { packageManager?: string };
+    return packageJson.packageManager;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Generate package.json
  */
@@ -165,10 +180,13 @@ function generatePackageJson(
           flags: "^4.0.0",
         };
 
+  const packageManager = readPrismPackageManager(prismRoot);
+
   const packageJson = {
     name: appName,
     version: "0.1.0",
     private: true,
+    ...(packageManager ? { packageManager } : {}),
     scripts: {
       dev: useFileDependencies ? "next dev --webpack" : "next dev",
       build: useFileDependencies ? "next build --webpack" : "next build",

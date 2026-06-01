@@ -10,7 +10,8 @@ This document is the **checklist for Prism monorepo maintainers** and for **apps
 
 ## 1. GitHub Actions CI
 
-- Add **`.github/workflows/ci.yml`** that installs with **`pnpm install --frozen-lockfile`**, pins Node via **`.nvmrc`** (same major as `engines` in `package.json`), and runs **read-only** checks:
+- Add **`.github/workflows/ci.yml`** that installs with **`pnpm install --frozen-lockfile`**, pins Node via **`.nvmrc`** (same major as `engines` in `package.json`), and runs **read-only** checks.
+- Use **`pnpm/action-setup@v4`** without a hardcoded `version:` — it reads **`packageManager`** from root **`package.json`** (must match local Corepack / embedder apps).
   - **`pnpm run format:check`** (never `format` / `--write` in CI—that mutates the tree).
   - **`pnpm run lint`**
   - **`pnpm run typecheck`**
