@@ -156,7 +156,7 @@ pnpm run knip                 # dependencies + orphan files (CI runs this)
 pnpm run knip:exports         # quarterly only (unused exports; local only)
 ```
 
-- **`knip`** — unlisted/unused deps and orphan files (see app `knip.config.ts`).
+- **`knip`** — unlisted/unused deps and orphan files (see root `knip.config.ts` in app and prism).
 - **`knip:exports`** — tighter export surface; noisier, run occasionally not every month.
 
 ### 6. Verify before you commit (5 min) **(report)** / **(verify)** after apply
