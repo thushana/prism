@@ -91,7 +91,7 @@ Use this after merging Dependabot PRs or whenever things feel “stale.” All c
 - **Submodule apps:** if committing, push **`prism/`** first, then the parent (see step 7).
 - **Dependabot PRs:** optional `gh pr list` — report open dependency PRs; do not merge unless asked.
 
-**Deliverable (report-only):** short sections — toolchain, git/submodule, outdated (root + prism), `prism:sync:dependencies` dry-run, audit (high), knip, quality (app + prism), recommended next actions (no changes made).
+**Deliverable (report-only):** short sections — toolchain, git/submodule, outdated (root + prism), `prism:sync:dependencies` dry-run, audit (high), knip, quality (app + prism), build (app + prism web), recommended next actions (no changes made).
 
 ### Before you start
 
@@ -161,12 +161,16 @@ pnpm run knip:exports         # quarterly only (unused exports; local only)
 
 ### 6. Verify before you commit (5 min) **(report)** / **(verify)** after apply
 
+Chores runs **knip → quality (app + prism) → build** so all tests finish before any production build.
+
 ```bash
-pnpm run quality:ci           # app: format check, lint, typecheck, knip, test, build
+pnpm run chores                 # full ritual (report-only by default)
+pnpm run quality:ci             # app CI parity in one command (includes build)
 cd prism && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run && cd ..
+pnpm run build                  # app production build (last gate before deploy)
 ```
 
-Or locally with auto-format: `pnpm run quality:all` (mutates formatting). **Agents:** prefer `quality:ci` unless the user asked to format.
+Or locally with auto-format: `pnpm run quality:all` (mutates formatting). **Agents:** prefer `quality:ci` or `pnpm run chores` unless the user asked to format.
 
 ### 7. Commit & push (submodule apps only) **(apply)**
 
