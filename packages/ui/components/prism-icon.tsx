@@ -32,8 +32,6 @@ import {
 
 export type PrismIconStyle = "material" | "lucide";
 
-export { resolveLucideIconByName } from "../source/prism-icon-lucide-resolve";
-
 /** Named size steps map to pixel `fontSize` / clamped `opsz` (20–48); aligns with `PrismButton` `size`. */
 export type PrismIconSizeName = PrismSize;
 
