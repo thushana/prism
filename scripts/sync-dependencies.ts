@@ -60,7 +60,6 @@ const REFERENCE_WEB_APPLICATION_DEVELOPMENT_DEPENDENCY_PACKAGE_NAMES = [
   "@types/react-dom",
   "commander",
   "drizzle-kit",
-  "@eslint/compat",
   "eslint",
   "eslint-config-next",
   "lightningcss",
