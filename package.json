@@ -24,6 +24,7 @@
     "build": "pnpm -r --if-present run build",
     "build:web": "pnpm --filter web run build",
     "clean": "rm -rf js scripts/*.js *.tsbuildinfo apps/*/.next apps/*/node_modules/.cache",
+    "chores": "tsx scripts/chores.ts",
     "clean:directories": "tsx scripts/clean-directories.ts",
     "database:generate": "drizzle-kit generate --config=packages/database/drizzle.config.ts",
     "database:migrate": "drizzle-kit migrate --config=packages/database/drizzle.config.ts",
