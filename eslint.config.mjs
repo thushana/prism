@@ -32,6 +32,9 @@ const eslintConfig = defineConfig([
   ]),
   // Prism root has no pages dir; packages/tools are not Next apps
   {
+    settings: {
+      react: { version: "19" },
+    },
     rules: {
       "@next/next/no-html-link-for-pages": "off",
     },
