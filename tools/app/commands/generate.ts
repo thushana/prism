@@ -60,6 +60,44 @@ function getInstallCommand(pm: string): string {
   }
 }
 
+/** Where generated app files live relative to the consumer repo root. */
+type GenerateLayout = "prism-monorepo" | "consumer-workspace" | "consumer-flat";
+
+function resolveGenerateLayout(
+  inMonorepo: boolean,
+  useGitDependency: boolean
+): GenerateLayout {
+  if (inMonorepo) {
+    return "prism-monorepo";
+  }
+  if (useGitDependency) {
+    return "consumer-flat";
+  }
+  return "consumer-workspace";
+}
+
+function resolveAppRoot(repoRoot: string, layout: GenerateLayout): string {
+  if (layout === "consumer-workspace") {
+    return path.join(repoRoot, "apps", "web");
+  }
+  return repoRoot;
+}
+
+function prismPackagesPrefix(layout: GenerateLayout): string {
+  switch (layout) {
+    case "prism-monorepo":
+      return "../../packages";
+    case "consumer-workspace":
+      return "../../prism/packages";
+    case "consumer-flat":
+      return "./prism/packages";
+  }
+}
+
+function usesSubmoduleFileDependencies(layout: GenerateLayout): boolean {
+  return layout === "consumer-workspace" || layout === "consumer-flat";
+}
+
 /**
  * Create directory structure
  */
@@ -132,66 +170,65 @@ function readPrismPackageManager(prismRoot: string | null): string | undefined {
   }
 }
 
-/**
- * Generate package.json
- */
-function generatePackageJson(
-  targetDir: string,
-  appName: string,
-  prismRoot: string | null,
-  prismRepo?: string,
-  useFileDependencies: boolean = false
-): void {
-  // Determine dependencies based on location
-  // If in monorepo, use workspace references like existing apps
-  // For standalone, use git dependencies (deployable) or file: (local dev)
-  const prismDependencies = prismRoot
-    ? {
-        // In monorepo, reference individual packages (like apps/web)
-        database: "*",
-        intelligence: "*",
-        logger: "*",
-        ui: "*",
-        "@prism/utilities": "*",
-        admin: "*",
-        "feature-flags": "*",
-        flags: "^4.0.0",
-      }
-    : prismRepo
-      ? {
-          // Standalone app with git dependency: use @prism/core from git repo
-          // This works for deployment - Vercel will clone the repo during build
-          "@prism/core": prismRepo,
-        }
-      : {
-          // Standalone app: use file: refs to Prism packages (local dev only)
-          // Prism is added as a git submodule at ./prism (inside the app)
-          // This enables CSS imports like @import "ui/styles/globals.css" to resolve
-          // For deployment, you'll need to either:
-          // 1. Use --prism-repo flag to generate with git dependency
-          // 2. Or manually change to git dependency before deploying
-          database: "file:./prism/packages/database",
-          intelligence: "file:./prism/packages/intelligence",
-          logger: "file:./prism/packages/logger",
-          ui: "file:./prism/packages/ui",
-          "@prism/utilities": "file:./prism/packages/utilities",
-          admin: "file:./prism/packages/admin",
-          "feature-flags": "file:./prism/packages/feature-flags",
-          flags: "^4.0.0",
-        };
+function buildPrismDependencies(
+  layout: GenerateLayout,
+  prismRepo?: string
+): Record<string, string> {
+  if (layout === "prism-monorepo") {
+    return {
+      database: "*",
+      intelligence: "*",
+      logger: "*",
+      ui: "*",
+      "@prism/utilities": "*",
+      admin: "*",
+      "feature-flags": "*",
+      flags: "^4.0.0",
+    };
+  }
 
+  if (prismRepo) {
+    return { "@prism/core": prismRepo };
+  }
+
+  const filePrefix =
+    layout === "consumer-workspace"
+      ? "file:../../prism/packages/"
+      : "file:./prism/packages/";
+
+  return {
+    database: `${filePrefix}database`,
+    intelligence: `${filePrefix}intelligence`,
+    logger: `${filePrefix}logger`,
+    ui: `${filePrefix}ui`,
+    "@prism/utilities": `${filePrefix}utilities`,
+    admin: `${filePrefix}admin`,
+    "feature-flags": `${filePrefix}feature-flags`,
+    flags: "^4.0.0",
+  };
+}
+
+function generateWebAppPackageJson(
+  appRoot: string,
+  appName: string,
+  layout: GenerateLayout,
+  prismRoot: string | null,
+  prismRepo?: string
+): void {
+  const useWebpack = usesSubmoduleFileDependencies(layout);
   const packageManager = readPrismPackageManager(prismRoot);
 
   const packageJson = {
-    name: appName,
+    name: layout === "consumer-workspace" ? "web" : appName,
     version: "0.1.0",
     private: true,
     ...(packageManager ? { packageManager } : {}),
     scripts: {
-      dev: useFileDependencies ? "next dev --webpack" : "next dev",
-      build: useFileDependencies ? "next build --webpack" : "next build",
+      dev: useWebpack ? "next dev --webpack" : "next dev",
+      build: useWebpack ? "next build --webpack" : "next build",
       start: "next start",
-      lint: "eslint app --ext .ts,.tsx",
+      lint: "eslint app",
+      "lint:fix": "eslint app --fix",
       format: 'prettier --write "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
       "format:check":
         'prettier --check "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
@@ -207,96 +244,178 @@ function generatePackageJson(
       "db:seed": "tsx database/seed.ts",
     },
     dependencies: {
-      ...prismDependencies,
+      ...buildPrismDependencies(layout, prismRepo),
       "@neondatabase/serverless": "^1.0.2",
       "@radix-ui/react-slot": "^1.2.4",
-      next: "16.1.1",
-      react: "^19.2.3",
-      "react-dom": "^19.2.3",
-      dotenv: "^17.2.3",
-      "drizzle-orm": "beta",
+      next: "16.2.7",
+      react: "19.2.7",
+      "react-dom": "19.2.7",
+      dotenv: "^17.4.2",
+      "drizzle-orm": "^0.45.2",
     },
     devDependencies: {
-      "@tailwindcss/postcss": "^4.1.17",
-      "@types/node": "^24.10.1",
-      "@types/react": "^19.2.6",
+      "@tailwindcss/postcss": "^4.3.0",
+      "@types/node": "^25.9.1",
+      "@types/react": "^19.2.16",
       "@types/react-dom": "^19.2.3",
-      commander: "^12.1.0",
-      "drizzle-kit": "beta",
-      eslint: "^9.39.1",
-      "eslint-config-next": "16.1.1",
-      lightningcss: "^1.30.2",
+      commander: "^15.0.0",
+      "drizzle-kit": "^0.31.10",
+      eslint: "^10.4.1",
+      "eslint-config-next": "16.2.7",
+      lightningcss: "^1.32.0",
       "postcss-import": "^16.1.1",
-      prettier: "^3.6.2",
-      tailwindcss: "^4.1.17",
-      tsx: "^4.20.6",
+      "postcss-load-config": "^6.0.1",
+      prettier: "^3.8.3",
+      tailwindcss: "^4.3.0",
+      tsx: "^4.22.4",
       "tw-animate-css": "^1.4.0",
-      typescript: "^5.9.3",
-      vitest: "^4.1.5",
-      "@vitejs/plugin-react": "^4.3.4",
+      typescript: "^6.0.3",
+      vitest: "^4.1.8",
     },
   };
 
   fs.writeFileSync(
-    path.join(targetDir, "package.json"),
+    path.join(appRoot, "package.json"),
     JSON.stringify(packageJson, null, 2) + "\n",
     "utf-8"
   );
 }
 
+function generateConsumerRepoPackageJson(
+  repoRoot: string,
+  appName: string,
+  prismRoot: string | null
+): void {
+  const packageManager = readPrismPackageManager(prismRoot);
+
+  const packageJson = {
+    name: appName,
+    version: "0.1.0",
+    private: true,
+    ...(packageManager ? { packageManager } : {}),
+    scripts: {
+      build: "pnpm --filter web run build",
+      clean: "rm -rf apps/*/.next apps/*/node_modules/.cache *.tsbuildinfo",
+      "db:generate": "pnpm --filter web run db:generate",
+      "db:migrate": "pnpm --filter web run db:migrate",
+      "db:push": "pnpm --filter web run db:push",
+      "db:seed": "pnpm --filter web run db:seed",
+      "db:studio": "pnpm --filter web run db:studio",
+      dev: "pnpm --filter web run dev",
+      "dev:web": "pnpm --filter web run dev",
+      format: 'prettier --write "apps/web/**/*.{ts,tsx}"',
+      "format:check": 'prettier --check "apps/web/**/*.{ts,tsx}"',
+      lint: "pnpm --filter web run lint",
+      "lint:fix": "pnpm --filter web run lint:fix",
+      "prism:sync": "tsx prism/scripts/sync.ts",
+      "prism:sync:dependencies": "tsx prism/scripts/sync-dependencies.ts",
+      "prism:sync:scripts": "tsx prism/scripts/sync-scripts.ts",
+      quality: "tsx prism/scripts/quality.ts",
+      "quality:quick": "pnpm run format && pnpm run lint && pnpm run typecheck",
+      start: "pnpm --filter web run start",
+      test: "pnpm --filter web run test",
+      "test:run": "pnpm --filter web run test:run",
+      typecheck: "pnpm --filter web run typecheck",
+      "vercel:build": "vercel build --cwd apps/web",
+    },
+    devDependencies: {
+      knip: "^6.15.0",
+      prettier: "^3.8.3",
+      tsx: "^4.22.4",
+      typescript: "^6.0.3",
+    },
+  };
+
+  fs.writeFileSync(
+    path.join(repoRoot, "package.json"),
+    JSON.stringify(packageJson, null, 2) + "\n",
+    "utf-8"
+  );
+}
+
+function generatePackageJson(
+  repoRoot: string,
+  appRoot: string,
+  appName: string,
+  layout: GenerateLayout,
+  prismRoot: string | null,
+  prismRepo?: string
+): void {
+  generateWebAppPackageJson(appRoot, appName, layout, prismRoot, prismRepo);
+
+  if (layout === "consumer-workspace") {
+    generateConsumerRepoPackageJson(repoRoot, appName, prismRoot);
+  }
+}
+
 /**
  * Generate next.config.ts
  */
-function generateNextConfig(
-  targetDir: string,
-  useFileDependencies: boolean
-): void {
-  // For file dependencies, we need to configure Next.js to allow external paths
-  // Turbopack doesn't support this, so we disable it and use webpack
-  const nextConfig = useFileDependencies
+function generateNextConfig(appRoot: string, layout: GenerateLayout): void {
+  const prismPrefix = prismPackagesPrefix(layout);
+  const prismToolsWatchPath =
+    layout === "consumer-workspace"
+      ? "../../prism/tools/**"
+      : "./prism/tools/**";
+
+  const nextConfig = usesSubmoduleFileDependencies(layout)
     ? `import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
-  // Webpack configuration for file dependencies (Prism as git submodule at ./prism)
-  // Turbopack is disabled via --webpack flag in package.json scripts
-  turbopack: {}, // Empty config to silence Turbopack warnings
+  transpilePackages: [
+    "@prism/utilities",
+    "authentication",
+    "intelligence",
+    "logger",
+    "ui",
+    "admin",
+    "feature-flags",
+  ],
+  turbopack: {},
   webpack: (config) => {
-    // Configure webpack to resolve TypeScript paths
-    // These match the paths in tsconfig.json
+    const authenticationSource = path.resolve(
+      __dirname,
+      "${prismPrefix}/authentication/source"
+    );
+
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@database": path.resolve(__dirname, "./prism/packages/database/source"),
-      "@intelligence": path.resolve(__dirname, "./prism/packages/intelligence/source"),
-      "@intelligence/tasks": path.resolve(__dirname, "./prism/packages/intelligence/source/tasks"),
-      "@logger": path.resolve(__dirname, "./prism/packages/logger/source"),
-      "@logger/client": path.resolve(__dirname, "./prism/packages/logger/source/client"),
-      "@logger/server": path.resolve(__dirname, "./prism/packages/logger/source/server"),
-      "@ui": path.resolve(__dirname, "./prism/packages/ui/source"),
-      "@utilities": path.resolve(__dirname, "./prism/packages/utilities/source"),
-      "@admin": path.resolve(__dirname, "./prism/packages/admin/source"),
-      "feature-flags": path.resolve(__dirname, "./prism/packages/feature-flags/source"),
+      "@database": path.resolve(__dirname, "${prismPrefix}/database/source"),
+      "@intelligence": path.resolve(__dirname, "${prismPrefix}/intelligence/source"),
+      "@intelligence/tasks": path.resolve(__dirname, "${prismPrefix}/intelligence/source/tasks"),
+      "@intelligence/client": path.resolve(__dirname, "${prismPrefix}/intelligence/source/client"),
+      "@logger": path.resolve(__dirname, "${prismPrefix}/logger/source"),
+      "@logger/client": path.resolve(__dirname, "${prismPrefix}/logger/source/client"),
+      "@logger/server": path.resolve(__dirname, "${prismPrefix}/logger/source/server"),
+      "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
+      "@utilities": path.resolve(__dirname, "${prismPrefix}/utilities/source"),
+      "@admin": path.resolve(__dirname, "${prismPrefix}/admin/source"),
+      "feature-flags": path.resolve(__dirname, "${prismPrefix}/feature-flags/source"),
+      "@authentication$": path.join(authenticationSource, "index.ts"),
+      "@authentication/": \`\${authenticationSource}/\`,
     };
-    // Allow resolving symlinks (submodule creates symlinks in node_modules)
     config.resolve.symlinks = true;
-    
-    // Exclude CLI and tools directories from webpack watch mode
-    // These are not needed for the web app build and should be ignored
-    // This optimizes dev builds by preventing webpack from watching these directories
-    // Production builds already exclude unimported files via tree-shaking
+
+    const existingIgnored = config.watchOptions?.ignored;
+    const existingPatterns = Array.isArray(existingIgnored)
+      ? existingIgnored
+      : existingIgnored
+        ? [existingIgnored]
+        : [];
+
     config.watchOptions = {
       ...config.watchOptions,
       ignored: [
-        ...(Array.isArray(config.watchOptions?.ignored)
-          ? config.watchOptions.ignored
-          : config.watchOptions?.ignored
-          ? [config.watchOptions.ignored]
-          : []),
+        ...existingPatterns.filter(
+          (pattern): pattern is string =>
+            typeof pattern === "string" && pattern.length > 0
+        ),
         "**/cli/**",
-        "**/prism/tools/**",
+        path.resolve(__dirname, "${prismToolsWatchPath}"),
       ],
     };
-    
+
     return config;
   },
 };
@@ -312,7 +431,7 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 `;
 
-  fs.writeFileSync(path.join(targetDir, "next.config.ts"), nextConfig, "utf-8");
+  fs.writeFileSync(path.join(appRoot, "next.config.ts"), nextConfig, "utf-8");
 }
 
 /**
@@ -326,31 +445,13 @@ function generateNvmrc(targetDir: string): void {
 /**
  * Generate tsconfig.json
  */
-function generateTsConfig(
-  targetDir: string,
-  inMonorepo: boolean,
-  useGitDependency: boolean
-): void {
-  // Both monorepo and standalone use the same import style (@ui, @database, etc.)
-  // For git dependencies, we still use path aliases pointing to node_modules
-  const paths = inMonorepo
-    ? {
-        "@/*": ["./*"],
-        // Monorepo: point to workspace packages
-        "@database": ["../../packages/database/source"],
-        "@intelligence": ["../../packages/intelligence/source"],
-        "@logger": ["../../packages/logger/source"],
-        "@logger/*": ["../../packages/logger/source/*"],
-        "@ui": ["../../packages/ui/source"],
-        "@utilities": ["../../packages/utilities/source"],
-        "@admin": ["../../packages/admin/source"],
-        "feature-flags": ["../../packages/feature-flags/source"],
-      }
-    : useGitDependency
+function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
+  const prismPrefix = prismPackagesPrefix(layout);
+
+  const paths =
+    layout === "consumer-flat"
       ? {
           "@/*": ["./*"],
-          // Git dependency: point to @prism/core subpaths in node_modules
-          // Paths are relative to tsconfig.json location (app root)
           "@database": ["node_modules/@prism/core/packages/database/source"],
           "@intelligence": [
             "node_modules/@prism/core/packages/intelligence/source",
@@ -358,7 +459,9 @@ function generateTsConfig(
           "@logger": ["node_modules/@prism/core/packages/logger/source"],
           "@logger/*": ["node_modules/@prism/core/packages/logger/source/*"],
           "@ui": ["node_modules/@prism/core/packages/ui/source"],
-          "@utilities": ["node_modules/@prism/core/packages/utilities/source"],
+          "@utilities": [
+            "node_modules/@prism/core/packages/utilities/source",
+          ],
           "@admin": ["node_modules/@prism/core/packages/admin/source"],
           "feature-flags": [
             "node_modules/@prism/core/packages/feature-flags/source",
@@ -366,22 +469,45 @@ function generateTsConfig(
         }
       : {
           "@/*": ["./*"],
-          // File dependencies: Prism is a git submodule at ./prism
-          // Point directly to source files (bypass symlinks)
-          // Turbopack doesn't support symlinks outside project root, so use direct paths
-          "@database": ["./prism/packages/database/source"],
-          "@intelligence": ["./prism/packages/intelligence/source"],
-          "@logger": ["./prism/packages/logger/source"],
-          "@logger/*": ["./prism/packages/logger/source/*"],
-          "@intelligence/tasks": ["./prism/packages/intelligence/source/tasks"],
+          "@database": [`${prismPrefix}/database/source`],
+          "@intelligence": [`${prismPrefix}/intelligence/source`],
+          "@logger": [`${prismPrefix}/logger/source`],
+          "@logger/*": [`${prismPrefix}/logger/source/*`],
+          "@intelligence/tasks": [`${prismPrefix}/intelligence/source/tasks`],
           "@intelligence/tasks/*": [
-            "./prism/packages/intelligence/source/tasks/*",
+            `${prismPrefix}/intelligence/source/tasks/*`,
           ],
-          "@ui": ["./prism/packages/ui/source"],
-          "@utilities": ["./prism/packages/utilities/source"],
-          "@admin": ["./prism/packages/admin/source"],
-          "feature-flags": ["./prism/packages/feature-flags/source"],
+          "@intelligence/client": [`${prismPrefix}/intelligence/source/client`],
+          "@ui": [`${prismPrefix}/ui/source`],
+          "@utilities": [`${prismPrefix}/utilities/source`],
+          "@admin": [`${prismPrefix}/admin/source`],
+          "@authentication": [`${prismPrefix}/authentication/source`],
+          "@authentication/*": [`${prismPrefix}/authentication/source/*`],
+          "feature-flags": [`${prismPrefix}/feature-flags/source`],
         };
+
+  const tsconfigExclude =
+    layout === "consumer-workspace"
+      ? [
+          "node_modules",
+          "../../prism/apps",
+          "../../prism/tools",
+          "../../prism/scripts",
+          "../../prism/packages/cli",
+          ".next",
+          "cli",
+        ]
+      : layout === "consumer-flat"
+        ? [
+            "node_modules",
+            "prism/apps",
+            "prism/tools",
+            "prism/scripts",
+            "prism/packages/cli",
+            ".next",
+            "cli",
+          ]
+        : ["node_modules", "cli"];
 
   const tsconfig = {
     compilerOptions: {
@@ -406,12 +532,97 @@ function generateTsConfig(
       paths,
     },
     include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    exclude: ["node_modules", "cli"],
+    exclude: tsconfigExclude,
   };
 
   fs.writeFileSync(
-    path.join(targetDir, "tsconfig.json"),
+    path.join(appRoot, "tsconfig.json"),
     JSON.stringify(tsconfig, null, 2) + "\n",
+    "utf-8"
+  );
+}
+
+function generatePnpmWorkspaceYaml(repoRoot: string): void {
+  const content = `packages:\n  - "apps/*"\n`;
+  fs.writeFileSync(path.join(repoRoot, "pnpm-workspace.yaml"), content, "utf-8");
+}
+
+function generateConsumerWorkspaceCi(repoRoot: string): void {
+  const ciDir = path.join(repoRoot, ".github/workflows");
+  fs.mkdirSync(ciDir, { recursive: true });
+
+  const ciContent = `# Generated by prism generate (consumer workspace layout).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: \${{ github.workflow }}-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Tests
+        run: pnpm run test:run
+
+      - name: Build
+        run: pnpm run build
+`;
+
+  fs.writeFileSync(path.join(ciDir, "ci.yml"), ciContent, "utf-8");
+}
+
+function patchGlobalsCss(appRoot: string, layout: GenerateLayout): void {
+  if (layout === "prism-monorepo") {
+    return;
+  }
+
+  const globalsPath = path.join(appRoot, "ui/styles/globals.css");
+  if (!fs.existsSync(globalsPath)) {
+    return;
+  }
+
+  const prismImport =
+    layout === "consumer-workspace"
+      ? '@import "../../../../prism/packages/ui/styles/globals.css";'
+      : '@import "../../../prism/packages/ui/styles/globals.css";';
+
+  const appSource =
+    layout === "consumer-workspace"
+      ? '@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";'
+      : '@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";';
+
+  fs.writeFileSync(
+    globalsPath,
+    `/* Import Prism styles from submodule (see ARCHITECTURE-Prism.md). */\n${prismImport}\n\n@source "../**/*.{ts,tsx,js,jsx,mdx}";\n${appSource}\n`,
     "utf-8"
   );
 }
@@ -693,43 +904,31 @@ export async function runGenerateCommand(
   }
 
   try {
-    // Create directory structure
-    log.info("Creating directory structure...");
-    createDirectoryStructure(targetDir);
-
-    // Generate files
-    log.info("Generating template files...");
-    // If --path is specified, treat as standalone (even if in monorepo)
     const inMonorepo = !!prismRoot && !options.path;
-    // For standalone apps:
-    // - If --prism-repo is specified, use git dependency (deployable)
-    // - If --prism-repo is NOT specified, add Prism as git submodule at ./prism (one deployable repo)
     let useGitDependency = false;
     let prismRepoUrl: string | undefined = undefined;
+
     if (!inMonorepo) {
       if (options.prismRepo !== undefined) {
-        // User explicitly specified git repo - use as npm dependency
         useGitDependency = true;
         prismRepoUrl = options.prismRepo;
         log.info(
           `📦 Using ${chalk.bold("💎 Prism")} from git: ${prismRepoUrl}`
         );
         log.info(
-          "💡 This creates a deployable app with Prism as npm dependency."
+          "💡 Flat layout at repo root (legacy). Use without --prism-repo for apps/web workspace layout."
         );
       } else {
-        // Default: add Prism as git submodule inside the app (one deployable repo)
         useGitDependency = false;
         const defaultPrismRepo = "https://github.com/thushana/prism.git";
         log.info(
           `📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`
         );
+        log.info("📁 Next.js app will be generated at apps/web/");
         try {
-          // Initialize git first if not already initialized
           if (!fs.existsSync(path.join(targetDir, ".git"))) {
             execSync("git init", { cwd: targetDir, stdio: "pipe" });
           }
-          // Add Prism as submodule
           execSync(`git submodule add ${defaultPrismRepo} prism`, {
             cwd: targetDir,
             stdio: "inherit",
@@ -740,100 +939,110 @@ export async function runGenerateCommand(
           log.warn("Please add it manually:");
           log.warn(`  cd ${targetDir}`);
           log.warn(`  git submodule add ${defaultPrismRepo} prism`);
-          // Continue anyway - user can add it manually
         }
       }
     }
-    const useFileDeps = !inMonorepo && !useGitDependency;
-    generatePackageJson(
-      targetDir,
-      appName,
-      inMonorepo ? prismRoot : null,
-      useGitDependency ? prismRepoUrl : undefined,
-      useFileDeps
-    );
-    generateTsConfig(targetDir, inMonorepo, useGitDependency);
-    generateNextConfig(targetDir, !inMonorepo && !useGitDependency);
-    generateNvmrc(targetDir);
-    generateTemplateFiles(targetDir, appName);
 
-    // Auto-copy .env.example to .env
+    const layout = resolveGenerateLayout(inMonorepo, useGitDependency);
+    const repoRoot = targetDir;
+    const appRoot = resolveAppRoot(repoRoot, layout);
+    const installRoot = layout === "consumer-workspace" ? repoRoot : appRoot;
+    const dbCommandRoot =
+      layout === "consumer-workspace" ? repoRoot : appRoot;
+
+    log.info("Creating directory structure...");
+    createDirectoryStructure(appRoot);
+
+    log.info("Generating template files...");
+    const consumerPrismRoot =
+      layout === "consumer-workspace"
+        ? path.join(repoRoot, "prism")
+        : null;
+
+    generatePackageJson(
+      repoRoot,
+      appRoot,
+      appName,
+      layout,
+      inMonorepo ? prismRoot : consumerPrismRoot,
+      useGitDependency ? prismRepoUrl : undefined
+    );
+    generateTsConfig(appRoot, layout);
+    generateNextConfig(appRoot, layout);
+    generateNvmrc(repoRoot);
+    if (layout === "consumer-workspace") {
+      generatePnpmWorkspaceYaml(repoRoot);
+      generateConsumerWorkspaceCi(repoRoot);
+    }
+    generateTemplateFiles(appRoot, appName);
+    patchGlobalsCss(appRoot, layout);
+
     log.info("Setting up environment files...");
-    const envExamplePath = path.join(targetDir, ".env.example");
-    const envPath = path.join(targetDir, ".env");
+    const envExamplePath = path.join(appRoot, ".env.example");
+    const envPath = path.join(appRoot, ".env");
     if (fs.existsSync(envExamplePath)) {
       fs.copyFileSync(envExamplePath, envPath);
     }
 
-    // Detect package manager
     const pm = detectPackageManager();
     log.info(`Detected package manager: ${pm}`);
 
-    // Install dependencies
-    // For standalone, install dependencies in the generated app
     if (!inMonorepo) {
-      log.info("Installing dependencies in generated app...");
+      log.info(`Installing dependencies at ${installRoot}...`);
       const installCmd = getInstallCommand(pm);
       try {
         execSync(installCmd, {
-          cwd: targetDir,
+          cwd: installRoot,
           stdio: "inherit",
         });
         log.info("✅ Dependencies installed successfully");
       } catch {
         log.warn("Failed to install dependencies automatically");
         log.warn(
-          "Please run 'pnpm install' (or your package manager's install) manually in the generated app"
+          `Please run '${installCmd}' manually from ${installRoot}`
         );
       }
     }
 
-    // Note: Database connection is configured via DATABASE_URL environment variable
-    // No need to create local database directory for PostgreSQL
-
-    // Run drizzle generate
     log.info("Generating database migrations...");
     try {
       execSync(`${pm} run db:generate`, {
-        cwd: targetDir,
+        cwd: dbCommandRoot,
         stdio: "inherit",
       });
     } catch {
       log.warn("Drizzle generate failed (this is okay if schema is empty)");
     }
 
-    // Run drizzle migrate
     log.info("Applying database migrations...");
     try {
       execSync(`${pm} run db:migrate`, {
-        cwd: targetDir,
+        cwd: dbCommandRoot,
         stdio: "inherit",
       });
     } catch {
       log.warn("Drizzle migrate failed (this is okay if no migrations)");
     }
 
-    // Run seed
     log.info("Seeding database...");
     try {
       execSync(`${pm} run db:seed`, {
-        cwd: targetDir,
+        cwd: dbCommandRoot,
         stdio: "inherit",
       });
     } catch {
       log.warn("Seed failed (this is okay if seed script has issues)");
     }
 
-    // Initialize git (if not already initialized for submodule)
     log.info("Initializing git repository...");
     try {
-      if (!fs.existsSync(path.join(targetDir, ".git"))) {
-        execSync("git init", { cwd: targetDir, stdio: "inherit" });
+      if (!fs.existsSync(path.join(repoRoot, ".git"))) {
+        execSync("git init", { cwd: repoRoot, stdio: "inherit" });
       }
-      execSync("git add .", { cwd: targetDir, stdio: "inherit" });
+      execSync("git add .", { cwd: repoRoot, stdio: "inherit" });
       execSync(
         'git commit -m "✨ INITIAL - Scaffold Prism Next.js app with core packages"',
-        { cwd: targetDir, stdio: "inherit" }
+        { cwd: repoRoot, stdio: "inherit" }
       );
     } catch {
       log.warn(
@@ -843,8 +1052,13 @@ export async function runGenerateCommand(
 
     log.info(`✅ Successfully generated ${appName}!`);
     log.info(`\nNext steps:`);
-    const relativePath = path.relative(process.cwd(), targetDir);
+    const relativePath = path.relative(process.cwd(), repoRoot);
     log.info(`  cd ${relativePath}`);
+    if (layout === "consumer-workspace") {
+      log.info("  pnpm install   # from repo root if you skipped install");
+      log.info("  cp apps/web/.env.example apps/web/.env");
+      log.info("  Vercel Root Directory: apps/web");
+    }
     log.info(`  ${pm} run dev`);
   } catch (error) {
     log.error(`Failed to generate app: ${error}`);

@@ -276,11 +276,12 @@ Prism is intended to be consumed as a dependency when building new apps:
    pnpm run prism generate my-app --path ../my-app
    ```
 
-   - Prism is added as a git submodule inside your app at `./prism`
-   - Uses `file:./prism/packages/...` dependencies
-   - One repo to deploy (your app + Prism submodule)
+   - Prism is added as a git submodule at `./prism`
+   - Next.js app is generated at **`apps/web/`** (pnpm workspace); root `package.json` orchestrates `pnpm --filter web`
+   - App uses `file:../../prism/packages/...` dependencies; run **`pnpm install` from repo root**
+   - One repo to deploy (your app + Prism submodule); Vercel **Root Directory** `apps/web`
    - Can commit Prism changes from within your app
-   - Perfect for iterative development and deployment
+   - Perfect for iterative development and deployment (see Porch Scope / TimeTraveler)
 
 2. **Git Dependency** (alternative for deployment):
 

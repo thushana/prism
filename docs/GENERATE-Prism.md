@@ -99,6 +99,28 @@ The generator creates a fully functional Next.js app with:
 
 ### Project Structure
 
+**Default** (`prism generate my-app --path ../my-app` with Prism submodule): consumer **workspace** layout — same as Porch Scope / TimeTraveler:
+
+```
+my-app/
+  prism/                    # git submodule
+  apps/web/                 # Next.js app (pnpm workspace name: web)
+    package.json
+    tsconfig.json
+    next.config.ts
+    app/
+    database/
+    ...
+  pnpm-workspace.yaml
+  package.json              # Root scripts (pnpm --filter web, prism:sync, …)
+  .nvmrc
+  .github/workflows/ci.yml  # checkout with submodules: recursive
+```
+
+Install and run dev from **repo root**: `pnpm install`, `pnpm run dev`. Vercel **Root Directory**: `apps/web`.
+
+**Legacy flat layout** (only with `--prism-repo` git dependency): app files at repo root:
+
 ```
 my-app/
   package.json              # Dependencies and scripts
