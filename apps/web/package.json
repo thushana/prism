@@ -18,21 +18,21 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@prism/utilities": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
+    "admin": "workspace:*",
     "authentication": "workspace:*",
     "database": "workspace:*",
     "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "feature-flags": "workspace:*",
     "flags": "^4.0.6",
-    "admin": "workspace:*",
-    "drizzle-orm": "^0.45.2",
     "intelligence": "workspace:*",
     "logger": "workspace:*",
     "next": "16.2.7",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "ui": "workspace:*",
-    "@prism/utilities": "workspace:*"
+    "ui": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
@@ -41,8 +41,7 @@
     "@types/react-dom": "^19.2.3",
     "commander": "^14.0.3",
     "drizzle-kit": "^0.31.10",
-    "@eslint/compat": "^2.0.5",
-    "eslint": "^9.39.4",
+    "eslint": "^10.4.1",
     "eslint-config-next": "16.2.7",
     "lightningcss": "^1.32.0",
     "postcss-import": "^16.1.1",

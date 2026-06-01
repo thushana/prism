@@ -1,23 +1,26 @@
-import { fixupConfigRules } from "@eslint/compat";
-import nextPlugin from "eslint-config-next";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
-const nextConfig = fixupConfigRules(nextPlugin);
-
-export default [
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "node_modules/**",
+    "*.tsbuildinfo",
+  ]),
   {
-    ignores: [
-      ".next/**",
-      "out/**",
-      "build/**",
-      "node_modules/**",
-      "*.tsbuildinfo",
-    ],
+    settings: {
+      react: { version: "19" },
+    },
   },
-  ...nextConfig,
   {
     files: ["app/**/*.{ts,tsx}", "**/*.{ts,tsx}"],
     rules: {
       // Add any custom rules here if needed
     },
   },
-];
+]);
