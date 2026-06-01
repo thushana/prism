@@ -156,6 +156,26 @@ function resolvePrismRoot(): string | null {
   return hasPackageJson(PRISM_DIR) ? PRISM_DIR : null;
 }
 
+/** Warn when a submodule consumer still uses legacy flat app/ at repo root. */
+function warnLegacyFlatLayout(appRoot: string): StepStatus {
+  const hasPrismSubmodule = fs.existsSync(path.join(appRoot, "prism"));
+  const hasFlatAppDir = fs.existsSync(path.join(appRoot, "app"));
+  const hasAppsWeb = fs.existsSync(path.join(appRoot, "apps/web/app"));
+
+  if (hasPrismSubmodule && hasFlatAppDir && !hasAppsWeb) {
+    console.log(
+      "⚠️  Legacy flat layout: app/ at repo root. New apps should use apps/web/ (see prism/docs/GENERATE-Prism.md)."
+    );
+    return "warn";
+  }
+
+  if (hasAppsWeb) {
+    console.log("✅ Consumer workspace layout (apps/web/)");
+  }
+
+  return "pass";
+}
+
 function runReportCommand(
   label: string,
   command: string,
@@ -199,6 +219,12 @@ function runChores(): void {
   }
 
   const results: StepResult[] = [];
+
+  if (appRoot) {
+    results.push(
+      runStep("App layout", () => warnLegacyFlatLayout(appRoot))
+    );
+  }
 
   results.push(
     runStep("Toolchain", () => {
