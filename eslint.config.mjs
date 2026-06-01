@@ -146,6 +146,13 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // Loop pills (GSAP + layout effect) share render with swatch grid; compiler false-positive on grid map.
+    files: ["packages/ui/components/prism-color-picker.tsx"],
+    rules: {
+      "react-hooks/refs": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
