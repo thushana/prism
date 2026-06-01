@@ -183,7 +183,10 @@ function syncScripts(): void {
         adaptedValue = "eslint app --ext .ts,.tsx --fix";
       }
 
-      // Apps defer quality to prism so one script defines format → lint → typecheck → test
+      // Apps defer quality/chores to prism (single source of truth under prism/scripts/)
+      if (key === "chores") {
+        adaptedValue = "tsx prism/scripts/chores.ts";
+      }
       if (key === "quality") {
         adaptedValue = "tsx prism/scripts/quality.ts";
       }
@@ -218,10 +221,11 @@ function syncScripts(): void {
     }
   }
 
-  // Apps defer to prism for quality (single source of truth: prism/scripts/quality.ts)
+  // Apps defer to prism for quality/chores (single source of truth under prism/scripts/)
   const isTargetingApp =
     path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
   if (isTargetingApp && mergedScripts) {
+    mergedScripts.chores = "tsx prism/scripts/chores.ts";
     mergedScripts.quality = "tsx prism/scripts/quality.ts";
     mergedScripts["quality:quick"] =
       "pnpm run format && pnpm run lint && pnpm run typecheck";
