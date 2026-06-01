@@ -56,7 +56,7 @@ Usage:
 Options:
   --pull           git pull + submodule update before checks
   --quarterly      include quarterly extras (store prune, knip:exports)
-  --skip-quality   skip quality:ci / prism verify steps
+  --skip-quality   skip quality checks and build steps
   --strict         exit 1 on audit/outdated warnings (default: warn only)
   --help, -h       show this help
 
@@ -173,6 +173,12 @@ function runReportCommand(
   }
   return strict ? "fail" : "warn";
 }
+
+const APP_QUALITY_CMD =
+  "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run";
+
+const PRISM_QUALITY_CMD =
+  "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run";
 
 function runChores(): void {
   const appRoot = resolveAppRoot();
@@ -320,17 +326,9 @@ function runChores(): void {
 
   if (!skipQuality) {
     if (appRoot) {
-      const appPkg = readPackageJson(appRoot);
       results.push(
-        runStep("Quality CI (app)", () => {
-          if (appPkg?.scripts?.["quality:ci"]) {
-            execInherit("pnpm run quality:ci", appRoot);
-          } else {
-            execInherit(
-              "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run",
-              appRoot
-            );
-          }
+        runStep("Quality (app)", () => {
+          execInherit(APP_QUALITY_CMD, appRoot);
           return "pass";
         })
       );
@@ -339,10 +337,7 @@ function runChores(): void {
     if (prismRoot) {
       results.push(
         runStep("Quality (prism)", () => {
-          execInherit(
-            "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run",
-            prismRoot
-          );
+          execInherit(PRISM_QUALITY_CMD, prismRoot);
           return "pass";
         })
       );
@@ -369,6 +364,38 @@ function runChores(): void {
           return "pass";
         })
       );
+    }
+  }
+
+  if (!skipQuality) {
+    if (appRoot) {
+      const appPkg = readPackageJson(appRoot);
+      if (appPkg?.scripts?.build) {
+        results.push(
+          runStep("Build (app)", () => {
+            execInherit("pnpm run build", appRoot);
+            return "pass";
+          })
+        );
+      } else {
+        results.push({
+          name: "Build (app)",
+          status: "skip",
+          detail: "build script not configured",
+        });
+      }
+    }
+
+    if (prismRoot) {
+      const prismPkg = readPackageJson(prismRoot);
+      if (prismPkg?.scripts?.["build:web"]) {
+        results.push(
+          runStep("Build (prism web)", () => {
+            execInherit("pnpm run build:web", prismRoot);
+            return "pass";
+          })
+        );
+      }
     }
   }
 
