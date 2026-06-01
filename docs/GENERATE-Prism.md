@@ -1,6 +1,16 @@
 # 💎 Prism Generate - Developer Experience
 
-The `prism generate` command scaffolds a complete Next.js application pre-wired with Prism core, ready to deploy.
+The `prism generate` command scaffolds a Next.js application pre-wired with Prism core.
+
+## Which command should I use?
+
+| Goal | Command | Where the app lives |
+| --- | --- | --- |
+| **New consumer app** (Porch Scope, TimeTraveler, …) — **recommended** | `prism generate my-app --path ../my-app` | `../my-app/apps/web/` + `../my-app/prism/` submodule |
+| New package inside the Prism monorepo | `prism generate my-app` (from Prism root) | `prism/apps/my-app/` |
+| Legacy: flat repo + Prism from npm/git only | `prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"` | `../my-app/app/` at repo root (no `apps/web/`) |
+
+**Rule of thumb:** If you will use a **`prism/` git submodule**, use `--path` **without** `--prism-repo`. You get the **workspace layout** (`apps/web/`).
 
 ## Quick Start
 
@@ -10,8 +20,10 @@ The `prism generate` command scaffolds a complete Next.js application pre-wired 
 # Run setup script to link CLI globally
 npm run setup
 
-# Now use the CLI directly
-prism generate my-app
+# New consumer app (recommended)
+prism generate my-app --path ../my-app
+
+# Show help
 prism --help
 ```
 
@@ -24,398 +36,194 @@ The CLI can be run in three ways. **Direct mode is recommended** after initial s
 After running `npm run setup`, use the CLI directly:
 
 ```bash
-# Generate a new app
-prism generate my-app
-
-# Show help
+prism generate my-app --path ../my-app
 prism --help
 ```
 
-**Benefits**:
-
-- Cleaner command syntax
-- Works from any directory
-- No need to prefix with `npm run` or `npx`
-
 ### 2. Via Npx (No Setup Required)
 
-Use `npx` to run without setup:
-
 ```bash
-# Generate a new app
-npx @prism/core generate my-app
-
-# Show help
-npx @prism/core --help
+npx @prism/core generate my-app --path ../my-app
 ```
-
-**Use when**: You haven't run `npm run setup` yet, or you're in a CI/CD environment.
 
 ### 3. Via npm Script
-
-Use the npm script (useful for development):
-
-```bash
-# Generate a new app
-npm run prism generate my-app
-
-# Show help
-npm run prism -- --help
-```
-
-**Use when**: You prefer npm scripts or are in a development workflow.
-
-## Examples
-
-All examples below use direct mode (`prism`). Replace with `npx @prism/core` or `npm run prism` if you haven't run setup.
-
-```bash
-# Generate a new app
-prism generate my-app
-
-# Generate with force (overwrite existing)
-prism generate my-app --force
-
-# Generate standalone app outside monorepo
-prism generate my-app --path ../my-app
-
-# Generate with git dependency
-prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-```
-
-That's it! The generator handles everything automatically.
-
-## What Gets Generated
-
-The generator creates a fully functional Next.js app with:
-
-### Core Stack
-
-- **Next.js 16** with App Router
-- **TypeScript** (strict mode)
-- **Tailwind CSS 4** (pre-configured with Prism theme)
-- **Drizzle ORM** with Neon PostgreSQL
-- **Prism core packages** integration
-
-### Project Structure
-
-**Default** (`prism generate my-app --path ../my-app` with Prism submodule): consumer **workspace** layout — same as Porch Scope / TimeTraveler:
-
-```
-my-app/
-  prism/                    # git submodule
-  apps/web/                 # Next.js app (pnpm workspace name: web)
-    package.json
-    tsconfig.json
-    next.config.ts
-    app/
-    database/
-    ...
-  pnpm-workspace.yaml
-  package.json              # Root scripts (pnpm --filter web, prism:sync, …)
-  .nvmrc
-  .github/workflows/ci.yml  # checkout with submodules: recursive
-```
-
-Install and run dev from **repo root**: `pnpm install`, `pnpm run dev`. Vercel **Root Directory**: `apps/web`.
-
-**Legacy flat layout** (only with `--prism-repo` git dependency): app files at repo root:
-
-```
-my-app/
-  package.json              # Dependencies and scripts
-  tsconfig.json            # TypeScript config
-  next.config.js           # Next.js config
-  vercel.json              # Vercel deployment config
-  .eslintrc                 # ESLint config
-  .prettierrc               # Prettier config
-  .gitignore                # Git ignore rules
-  .env.example              # Environment template
-  .env                      # Auto-copied from .env.example
-
-  app/
-    layout.tsx              # Root layout with Prism UI
-    page.tsx                # Home page (Prism demo)
-    flags/
-      index.ts              # Feature flags (identify + standard flags)
-    system-sheet/
-      page.tsx              # System sheet page
-    .well-known/
-      vercel/flags/
-        route.ts            # Vercel Flags Explorer discovery (optional FLAGS_SECRET)
-    api/
-      system-sheet/
-        route.ts            # System sheet API route
-
-  proxy.ts                  # Forwards ?flag_* query params to request header for FeatureFlags (Next.js 16 proxy convention)
-
-  ui/
-    styles/
-      globals.css           # Tailwind CSS with Prism theme
-
-  docs/
-    index.mdx               # Documentation scaffold
-
-  database/
-    drizzle.config.ts       # Drizzle configuration
-    schema.ts               # Database schema
-    migrations/             # Migration files
-    seed.ts                 # Seed script
-    db.ts                   # Database client
-
-  intelligence/
-    tasks/
-      exampleTask.ts        # Example AI task
-
-  cli/
-    index.ts                # Sample CLI command
-
-  public/
-    .gitkeep                # Placeholder for public assets
-```
-
-## What Runs Automatically
-
-The generator performs these steps automatically:
-
-1. **Creates directory structure** - All folders and files
-2. **Generates template files** - Pre-configured with Prism defaults
-3. **Installs dependencies** - Detects and uses npm/yarn/pnpm
-4. **Sets up database** - Runs `drizzle-kit generate` and `migrate`
-5. **Seeds database** - Runs the seed script with sample data
-6. **Initializes git** - Creates repo and makes first commit
-
-## First Time Usage
-
-After generation, you're ready to go:
-
-```bash
-cd my-app
-npm run dev
-```
-
-Visit:
-
-- **App**: http://localhost:3000
-- **System Sheet**: http://localhost:3000/system-sheet
-
-## Database Workflow
-
-The generated app includes a complete database setup:
-
-```bash
-# Generate migrations from schema changes
-npm run db:generate
-
-# Apply migrations
-npm run db:migrate
-
-# Push schema directly (dev only)
-npm run db:push
-
-# Open Drizzle Studio (database GUI)
-npm run db:studio
-
-# Seed database
-npm run db:seed
-```
-
-### Database (Neon Postgresql)
-
-- Uses Neon PostgreSQL with `@neondatabase/serverless`
-- Configure `DATABASE_URL` in `.env` with your Neon connection string
-- Pooled connection for runtime queries, unpooled for migrations
-- Get connection strings from [Neon Console](https://console.neon.tech)
-
-## Feature Flags
-
-Generated apps include the Prism FeatureFlags package: root `proxy.ts`, `app/flags/index.ts` (identify + standard flags), and `app/.well-known/vercel/flags/route.ts` for Vercel Flags Explorer. Optional: set `FLAGS_SECRET` in env for the discovery endpoint. Add `authCheck` to `createIdentify` when using the authentication package. See [FEATUREFLAGS-Prism.md](./FEATUREFLAGS-Prism.md).
-
-## Prism Core Integration
-
-The generated app uses `@prism/core` as a dependency:
-
-```typescript
-// UI components
-import { PrismButton, PrismCard } from "@prism/core/ui";
-
-// Database
-import { db } from "../database/db";
-
-// Intelligence (AI tasks)
-import { BaseTask } from "@prism/core/intelligence/tasks/base";
-
-// Logger
-import { logger } from "@prism/core/logger";
-
-// System sheet
-import { SystemSheetPage } from "@prism/core/admin";
-```
-
-## Standalone App Deployment
-
-For standalone apps (generated outside the monorepo), you have two options:
-
-### Option 1: Git Submodule (Recommended - One Deployable Repo)
-
-Generate without `--prism-repo` to add Prism as a git submodule inside your app:
 
 ```bash
 npm run prism generate my-app --path ../my-app
 ```
 
-This automatically:
+## Examples
 
-- Adds Prism as a git submodule at `./prism` inside your app
-- Uses `file:./prism/packages/...` dependencies for fast iteration
-- Creates a single deployable repo (your app + Prism submodule)
+```bash
+# ✅ RECOMMENDED — consumer repo: apps/web + prism submodule
+prism generate my-app --path ../my-app
 
-**Workflow:**
+# Inside the Prism monorepo only (saves to prism/apps/my-app)
+prism generate my-app
+
+# Overwrite existing directory
+prism generate my-app --path ../my-app --force
+
+# ⚠️ LEGACY — flat layout at repo root + @prism/core from git (deploy-only style)
+prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+```
+
+## What Gets Generated
+
+### Core Stack
+
+- **Next.js 16** with App Router
+- **TypeScript** (strict mode)
+- **Tailwind CSS 4** (Prism theme via submodule)
+- **Drizzle ORM** with Neon PostgreSQL (template default)
+- **Prism packages** via submodule `file:` deps or monorepo `workspace:*`
+
+### Project Structure (recommended consumer layout)
+
+`prism generate my-app --path ../my-app` **without** `--prism-repo`:
+
+```
+my-app/
+  README.md                 # Setup cheat sheet (generated)
+  prism/                    # git submodule
+  apps/web/                 # Next.js app (pnpm workspace name: web)
+    package.json
+    tsconfig.json
+    next.config.ts
+    .env.example
+    app/
+    database/
+    intelligence/tasks/
+    ui/styles/
+    cli/
+    ...
+  pnpm-workspace.yaml
+  package.json              # Root scripts: pnpm --filter web, prism:sync, …
+  .nvmrc
+  .github/workflows/ci.yml  # checkout with submodules: recursive
+```
+
+**Install and run from repo root:**
 
 ```bash
 cd my-app
-
-# Make changes to Prism
-vim prism/packages/ui/components/prism-button.tsx
-
-# Commit to Prism (pushes to github.com/thushana/prism)
-cd prism
-git add . && git commit -m "UI - Update button"
-git push
-cd ..
-
-# Update submodule reference in app
-git add prism
-git commit -m "Update Prism submodule"
-git push  # Deploys to Vercel
+git submodule update --init --recursive
+pnpm install
+cp apps/web/.env.example apps/web/.env
+pnpm run dev
 ```
 
-Vercel automatically handles git submodules during deployment.
+**Vercel:** Root Directory = `apps/web`, Install = `cd ../.. && pnpm install`.
 
-### Option 2: Git Dependency (Alternative for Deployment)
+### Legacy flat layout
 
-Generate with the `--prism-repo` flag to use Prism from GitHub as an npm dependency:
+Only when you pass **`--prism-repo`**. App files sit at **repo root** (`app/`, `database/`, …). Prefer the workspace layout for new apps.
+
+## What Runs Automatically
+
+1. **Creates directories** — under `apps/web/` (consumer) or `prism/apps/<name>` (monorepo)
+2. **Adds `prism/` submodule** — consumer layout only (unless `--prism-repo`)
+3. **Writes `package.json`** — root orchestrator + `apps/web/package.json` when using workspace layout
+4. **Copies template** from `prism/apps/web`
+5. **`pnpm install`** — from **consumer repo root** (not only inside `prism/`)
+6. **Database** — `db:generate`, `db:migrate`, `db:seed` via root scripts (`pnpm --filter web` when workspace)
+7. **Git** — initial commit; **README.md** at consumer repo root with setup steps
+
+## First Time Usage (consumer workspace)
 
 ```bash
-npm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+cd my-app
+git submodule update --init --recursive
+pnpm install
+cp apps/web/.env.example apps/web/.env
+pnpm run db:push
+pnpm run dev
 ```
 
-This creates a deployable app that Vercel can build. Prism will be cloned from GitHub during the build process. Note: You won't be able to commit Prism changes from within your app with this approach.
+Visit the URL printed by Next (default sample uses port 3000 unless you change `apps/web/package.json`).
+
+- **System sheet** (if generated): `/system-sheet`
+- Edit app code only under **`apps/web/`**
+
+## Database Workflow
+
+From **repo root** (workspace layout):
+
+```bash
+pnpm run db:generate
+pnpm run db:migrate
+pnpm run db:push
+pnpm run db:studio
+pnpm run db:seed
+```
+
+Env file: **`apps/web/.env`** (not repo root).
+
+### Database (Neon PostgreSQL)
+
+Template defaults to Neon. Configure `DATABASE_URL` in `apps/web/.env`. See [DATABASE-Prism.md](./DATABASE-Prism.md).
+
+## Feature Flags
+
+See [FEATUREFLAGS-Prism.md](./FEATUREFLAGS-Prism.md). Generated paths are under `apps/web/app/…` for consumer layout.
+
+## Import patterns (consumer workspace)
+
+Inside `apps/web/`, use the same aliases as the Prism sample app:
+
+```typescript
+import { PrismButton } from "@ui";
+import { db } from "@/database/db";
+import { BaseTask } from "@intelligence/tasks/base";
+```
+
+Paths resolve to `../../prism/packages/…` via `tsconfig.json` and webpack.
+
+## Standalone App Deployment
+
+### Option 1: Submodule + `apps/web` (recommended)
+
+```bash
+prism generate my-app --path ../my-app
+```
+
+- Submodule at `./prism`
+- App at `./apps/web`
+- Vercel Root Directory: **`apps/web`**
+- Enable git **submodules** on the Vercel project
+
+**Iterate on Prism:**
+
+```bash
+cd my-app/prism
+# edit, commit, push to github.com/thushana/prism
+cd ..
+git add prism && git commit -m "Update Prism submodule"
+```
+
+### Option 2: Legacy git dependency (flat root)
+
+```bash
+prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
+```
+
+Flat layout; Vercel builds from repo root. You cannot commit Prism changes from the app repo.
 
 ## Customization
 
+Paths below are relative to the **Next.js app root** (`apps/web/` for consumer layout).
+
 ### Adding Database Tables
 
-1. Edit `database/schema.ts`:
+1. Edit `apps/web/database/schema.ts` (consumer) or `database/schema.ts` (monorepo app).
+2. From repo root: `pnpm run db:generate` then `pnpm run db:migrate`.
 
-```typescript
-export const posts = pgTable("posts", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  content: text("content"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-```
+### Adding AI Tasks
 
-2. Generate and apply migration:
+Add tasks under `apps/web/intelligence/tasks/` and register them. See [INTELLIGENCE-Prism.md](./INTELLIGENCE-Prism.md).
 
-```bash
-npm run db:generate
-npm run db:migrate
-```
+## Related Docs
 
-### Adding Ai Tasks
-
-1. Create a new task in `intelligence/tasks/`:
-
-```typescript
-import { BaseTask } from "@prism/core/intelligence/tasks/base";
-import { z } from "zod";
-
-export class MyTask extends BaseTask<Input, Output> {
-  name = "my-task";
-  // ... implement task
-}
-```
-
-2. Register the task in your app code
-
-### Adding CLI Commands
-
-Edit `cli/index.ts` to add your own commands:
-
-```typescript
-program
-  .command("my-command")
-  .description("My custom command")
-  .action(() => {
-    // Your logic here
-  });
-```
-
-## Deployment
-
-The generated app is ready for Vercel deployment:
-
-1. **Push to GitHub**
-2. **Import to Vercel** - Point to the app directory
-3. **Set environment variables** - Add `DATABASE_URL` for production
-4. **Deploy** - Vercel handles the rest
-
-The `vercel.json` file is pre-configured with:
-
-- Region: `iad1`
-- Function timeout: 10 seconds
-
-## Troubleshooting
-
-### Database Issues
-
-If migrations fail:
-
-```bash
-# Reset database (dev only)
-rm -rf data/database/*.db*
-npm run db:push
-```
-
-### Import Errors
-
-If imports fail:
-
-- **Monorepo apps**: Ensure workspace dependencies are installed: `npm install` (from monorepo root)
-- **Standalone apps with git dependency**: Ensure Prism repo is accessible and `npm install` completes
-- **Standalone apps with file dependencies**: Ensure Prism submodule is initialized: `git submodule update --init --recursive`
-- Check that TypeScript paths in `tsconfig.json` are correctly configured
-
-### Build Errors
-
-```bash
-# Type check
-npm run typecheck
-
-# Lint
-npm run lint
-
-# Format
-npm run format
-```
-
-## Philosophy
-
-The generator is **highly opinionated** - no configuration options beyond the app name. This ensures:
-
-- **Consistency** - All Prism apps follow the same structure
-- **Speed** - No decision fatigue, just generate and go
-- **Best practices** - Prism defaults are baked in
-- **Ready to deploy** - Everything is configured for production
-
-## Next Steps
-
-- Read the [Architecture Guide](./ARCHITECTURE-Prism.md)
-- Check the [Database Guide](./DATABASE-Prism.md)
-- Explore [Intelligence Tasks](./INTELLIGENCE-Prism.md)
-- Review [Deployment Guide](./DEPLOYMENT-Prism.md)
-- Set up **CI, Dependabot, and hooks** using [Project health](./PROJECT-HEALTH-Prism.md) (submodule checkout, `quality:ci`, lint-staged)
+- [ARCHITECTURE-Prism.md](./ARCHITECTURE-Prism.md) — monorepo vs consumer layout
+- [DEPLOYMENT-Prism.md](./DEPLOYMENT-Prism.md) — Vercel root directory and install
+- [SYNC-Prism.md](./SYNC-Prism.md) — `prism:sync` for consumer repos

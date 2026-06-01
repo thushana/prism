@@ -600,6 +600,78 @@ jobs:
   fs.writeFileSync(path.join(ciDir, "ci.yml"), ciContent, "utf-8");
 }
 
+function generateConsumerReadme(
+  repoRoot: string,
+  appName: string,
+  vars: Record<string, string>
+): void {
+  const readme = `# {{APP_NAME}}
+
+Next.js app generated with **Prism**. The UI and API live in **\`apps/web/\`** — not at the repo root.
+
+## Repo layout
+
+\`\`\`
+{{APP_NAME}}/
+  prism/           # git submodule (Prism core)
+  apps/web/        # Next.js app — edit here
+  package.json     # run scripts from repo root
+  pnpm-workspace.yaml
+\`\`\`
+
+## First-time setup
+
+From the **repo root** (this directory):
+
+\`\`\`bash
+git submodule update --init --recursive
+pnpm install
+cp apps/web/.env.example apps/web/.env
+# Edit apps/web/.env (DATABASE_URL, PRISM_KEY_WEB, PRISM_KEY_API, …)
+pnpm run db:push
+pnpm run dev
+\`\`\`
+
+Open http://localhost:3000 (or the port in \`apps/web/package.json\`).
+
+## Daily commands (repo root)
+
+| Task | Command |
+| --- | --- |
+| Dev server | \`pnpm run dev\` |
+| Build | \`pnpm run build\` |
+| Lint / typecheck | \`pnpm run lint\` / \`pnpm run typecheck\` |
+| Database | \`pnpm run db:push\` / \`pnpm run db:studio\` |
+| Align with Prism | \`pnpm run prism:sync\` |
+
+Do **not** run \`pnpm install\` only inside \`prism/\` — install once at repo root.
+
+## Vercel
+
+- **Root Directory**: \`apps/web\`
+- **Install Command**: \`cd ../.. && pnpm install\`
+- **Build Command**: \`pnpm run build\`
+- Enable **submodules** on the Git integration (or use CI with \`submodules: recursive\`)
+
+## Working on Prism
+
+\`\`\`bash
+cd prism
+# edit packages, commit, push to github.com/thushana/prism
+cd ..
+git add prism && git commit -m "Update Prism submodule"
+\`\`\`
+
+See \`prism/docs/GENERATE-Prism.md\` and \`prism/docs/DEPLOYMENT-Prism.md\`.
+`;
+
+  fs.writeFileSync(
+    path.join(repoRoot, "README.md"),
+    renderTemplate(readme, vars),
+    "utf-8"
+  );
+}
+
 function patchGlobalsCss(appRoot: string, layout: GenerateLayout): void {
   if (layout === "prism-monorepo") {
     return;
@@ -870,8 +942,17 @@ export async function runGenerateCommand(
   log.info(`Generating ${chalk.bold("💎 Prism")} app: ${appName}`);
   if (options.path) {
     log.info(`Saving to: ${targetDir}`);
+    if (options.prismRepo === undefined) {
+      log.info(
+        `Layout: ${chalk.bold("apps/web")} workspace + ${chalk.bold("./prism")} submodule (recommended)`
+      );
+    } else {
+      log.info(
+        `Layout: ${chalk.yellow("flat")} at repo root + git dependency (legacy)`
+      );
+    }
   } else if (prismRoot) {
-    log.info(`Saving to monorepo: ${targetDir}`);
+    log.info(`Saving to Prism monorepo: ${targetDir}`);
   }
 
   // Check if directory already exists
@@ -973,6 +1054,7 @@ export async function runGenerateCommand(
     if (layout === "consumer-workspace") {
       generatePnpmWorkspaceYaml(repoRoot);
       generateConsumerWorkspaceCi(repoRoot);
+      generateConsumerReadme(repoRoot, appName, { APP_NAME: appName });
     }
     generateTemplateFiles(appRoot, appName);
     patchGlobalsCss(appRoot, layout);
@@ -1073,17 +1155,19 @@ export async function runGenerateCommand(
 export function registerGenerateCommand(program: Command): void {
   program
     .command("generate <name>")
-    .description("Generate a new Next.js app with Prism core")
+    .description(
+      "Scaffold a Next.js app with Prism (consumer: apps/web + prism submodule)"
+    )
     .option("-v, --verbose", "Enable verbose logging", false)
     .option("-d, --debug", "Enable debug logging", false)
     .option("-f, --force", "Overwrite existing directory if it exists", false)
     .option(
       "-p, --path <path>",
-      "Target directory path (for standalone apps outside monorepo)"
+      "Consumer repo directory (recommended: creates apps/web/ + prism/ submodule at that path)"
     )
     .option(
       "--prism-repo <url>",
-      "Git URL for Prism (default: 'git+https://github.com/thushana/prism.git'). Use this for deployable standalone apps. For local dev iteration, omit and use file: dependencies with git submodule."
+      "Legacy flat layout at repo root with @prism/core from git (omit for apps/web workspace + submodule)"
     )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {
