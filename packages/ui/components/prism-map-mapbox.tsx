@@ -121,14 +121,17 @@ export function PrismMapMapbox({
   const routesRef = useRef(routes);
   const routesByIdRef = useRef(new Map<string, PrismMapRoute>());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
-  onRouteSelectionRef.current = onRouteSelectionChange;
   const onMapLoadErrorRef = useRef(onMapLoadError);
-  onMapLoadErrorRef.current = onMapLoadError;
   const mapLoadErrorReportedRef = useRef(false);
   const autoFitRef = useRef(autoFit);
   const lastGeometrySigRef = useRef<string>("");
-  routesRef.current = routes;
-  autoFitRef.current = autoFit;
+
+  useEffect(() => {
+    routesRef.current = routes;
+    autoFitRef.current = autoFit;
+    onRouteSelectionRef.current = onRouteSelectionChange;
+    onMapLoadErrorRef.current = onMapLoadError;
+  }, [routes, autoFit, onRouteSelectionChange, onMapLoadError]);
 
   const [mapInstance, setMapInstance] = useState<
     import("mapbox-gl").Map | null

@@ -81,9 +81,12 @@ export function PrismMapGoogle({
   const markerByKeyRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const routesByIdRef = useRef<Map<string, PrismMapRoute>>(new Map());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
-  onRouteSelectionRef.current = onRouteSelectionChange;
   const lastGeometrySigRef = useRef<string>("");
   const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    onRouteSelectionRef.current = onRouteSelectionChange;
+  }, [onRouteSelectionChange]);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
 
   // Bootstrap map once; do not depend on `routes` (hover restyles must not re-run this).

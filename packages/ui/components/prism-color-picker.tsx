@@ -181,10 +181,6 @@ export function PrismColorPicker({
   );
   const paletteId = normalizedColor.palette;
 
-  React.useEffect(() => {
-    if (!isOpen) setHoverPreviewPaint(null);
-  }, [isOpen]);
-
   /** Resolved CSS `<color>` from committed `color` (hex, `oklch(...)`, etc.). */
   const resolvedPaintFromSpec = React.useMemo(
     () => prismColorSpecToHex(colorSpec),
@@ -198,7 +194,10 @@ export function PrismColorPicker({
   );
 
   /** Hover preview drives the trigger until click commits or pointer leaves the swatch grid. */
-  const paintOnTriggerFace = hoverPreviewPaint ?? resolvedPaintFromSpec;
+  const paintOnTriggerFace =
+    isOpen && hoverPreviewPaint != null
+      ? hoverPreviewPaint
+      : resolvedPaintFromSpec;
 
   const normalizedPaintOnTrigger = React.useMemo(
     () => normalizePickerColorToken(paintOnTriggerFace),
@@ -324,12 +323,12 @@ export function PrismColorPicker({
     [paletteId]
   );
 
-  React.useEffect(() => {
-    setLoopSurfaceMode((mode) => {
-      const next = hasGradientSpec ? "gradient" : "single";
-      return mode === next ? mode : next;
-    });
-  }, [hasGradientSpec]);
+  const [prevHasGradientSpec, setPrevHasGradientSpec] =
+    React.useState(hasGradientSpec);
+  if (hasGradientSpec !== prevHasGradientSpec) {
+    setPrevHasGradientSpec(hasGradientSpec);
+    setLoopSurfaceMode(hasGradientSpec ? "gradient" : "single");
+  }
 
   const gradientPreviewPair = React.useMemo(() => {
     if (!isGradientMode || gradientSwatches.length === 0) return null;
@@ -572,7 +571,7 @@ export function PrismColorPicker({
           : {}),
       });
       setIsOpen(false);
-      triggerRef.current?.focus();
+      queueMicrotask(() => triggerRef.current?.focus());
     },
     [
       colorSpec,
