@@ -15,6 +15,9 @@ export default defineConfig([
   {
     settings: {
       react: { version: "19" },
+      next: {
+        rootDir: "apps/web",
+      },
     },
   },
   {

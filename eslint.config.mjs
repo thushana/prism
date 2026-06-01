@@ -34,6 +34,9 @@ const eslintConfig = defineConfig([
   {
     settings: {
       react: { version: "19" },
+      next: {
+        rootDir: ["apps/web"],
+      },
     },
     rules: {
       "@next/next/no-html-link-for-pages": "off",
