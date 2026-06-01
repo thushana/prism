@@ -3,7 +3,8 @@
  * Aligns selected dependency ranges in the parent app package.json with
  * prism/apps/web (canonical Next.js app in the monorepo).
  *
- * Default: dry-run (report drift only). Pass --update to write the root manifest.
+ * Default: dry-run (report drift only). Pass --update to write the parent app manifest
+ * (`apps/web/package.json` when present, else repo root `package.json`).
  */
 
 import fs from "fs";
@@ -35,9 +36,21 @@ const referenceWebApplicationPackageJsonPath = path.join(
   prismRepositoryRootDirectoryPath,
   "apps/web/package.json"
 );
-const parentApplicationPackageJsonPath = path.join(
-  parentProjectRootDirectoryPath,
-  "package.json"
+function resolveParentApplicationPackageJsonPath(
+  parentProjectRootDirectoryPath: string
+): string {
+  const appWebPackageJsonPath = path.join(
+    parentProjectRootDirectoryPath,
+    "apps/web/package.json"
+  );
+  if (fs.existsSync(appWebPackageJsonPath)) {
+    return appWebPackageJsonPath;
+  }
+  return path.join(parentProjectRootDirectoryPath, "package.json");
+}
+
+const parentApplicationPackageJsonPath = resolveParentApplicationPackageJsonPath(
+  parentProjectRootDirectoryPath
 );
 
 /** Package names: web `dependencies` mirrored to parent `dependencies`. */
@@ -172,7 +185,9 @@ function synchronizeDependencyVersions(
   }
 
   if (versionDriftDescriptionLines.length === 0) {
-    console.log("✅ Dependency ranges already match prism/apps/web.");
+    console.log(
+      `✅ Dependency ranges already match prism/apps/web (${path.relative(parentProjectRootDirectoryPath, parentApplicationPackageJsonPath)}).`
+    );
     return;
   }
 
