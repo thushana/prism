@@ -1286,7 +1286,7 @@ function patchGlobalsCss(appRoot: string, layout: GenerateLayout): void {
 
   fs.writeFileSync(
     globalsPath,
-    `/* Import Prism styles from submodule (see ARCHITECTURE-Prism.md). */\n@import "../../../../prism/packages/ui/styles/globals.css";\n\n@source "../**/*.{ts,tsx,js,jsx,mdx}";\n@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";\n`,
+    `/* Tailwind from app workspace; Prism theme from submodule (see ARCHITECTURE-Prism.md). */\n@import "tailwindcss";\n@import "tw-animate-css";\n@import "../../../../prism/packages/ui/styles/globals-prism.css";\n\n@source "../**/*.{ts,tsx,js,jsx,mdx}";\n@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";\n`,
     "utf-8"
   );
 }
