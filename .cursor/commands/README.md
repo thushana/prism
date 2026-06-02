@@ -9,6 +9,14 @@ pnpm prism:sync:commands
 
 That **copies** `prism/.cursor/commands/*.md` → `.cursor/commands/` (real files, not a symlink).
 
+**Keeps in sync automatically** when you:
+
+- run `pnpm prism:sync` or `pnpm prism:sync:git` (after submodule pull)
+- run `pnpm install` (via `prepare`, only copies if prism files are newer)
+- run `pnpm prism:sync:commands` manually after editing commands in `prism/`
+
+Edit commands **only under `prism/.cursor/commands/`** — the parent copy is generated.
+
 Cursor’s `/` menu should list `CHORES`, `CODEREVIEW`, `COMMITMESSAGE`, etc. after sync. If commands are missing, run sync again and fully quit Cursor (`Cmd+Q`), then reopen.
 
 **Do not** symlink `.cursor/commands` to prism — Cursor often does not index symlinked command directories.
