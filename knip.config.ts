@@ -74,7 +74,6 @@ const config: KnipConfig = {
       drizzle: { config: [] },
     },
     "packages/*": {
-      entry: ["source/index.ts"],
       project: ["**/*.{ts,tsx}"],
       ignore: ["**/*.test.ts", "**/*.test.tsx"],
     },
@@ -116,7 +115,6 @@ const config: KnipConfig = {
       ignoreDependencies: ["server-only", "@vitejs/plugin-react"],
     },
     tools: {
-      entry: ["app/tools.ts"],
       project: ["app/**/*.{ts,tsx,mjs}"],
       ignoreDependencies: ["@prism/cli", "database", "logger"],
     },

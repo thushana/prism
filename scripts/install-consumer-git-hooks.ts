@@ -43,7 +43,7 @@ function assertHuskyDependency(appRoot: string): void {
   };
   if (!pkg.devDependencies?.husky) {
     console.error(
-      "❌ husky is required in devDependencies (Prism consumer standard). Add husky ^9 and prepare: \"husky\"."
+      '❌ husky is required in devDependencies (Prism consumer standard). Add husky ^9 and prepare: "husky".'
     );
     process.exit(1);
   }

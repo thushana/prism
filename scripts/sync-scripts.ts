@@ -74,7 +74,10 @@ function syncScripts(): void {
 
   // Determine the main project root for path checks
   const mainProjectRoot = path.dirname(MAIN_PACKAGE_JSON);
-  const appsWebPackageJsonPath = path.join(mainProjectRoot, "apps/web/package.json");
+  const appsWebPackageJsonPath = path.join(
+    mainProjectRoot,
+    "apps/web/package.json"
+  );
   const hasAppsWebLayout = fs.existsSync(appsWebPackageJsonPath);
   let appsWebScripts: Record<string, string> = {};
   if (hasAppsWebLayout) {

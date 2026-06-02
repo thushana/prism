@@ -58,8 +58,13 @@ function sync(): void {
 
     console.log("\n");
 
-    console.log("Step 3b: Installing git post-merge hook (Cursor commands)...\n");
-    const installHooksPath = path.join(scriptDir, "install-consumer-git-hooks.ts");
+    console.log(
+      "Step 3b: Installing git post-merge hook (Cursor commands)...\n"
+    );
+    const installHooksPath = path.join(
+      scriptDir,
+      "install-consumer-git-hooks.ts"
+    );
     execSync(`tsx ${installHooksPath}`, { stdio: "inherit" });
 
     console.log("\n");
