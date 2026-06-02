@@ -28,20 +28,16 @@ Generate apps from the repo root with **`pnpm run tools generate <name>`** or **
 
 **Recommended layout** (Porch Scope, TimeTraveler, …): Next.js at **`apps/web/`**, Prism submodule at **`prism/`**.
 
-| Vercel setting | Value |
-| --- | --- |
-| **Root Directory** | `apps/web` |
-| **Install Command** | `cd ../.. && pnpm install` |
-| **Build Command** | `pnpm run build` |
-| Git | Enable **submodules** (or use generated `.github/workflows/ci.yml` with `submodules: recursive`) |
+| Vercel setting      | Value                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| **Root Directory**  | `apps/web`                                                                                       |
+| **Install Command** | `cd ../.. && pnpm install`                                                                       |
+| **Build Command**   | `pnpm run build`                                                                                 |
+| Git                 | Enable **submodules** (or use generated `.github/workflows/ci.yml` with `submodules: recursive`) |
 
 Install and scripts run from the **consumer repo root** (`pnpm run dev` → `pnpm --filter web`). Do not set Root Directory to the repo root — Next.js `app/` is under `apps/web/app/`.
 
 See [GENERATE-Prism.md](./GENERATE-Prism.md) and [SYNC-Prism.md](./SYNC-Prism.md).
-
-### Legacy flat consumer repo (`--prism-repo`)
-
-If you generated with **`--prism-repo`**, the app lives at **repo root** (`app/`). Use Root Directory **`.`** and `pnpm install` / `pnpm run build` from that root. Prefer the `apps/web` layout for new projects.
 
 ## Deployment Behavior
 

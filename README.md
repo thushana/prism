@@ -193,7 +193,7 @@ pnpm run database:studio
 
 Apps in separate repositories can import Prism Core as a dependency. The generator handles this automatically:
 
-**Option 1: Submodule + `apps/web` (recommended — Porch Scope / TimeTraveler style)**
+**Consumer app (Porch Scope / TimeTraveler style)**
 
 ```bash
 prism generate my-app --path ../my-app
@@ -209,14 +209,6 @@ This creates:
 Vercel **Root Directory**: `apps/web`. Full guide: [GENERATE-Prism.md](./docs/GENERATE-Prism.md).
 
 After updating the submodule, run `pnpm run prism:sync` from your app repo root. Details: [SYNC-Prism.md](./docs/SYNC-Prism.md).
-
-**Option 2: Legacy flat layout + git dependency (deploy-only)**
-
-```bash
-prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-```
-
-App files at **repo root** (`app/`, not `apps/web/`). Prefer Option 1 for new projects.
 
 **Import in your app:**
 

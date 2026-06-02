@@ -4,13 +4,12 @@ The `prism generate` command scaffolds a Next.js application pre-wired with Pris
 
 ## Which command should I use?
 
-| Goal | Command | Where the app lives |
-| --- | --- | --- |
-| **New consumer app** (Porch Scope, TimeTraveler, …) — **recommended** | `prism generate my-app --path ../my-app` | `../my-app/apps/web/` + `../my-app/prism/` submodule |
-| New package inside the Prism monorepo | `prism generate my-app` (from Prism root) | `prism/apps/my-app/` |
-| Legacy: flat repo + Prism from npm/git only | `prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"` | `../my-app/app/` at repo root (no `apps/web/`) |
+| Goal                                                | Command                                   | Where the app lives                                  |
+| --------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| **New consumer app** (Porch Scope, TimeTraveler, …) | `prism generate my-app --path ../my-app`  | `../my-app/apps/web/` + `../my-app/prism/` submodule |
+| New package inside the Prism monorepo               | `prism generate my-app` (from Prism root) | `prism/apps/my-app/`                                 |
 
-**Rule of thumb:** If you will use a **`prism/` git submodule**, use `--path` **without** `--prism-repo`. You get the **workspace layout** (`apps/web/`).
+Consumer apps always use the **workspace layout**: `apps/web/` plus a `prism/` git submodule at the repo root.
 
 ## Quick Start
 
@@ -20,7 +19,7 @@ The `prism generate` command scaffolds a Next.js application pre-wired with Pris
 # Run setup script to link CLI globally
 npm run setup
 
-# New consumer app (recommended)
+# New consumer app
 prism generate my-app --path ../my-app
 
 # Show help
@@ -55,7 +54,7 @@ npm run prism generate my-app --path ../my-app
 ## Examples
 
 ```bash
-# ✅ RECOMMENDED — consumer repo: apps/web + prism submodule
+# Consumer repo: apps/web + prism submodule
 prism generate my-app --path ../my-app
 
 # Inside the Prism monorepo only (saves to prism/apps/my-app)
@@ -63,9 +62,6 @@ prism generate my-app
 
 # Overwrite existing directory
 prism generate my-app --path ../my-app --force
-
-# ⚠️ LEGACY — flat layout at repo root + @prism/core from git (deploy-only style)
-prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
 ```
 
 ## What Gets Generated
@@ -78,15 +74,36 @@ prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thus
 - **Drizzle ORM** with Neon PostgreSQL (template default)
 - **Prism packages** via submodule `file:` deps or monorepo `workspace:*`
 
-### Project Structure (recommended consumer layout)
+### Project Structure (consumer layout)
 
-`prism generate my-app --path ../my-app` **without** `--prism-repo`:
+`prism generate my-app --path ../my-app`:
 
 ```
 my-app/
   README.md                 # Setup cheat sheet (generated)
+  docs/
+    ARCHITECTURE-MyApp.md
+    CONVENTIONS-MyApp.md
+    DATABASE-MyApp.md
+    CLI-MyApp.md
+    MILESTONES-MyApp.md
+    decisions/
+      README.md
+      001-DECISION-consumer-workspace-layout.md
+  knip.config.ts
+  .github/workflows/ci.yml
+  .github/dependabot.yml
+  .husky/pre-commit
+  .lintstagedrc.cjs
+  .gitignore
   prism/                    # git submodule
   apps/web/                 # Next.js app (pnpm workspace name: web)
+    .env.example            # Committed template
+    .env                    # Created on generate (gitignored; edit values)
+    docs/index.mdx
+    scripts/README.md
+    tests/smoke.test.ts
+    cli/index.js            # bin wrapper for `pnpm link`
     package.json
     tsconfig.json
     next.config.ts
@@ -109,25 +126,22 @@ my-app/
 cd my-app
 git submodule update --init --recursive
 pnpm install
-cp apps/web/.env.example apps/web/.env
+# edit apps/web/.env (already created from .env.example)
 pnpm run dev
 ```
 
 **Vercel:** Root Directory = `apps/web`, Install = `cd ../.. && pnpm install`.
 
-### Legacy flat layout
-
-Only when you pass **`--prism-repo`**. App files sit at **repo root** (`app/`, `database/`, …). Prefer the workspace layout for new apps.
-
 ## What Runs Automatically
 
 1. **Creates directories** — under `apps/web/` (consumer) or `prism/apps/<name>` (monorepo)
-2. **Adds `prism/` submodule** — consumer layout only (unless `--prism-repo`)
-3. **Writes `package.json`** — root orchestrator + `apps/web/package.json` when using workspace layout
+2. **Adds `prism/` submodule** — consumer layout
+3. **Writes `package.json`** — root orchestrator + `apps/web/package.json`
 4. **Copies template** from `prism/apps/web`
-5. **`pnpm install`** — from **consumer repo root** (not only inside `prism/`)
-6. **Database** — `db:generate`, `db:migrate`, `db:seed` via root scripts (`pnpm --filter web` when workspace)
+5. **`pnpm install`** — from **consumer repo root**
+6. **Database** — `db:generate`, `db:migrate`, `db:seed` via root scripts (`pnpm --filter web`)
 7. **Git** — initial commit; **README.md** at consumer repo root with setup steps
+8. **Tooling** — Dependabot, Knip, Husky/lint-staged, expanded CI (`format:check`, `knip`, build env vars)
 
 ## First Time Usage (consumer workspace)
 
@@ -181,8 +195,6 @@ Paths resolve to `../../prism/packages/…` via `tsconfig.json` and webpack.
 
 ## Standalone App Deployment
 
-### Option 1: Submodule + `apps/web` (recommended)
-
 ```bash
 prism generate my-app --path ../my-app
 ```
@@ -200,14 +212,6 @@ cd my-app/prism
 cd ..
 git add prism && git commit -m "Update Prism submodule"
 ```
-
-### Option 2: Legacy git dependency (flat root)
-
-```bash
-prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-```
-
-Flat layout; Vercel builds from repo root. You cannot commit Prism changes from the app repo.
 
 ## Customization
 

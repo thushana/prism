@@ -27,7 +27,6 @@ export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
   force?: boolean;
   path?: string;
-  prismRepo?: string; // Git URL for Prism (e.g., "git+https://github.com/user/prism.git")
 }
 
 /**
@@ -60,42 +59,22 @@ function getInstallCommand(pm: string): string {
   }
 }
 
-/** Where generated app files live relative to the consumer repo root. */
-type GenerateLayout = "prism-monorepo" | "consumer-workspace" | "consumer-flat";
+type GenerateLayout = "prism-monorepo" | "consumer-workspace";
 
-function resolveGenerateLayout(
-  inMonorepo: boolean,
-  useGitDependency: boolean
-): GenerateLayout {
-  if (inMonorepo) {
-    return "prism-monorepo";
-  }
-  if (useGitDependency) {
-    return "consumer-flat";
-  }
-  return "consumer-workspace";
+function resolveGenerateLayout(inMonorepo: boolean): GenerateLayout {
+  return inMonorepo ? "prism-monorepo" : "consumer-workspace";
 }
 
 function resolveAppRoot(repoRoot: string, layout: GenerateLayout): string {
-  if (layout === "consumer-workspace") {
-    return path.join(repoRoot, "apps", "web");
-  }
-  return repoRoot;
+  return layout === "consumer-workspace"
+    ? path.join(repoRoot, "apps", "web")
+    : repoRoot;
 }
 
 function prismPackagesPrefix(layout: GenerateLayout): string {
-  switch (layout) {
-    case "prism-monorepo":
-      return "../../packages";
-    case "consumer-workspace":
-      return "../../prism/packages";
-    case "consumer-flat":
-      return "./prism/packages";
-  }
-}
-
-function usesSubmoduleFileDependencies(layout: GenerateLayout): boolean {
-  return layout === "consumer-workspace" || layout === "consumer-flat";
+  return layout === "consumer-workspace"
+    ? "../../prism/packages"
+    : "../../packages";
 }
 
 /**
@@ -109,10 +88,13 @@ function createDirectoryStructure(targetDir: string): void {
     "app/api",
     "ui/styles",
     "docs",
+    "config",
     "database",
     "database/migrations",
     "intelligence/tasks",
     "cli",
+    "scripts",
+    "tests",
     "public",
   ];
 
@@ -138,23 +120,6 @@ function renderTemplate(
   return result;
 }
 
-/**
- * Write file from template
- */
-function writeTemplateFile(
-  targetDir: string,
-  filePath: string,
-  template: string,
-  vars: Record<string, string>
-): void {
-  const fullPath = path.join(targetDir, filePath);
-  const dir = path.dirname(fullPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(fullPath, renderTemplate(template, vars), "utf-8");
-}
-
 /** `packageManager` from Prism root so CI `pnpm/action-setup` matches local Corepack. */
 function readPrismPackageManager(prismRoot: string | null): string | undefined {
   if (!prismRoot) {
@@ -171,8 +136,7 @@ function readPrismPackageManager(prismRoot: string | null): string | undefined {
 }
 
 function buildPrismDependencies(
-  layout: GenerateLayout,
-  prismRepo?: string
+  layout: GenerateLayout
 ): Record<string, string> {
   if (layout === "prism-monorepo") {
     return {
@@ -182,19 +146,14 @@ function buildPrismDependencies(
       ui: "*",
       "@prism/utilities": "*",
       admin: "*",
+      authentication: "*",
+      charts: "*",
       "feature-flags": "*",
       flags: "^4.0.0",
     };
   }
 
-  if (prismRepo) {
-    return { "@prism/core": prismRepo };
-  }
-
-  const filePrefix =
-    layout === "consumer-workspace"
-      ? "file:../../prism/packages/"
-      : "file:./prism/packages/";
+  const filePrefix = "file:../../prism/packages/";
 
   return {
     database: `${filePrefix}database`,
@@ -203,6 +162,8 @@ function buildPrismDependencies(
     ui: `${filePrefix}ui`,
     "@prism/utilities": `${filePrefix}utilities`,
     admin: `${filePrefix}admin`,
+    authentication: `${filePrefix}authentication`,
+    charts: `${filePrefix}charts`,
     "feature-flags": `${filePrefix}feature-flags`,
     flags: "^4.0.0",
   };
@@ -212,10 +173,9 @@ function generateWebAppPackageJson(
   appRoot: string,
   appName: string,
   layout: GenerateLayout,
-  prismRoot: string | null,
-  prismRepo?: string
+  prismRoot: string | null
 ): void {
-  const useWebpack = usesSubmoduleFileDependencies(layout);
+  const useWebpack = layout === "consumer-workspace";
   const packageManager = readPrismPackageManager(prismRoot);
 
   const packageJson = {
@@ -227,8 +187,8 @@ function generateWebAppPackageJson(
       dev: useWebpack ? "next dev --webpack" : "next dev",
       build: useWebpack ? "next build --webpack" : "next build",
       start: "next start",
-      lint: "eslint app",
-      "lint:fix": "eslint app --fix",
+      lint: "eslint app cli scripts tests",
+      "lint:fix": "eslint app cli scripts tests --fix",
       format: 'prettier --write "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
       "format:check":
         'prettier --check "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
@@ -244,7 +204,7 @@ function generateWebAppPackageJson(
       "db:seed": "tsx database/seed.ts",
     },
     dependencies: {
-      ...buildPrismDependencies(layout, prismRepo),
+      ...buildPrismDependencies(layout),
       "@neondatabase/serverless": "^1.0.2",
       "@radix-ui/react-slot": "^1.2.4",
       next: "16.2.7",
@@ -281,20 +241,38 @@ function generateWebAppPackageJson(
   );
 }
 
+/** npm-safe CLI binary name (e.g. my-app → my-app). */
+function sanitizeCliBinName(appName: string): string {
+  const normalized = appName
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return normalized.length > 0 ? normalized : "app";
+}
+
 function generateConsumerRepoPackageJson(
   repoRoot: string,
   appName: string,
   prismRoot: string | null
 ): void {
   const packageManager = readPrismPackageManager(prismRoot);
+  const cliBin = sanitizeCliBinName(appName);
 
   const packageJson = {
     name: appName,
     version: "0.1.0",
     private: true,
     ...(packageManager ? { packageManager } : {}),
+    engines: {
+      node: "24.x",
+    },
+    bin: {
+      [cliBin]: "./apps/web/cli/index.js",
+    },
     scripts: {
       build: "pnpm --filter web run build",
+      "build:web": "pnpm --filter web run build",
+      chores: "tsx prism/scripts/chores.ts",
       clean: "rm -rf apps/*/.next apps/*/node_modules/.cache *.tsbuildinfo",
       "db:generate": "pnpm --filter web run db:generate",
       "db:migrate": "pnpm --filter web run db:migrate",
@@ -303,26 +281,59 @@ function generateConsumerRepoPackageJson(
       "db:studio": "pnpm --filter web run db:studio",
       dev: "pnpm --filter web run dev",
       "dev:web": "pnpm --filter web run dev",
-      format: 'prettier --write "apps/web/**/*.{ts,tsx}"',
-      "format:check": 'prettier --check "apps/web/**/*.{ts,tsx}"',
+      format:
+        'prettier --write "apps/web/**/*.{ts,tsx,js,mjs,cjs}" "docs/**/*.{md,mdx}"',
+      "format:check":
+        'prettier --check "apps/web/**/*.{ts,tsx,js,mjs,cjs}" "docs/**/*.{md,mdx}"',
+      "generate:colors": "cd prism/packages/ui && pnpm run generate:colors",
+      knip: "knip --dependencies",
+      "knip:exports": "knip --exports",
       lint: "pnpm --filter web run lint",
       "lint:fix": "pnpm --filter web run lint:fix",
+      precommit: "pnpm exec lint-staged",
+      prepare:
+        "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\"",
       "prism:sync": "tsx prism/scripts/sync.ts",
+      "prism:sync:commands": "tsx prism/scripts/sync-commands.ts",
       "prism:sync:dependencies": "tsx prism/scripts/sync-dependencies.ts",
+      "prism:sync:git": "tsx prism/scripts/sync-git.ts",
       "prism:sync:scripts": "tsx prism/scripts/sync-scripts.ts",
       quality: "tsx prism/scripts/quality.ts",
+      "quality:ci":
+        "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run knip && pnpm run test:run && pnpm run build",
       "quality:quick": "pnpm run format && pnpm run lint && pnpm run typecheck",
+      setup: "pnpm link --global && pnpm run prism:sync",
       start: "pnpm --filter web run start",
+      "start:web": "pnpm --filter web run start",
+      [cliBin]: "tsx apps/web/cli/index.ts",
       test: "pnpm --filter web run test",
       "test:run": "pnpm --filter web run test:run",
       typecheck: "pnpm --filter web run typecheck",
       "vercel:build": "vercel build --cwd apps/web",
+      "vercel:test:web": "pnpm --filter web run build",
     },
     devDependencies: {
+      eslint: "^10.4.1",
+      "eslint-config-next": "16.2.7",
+      husky: "^9.1.7",
       knip: "^6.15.0",
+      "lint-staged": "^17.0.7",
       prettier: "^3.8.3",
       tsx: "^4.22.4",
       typescript: "^6.0.3",
+    },
+    pnpm: {
+      overrides: {
+        next: "16.2.7",
+        react: "19.2.7",
+        "react-dom": "19.2.7",
+      },
+      onlyBuiltDependencies: [
+        "better-sqlite3",
+        "esbuild",
+        "sharp",
+        "unrs-resolver",
+      ],
     },
   };
 
@@ -338,10 +349,9 @@ function generatePackageJson(
   appRoot: string,
   appName: string,
   layout: GenerateLayout,
-  prismRoot: string | null,
-  prismRepo?: string
+  prismRoot: string | null
 ): void {
-  generateWebAppPackageJson(appRoot, appName, layout, prismRoot, prismRepo);
+  generateWebAppPackageJson(appRoot, appName, layout, prismRoot);
 
   if (layout === "consumer-workspace") {
     generateConsumerRepoPackageJson(repoRoot, appName, prismRoot);
@@ -353,13 +363,10 @@ function generatePackageJson(
  */
 function generateNextConfig(appRoot: string, layout: GenerateLayout): void {
   const prismPrefix = prismPackagesPrefix(layout);
-  const prismToolsWatchPath =
-    layout === "consumer-workspace"
-      ? "../../prism/tools/**"
-      : "./prism/tools/**";
 
-  const nextConfig = usesSubmoduleFileDependencies(layout)
-    ? `import type { NextConfig } from "next";
+  const nextConfig =
+    layout === "consumer-workspace"
+      ? `import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
@@ -370,6 +377,8 @@ const nextConfig: NextConfig = {
     "logger",
     "ui",
     "admin",
+    "authentication",
+    "charts",
     "feature-flags",
   ],
   turbopack: {},
@@ -412,7 +421,7 @@ const nextConfig: NextConfig = {
             typeof pattern === "string" && pattern.length > 0
         ),
         "**/cli/**",
-        path.resolve(__dirname, "${prismToolsWatchPath}"),
+        path.resolve(__dirname, "../../prism/tools/**"),
       ],
     };
 
@@ -422,7 +431,7 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 `
-    : `import type { NextConfig } from "next";
+      : `import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -448,43 +457,22 @@ function generateNvmrc(targetDir: string): void {
 function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
   const prismPrefix = prismPackagesPrefix(layout);
 
-  const paths =
-    layout === "consumer-flat"
-      ? {
-          "@/*": ["./*"],
-          "@database": ["node_modules/@prism/core/packages/database/source"],
-          "@intelligence": [
-            "node_modules/@prism/core/packages/intelligence/source",
-          ],
-          "@logger": ["node_modules/@prism/core/packages/logger/source"],
-          "@logger/*": ["node_modules/@prism/core/packages/logger/source/*"],
-          "@ui": ["node_modules/@prism/core/packages/ui/source"],
-          "@utilities": [
-            "node_modules/@prism/core/packages/utilities/source",
-          ],
-          "@admin": ["node_modules/@prism/core/packages/admin/source"],
-          "feature-flags": [
-            "node_modules/@prism/core/packages/feature-flags/source",
-          ],
-        }
-      : {
-          "@/*": ["./*"],
-          "@database": [`${prismPrefix}/database/source`],
-          "@intelligence": [`${prismPrefix}/intelligence/source`],
-          "@logger": [`${prismPrefix}/logger/source`],
-          "@logger/*": [`${prismPrefix}/logger/source/*`],
-          "@intelligence/tasks": [`${prismPrefix}/intelligence/source/tasks`],
-          "@intelligence/tasks/*": [
-            `${prismPrefix}/intelligence/source/tasks/*`,
-          ],
-          "@intelligence/client": [`${prismPrefix}/intelligence/source/client`],
-          "@ui": [`${prismPrefix}/ui/source`],
-          "@utilities": [`${prismPrefix}/utilities/source`],
-          "@admin": [`${prismPrefix}/admin/source`],
-          "@authentication": [`${prismPrefix}/authentication/source`],
-          "@authentication/*": [`${prismPrefix}/authentication/source/*`],
-          "feature-flags": [`${prismPrefix}/feature-flags/source`],
-        };
+  const paths = {
+    "@/*": ["./*"],
+    "@database": [`${prismPrefix}/database/source`],
+    "@intelligence": [`${prismPrefix}/intelligence/source`],
+    "@logger": [`${prismPrefix}/logger/source`],
+    "@logger/*": [`${prismPrefix}/logger/source/*`],
+    "@intelligence/tasks": [`${prismPrefix}/intelligence/source/tasks`],
+    "@intelligence/tasks/*": [`${prismPrefix}/intelligence/source/tasks/*`],
+    "@intelligence/client": [`${prismPrefix}/intelligence/source/client`],
+    "@ui": [`${prismPrefix}/ui/source`],
+    "@utilities": [`${prismPrefix}/utilities/source`],
+    "@admin": [`${prismPrefix}/admin/source`],
+    "@authentication": [`${prismPrefix}/authentication/source`],
+    "@authentication/*": [`${prismPrefix}/authentication/source/*`],
+    "feature-flags": [`${prismPrefix}/feature-flags/source`],
+  };
 
   const tsconfigExclude =
     layout === "consumer-workspace"
@@ -497,17 +485,7 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
           ".next",
           "cli",
         ]
-      : layout === "consumer-flat"
-        ? [
-            "node_modules",
-            "prism/apps",
-            "prism/tools",
-            "prism/scripts",
-            "prism/packages/cli",
-            ".next",
-            "cli",
-          ]
-        : ["node_modules", "cli"];
+      : ["node_modules", "cli"];
 
   const tsconfig = {
     compilerOptions: {
@@ -543,8 +521,187 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
 }
 
 function generatePnpmWorkspaceYaml(repoRoot: string): void {
-  const content = `packages:\n  - "apps/*"\n`;
-  fs.writeFileSync(path.join(repoRoot, "pnpm-workspace.yaml"), content, "utf-8");
+  const content = `packages:
+  - "apps/*"
+  - "packages/*"
+
+shamefullyHoist: true
+strictPeerDependencies: false
+
+overrides:
+  next: 16.2.7
+  react: 19.2.7
+  react-dom: 19.2.7
+  typescript-eslint: ^8.59.3
+
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+`;
+  fs.writeFileSync(
+    path.join(repoRoot, "pnpm-workspace.yaml"),
+    content,
+    "utf-8"
+  );
+}
+
+function generateConsumerDependabot(repoRoot: string): void {
+  const dependabotDir = path.join(repoRoot, ".github");
+  fs.mkdirSync(dependabotDir, { recursive: true });
+
+  const content = `version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      react-next:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+          - "eslint-config-next"
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+
+  - package-ecosystem: "npm"
+    directory: "/prism"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      react-next:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+          - "eslint-config-next"
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "prism"
+      include: "scope"
+`;
+
+  fs.writeFileSync(
+    path.join(dependabotDir, "dependabot.yml"),
+    content,
+    "utf-8"
+  );
+}
+
+function generateConsumerKnip(repoRoot: string): void {
+  const content = `import type { KnipConfig } from "knip";
+
+const nextAppEntry = [
+  "app/**/{page,layout,route,loading,error,not-found,default,template,global-error}.{ts,tsx}",
+  "app/**/route.ts",
+];
+
+/** Generated consumer workspace — scopes analysis to apps/web (not prism/). */
+const config: KnipConfig = {
+  ignoreBinaries: ["vercel"],
+  workspaces: {
+    "apps/web": {
+      entry: [
+        ...nextAppEntry,
+        "database/drizzle.config.ts",
+        "config/**/*.ts",
+        "intelligence/tasks/**/*.ts",
+        "cli/index.ts",
+        "cli/index.js",
+      ],
+      project: [
+        "app/**/*.{ts,tsx}",
+        "cli/**/*.{ts,tsx,js}",
+        "database/**/*.ts",
+        "intelligence/**/*.ts",
+        "config/**/*.ts",
+        "scripts/**/*.{ts,cjs,mjs}",
+        "tests/**/*.{ts,tsx}",
+      ],
+      ignore: ["../../prism/**"],
+      ignoreDependencies: [
+        "admin",
+        "authentication",
+        "charts",
+        "database",
+        "intelligence",
+        "logger",
+        "ui",
+        "@prism/utilities",
+        "@radix-ui/react-slot",
+        "feature-flags",
+        "flags",
+        "lightningcss",
+        "tw-animate-css",
+        "tailwindcss",
+        "postcss-import",
+        "postcss-load-config",
+      ],
+    },
+  },
+};
+
+export default config;
+`;
+
+  fs.writeFileSync(path.join(repoRoot, "knip.config.ts"), content, "utf-8");
+}
+
+function generateConsumerHusky(repoRoot: string): void {
+  const huskyDir = path.join(repoRoot, ".husky");
+  fs.mkdirSync(huskyDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(huskyDir, "pre-commit"),
+    "#!/usr/bin/env sh\npnpm exec lint-staged --no-stash\n",
+    "utf-8"
+  );
+  try {
+    fs.chmodSync(path.join(huskyDir, "pre-commit"), 0o755);
+  } catch {
+    // Windows may not support chmod
+  }
+
+  const lintStaged = `/**
+ * Pre-commit hooks (consumer apps/web layout).
+ * @type {import('lint-staged').Configuration}
+ */
+module.exports = {
+  "apps/web/**/*.{ts,tsx,mjs,js,cjs}": (filenames) => {
+    const files = filenames.map((f) => JSON.stringify(f)).join(" ");
+    return [
+      \`prettier --write \${files}\`,
+      \`eslint --config apps/web/eslint.config.mjs --fix --max-warnings 0 \${files}\`,
+    ];
+  },
+  "apps/web/**/*.{json,css,md,mdx,yml,yaml}": ["prettier --write"],
+  "docs/**/*.{md,mdx}": ["prettier --write"],
+};
+`;
+
+  fs.writeFileSync(
+    path.join(repoRoot, ".lintstagedrc.cjs"),
+    lintStaged,
+    "utf-8"
+  );
 }
 
 function generateConsumerWorkspaceCi(repoRoot: string): void {
@@ -565,12 +722,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: Lint, typecheck, test, build
+  quality:
+    name: Quality & build
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      NO_COLOR: "1"
+      FORCE_COLOR: "0"
+      NEXT_TELEMETRY_DISABLED: "1"
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?sslmode=disable
+      DATABASE_URL_UNPOOLED: postgresql://ci:ci@127.0.0.1:5432/ci?sslmode=disable
+      GOOGLE_MAPS_API_KEY: ci_dummy_not_used_at_build
+      PRISM_KEY_API: ci_dummy_not_used_at_build
+      PRISM_KEY_WEB: ci_dummy_not_used_at_build
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout (with Prism submodule)
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -584,14 +752,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Format check
+        run: pnpm run format:check
+
       - name: Lint
         run: pnpm run lint
 
       - name: Typecheck
         run: pnpm run typecheck
 
+      - name: Knip (dependencies)
+        run: pnpm run knip
+
       - name: Tests
         run: pnpm run test:run
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: \${{ runner.os }}-next-\${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            \${{ runner.os }}-next-
 
       - name: Build
         run: pnpm run build
@@ -600,60 +782,480 @@ jobs:
   fs.writeFileSync(path.join(ciDir, "ci.yml"), ciContent, "utf-8");
 }
 
+function generateAppCliWrapper(appRoot: string): void {
+  const wrapper = `#!/usr/bin/env node
+
+/**
+ * CLI wrapper — runs apps/web/cli/index.ts via tsx (for pnpm link / bin).
+ */
+
+const { spawn } = require("child_process");
+const path = require("path");
+
+const tsxPath = require.resolve("tsx/cli");
+const cliPath = path.join(__dirname, "index.ts");
+
+const child = spawn("node", [tsxPath, cliPath, ...process.argv.slice(2)], {
+  stdio: "inherit",
+  cwd: path.join(__dirname, ".."),
+});
+
+child.on("exit", (code) => {
+  process.exit(code || 0);
+});
+`;
+
+  fs.writeFileSync(path.join(appRoot, "cli/index.js"), wrapper, "utf-8");
+  try {
+    fs.chmodSync(path.join(appRoot, "cli/index.js"), 0o755);
+  } catch {
+    // Windows may not support chmod; bin still works via node
+  }
+}
+
+function generateAppScaffoldFiles(
+  appRoot: string,
+  appName: string,
+  vars: Record<string, string>
+): void {
+  const scriptsReadme = `# scripts/
+
+One-off maintenance scripts for **{{APP_NAME}}** (import routes, benchmarks, etc.).
+Run with \`tsx scripts/your-script.ts\` from \`apps/web/\` or add root scripts that call into here.
+`;
+
+  fs.writeFileSync(
+    path.join(appRoot, "scripts/README.md"),
+    renderTemplate(scriptsReadme, vars),
+    "utf-8"
+  );
+
+  const smokeTest = `import { describe, expect, it } from "vitest";
+
+describe("{{APP_NAME}}", () => {
+  it("scaffold smoke test", () => {
+    expect(true).toBe(true);
+  });
+});
+`;
+
+  fs.writeFileSync(
+    path.join(appRoot, "tests/smoke.test.ts"),
+    renderTemplate(smokeTest, vars),
+    "utf-8"
+  );
+
+  const cliIndexPath = path.join(appRoot, "cli/index.ts");
+  if (fs.existsSync(cliIndexPath)) {
+    const cliBin = sanitizeCliBinName(appName);
+    const cliSource = fs.readFileSync(cliIndexPath, "utf-8");
+    const updated = cliSource.replace(
+      /program\.name\([^)]+\)/,
+      `program.name("${cliBin}")`
+    );
+    if (updated !== cliSource) {
+      fs.writeFileSync(cliIndexPath, updated, "utf-8");
+    }
+  }
+}
+
+/** Stable doc token for host-project filenames (e.g. my-app → MyApp). */
+function formatProjectDocToken(appName: string): string {
+  return appName
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join("");
+}
+
+function readEnvExampleFromTemplate(): string {
+  const templateDir = getTemplatesDir();
+  const envExamplePath = path.join(templateDir, ".env.example");
+  if (!fs.existsSync(envExamplePath)) {
+    throw new Error(`Missing template .env.example at ${envExamplePath}`);
+  }
+  return fs.readFileSync(envExamplePath, "utf-8");
+}
+
+/** Write apps/web/.env.example and .env (same content; .env is gitignored). */
+function writeAppEnvFiles(appRoot: string): void {
+  const envContent = readEnvExampleFromTemplate();
+  for (const name of [".env.example", ".env"]) {
+    fs.writeFileSync(path.join(appRoot, name), envContent, "utf-8");
+  }
+}
+
+function generateConsumerGitignore(repoRoot: string): void {
+  const gitignore = `# dependencies
+/node_modules
+**/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/apps/*/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+*.db
+*.db-wal
+*.db-shm
+data/
+`;
+
+  fs.writeFileSync(path.join(repoRoot, ".gitignore"), gitignore, "utf-8");
+}
+
+function generateConsumerRepoDocs(
+  repoRoot: string,
+  appName: string,
+  vars: Record<string, string>
+): void {
+  const projectToken = formatProjectDocToken(appName);
+  const docsDir = path.join(repoRoot, "docs");
+  fs.mkdirSync(docsDir, { recursive: true });
+
+  const architecture = `# ARCHITECTURE-${projectToken}
+
+Mental model for **{{APP_NAME}}**: a Prism consumer app with the submodule at \`prism/\`.
+
+This matches [ARCHITECTURE-Prism.md](../prism/docs/ARCHITECTURE-Prism.md) and apps like Porch Scope / TimeTraveler:
+
+- **\`pnpm install\` at repo root** — not only inside \`prism/\`
+- **Next.js app** under **\`apps/web/\`**
+- **Dependencies**: \`file:../../prism/packages/...\` in \`apps/web/package.json\`
+- **TypeScript paths**: \`../../prism/packages/*/source\` in \`apps/web/tsconfig.json\`
+- **Next.js**: \`--webpack\` dev/build; \`transpilePackages\` + webpack aliases in \`apps/web/next.config.ts\`
+- **Styles**: Prism globals imported from \`apps/web/ui/styles/globals.css\`
+
+## Layout
+
+\`\`\`
+{{APP_NAME}}/
+  prism/                 # git submodule
+  apps/
+    web/                 # Next.js App Router (pnpm workspace name: web)
+      app/
+      database/
+      intelligence/tasks/
+      ui/styles/
+      config/
+      cli/
+      scripts/
+      tests/
+      docs/              # in-app notes (MDX)
+  docs/                  # ARCHITECTURE-*, DATABASE-*, CLI-*, MILESTONES-*, decisions/
+  knip.config.ts
+  .github/               # ci.yml, dependabot.yml
+  package.json           # pnpm --filter web, prism:sync, quality:ci, …
+  pnpm-workspace.yaml
+\`\`\`
+
+## Decisions
+
+Architecture decision records live under **\`docs/decisions/\`** (\`NNN-DECISION-short-slug.md\`). See [DOCS-Prism.md](../prism/docs/DOCS-Prism.md).
+
+## Customize
+
+Describe your domain, data flow, and auth model here. Link to \`prism/docs/\` for Prism-owned behavior (admin, UI, flags, database patterns).
+`;
+
+  const conventions = `# CONVENTIONS-${projectToken}
+
+Project token for doc filenames: **${projectToken}** (\`ARCHITECTURE-${projectToken}.md\`, this file).
+
+## Commands
+
+Run from **repo root**: \`pnpm run dev\`, \`pnpm run build\`, \`pnpm run quality:ci\`, \`pnpm run prism:sync\`, \`pnpm run chores\`.
+
+## Environment
+
+- **\`apps/web/.env\`** — local secrets (gitignored)
+- **\`apps/web/.env.example\`** — committed template
+
+## Code layout
+
+- App code only under **\`apps/web/\`**
+- Shared Prism packages under **\`prism/packages/\`**
+- Add app-owned packages under **\`packages/\`** when needed (update \`pnpm-workspace.yaml\`)
+
+## Decision records
+
+- Directory: **\`docs/decisions/\`**
+- Filename: **\`NNN-DECISION-short-slug.md\`** (three-digit prefix, increasing)
+- Document **why**, not full **how** — link to code paths under \`Where Implemented\`
+
+See [DOCS-Prism.md](../prism/docs/DOCS-Prism.md) for documentation philosophy.
+`;
+
+  const decisionsDir = path.join(docsDir, "decisions");
+  fs.mkdirSync(decisionsDir, { recursive: true });
+
+  const initialDecision = `# 001-DECISION-consumer-workspace-layout
+
+Decision record (see [DOCS-Prism.md](../../prism/docs/DOCS-Prism.md): document **why**, not full **how**—implementation lives in code).
+
+## Context
+
+- **{{APP_NAME}}** is a Prism consumer app: Next.js UI plus shared packages from the **\`prism/\`** git submodule.
+- We need one deployable git repo, Vercel-friendly installs, and the same ergonomics as mature consumers (TimeTraveler, Porch Scope).
+- Running \`pnpm install\` only inside \`prism/\` duplicates dependencies and breaks alignment with the app.
+
+## Decision
+
+- **Repo root** orchestrates scripts (\`pnpm --filter web\`, \`prism:sync\`, database commands).
+- **Next.js app** lives at **\`apps/web/\`** (pnpm workspace package name \`web\`).
+- **Prism** is a **git submodule** at **\`prism/\`** with \`file:../../prism/packages/...\` dependencies in \`apps/web/package.json\`.
+- **Docs**: app mental model in \`docs/ARCHITECTURE-${projectToken}.md\`; ADRs in \`docs/decisions/\`.
+- **Env**: \`apps/web/.env.example\` (committed) and \`apps/web/.env\` (gitignored, created on generate).
+
+## Pros
+
+- Matches Prism \`generate\` output and existing consumer repos — no flat-root layout drift.
+- Vercel **Root Directory** \`apps/web\` with install \`cd ../.. && pnpm install\`.
+- Submodule lets you commit Prism changes from the app repo when iterating on shared packages.
+
+## Cons / Risks
+
+- Contributors must learn to run commands from **repo root**, not only \`apps/web/\`.
+- Git submodules require \`submodules: recursive\` in CI and on Vercel.
+
+## Follow-Ups
+
+- Add domain-specific ADRs as **\`002-DECISION-…\`**, **\`003-DECISION-…\`** under \`docs/decisions/\`.
+- Flesh out \`docs/ARCHITECTURE-${projectToken}.md\` with your data flow and auth model.
+
+## Where Implemented
+
+- Scaffold: \`prism generate\` ([GENERATE-Prism.md](../../prism/docs/GENERATE-Prism.md))
+- Workspace: \`pnpm-workspace.yaml\`, root \`package.json\`, \`apps/web/package.json\`
+- Prism layout reference: [ARCHITECTURE-Prism.md](../../prism/docs/ARCHITECTURE-Prism.md)
+`;
+
+  fs.writeFileSync(
+    path.join(docsDir, `ARCHITECTURE-${projectToken}.md`),
+    renderTemplate(architecture, vars),
+    "utf-8"
+  );
+  fs.writeFileSync(
+    path.join(docsDir, `CONVENTIONS-${projectToken}.md`),
+    renderTemplate(conventions, vars),
+    "utf-8"
+  );
+  fs.writeFileSync(
+    path.join(decisionsDir, "001-DECISION-consumer-workspace-layout.md"),
+    renderTemplate(initialDecision, vars),
+    "utf-8"
+  );
+
+  const decisionsReadme = `# decisions/
+
+Architecture decision records (ADRs) for **{{APP_NAME}}**.
+
+| File | Topic |
+| --- | --- |
+| [001-DECISION-consumer-workspace-layout.md](./001-DECISION-consumer-workspace-layout.md) | \`apps/web/\` + \`prism/\` submodule layout |
+
+Add **\`002-DECISION-short-slug.md\`**, **\`003-…\`** as you make product choices (API vendors, storage, charting, auth, …). See [DOCS-Prism.md](../../prism/docs/DOCS-Prism.md).
+`;
+
+  const databaseDoc = `# DATABASE-${projectToken}
+
+Quick reference for schema shape and query patterns. **Canonical columns and types:** \`apps/web/database/schema.ts\` — verify there first.
+
+See [ARCHITECTURE-${projectToken}.md](./ARCHITECTURE-${projectToken}.md) for the mental model and [DATABASE-Prism.md](../prism/docs/DATABASE-Prism.md) for Prism database patterns.
+
+## Stack
+
+- **Drizzle ORM** with **PostgreSQL** (Neon) by default
+- Env: \`DATABASE_URL\` / \`DATABASE_URL_UNPOOLED\` in \`apps/web/.env\`
+
+## Commands (repo root)
+
+\`\`\`bash
+pnpm run db:generate
+pnpm run db:migrate
+pnpm run db:push
+pnpm run db:studio
+pnpm run db:seed
+\`\`\`
+
+## Customize
+
+Document your tables, relationships, and indexing choices here. Link domain ADRs under \`docs/decisions/\` when schema choices need a **why**.
+`;
+
+  const cliDoc = `# CLI-${projectToken}
+
+App CLI for **{{APP_NAME}}** (Commander + tsx).
+
+## Quick start
+
+\`\`\`bash
+pnpm run setup          # optional: pnpm link --global
+pnpm run ${sanitizeCliBinName(appName)} --help
+# or
+pnpm exec ${sanitizeCliBinName(appName)} --help
+\`\`\`
+
+Implementation: \`apps/web/cli/index.ts\` (bin wrapper: \`apps/web/cli/index.js\`).
+
+## Customize
+
+Add commands under \`apps/web/cli/\` and document them here. For Prism tooling, see [CLI-Prism.md](../prism/docs/CLI-Prism.md).
+`;
+
+  const milestonesDoc = `# MILESTONES-${projectToken}
+
+Discrete, testable milestones for **{{APP_NAME}}**. Philosophy: [DOCS-Prism.md](../prism/docs/DOCS-Prism.md).
+
+## Milestone 1: Foundation
+
+_Goal: App runs locally with database and Prism auth wired._
+
+- [ ] \`pnpm install\` at repo root, submodule initialized
+- [ ] \`apps/web/.env\` configured (Neon + \`PRISM_KEY_*\`)
+- [ ] \`pnpm run db:push\` / migrations applied
+- [ ] \`pnpm run dev\` — app loads at localhost
+- [ ] \`pnpm run quality:ci\` passes locally
+
+## Milestone 2: Domain core
+
+_Goal: Describe your primary user flow._
+
+- [ ] …
+
+## Milestone 3: Production
+
+_Goal: Vercel deploy with submodules._
+
+- [ ] Root Directory \`apps/web\`, install \`cd ../.. && pnpm install\`
+- [ ] CI green on \`main\`
+
+Add checkboxes as you ship; keep **why** in \`docs/decisions/\` when choices are non-obvious.
+`;
+
+  fs.writeFileSync(
+    path.join(decisionsDir, "README.md"),
+    renderTemplate(decisionsReadme, vars),
+    "utf-8"
+  );
+  fs.writeFileSync(
+    path.join(docsDir, `DATABASE-${projectToken}.md`),
+    renderTemplate(databaseDoc, vars),
+    "utf-8"
+  );
+  fs.writeFileSync(
+    path.join(docsDir, `CLI-${projectToken}.md`),
+    renderTemplate(cliDoc, vars),
+    "utf-8"
+  );
+  fs.writeFileSync(
+    path.join(docsDir, `MILESTONES-${projectToken}.md`),
+    renderTemplate(milestonesDoc, vars),
+    "utf-8"
+  );
+}
+
 function generateConsumerReadme(
   repoRoot: string,
   appName: string,
   vars: Record<string, string>
 ): void {
+  const projectToken = formatProjectDocToken(appName);
+  const cliBin = sanitizeCliBinName(appName);
+
   const readme = `# {{APP_NAME}}
 
-Next.js app generated with **Prism**. The UI and API live in **\`apps/web/\`** — not at the repo root.
+Next.js app generated with **Prism** (\`prism/\` git submodule). The UI and API live in **\`apps/web/\`** — not at the repo root.
 
-## Repo layout
+Architecture and conventions: **[DOCS-Prism.md](prism/docs/DOCS-Prism.md)**.
 
-\`\`\`
-{{APP_NAME}}/
-  prism/           # git submodule (Prism core)
-  apps/web/        # Next.js app — edit here
-  package.json     # run scripts from repo root
-  pnpm-workspace.yaml
-\`\`\`
+### Prerequisites
 
-## First-time setup
+- **Node.js** **24.x** (\`engines\` in \`package.json\`)
+- **pnpm** — version in \`packageManager\`. \`corepack enable\` then \`pnpm -v\`.
 
-From the **repo root** (this directory):
+### Quick start
 
 \`\`\`bash
 git submodule update --init --recursive
 pnpm install
-cp apps/web/.env.example apps/web/.env
-# Edit apps/web/.env (DATABASE_URL, PRISM_KEY_WEB, PRISM_KEY_API, …)
+# Edit apps/web/.env (created from .env.example during generate)
 pnpm run db:push
 pnpm run dev
 \`\`\`
 
 Open http://localhost:3000 (or the port in \`apps/web/package.json\`).
 
-## Daily commands (repo root)
+### Documentation
+
+| Doc | Purpose |
+| --- | --- |
+| [ARCHITECTURE-${projectToken}.md](docs/ARCHITECTURE-${projectToken}.md) | Mental model — fill in your domain |
+| [DATABASE-${projectToken}.md](docs/DATABASE-${projectToken}.md) | Schema / query notes |
+| [CLI-${projectToken}.md](docs/CLI-${projectToken}.md) | App CLI (\`${cliBin}\`) |
+| [MILESTONES-${projectToken}.md](docs/MILESTONES-${projectToken}.md) | Delivery checklist |
+| [docs/decisions/](docs/decisions/) | ADRs (\`001\` scaffolded) |
+| [prism/docs/](prism/docs/) | Prism UI, admin, deployment, sync |
+
+### Daily commands (repo root)
 
 | Task | Command |
 | --- | --- |
 | Dev server | \`pnpm run dev\` |
 | Build | \`pnpm run build\` |
+| CI parity | \`pnpm run quality:ci\` |
 | Lint / typecheck | \`pnpm run lint\` / \`pnpm run typecheck\` |
+| Knip | \`pnpm run knip\` |
 | Database | \`pnpm run db:push\` / \`pnpm run db:studio\` |
 | Align with Prism | \`pnpm run prism:sync\` |
+| Monthly health | \`pnpm run chores\` |
 
 Do **not** run \`pnpm install\` only inside \`prism/\` — install once at repo root.
 
-## Vercel
+### Project health & CI
+
+- **CI:** [.github/workflows/ci.yml](.github/workflows/ci.yml) — submodules, format, lint, knip, test, build
+- **Dependabot:** [.github/dependabot.yml](.github/dependabot.yml) — root, \`prism/\`, submodule SHA
+- **Commits:** Husky + lint-staged (\`.lintstagedrc.cjs\`)
+- **CLI:** \`pnpm run setup\` then \`${cliBin} --help\`
+
+### Vercel
 
 - **Root Directory**: \`apps/web\`
 - **Install Command**: \`cd ../.. && pnpm install\`
 - **Build Command**: \`pnpm run build\`
-- Enable **submodules** on the Git integration (or use CI with \`submodules: recursive\`)
+- Enable **submodules** on the Git integration
 
-## Working on Prism
+### Working on Prism
 
 \`\`\`bash
 cd prism
@@ -662,7 +1264,7 @@ cd ..
 git add prism && git commit -m "Update Prism submodule"
 \`\`\`
 
-See \`prism/docs/GENERATE-Prism.md\` and \`prism/docs/DEPLOYMENT-Prism.md\`.
+See [GENERATE-Prism.md](prism/docs/GENERATE-Prism.md) and [DEPLOYMENT-Prism.md](prism/docs/DEPLOYMENT-Prism.md).
 `;
 
   fs.writeFileSync(
@@ -682,19 +1284,9 @@ function patchGlobalsCss(appRoot: string, layout: GenerateLayout): void {
     return;
   }
 
-  const prismImport =
-    layout === "consumer-workspace"
-      ? '@import "../../../../prism/packages/ui/styles/globals.css";'
-      : '@import "../../../prism/packages/ui/styles/globals.css";';
-
-  const appSource =
-    layout === "consumer-workspace"
-      ? '@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";'
-      : '@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";';
-
   fs.writeFileSync(
     globalsPath,
-    `/* Import Prism styles from submodule (see ARCHITECTURE-Prism.md). */\n${prismImport}\n\n@source "../**/*.{ts,tsx,js,jsx,mdx}";\n${appSource}\n`,
+    `/* Import Prism styles from submodule (see ARCHITECTURE-Prism.md). */\n@import "../../../../prism/packages/ui/styles/globals.css";\n\n@source "../**/*.{ts,tsx,js,jsx,mdx}";\n@source "../../app/**/*.{ts,tsx,js,jsx,mdx}";\n`,
     "utf-8"
   );
 }
@@ -780,6 +1372,7 @@ function copyTemplateFiles(
     "package.json", // Skip package.json (generated separately with correct name)
     "tsconfig.json", // Skip tsconfig.json (generated separately with correct paths)
     "next.config.ts", // Skip next.config.ts (generated separately with correct config)
+    ".env.example", // Written from template via writeAppEnvFiles
   ];
 
   function shouldSkip(name: string): boolean {
@@ -844,49 +1437,7 @@ function generateTemplateFiles(targetDir: string, appName: string): void {
 
   const templateSourceDir = getTemplatesDir();
   copyTemplateFiles(templateSourceDir, targetDir, vars);
-
-  // Create .env files (they're gitignored, so copy manually)
-  const envExampleContent = `# Database - Neon PostgreSQL
-# Get your connection strings from: https://console.neon.tech
-# Recommended for most uses (with connection pooling) - used for runtime queries
-DATABASE_URL=postgresql://user:password@ep-xxxxx-pooler.region.aws.neon.tech/dbname?sslmode=require
-
-# For uses requiring a connection without pgbouncer - used for drizzle-kit operations (migrations, push)
-DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxxxx.region.aws.neon.tech/dbname?sslmode=require
-
-# Google Maps API
-# Get your API key from: https://console.cloud.google.com/apis/credentials
-# Required APIs: Places API, Timezone API, Geocoding API, Directions API
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-
-# Prism Authentication
-# Generate secure random strings: openssl rand -hex 32
-# PRISM_KEY_API: Used in x-prism-api-key header for API route authentication (including cron endpoint)
-PRISM_KEY_API=your_prism_api_key_here
-# PRISM_KEY_WEB: Used for web page authentication (password form, stored in cookie)
-PRISM_KEY_WEB=your_prism_web_key_here
-
-# Cron Security (Optional)
-# Generate a secure random string for verifying cron requests from Vercel
-# Vercel automatically sends this as Authorization: Bearer <CRON_SECRET> header
-# Works for both automatic cron jobs and manual triggers from dashboard
-# Recommended for production to prevent unauthorized cron triggers
-CRON_SECRET=your_cron_secret_here
-
-# Host Project Dashboard (Optional)
-# URL to your hosting platform's project dashboard (e.g., Vercel, Netlify, etc.)
-# Used by "run dev" command to open project dashboard and deployments pages
-HOST_PROJECT_DASHBOARD=https://vercel.com/username/project
-
-# Feature Flags (Optional – for Vercel Flags Explorer)
-# Generate with: openssl rand -base64 32
-# FLAGS_SECRET=your_base64_secret_here
-
-# Node Environment (automatically set by Vercel in production)
-NODE_ENV=development
-`;
-  writeTemplateFile(targetDir, ".env.example", envExampleContent, vars);
-  writeTemplateFile(targetDir, ".env", envExampleContent, vars);
+  writeAppEnvFiles(targetDir);
 }
 
 /**
@@ -942,15 +1493,9 @@ export async function runGenerateCommand(
   log.info(`Generating ${chalk.bold("💎 Prism")} app: ${appName}`);
   if (options.path) {
     log.info(`Saving to: ${targetDir}`);
-    if (options.prismRepo === undefined) {
-      log.info(
-        `Layout: ${chalk.bold("apps/web")} workspace + ${chalk.bold("./prism")} submodule (recommended)`
-      );
-    } else {
-      log.info(
-        `Layout: ${chalk.yellow("flat")} at repo root + git dependency (legacy)`
-      );
-    }
+    log.info(
+      `Layout: ${chalk.bold("apps/web")} + ${chalk.bold("./prism")} submodule`
+    );
   } else if (prismRoot) {
     log.info(`Saving to Prism monorepo: ${targetDir}`);
   }
@@ -986,85 +1531,75 @@ export async function runGenerateCommand(
 
   try {
     const inMonorepo = !!prismRoot && !options.path;
-    let useGitDependency = false;
-    let prismRepoUrl: string | undefined = undefined;
 
     if (!inMonorepo) {
-      if (options.prismRepo !== undefined) {
-        useGitDependency = true;
-        prismRepoUrl = options.prismRepo;
-        log.info(
-          `📦 Using ${chalk.bold("💎 Prism")} from git: ${prismRepoUrl}`
-        );
-        log.info(
-          "💡 Flat layout at repo root (legacy). Use without --prism-repo for apps/web workspace layout."
-        );
-      } else {
-        useGitDependency = false;
-        const defaultPrismRepo = "https://github.com/thushana/prism.git";
-        log.info(
-          `📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`
-        );
-        log.info("📁 Next.js app will be generated at apps/web/");
-        try {
-          if (!fs.existsSync(path.join(targetDir, ".git"))) {
-            execSync("git init", { cwd: targetDir, stdio: "pipe" });
-          }
-          execSync(`git submodule add ${defaultPrismRepo} prism`, {
-            cwd: targetDir,
-            stdio: "inherit",
-          });
-          log.info(`✅ ${chalk.bold("💎 Prism")} submodule added successfully`);
-        } catch {
-          log.warn("Failed to add Prism submodule automatically");
-          log.warn("Please add it manually:");
-          log.warn(`  cd ${targetDir}`);
-          log.warn(`  git submodule add ${defaultPrismRepo} prism`);
+      const defaultPrismRepo = "https://github.com/thushana/prism.git";
+      log.info(
+        `📦 Adding ${chalk.bold("💎 Prism")} as git submodule at ./prism`
+      );
+      log.info("📁 Next.js app at apps/web/");
+      try {
+        if (!fs.existsSync(path.join(targetDir, ".git"))) {
+          execSync("git init", { cwd: targetDir, stdio: "pipe" });
         }
+        execSync(`git submodule add ${defaultPrismRepo} prism`, {
+          cwd: targetDir,
+          stdio: "inherit",
+        });
+        log.info(`✅ ${chalk.bold("💎 Prism")} submodule added successfully`);
+      } catch {
+        log.warn("Failed to add Prism submodule automatically");
+        log.warn("Please add it manually:");
+        log.warn(`  cd ${targetDir}`);
+        log.warn(`  git submodule add ${defaultPrismRepo} prism`);
       }
     }
 
-    const layout = resolveGenerateLayout(inMonorepo, useGitDependency);
+    const layout = resolveGenerateLayout(inMonorepo);
     const repoRoot = targetDir;
     const appRoot = resolveAppRoot(repoRoot, layout);
     const installRoot = layout === "consumer-workspace" ? repoRoot : appRoot;
-    const dbCommandRoot =
-      layout === "consumer-workspace" ? repoRoot : appRoot;
+    const dbCommandRoot = layout === "consumer-workspace" ? repoRoot : appRoot;
 
     log.info("Creating directory structure...");
     createDirectoryStructure(appRoot);
 
     log.info("Generating template files...");
     const consumerPrismRoot =
-      layout === "consumer-workspace"
-        ? path.join(repoRoot, "prism")
-        : null;
+      layout === "consumer-workspace" ? path.join(repoRoot, "prism") : null;
 
     generatePackageJson(
       repoRoot,
       appRoot,
       appName,
       layout,
-      inMonorepo ? prismRoot : consumerPrismRoot,
-      useGitDependency ? prismRepoUrl : undefined
+      inMonorepo ? prismRoot : consumerPrismRoot
     );
     generateTsConfig(appRoot, layout);
     generateNextConfig(appRoot, layout);
     generateNvmrc(repoRoot);
+    const templateVars = { APP_NAME: appName };
+
     if (layout === "consumer-workspace") {
       generatePnpmWorkspaceYaml(repoRoot);
+      generateConsumerDependabot(repoRoot);
+      generateConsumerKnip(repoRoot);
+      generateConsumerHusky(repoRoot);
       generateConsumerWorkspaceCi(repoRoot);
-      generateConsumerReadme(repoRoot, appName, { APP_NAME: appName });
+      generateConsumerGitignore(repoRoot);
+      generateConsumerRepoDocs(repoRoot, appName, templateVars);
+      generateConsumerReadme(repoRoot, appName, templateVars);
     }
     generateTemplateFiles(appRoot, appName);
+    if (layout === "consumer-workspace") {
+      generateAppCliWrapper(appRoot);
+      generateAppScaffoldFiles(appRoot, appName, templateVars);
+    }
     patchGlobalsCss(appRoot, layout);
 
-    log.info("Setting up environment files...");
-    const envExamplePath = path.join(appRoot, ".env.example");
-    const envPath = path.join(appRoot, ".env");
-    if (fs.existsSync(envExamplePath)) {
-      fs.copyFileSync(envExamplePath, envPath);
-    }
+    log.info(
+      "Environment: apps/web/.env.example + apps/web/.env (edit before db:push)"
+    );
 
     const pm = detectPackageManager();
     log.info(`Detected package manager: ${pm}`);
@@ -1080,9 +1615,7 @@ export async function runGenerateCommand(
         log.info("✅ Dependencies installed successfully");
       } catch {
         log.warn("Failed to install dependencies automatically");
-        log.warn(
-          `Please run '${installCmd}' manually from ${installRoot}`
-        );
+        log.warn(`Please run '${installCmd}' manually from ${installRoot}`);
       }
     }
 
@@ -1138,7 +1671,7 @@ export async function runGenerateCommand(
     log.info(`  cd ${relativePath}`);
     if (layout === "consumer-workspace") {
       log.info("  pnpm install   # from repo root if you skipped install");
-      log.info("  cp apps/web/.env.example apps/web/.env");
+      log.info("  Edit apps/web/.env (DATABASE_URL, PRISM_KEY_WEB, …)");
       log.info("  Vercel Root Directory: apps/web");
     }
     log.info(`  ${pm} run dev`);
@@ -1163,11 +1696,7 @@ export function registerGenerateCommand(program: Command): void {
     .option("-f, --force", "Overwrite existing directory if it exists", false)
     .option(
       "-p, --path <path>",
-      "Consumer repo directory (recommended: creates apps/web/ + prism/ submodule at that path)"
-    )
-    .option(
-      "--prism-repo <url>",
-      "Legacy flat layout at repo root with @prism/core from git (omit for apps/web workspace + submodule)"
+      "Consumer repo directory (creates apps/web/ + prism/ submodule)"
     )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {

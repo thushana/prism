@@ -1,46 +1,43 @@
-# web Documentation
+# {{APP_NAME}} Documentation
 
-Welcome to your Prism-powered application!
+App docs for your Prism-powered Next.js app under **`apps/web/`**.
 
-## Getting Started
+## Repo layout (consumer workspace)
 
-This app was generated with `prism generate` and includes:
+```
+{{APP_NAME}}/
+  prism/           # git submodule — Prism core docs at prism/docs/
+  apps/web/        # this app — edit code here
+  docs/            # ARCHITECTURE-*, CONVENTIONS-*, decisions/ (repo root)
+```
 
-- Next.js 16 with App Router
-- TypeScript
-- Tailwind CSS
-- Drizzle ORM with Neon PostgreSQL
-- Prism core packages
+## First-time setup
 
-## Development
+From the **repo root** (not inside `prism/`):
 
-\`\`\`bash
-npm run dev
-\`\`\`
+```bash
+git submodule update --init --recursive
+pnpm install
+# apps/web/.env is created from .env.example by prism generate — edit values there
+pnpm run db:push
+pnpm run dev
+```
 
-Visit http://localhost:3000
+## Daily commands (repo root)
 
-## Database
+| Task             | Command                                   |
+| ---------------- | ----------------------------------------- |
+| Dev server       | `pnpm run dev`                            |
+| Build            | `pnpm run build`                          |
+| Lint / typecheck | `pnpm run lint` / `pnpm run typecheck`    |
+| Database         | `pnpm run db:push` / `pnpm run db:studio` |
+| Align with Prism | `pnpm run prism:sync`                     |
 
-\`\`\`bash
+## Environment
 
-# Generate migrations
+- **`.env.example`** — committed template (copy for reference)
+- **`.env`** — local secrets (gitignored); edit after generate
 
-npm run db:generate
+## Prism docs
 
-# Apply migrations
-
-npm run db:migrate
-
-# Push schema (dev only)
-
-npm run db:push
-
-# Open Drizzle Studio
-
-npm run db:studio
-\`\`\`
-
-## Deployment
-
-This app is configured for Vercel deployment. See `vercel.json` for configuration.
+See **`prism/docs/`** for UI, admin, database, deployment, and feature flags.
