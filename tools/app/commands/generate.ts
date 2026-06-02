@@ -292,7 +292,7 @@ function generateConsumerRepoPackageJson(
       "lint:fix": "pnpm --filter web run lint:fix",
       precommit: "pnpm exec lint-staged",
       prepare:
-        "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\"",
+        "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\" && tsx prism/scripts/sync-commands.ts",
       "prism:sync": "tsx prism/scripts/sync.ts",
       "prism:sync:commands": "tsx prism/scripts/sync-commands.ts",
       "prism:sync:dependencies": "tsx prism/scripts/sync-dependencies.ts",

@@ -7,6 +7,7 @@
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import { syncCommands } from "./sync-commands";
 
 // Detect if we're running from prism or parent project
 const scriptDir = __dirname;
@@ -60,6 +61,8 @@ function syncGit(): void {
         });
       }
       console.log("✅ Prism submodule updated");
+      console.log("\n📋 Refreshing Cursor slash commands...\n");
+      syncCommands();
     }
   } catch (error) {
     console.error("❌ Failed to sync prism git repository");
