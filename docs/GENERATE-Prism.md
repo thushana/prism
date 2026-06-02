@@ -94,6 +94,7 @@ my-app/
   .github/workflows/ci.yml
   .github/dependabot.yml
   .husky/pre-commit
+  .husky/post-merge
   .lintstagedrc.cjs
   .gitignore
   prism/                    # git submodule
