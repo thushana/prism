@@ -201,6 +201,7 @@ export function PrismButton(
     labelHidden = false,
     asChild = false,
     className = "",
+    children,
     ...rest
   } = resolved;
   const [hovered, setHovered] = React.useState(false);
@@ -713,6 +714,17 @@ export function PrismButton(
   } = rest as React.ComponentProps<"button">;
 
   if (asChild) {
+    const slotChild = React.isValidElement(children)
+      ? React.cloneElement(
+          children,
+          undefined,
+          (children.props as { children?: React.ReactNode }).children ??
+            content
+        )
+      : (
+          <span>{content}</span>
+        );
+
     return (
       <Slot
         ref={rootRef as React.Ref<HTMLElement>}
@@ -726,7 +738,7 @@ export function PrismButton(
         onPointerEnter={onEnter}
         onPointerLeave={onLeave}
       >
-        <span>{content}</span>
+        {slotChild}
       </Slot>
     );
   }
