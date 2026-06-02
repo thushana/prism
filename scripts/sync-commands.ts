@@ -40,9 +40,7 @@ function isConsumerAppRoot(): boolean {
     return false;
   }
   try {
-    return (
-      fs.realpathSync(prismAtParent) === fs.realpathSync(PRISM_DIR)
-    );
+    return fs.realpathSync(prismAtParent) === fs.realpathSync(PRISM_DIR);
   } catch {
     return false;
   }
@@ -124,7 +122,9 @@ export function syncCommands(options: SyncCommandsOptions = {}): void {
 
   if (!isConsumerAppRoot()) {
     if (!quiet) {
-      console.log("ℹ️  Skipping Cursor commands sync (not a Prism consumer app root)");
+      console.log(
+        "ℹ️  Skipping Cursor commands sync (not a Prism consumer app root)"
+      );
     }
     return;
   }

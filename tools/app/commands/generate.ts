@@ -503,6 +503,7 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
       allowJs: true,
       skipLibCheck: true,
       strict: true,
+      ignoreDeprecations: "6.0",
       noEmit: true,
       esModuleInterop: true,
       module: "esnext",

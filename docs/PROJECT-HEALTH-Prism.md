@@ -50,9 +50,9 @@ Reference implementation: **TimeTraveler** `.github/workflows/ci.yml`.
 
 Same as [TimeTraveler](https://github.com/thushana/timetraveler): **`husky`** in **`devDependencies`**, **`"prepare": "husky"`** (plus **`tsx prism/scripts/sync-commands.ts`** on generated consumers).
 
-| Hook | Role |
-|------|------|
-| **`.husky/pre-commit`** | **`pnpm exec lint-staged --no-stash`** — Prettier + ESLint on staged files only |
+| Hook                    | Role                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **`.husky/pre-commit`** | **`pnpm exec lint-staged --no-stash`** — Prettier + ESLint on staged files only                                          |
 | **`.husky/post-merge`** | **`pnpm exec tsx prism/scripts/sync-commands.ts --quiet`** — refresh copied **`.cursor/commands/`** after **`git pull`** |
 
 - Scaffolded by **`prism generate`**; refreshed via **`pnpm prism:sync:hooks`** or **`pnpm prism:sync`**.
