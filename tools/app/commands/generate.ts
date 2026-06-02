@@ -459,6 +459,14 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
 
   const paths = {
     "@/*": ["./*"],
+    // Prism packages live outside apps/web; on Vercel prism/node_modules is absent.
+    // Resolve React/Next from the app install for typecheck of transpiled packages.
+    react: ["node_modules/@types/react/index.d.ts"],
+    "react-dom": ["node_modules/@types/react-dom/index.d.ts"],
+    "react/jsx-runtime": ["node_modules/@types/react/jsx-runtime.d.ts"],
+    "react/jsx-dev-runtime": ["node_modules/@types/react/jsx-dev-runtime.d.ts"],
+    next: ["node_modules/next/index.d.ts"],
+    "next/*": ["node_modules/next/*"],
     "@database": [`${prismPrefix}/database/source`],
     "@intelligence": [`${prismPrefix}/intelligence/source`],
     "@logger": [`${prismPrefix}/logger/source`],
@@ -507,6 +515,7 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
           name: "next",
         },
       ],
+      baseUrl: ".",
       paths,
     },
     include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
@@ -886,9 +895,12 @@ function writeAppEnvFiles(appRoot: string): void {
 }
 
 function generateConsumerGitignore(repoRoot: string): void {
-  const gitignore = `# dependencies
+  const gitignore = `# dependencies (never commit installs)
 /node_modules
 **/node_modules
+**/node_modules/
+node_modules.bak/
+**/.pnpm-store
 /.pnp
 .pnp.js
 
