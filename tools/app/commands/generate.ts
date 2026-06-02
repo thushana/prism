@@ -931,6 +931,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cursor slash commands (copied from prism via prism:sync:commands)
+.cursor/commands/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

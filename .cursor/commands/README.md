@@ -1,12 +1,16 @@
 # Cursor slash commands (Prism)
 
-Edit these files here. Parent apps link this folder into their workspace:
+Edit these files here. Parent apps refresh their copy with:
 
 ```bash
-# from timetraveler (or other Prism consumer)
+# from porch-scope / timetraveler (repo root)
 pnpm prism:sync:commands
 ```
 
-That creates `.cursor/commands` → `prism/.cursor/commands` (directory symlink). Cursor’s `/` menu lists `CHORES`, `CODEREVIEW`, `COMMITMESSAGE`, etc. from this directory.
+That **copies** `prism/.cursor/commands/*.md` → `.cursor/commands/` (real files, not a symlink).
 
-Per-file symlinks under `.cursor/commands/*.md` are **not** reliably discovered — use the directory symlink.
+Cursor’s `/` menu should list `CHORES`, `CODEREVIEW`, `COMMITMESSAGE`, etc. after sync. If commands are missing, run sync again and fully quit Cursor (`Cmd+Q`), then reopen.
+
+**Do not** symlink `.cursor/commands` to prism — Cursor often does not index symlinked command directories.
+
+Per-file symlinks under `.cursor/commands/*.md` are also unreliable.
