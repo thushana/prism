@@ -74,6 +74,15 @@ function syncScripts(): void {
 
   // Determine the main project root for path checks
   const mainProjectRoot = path.dirname(MAIN_PACKAGE_JSON);
+  const appsWebPackageJsonPath = path.join(mainProjectRoot, "apps/web/package.json");
+  const hasAppsWebLayout = fs.existsSync(appsWebPackageJsonPath);
+  let appsWebScripts: Record<string, string> = {};
+  if (hasAppsWebLayout) {
+    const appsWebPackage: PackageJson = JSON.parse(
+      fs.readFileSync(appsWebPackageJsonPath, "utf-8")
+    );
+    appsWebScripts = appsWebPackage.scripts || {};
+  }
 
   // Remove scripts that shouldn't be in the main project
   // (workspace-specific or duplicates that were added previously)
@@ -88,7 +97,6 @@ function syncScripts(): void {
       value.includes("-w apps/") ||
       ((key === "test" || key === "test:run") &&
         value.includes("--workspaces")) ||
-      (key === "clean" && value.includes("apps/")) ||
       (key === "dev:setup" &&
         !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh")))
     ) {
@@ -160,6 +168,22 @@ function syncScripts(): void {
         continue;
       }
 
+      // Skip root scripts that delegate to apps/web when the web package lacks them
+      if (
+        hasAppsWebLayout &&
+        (key === "test:coverage" || key === "test:ui") &&
+        value.includes("--filter web") &&
+        !(key in appsWebScripts)
+      ) {
+        skippedScripts.push(key);
+        continue;
+      }
+
+      if (hasAppsWebLayout && key === "watch" && value === "tsc --watch") {
+        skippedScripts.push(key);
+        continue;
+      }
+
       // Adapt database scripts to use the correct config path
       if (key.startsWith("database:")) {
         adaptedValue = value.replace(
@@ -198,7 +222,9 @@ function syncScripts(): void {
 
       // Adapt clean script to work in main project
       if (key === "clean") {
-        adaptedValue = "rm -rf .next node_modules/.cache *.tsbuildinfo";
+        adaptedValue = hasAppsWebLayout
+          ? "rm -rf apps/*/.next apps/*/node_modules/.cache *.tsbuildinfo"
+          : "rm -rf .next node_modules/.cache *.tsbuildinfo";
       }
 
       // Adapt clean:directories to use correct path
