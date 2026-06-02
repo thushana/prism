@@ -34,7 +34,7 @@ Return it as a copyable Markdown block
 
 ## Commit and push (repos with a `prism/` submodule)
 
-**TimeTraveler** (and similar apps): `.cursor/commands` is symlinked to `prism/.cursor/commands`; this file applies to both.
+**TimeTraveler** (and similar apps): run `pnpm prism:sync:commands` so `.cursor/commands/` is a copy of this folder.
 
 ### Commit order
 

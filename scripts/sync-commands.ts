@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
- * Symlink parent `.cursor/commands` → `prism/.cursor/commands/`.
- * Cursor indexes the directory symlink and lists all prism command .md files in `/`.
+ * Copy prism/.cursor/commands/*.md into parent .cursor/commands/.
+ * Cursor's slash-command indexer often skips symlinked command dirs; use real files.
  */
 
 import fs from "fs";
@@ -20,7 +20,26 @@ const PARENT_DIR = isInPrism
   : path.join(scriptDir, "..");
 
 const PRISM_COMMANDS_DIR = path.join(PRISM_DIR, ".cursor", "commands");
-const PARENT_COMMANDS_LINK = path.join(PARENT_DIR, ".cursor", "commands");
+const PARENT_COMMANDS_DIR = path.join(PARENT_DIR, ".cursor", "commands");
+
+function removeParentCommandsDir(): void {
+  if (!fs.existsSync(PARENT_COMMANDS_DIR)) {
+    return;
+  }
+  const stats = fs.lstatSync(PARENT_COMMANDS_DIR);
+  if (stats.isSymbolicLink()) {
+    fs.unlinkSync(PARENT_COMMANDS_DIR);
+    return;
+  }
+  if (stats.isDirectory()) {
+    fs.rmSync(PARENT_COMMANDS_DIR, { recursive: true, force: true });
+    return;
+  }
+  console.error(
+    `❌ ${PARENT_COMMANDS_DIR} exists and is not a directory or symlink`
+  );
+  process.exit(1);
+}
 
 function syncCommands(): void {
   if (!fs.existsSync(PRISM_DIR)) {
@@ -33,39 +52,32 @@ function syncCommands(): void {
     console.log(`✅ Created ${PRISM_COMMANDS_DIR}`);
   }
 
-  const parentCursorDir = path.dirname(PARENT_COMMANDS_LINK);
+  const parentCursorDir = path.dirname(PARENT_COMMANDS_DIR);
   if (!fs.existsSync(parentCursorDir)) {
     fs.mkdirSync(parentCursorDir, { recursive: true });
   }
 
-  if (fs.existsSync(PARENT_COMMANDS_LINK)) {
-    const stats = fs.lstatSync(PARENT_COMMANDS_LINK);
-    if (stats.isSymbolicLink()) {
-      const target = fs.readlinkSync(PARENT_COMMANDS_LINK);
-      const resolvedTarget = path.resolve(
-        path.dirname(PARENT_COMMANDS_LINK),
-        target
-      );
-      const resolvedPrismCommands = path.resolve(PRISM_COMMANDS_DIR);
-      if (resolvedTarget === resolvedPrismCommands) {
-        console.log("✅ commands symlink already points at prism");
-        return;
-      }
-      fs.unlinkSync(PARENT_COMMANDS_LINK);
-    } else {
-      console.error(
-        `❌ ${PARENT_COMMANDS_LINK} exists and is not a symlink (remove it first)`
-      );
-      process.exit(1);
-    }
+  const sourceFiles = fs
+    .readdirSync(PRISM_COMMANDS_DIR)
+    .filter((name) => name.endsWith(".md"));
+
+  if (sourceFiles.length === 0) {
+    console.warn(`⚠️  No .md files in ${PRISM_COMMANDS_DIR}`);
   }
 
-  const relativePath = path.relative(
-    path.dirname(PARENT_COMMANDS_LINK),
-    PRISM_COMMANDS_DIR
+  removeParentCommandsDir();
+  fs.mkdirSync(PARENT_COMMANDS_DIR, { recursive: true });
+
+  for (const name of sourceFiles) {
+    fs.copyFileSync(
+      path.join(PRISM_COMMANDS_DIR, name),
+      path.join(PARENT_COMMANDS_DIR, name)
+    );
+  }
+
+  console.log(
+    `✅ Copied ${sourceFiles.length} command file(s) to ${PARENT_COMMANDS_DIR}`
   );
-  fs.symlinkSync(relativePath, PARENT_COMMANDS_LINK, "dir");
-  console.log(`✅ ${PARENT_COMMANDS_LINK} → ${PRISM_COMMANDS_DIR}`);
 }
 
 if (require.main === module) {
