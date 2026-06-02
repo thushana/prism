@@ -60,6 +60,7 @@
     "test:ui": "pnpm --filter web run test:ui",
     "tools": "pnpm --filter tools run start --",
     "typecheck": "tsx scripts/typecheck-workspaces.ts",
+    "vercel:env:sync-development": "tsx scripts/sync-vercel-development-env.ts",
     "vercel:build": "vercel build",
     "vercel:build:web": "vercel build --cwd apps/web",
     "vercel:test:web": "pnpm --filter web run build",

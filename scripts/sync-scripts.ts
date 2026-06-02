@@ -220,6 +220,9 @@ function syncScripts(): void {
       if (key === "quality:quick") {
         adaptedValue = "pnpm run format && pnpm run lint && pnpm run typecheck";
       }
+      if (key === "vercel:env:sync-development") {
+        adaptedValue = "tsx prism/scripts/sync-vercel-development-env.ts";
+      }
 
       // quality script is smart and handles both app and prism automatically
 
@@ -258,6 +261,8 @@ function syncScripts(): void {
     mergedScripts.quality = "tsx prism/scripts/quality.ts";
     mergedScripts["quality:quick"] =
       "pnpm run format && pnpm run lint && pnpm run typecheck";
+    mergedScripts["vercel:env:sync-development"] =
+      "tsx prism/scripts/sync-vercel-development-env.ts";
   }
 
   // Sort scripts alphabetically

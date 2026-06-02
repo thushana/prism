@@ -48,6 +48,16 @@ See [GENERATE-Prism.md](./GENERATE-Prism.md) and [SYNC-Prism.md](./SYNC-Prism.md
 
 Neon (or any Postgres) URLs are set in Vercel **Project → Settings → Environment Variables**. Typical pair: **`DATABASE_URL`** (pooled) and **`DATABASE_URL_UNPOOLED`** (for migrations / drizzle-kit). Details: [DATABASE-Prism.md](./DATABASE-Prism.md).
 
+### Development environment (local `vercel env pull`)
+
+Prefer **Storage → Connect Project** with **Development** checked, then from your Vercel cwd (`apps/web` or repo root for flat apps):
+
+```bash
+vercel env pull .env.development.local
+```
+
+If Neon integration vars exist only on Preview/Production, use **`pnpm vercel:env:sync-development`** (see [`scripts/sync-vercel-development-env.ts`](../scripts/sync-vercel-development-env.ts)): copy `.env.neon-sync.example` → `.env.neon-sync`, fill from Neon Console, set **`VERCEL_TEAM_SLUG`** (or `--team=`), then run the script.
+
 ## Local Build Checks
 
 From the Prism root, **`pnpm run vercel:test:web`** runs the sample web production build (`pnpm --filter web run build`)—fast parity with what Vercel runs for `apps/web` after install.
