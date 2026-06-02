@@ -174,5 +174,6 @@ export function syncCommands(options: SyncCommandsOptions = {}): void {
 }
 
 if (require.main === module) {
-  syncCommands();
+  const quiet = process.argv.includes("--quiet");
+  syncCommands({ quiet });
 }

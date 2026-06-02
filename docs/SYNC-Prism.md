@@ -16,6 +16,7 @@ From the **root of your application** (the directory that contains the `prism/` 
 | `pnpm run prism:sync:git`          | Submodule update only.                                                                                                                             |
 | `pnpm run prism:sync:scripts`      | Merge scripts from Prism’s workspace `package.json` into the parent `package.json`.                                                                |
 | `pnpm run prism:sync:commands`     | Copy Cursor command files into the parent repo.                                                                                                    |
+| `pnpm run prism:sync:hooks`        | Ensure Husky **`.husky/pre-commit`** + **`.husky/post-merge`** (Prism consumer standard).                                                             |
 | `pnpm run prism:sync:dependencies` | **Dry run:** print drift between parent `package.json` and `prism/apps/web/package.json` for an allowlisted set of packages. Does not write files. |
 
 Dependency alignment during `prism:sync` runs the same logic as `sync-dependencies.ts` with `--update`, so the parent’s allowlisted ranges match the reference Next app in Prism (`apps/web`).

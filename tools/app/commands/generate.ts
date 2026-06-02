@@ -13,6 +13,7 @@ import { execSync } from "child_process";
 import * as LoggerModule from "../../../packages/logger/source/server";
 const serverLogger = LoggerModule.serverLogger;
 import type { BaseCommandOptions } from "../../../packages/cli/source/command";
+import { ensureConsumerHusky } from "../../../scripts/consumer-husky";
 import chalk from "chalk";
 
 const logger = serverLogger;
@@ -291,10 +292,10 @@ function generateConsumerRepoPackageJson(
       lint: "pnpm --filter web run lint",
       "lint:fix": "pnpm --filter web run lint:fix",
       precommit: "pnpm exec lint-staged",
-      prepare:
-        "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\" && tsx prism/scripts/sync-commands.ts",
+      prepare: "husky && tsx prism/scripts/sync-commands.ts",
       "prism:sync": "tsx prism/scripts/sync.ts",
       "prism:sync:commands": "tsx prism/scripts/sync-commands.ts",
+      "prism:sync:hooks": "tsx prism/scripts/install-consumer-git-hooks.ts",
       "prism:sync:dependencies": "tsx prism/scripts/sync-dependencies.ts",
       "prism:sync:git": "tsx prism/scripts/sync-git.ts",
       "prism:sync:scripts": "tsx prism/scripts/sync-scripts.ts",
@@ -676,41 +677,7 @@ export default config;
 }
 
 function generateConsumerHusky(repoRoot: string): void {
-  const huskyDir = path.join(repoRoot, ".husky");
-  fs.mkdirSync(huskyDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(huskyDir, "pre-commit"),
-    "#!/usr/bin/env sh\npnpm exec lint-staged --no-stash\n",
-    "utf-8"
-  );
-  try {
-    fs.chmodSync(path.join(huskyDir, "pre-commit"), 0o755);
-  } catch {
-    // Windows may not support chmod
-  }
-
-  const lintStaged = `/**
- * Pre-commit hooks (consumer apps/web layout).
- * @type {import('lint-staged').Configuration}
- */
-module.exports = {
-  "apps/web/**/*.{ts,tsx,mjs,js,cjs}": (filenames) => {
-    const files = filenames.map((f) => JSON.stringify(f)).join(" ");
-    return [
-      \`prettier --write \${files}\`,
-      \`eslint --config apps/web/eslint.config.mjs --fix --max-warnings 0 \${files}\`,
-    ];
-  },
-  "apps/web/**/*.{json,css,md,mdx,yml,yaml}": ["prettier --write"],
-  "docs/**/*.{md,mdx}": ["prettier --write"],
-};
-`;
-
-  fs.writeFileSync(
-    path.join(repoRoot, ".lintstagedrc.cjs"),
-    lintStaged,
-    "utf-8"
-  );
+  ensureConsumerHusky(repoRoot);
 }
 
 function generateConsumerWorkspaceCi(repoRoot: string): void {

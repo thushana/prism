@@ -14,6 +14,7 @@ That **copies** `prism/.cursor/commands/*.md` → `.cursor/commands/` (real file
 - run `pnpm prism:sync` or `pnpm prism:sync:git` (after submodule pull)
 - run `pnpm install` (via `prepare`, only copies if prism files are newer)
 - run `pnpm prism:sync:commands` manually after editing commands in `prism/`
+- run `git pull` (Husky **`post-merge`** — install with `pnpm prism:sync:hooks` or `prism generate`)
 
 Edit commands **only under `prism/.cursor/commands/`** — the parent copy is generated.
 

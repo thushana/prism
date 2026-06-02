@@ -46,11 +46,18 @@ Reference implementation: **TimeTraveler** `.github/workflows/ci.yml`.
 - Add **`.github/dependabot.yml`** with **`package-ecosystem: npm`**, **`directory: "/"`**, weekly schedule, and **groups** for related packages (e.g. React/Next, typescript-eslint).
 - **Embedder apps** (TimeTraveler): also watch **`directory: "/prism"`** (Prism lockfile) and **`package-ecosystem: gitsubmodule`** (submodule SHA). See TimeTraveler [`.github/dependabot.yml`](../../.github/dependabot.yml).
 
-## 3. Pre-commit (lint-staged + Husky)
+## 3. Git hooks (Husky — Prism consumer standard)
 
-- Use **`lint-staged`** to run **Prettier** and **ESLint** only on **staged** files.
-- Use **`husky`** **`pre-commit`** to invoke **`pnpm exec lint-staged`**.
-- Do **not** run **`next build`** on every commit (slow); CI owns full build + tests.
+Same as [TimeTraveler](https://github.com/thushana/timetraveler): **`husky`** in **`devDependencies`**, **`"prepare": "husky"`** (plus **`tsx prism/scripts/sync-commands.ts`** on generated consumers).
+
+| Hook | Role |
+|------|------|
+| **`.husky/pre-commit`** | **`pnpm exec lint-staged --no-stash`** — Prettier + ESLint on staged files only |
+| **`.husky/post-merge`** | **`pnpm exec tsx prism/scripts/sync-commands.ts --quiet`** — refresh copied **`.cursor/commands/`** after **`git pull`** |
+
+- Scaffolded by **`prism generate`**; refreshed via **`pnpm prism:sync:hooks`** or **`pnpm prism:sync`**.
+- Do **not** use **`.githooks/`** or symlinked **`.cursor/commands`** (Cursor does not index symlinks reliably).
+- Do **not** run **`next build`** on every commit; CI owns full build + tests.
 
 ## 4. Scripts naming
 
