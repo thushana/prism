@@ -49,9 +49,8 @@ function resolveParentApplicationPackageJsonPath(
   return path.join(parentProjectRootDirectoryPath, "package.json");
 }
 
-const parentApplicationPackageJsonPath = resolveParentApplicationPackageJsonPath(
-  parentProjectRootDirectoryPath
-);
+const parentApplicationPackageJsonPath =
+  resolveParentApplicationPackageJsonPath(parentProjectRootDirectoryPath);
 
 /** Package names: web `dependencies` mirrored to parent `dependencies`. */
 const REFERENCE_WEB_APPLICATION_RUNTIME_DEPENDENCY_PACKAGE_NAMES = [

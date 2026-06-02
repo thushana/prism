@@ -267,38 +267,23 @@ The `*` version means "use the local workspace version" during development. Each
 
 Prism is intended to be consumed when building apps **outside** this monorepo (e.g. Porch Scope, TimeTraveler):
 
-| Layout | Generate command | Next.js location | When |
-| --- | --- | --- | --- |
-| **Workspace** (default) | `prism generate <name> --path <dir>` | `<dir>/apps/web/` | Submodule at `<dir>/prism/` — **use for all new consumer apps** |
-| **Prism monorepo** | `prism generate <name>` from Prism root | `prism/apps/<name>/` | Developing inside the Prism repo |
-| **Flat** (legacy) | `… --path <dir> --prism-repo <git url>` | `<dir>/app/` at repo root | Deploy-only; no submodule iteration |
+| Layout                 | Generate command                        | Next.js location     | When                                                                           |
+| ---------------------- | --------------------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| **Consumer workspace** | `prism generate <name> --path <dir>`    | `<dir>/apps/web/`    | Submodule at `<dir>/prism/` — all consumer apps (Porch Scope, TimeTraveler, …) |
+| **Prism monorepo**     | `prism generate <name>` from Prism root | `prism/apps/<name>/` | Developing inside the Prism repo                                               |
 
 **For Standalone Apps (Outside Monorepo):**
 
-1. **Git Submodule + `apps/web`** (recommended — one deployable repo):
+```bash
+# Generate app (adds Prism submodule at ./prism, Next.js at apps/web/)
+pnpm run prism generate my-app --path ../my-app
+```
 
-   ```bash
-   # Generate app (automatically adds Prism as submodule at ./prism)
-   pnpm run prism generate my-app --path ../my-app
-   ```
-
-   - Prism is added as a git submodule at `./prism`
-   - Next.js app is generated at **`apps/web/`** (pnpm workspace); root `package.json` orchestrates `pnpm --filter web`
-   - App uses `file:../../prism/packages/...` dependencies; run **`pnpm install` from repo root**
-   - One repo to deploy (your app + Prism submodule); Vercel **Root Directory** `apps/web`
-   - Can commit Prism changes from within your app
-   - Perfect for iterative development and deployment (see Porch Scope / TimeTraveler)
-
-2. **Git Dependency** (alternative for deployment):
-
-   ```bash
-   # Generate app with git dependency
-   pnpm run prism generate my-app --path ../my-app --prism-repo "git+https://github.com/thushana/prism.git"
-   ```
-
-   - Vercel will clone Prism from GitHub during build
-   - Works seamlessly for deployment
-   - Note: You won't be able to commit Prism changes from within your app
+- Prism is added as a git submodule at `./prism`
+- Next.js app is generated at **`apps/web/`** (pnpm workspace); root `package.json` orchestrates `pnpm --filter web`
+- App uses `file:../../prism/packages/...` dependencies; run **`pnpm install` from repo root**
+- One repo to deploy (your app + Prism submodule); Vercel **Root Directory** `apps/web`
+- You can commit Prism changes from within your app (see Porch Scope / TimeTraveler)
 
 **Import Patterns:**
 
