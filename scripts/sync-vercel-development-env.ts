@@ -78,7 +78,7 @@ function resolveConsumerContext(consumerRoot: string): ConsumerContext {
   const exampleRelative = path.relative(consumerRoot, vercelCwd);
   const exampleHint =
     exampleRelative === ""
-      ? ".env.neon-sync.example → .env.neon-sync"
+      ? "prism/.env.neon-sync.example → .env.neon-sync"
       : `${exampleRelative}/.env.neon-sync.example → ${exampleRelative}/.env.neon-sync`;
 
   const pullHint =
@@ -183,7 +183,7 @@ function ensureLinked(
   const projectJson = path.join(vercelCwd, ".vercel/project.json");
   if (fs.existsSync(projectJson)) return;
 
-  execSync(`vercel link -p ${project} --scope ${teamSlug} -y`, {
+  execSync("vercel", ["link", "-p", project, "--scope", teamSlug, "-y"], {
     cwd: vercelCwd,
     stdio: "inherit",
   });
@@ -198,7 +198,12 @@ async function main(): Promise<void> {
   if (cwdOverride) {
     vercelCwd = path.resolve(consumerRoot, cwdOverride);
     sourceFile = path.join(vercelCwd, ".env.neon-sync");
-    pullHint = `cd ${path.relative(consumerRoot, vercelCwd) || "."} && vercel env pull .env.development.local`;
+    const rel = path.relative(consumerRoot, vercelCwd);
+    exampleHint =
+      rel === ""
+        ? "prism/.env.neon-sync.example → .env.neon-sync"
+        : `${rel}/.env.neon-sync.example → ${rel}/.env.neon-sync`;
+    pullHint = `cd ${rel || "."} && vercel env pull .env.development.local`;
   }
 
   const teamSlug = parseCliFlag("team") ?? process.env.VERCEL_TEAM_SLUG;
