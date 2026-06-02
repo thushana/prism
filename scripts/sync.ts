@@ -58,6 +58,12 @@ function sync(): void {
 
     console.log("\n");
 
+    console.log("Step 3b: Installing git post-merge hook (Cursor commands)...\n");
+    const installHooksPath = path.join(scriptDir, "install-consumer-git-hooks.ts");
+    execSync(`tsx ${installHooksPath}`, { stdio: "inherit" });
+
+    console.log("\n");
+
     // Align root dependency ranges with prism/apps/web
     console.log("Step 4: Syncing dependency versions to app root...\n");
     const synchronizeDependenciesScriptPath = path.join(
