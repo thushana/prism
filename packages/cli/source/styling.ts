@@ -7,6 +7,7 @@
 import chalk, { type ChalkInstance } from "chalk";
 import * as fs from "fs";
 import * as path from "path";
+import { createRequire } from "module";
 import { fileURLToPath } from "url";
 
 // Re-export chalk for direct use
@@ -14,8 +15,11 @@ export { chalk };
 
 // Import Material UI colors from package (single source of truth)
 // Only extract the shades we need for CLI (50, 600, 900)
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- no ESM default export in material-ui-colors
-const materialUIColors = require("material-ui-colors");
+const require = createRequire(import.meta.url);
+const materialUIColors = require("material-ui-colors") as Record<
+  string,
+  Record<number, string>
+>;
 const materialColors = Object.keys(materialUIColors)
   .filter((name: string) => name !== "common")
   .reduce(

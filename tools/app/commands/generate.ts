@@ -8,13 +8,20 @@ import { Command } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
+import { fileURLToPath, pathToFileURL } from "url";
 // TODO: Fix tsx ESM resolution issue - revert to @logger/server when fixed
 // Workaround: Use namespace import due to tsx bug with package.json exports
 import * as LoggerModule from "../../../packages/logger/source/server";
-const serverLogger = LoggerModule.serverLogger;
 import type { BaseCommandOptions } from "../../../packages/cli/source/command";
-import { ensureConsumerHusky } from "../../../scripts/consumer-husky";
 import chalk from "chalk";
+
+const serverLogger = LoggerModule.serverLogger;
+
+/** Prism monorepo root (tools/app/commands → ../../../) */
+const PRISM_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../.."
+);
 
 const logger = serverLogger;
 const log: {
@@ -208,6 +215,7 @@ function generateWebAppPackageJson(
       ...buildPrismDependencies(layout),
       "@neondatabase/serverless": "^1.0.2",
       "@radix-ui/react-slot": "^1.2.4",
+      "mapbox-gl": "^3.16.0",
       next: "16.2.7",
       react: "19.2.7",
       "react-dom": "19.2.7",
@@ -216,6 +224,7 @@ function generateWebAppPackageJson(
     },
     devDependencies: {
       "@tailwindcss/postcss": "^4.3.0",
+      "@types/google.maps": "^3.64.0",
       "@types/node": "^25.9.1",
       "@types/react": "^19.2.16",
       "@types/react-dom": "^19.2.3",
@@ -322,19 +331,6 @@ function generateConsumerRepoPackageJson(
       prettier: "^3.8.3",
       tsx: "^4.22.4",
       typescript: "^6.0.3",
-    },
-    pnpm: {
-      overrides: {
-        next: "16.2.7",
-        react: "19.2.7",
-        "react-dom": "19.2.7",
-      },
-      onlyBuiltDependencies: [
-        "better-sqlite3",
-        "esbuild",
-        "sharp",
-        "unrs-resolver",
-      ],
     },
   };
 
@@ -677,7 +673,11 @@ export default config;
   fs.writeFileSync(path.join(repoRoot, "knip.config.ts"), content, "utf-8");
 }
 
-function generateConsumerHusky(repoRoot: string): void {
+async function generateConsumerHusky(repoRoot: string): Promise<void> {
+  // Dynamic import: static import fails under tsx when tools.ts loads this module
+  const { ensureConsumerHusky } = await import(
+    pathToFileURL(path.join(PRISM_ROOT, "scripts/consumer-husky.ts")).href
+  );
   ensureConsumerHusky(repoRoot);
 }
 
@@ -1279,38 +1279,12 @@ function patchGlobalsCss(appRoot: string, layout: GenerateLayout): void {
  * Uses apps/web as the template source (the actual working app)
  */
 function getTemplatesDir(): string {
-  // Find Prism root by looking for package.json with workspaces
-  let currentDir = process.cwd();
-  while (currentDir !== path.dirname(currentDir)) {
-    const packageJsonPath = path.join(currentDir, "package.json");
-    if (fs.existsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(
-          fs.readFileSync(packageJsonPath, "utf-8")
-        );
-        if (
-          packageJson.workspaces &&
-          (packageJson.name === "@prism/core" ||
-            packageJson.name?.includes("prism"))
-        ) {
-          const appsWebPath = path.join(currentDir, "apps", "web");
-          if (fs.existsSync(appsWebPath)) {
-            return appsWebPath;
-          }
-        }
-      } catch {
-        // Continue searching
-      }
-    }
-    currentDir = path.dirname(currentDir);
-  }
-  // Fallback: try relative to current directory
-  const fallbackPath = path.resolve(process.cwd(), "apps", "web");
-  if (fs.existsSync(fallbackPath)) {
-    return fallbackPath;
+  const appsWebPath = path.join(PRISM_ROOT, "apps", "web");
+  if (fs.existsSync(appsWebPath)) {
+    return appsWebPath;
   }
   throw new Error(
-    "Could not find apps/web directory. Make sure you're running from the Prism monorepo root."
+    `Could not find apps/web at ${appsWebPath}. Run generate from a Prism checkout with apps/web.`
   );
 }
 
@@ -1567,7 +1541,7 @@ export async function runGenerateCommand(
       generatePnpmWorkspaceYaml(repoRoot);
       generateConsumerDependabot(repoRoot);
       generateConsumerKnip(repoRoot);
-      generateConsumerHusky(repoRoot);
+      await generateConsumerHusky(repoRoot);
       generateConsumerWorkspaceCi(repoRoot);
       generateConsumerGitignore(repoRoot);
       generateConsumerRepoDocs(repoRoot, appName, templateVars);
