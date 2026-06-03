@@ -73,6 +73,7 @@ prism generate my-app --path ../my-app --force
 - **Tailwind CSS 4** (Prism theme via submodule)
 - **Drizzle ORM** with Neon PostgreSQL (template default)
 - **Prism packages** via submodule `file:` deps or monorepo `workspace:*`
+- **`mapbox-gl`** + **`@types/google.maps`** in `apps/web` — satisfies `ui` optional peers so `PrismMap` (via `admin` / `@ui` barrel) builds without extra install steps
 
 ### Project Structure (consumer layout)
 
@@ -137,7 +138,7 @@ pnpm run dev
 
 1. **Creates directories** — under `apps/web/` (consumer) or `prism/apps/<name>` (monorepo)
 2. **Adds `prism/` submodule** — consumer layout
-3. **Writes `package.json`** — root orchestrator + `apps/web/package.json`
+3. **Writes `package.json`** — root orchestrator + `apps/web/package.json` (includes `mapbox-gl` for `PrismMap`)
 4. **Copies template** from `prism/apps/web`
 5. **`pnpm install`** — from **consumer repo root**
 6. **Database** — `db:generate`, `db:migrate`, `db:seed` via root scripts (`pnpm --filter web`)
