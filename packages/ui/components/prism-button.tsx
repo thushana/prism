@@ -714,16 +714,15 @@ export function PrismButton(
   } = rest as React.ComponentProps<"button">;
 
   if (asChild) {
-    const slotChild = React.isValidElement(children)
-      ? React.cloneElement(
-          children,
-          undefined,
-          (children.props as { children?: React.ReactNode }).children ??
-            content
-        )
-      : (
-          <span>{content}</span>
-        );
+    const slotChild = React.isValidElement(children) ? (
+      React.cloneElement(
+        children,
+        undefined,
+        (children.props as { children?: React.ReactNode }).children ?? content
+      )
+    ) : (
+      <span>{content}</span>
+    );
 
     return (
       <Slot

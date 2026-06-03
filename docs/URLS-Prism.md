@@ -24,14 +24,14 @@ Pattern:
 
 Examples:
 
-| URL | Meaning |
-| --- | ------- |
-| `/addresses` | Addresses, page 1, sorted by address ascending (default) |
-| `/addresses/sort/name/ascending` | Addresses, page 1, by name A→Z |
-| `/addresses/sort/members/descending` | Addresses, page 1, by member count high→low |
-| `/addresses/page/2` | Addresses, page 2, default sort |
-| `/addresses/page/2/sort/name/ascending` | Addresses, page 2, by name A→Z |
-| `/people/sort/address/descending` | People, page 1, by address Z→A |
+| URL                                     | Meaning                                                  |
+| --------------------------------------- | -------------------------------------------------------- |
+| `/addresses`                            | Addresses, page 1, sorted by address ascending (default) |
+| `/addresses/sort/name/ascending`        | Addresses, page 1, by name A→Z                           |
+| `/addresses/sort/members/descending`    | Addresses, page 1, by member count high→low              |
+| `/addresses/page/2`                     | Addresses, page 2, default sort                          |
+| `/addresses/page/2/sort/name/ascending` | Addresses, page 2, by name A→Z                           |
+| `/people/sort/address/descending`       | People, page 1, by address Z→A                           |
 
 ### Sort segments
 
@@ -53,10 +53,10 @@ Pattern:
 
 Examples:
 
-| URL | Meaning |
-| --- | ------- |
+| URL                              | Meaning                               |
+| -------------------------------- | ------------------------------------- |
 | `/addresses/8896/1305-105th-ave` | Address #8896 (slug from street line) |
-| `/people/42` | Person #42 |
+| `/people/42`                     | Person #42                            |
 
 ### Slugs after ids
 
@@ -66,13 +66,13 @@ Examples:
 
 ## General rules
 
-| Rule | Example |
-| ---- | ------- |
-| Plural collection nouns | `/addresses`, `/people` |
-| kebab-case segments | `/admin/app/system` |
-| No trailing slash | `/addresses` not `/addresses/` |
-| Page segment literal `page` | `/addresses/page/2` |
-| Sort segment literal `sort` | `/addresses/sort/name/ascending` |
+| Rule                            | Example                                   |
+| ------------------------------- | ----------------------------------------- |
+| Plural collection nouns         | `/addresses`, `/people`                   |
+| kebab-case segments             | `/admin/app/system`                       |
+| No trailing slash               | `/addresses` not `/addresses/`            |
+| Page segment literal `page`     | `/addresses/page/2`                       |
+| Sort segment literal `sort`     | `/addresses/sort/name/ascending`          |
 | RESTful ids in dynamic segments | `[addressId]`, `[personId]` in App Router |
 
 ## API routes

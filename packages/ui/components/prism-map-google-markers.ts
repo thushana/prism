@@ -50,8 +50,6 @@ export function updateGoogleRouteEndpointMarker(
   marker.content = createGoogleRouteEndpointPinContent(options);
 }
 
-export function detachGoogleAdvancedMarker(
-  marker: GoogleAdvancedMarker
-): void {
+export function detachGoogleAdvancedMarker(marker: GoogleAdvancedMarker): void {
   marker.map = null;
 }

@@ -231,7 +231,10 @@ async function main(): Promise<void> {
   const source = parseEnvFile(sourceFile);
   const missing = NEON_ENV_KEYS.filter((key) => !source[key]?.trim());
   if (missing.length > 0) {
-    console.error("Missing or empty keys in .env.neon-sync:", missing.join(", "));
+    console.error(
+      "Missing or empty keys in .env.neon-sync:",
+      missing.join(", ")
+    );
     process.exit(1);
   }
 
