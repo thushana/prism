@@ -69,7 +69,10 @@ export function createFetchKeyGoogleMapsLoader(
           if (!res.ok) {
             throw new Error(`Google Maps key fetch failed: ${res.status}`);
           }
-          const data = (await res.json()) as { apiKey?: string; mapId?: string };
+          const data = (await res.json()) as {
+            apiKey?: string;
+            mapId?: string;
+          };
           if (!data.apiKey) {
             throw new Error("Google Maps key response missing apiKey");
           }
