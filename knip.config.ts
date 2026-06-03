@@ -70,6 +70,9 @@ const config: KnipConfig = {
         "tailwindcss",
         "tw-animate-css",
         "ui",
+        // Satisfy ui optional peers for PrismMap at build time (loaded in packages/ui)
+        "mapbox-gl",
+        "@types/google.maps",
       ],
       drizzle: { config: [] },
     },
