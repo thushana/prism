@@ -13,28 +13,17 @@
 import { useEffect, useRef, useState } from "react";
 import { decodeEncodedPolyline } from "../source/polyline-decode";
 import {
-  PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
-  PRISM_MAP_GOOGLE_ROADMAP_BASE,
-} from "./prism-map-styles";
+  createGoogleRouteEndpointMarker,
+  detachGoogleAdvancedMarker,
+  updateGoogleRouteEndpointMarker,
+  type GoogleAdvancedMarker,
+} from "./prism-map-google-markers";
+import { resolvePrismGoogleMapsOptions } from "./prism-map-loaders";
 import {
   ROUTE_ENDPOINT_LABEL,
   collectMapEndpointMarkers,
 } from "./prism-map-endpoints";
 import type { PrismMapRoute } from "./prism-map-types";
-
-function googleEndpointMarkerIcon(
-  color: string,
-  opacity: number
-): google.maps.Symbol {
-  return {
-    path: google.maps.SymbolPath.CIRCLE,
-    scale: 7,
-    fillColor: color,
-    fillOpacity: opacity,
-    strokeColor: "#ffffff",
-    strokeWeight: 2,
-  };
-}
 
 function padLatLngBounds(
   bounds: google.maps.LatLngBounds,
@@ -61,7 +50,6 @@ export type PrismMapGoogleProps = {
   autoFit?: boolean;
   loadGoogleMaps: () => Promise<void>;
   mapOptions?: google.maps.MapOptions;
-  styles?: google.maps.MapTypeStyle[];
   onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
 };
 
@@ -70,7 +58,6 @@ export function PrismMapGoogle({
   autoFit = true,
   loadGoogleMaps,
   mapOptions,
-  styles,
   onRouteSelectionChange,
 }: PrismMapGoogleProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -78,7 +65,7 @@ export function PrismMapGoogle({
   const polylineByRouteIdRef = useRef<Map<string, google.maps.Polyline>>(
     new Map()
   );
-  const markerByKeyRef = useRef<Map<string, google.maps.Marker>>(new Map());
+  const markerByKeyRef = useRef<Map<string, GoogleAdvancedMarker>>(new Map());
   const routesByIdRef = useRef<Map<string, PrismMapRoute>>(new Map());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   const lastGeometrySigRef = useRef<string>("");
@@ -102,21 +89,18 @@ export function PrismMapGoogle({
         await loadGoogleMaps();
         if (cancelled || !containerRef.current) return;
 
+        const mapInitOptions = resolvePrismGoogleMapsOptions(mapOptions);
+
         if (!mapRef.current) {
-          mapRef.current = new google.maps.Map(containerRef.current, {
-            ...PRISM_MAP_GOOGLE_ROADMAP_BASE,
-            styles: styles ?? PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
-            ...mapOptions,
-          });
+          mapRef.current = new google.maps.Map(
+            containerRef.current,
+            mapInitOptions
+          );
           mapRef.current.addListener("click", () => {
             onRouteSelectionRef.current?.(null);
           });
         } else {
-          mapRef.current.setOptions({
-            ...PRISM_MAP_GOOGLE_ROADMAP_BASE,
-            styles: styles ?? PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
-            ...mapOptions,
-          });
+          mapRef.current.setOptions(mapInitOptions);
         }
 
         setMapReady(true);
@@ -144,7 +128,7 @@ export function PrismMapGoogle({
       polys.clear();
       // eslint-disable-next-line react-hooks/exhaustive-deps -- read latest marker Map at unmount
       const markers = markerByKeyRef.current;
-      markers.forEach((m) => m.setMap(null));
+      markers.forEach((marker) => detachGoogleAdvancedMarker(marker));
       markers.clear();
       lastGeometrySigRef.current = "";
       const map = mapRef.current;
@@ -154,7 +138,7 @@ export function PrismMapGoogle({
       }
       setMapReady(false);
     };
-  }, [loadGoogleMaps, mapOptions, styles]);
+  }, [loadGoogleMaps, mapOptions]);
 
   // Patch polylines in place; fit camera only when encoded paths change.
   useEffect(() => {
@@ -234,44 +218,29 @@ export function PrismMapGoogle({
         lng: endpoint.position.lng,
       };
       if (!marker) {
-        marker = new google.maps.Marker({
-          position,
+        marker = createGoogleRouteEndpointMarker({
           map,
-          clickable: false,
+          position,
+          label,
+          fillColor: endpoint.fillColor,
+          fillOpacity: endpoint.fillOpacity,
           zIndex: endpoint.stackOrder,
-          label: {
-            text: label,
-            color: "#ffffff",
-            fontSize: "11px",
-            fontWeight: "700",
-          },
-          icon: googleEndpointMarkerIcon(
-            endpoint.fillColor,
-            endpoint.fillOpacity
-          ),
         });
         markers.set(endpoint.id, marker);
       } else {
-        marker.setPosition(position);
-        marker.setOptions({
+        updateGoogleRouteEndpointMarker(marker, {
+          position,
+          label,
+          fillColor: endpoint.fillColor,
+          fillOpacity: endpoint.fillOpacity,
           zIndex: endpoint.stackOrder,
-          label: {
-            text: label,
-            color: "#ffffff",
-            fontSize: "11px",
-            fontWeight: "700",
-          },
-          icon: googleEndpointMarkerIcon(
-            endpoint.fillColor,
-            endpoint.fillOpacity
-          ),
         });
       }
     }
 
     for (const [key, marker] of [...markers.entries()]) {
       if (!nextMarkerKeys.has(key)) {
-        marker.setMap(null);
+        detachGoogleAdvancedMarker(marker);
         markers.delete(key);
       }
     }

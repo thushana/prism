@@ -59,7 +59,6 @@ export type PrismMapProps =
       loadGoogleMaps: () => Promise<void>;
       google?: {
         mapOptions?: google.maps.MapOptions;
-        styles?: google.maps.MapTypeStyle[];
       };
     })
   | (PeerProps & {
@@ -111,7 +110,6 @@ export function PrismMap(props: PrismMapProps) {
         autoFit={autoFit}
         loadGoogleMaps={props.loadGoogleMaps}
         mapOptions={props.google?.mapOptions}
-        styles={props.google?.styles}
         onRouteSelectionChange={onRouteSelectionChange}
       />
     ) : (
