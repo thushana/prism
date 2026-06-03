@@ -1,8 +1,9 @@
 /// <reference types="google.maps" />
 
 /**
- * Neutral roadmap styling for Prism map shells (high contrast with route overlays).
- * All textual basemap labels are hidden so route polylines stay the readable foreground.
+ * Reference JSON styling for Prism Google maps (high contrast, labels off).
+ * Not passed at runtime when a Map ID is set — recreate this palette in Cloud Console
+ * on your {@link PRISM_MAP_GOOGLE_MAP_ID} / `GOOGLE_MAPS_MAP_ID`.
  */
 export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
@@ -43,6 +44,13 @@ export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
     stylers: [{ visibility: "off" }],
   },
 ];
+
+/**
+ * Default Map ID for {@link google.maps.marker.AdvancedMarkerElement}.
+ * Override at runtime via {@link resolvePrismGoogleMapsMapId} (from the maps key endpoint).
+ * Create a Cloud Map ID for production styling: https://developers.google.com/maps/documentation/javascript/map-ids
+ */
+export const PRISM_MAP_GOOGLE_MAP_ID = "DEMO_MAP_ID";
 
 /** Default `Map` constructor options shared with {@link PRISM_MAP_GOOGLE_GRAYSCALE_STYLES}. */
 export const PRISM_MAP_GOOGLE_ROADMAP_BASE: google.maps.MapOptions = {
