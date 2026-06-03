@@ -33,6 +33,20 @@ Examples:
 | `/addresses/page/2/sort/name/ascending` | Addresses, page 2, by name A→Z                           |
 | `/people/sort/address/descending`       | People, page 1, by address Z→A                           |
 
+### Search
+
+List search uses the **`q`** query param only — page and sort stay in the path ([When query params are OK](#when-query-params-are-ok)).
+
+| URL                                              | Meaning                                      |
+| ------------------------------------------------ | -------------------------------------------- |
+| `/addresses?q=thushan`                             | Search, page 1, default sort                 |
+| `/addresses/page/2?q=thushan`                    | Search on page 2, default sort               |
+| `/addresses/sort/name/ascending?q=thushan`       | Search with explicit sort on page 1          |
+| `/people/page/3/sort/address/descending?q=lee`   | Search on page 3 with explicit sort          |
+
+- **`q` is preserved** when redirecting legacy `?sort=`, `?dir=`, or `?page=` links to path form.
+- Omit `q` when the search box is empty (no `?q=` in the URL).
+
 ### Sort segments
 
 - **Column** — Matches the table column id (`name`, `address`, `members`, `kind`). Same vocabulary as props and types ([NAMING.md](../.cursor/commands/NAMING.md)).
@@ -40,7 +54,7 @@ Examples:
 
 ### Legacy query URLs
 
-Old `?sort=` / `?dir=` links should redirect to the path form (e.g. `/addresses?sort=address&dir=asc` → `/addresses`). Host apps implement this in list route handlers.
+Old `?sort=` / `?dir=` / `?page=` links should redirect to the path form (e.g. `/addresses?sort=address&dir=asc` → `/addresses`). Preserve any `?q=` search param on redirect. Host apps implement this in list route handlers.
 
 ## Resource detail
 
