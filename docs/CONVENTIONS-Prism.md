@@ -19,17 +19,7 @@ Workspaces can still define their own `lint` / `typecheck` / `test:run` scripts 
 
 ## URLs
 
-- Use **kebab-case** (lowercase with hyphens)
-- Use **plural nouns** for collections
-- **RESTful Pattern (Preferred)**: Collections and individual resources both use plural
-  - Collections: `/users/` - list of users
-  - Individual resources: `/users/[id]/` - single user
-  - Collections: `/posts/` - list of posts
-  - Individual resources: `/posts/[id]/` - single post
-- **App Router Pattern**: Use Next.js App Router conventions
-  - `/about` - static page
-  - `/users/[id]` - dynamic route with parameter
-  - `/admin/settings` - nested routes
+See **[URLS-Prism.md](./URLS-Prism.md)** for the full URL convention: paths over query args, directory sort/page segments, optional detail slugs, and when query params are still appropriate.
 
 ## API Endpoints
 
