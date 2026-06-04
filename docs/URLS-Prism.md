@@ -37,12 +37,12 @@ Examples:
 
 List search uses the **`q`** query param only — page and sort stay in the path ([When query params are OK](#when-query-params-are-ok)).
 
-| URL                                              | Meaning                                      |
-| ------------------------------------------------ | -------------------------------------------- |
-| `/addresses?q=thushan`                             | Search, page 1, default sort                 |
-| `/addresses/page/2?q=thushan`                    | Search on page 2, default sort               |
-| `/addresses/sort/name/ascending?q=thushan`       | Search with explicit sort on page 1          |
-| `/people/page/3/sort/address/descending?q=lee`   | Search on page 3 with explicit sort          |
+| URL                                            | Meaning                             |
+| ---------------------------------------------- | ----------------------------------- |
+| `/addresses?q=thushan`                         | Search, page 1, default sort        |
+| `/addresses/page/2?q=thushan`                  | Search on page 2, default sort      |
+| `/addresses/sort/name/ascending?q=thushan`     | Search with explicit sort on page 1 |
+| `/people/page/3/sort/address/descending?q=lee` | Search on page 3 with explicit sort |
 
 - **`q` is preserved** when redirecting legacy `?sort=`, `?dir=`, or `?page=` links to path form.
 - Omit `q` when the search box is empty (no `?q=` in the URL).
