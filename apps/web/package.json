@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint app",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"*.{ts,tsx}\" \"*.{js,mjs}\"",
@@ -14,14 +14,17 @@
     "db:push": "drizzle-kit push --config=database/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=database/drizzle.config.ts",
     "db:seed": "tsx database/seed.ts",
+    "db:seed:admin": "tsx database/seed-admin.ts",
     "test": "vitest",
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@prism/utilities": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
     "admin": "workspace:*",
     "authentication": "workspace:*",
+    "better-auth": "^1.6.14",
     "database": "workspace:*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
@@ -29,16 +32,15 @@
     "flags": "^4.0.6",
     "intelligence": "workspace:*",
     "logger": "workspace:*",
-    "mapbox-gl": "^3.16.0",
     "next": "16.2.7",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "server-only": "^0.0.1",
-    "ui": "workspace:*"
+    "ui": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
-    "@types/google.maps": "^3.64.0",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",

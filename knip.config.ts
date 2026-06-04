@@ -63,6 +63,8 @@ const config: KnipConfig = {
         "@prism/utilities",
         "@radix-ui/react-slot",
         "admin",
+        "authentication",
+        "better-auth",
         "database",
         "intelligence",
         "lightningcss",
@@ -86,6 +88,20 @@ const config: KnipConfig = {
         "@utilities": ["../utilities/source"],
       },
       ignoreDependencies: ["ui", "@prism/utilities"],
+    },
+    "packages/authentication": {
+      paths: {
+        "@ui": ["../ui/source"],
+        "@utilities": ["../utilities/source"],
+      },
+      ignoreDependencies: [
+        "ui",
+        "@prism/utilities",
+        "drizzle-orm",
+        "better-auth",
+        "@better-auth/drizzle-adapter",
+        "@better-auth/api-key",
+      ],
     },
     "packages/ui": {
       paths: {

@@ -1,10 +1,11 @@
 /**
  * Authentication package — client-safe entry.
- * Import server-only helpers from subpaths (e.g. `@authentication/web`, `@authentication/api`)
- * so `"use client"` modules can import UI from `@authentication` without pulling `server-only`.
+ * Server helpers: @authentication/better-auth, @authentication/gates, @authentication/api
+ * Legacy (shared-secret): @authentication/web, @authentication/legacy/*
  */
 
 export * from "./core";
-export * from "./password-form";
+export * from "./sign-in-form";
+export * from "./sign-in-page";
 export * from "./admin-layout";
 export * from "./sign-out-form";

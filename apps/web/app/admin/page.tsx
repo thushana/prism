@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AdminPageShell } from "authentication";
-import { requireAdminPage } from "authentication/admin-page";
+import { requireAdminPage } from "@/lib/auth-gates";
 import { PrismTypography } from "@ui";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,12 @@ const adminSections = [
     description: "Environment, git, and deployment details for quick checks.",
     href: "/admin/app/system",
   },
+  {
+    title: "API keys",
+    description:
+      "Create keys for extensions and integrations (x-api-key header).",
+    href: "/admin/app/api-keys",
+  },
 ];
 
 export default async function AdminHomePage(): Promise<React.JSX.Element> {
@@ -22,7 +28,7 @@ export default async function AdminHomePage(): Promise<React.JSX.Element> {
   return (
     <AdminPageShell
       title="Administrative Tools"
-      description="Password-protected internal tools for this deployment."
+      description="Sign-in protected internal tools for this deployment."
       showSignOut
     >
       <section className="grid gap-4">

@@ -18,16 +18,11 @@ Standard chrome fields in **`config.prism.json` → `app`** (via `readApplicatio
 
 ## How It Works
 
-Authentication uses a **signed session cookie** (`prism-admin-authentication`). On login, a random session token is stored in the cookie and signed with `PRISM_KEY_WEB`; the password is never written to the cookie. There is no user table — the password _is_ the key. Suitable for internal tools with a single owner or small team.
+Prism’s default is **Better Auth** (email/password sessions in Postgres, API keys for integrations). See **[AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)** for env vars, app wiring (`lib/auth-gates.ts`), migration, and API key headers.
 
-Two keys exist so API and web surfaces can be rotated independently:
+Admin pages still use the same gate pattern; import `requireAdminPage` from your app’s `lib/auth-gates.ts` (not the legacy `@authentication/admin-page` shared-secret helper).
 
-| Key             | Used by                                        |
-| --------------- | ---------------------------------------------- |
-| `PRISM_KEY_WEB` | Web page cookie auth (`/admin`, password form) |
-| `PRISM_KEY_API` | API route header auth (`x-prism-api-key`)      |
-
-**Rate limits** (in-memory, per client IP, best-effort on serverless): web login — 10 attempts / 15 min; API routes — 120 requests / min. Returns `429 Too Many Requests`. Use Vercel Firewall or similar for stronger protection in production.
+**Rate limits** (in-memory, per client IP): API routes — 120 requests / min after API key verification. Use Vercel Firewall for stronger production protection.
 
 ## Route Structure
 
@@ -52,8 +47,8 @@ app/
 │               └── page.tsx      # Admin / Prism / Components / PrismTypography
 └── api/
     └── admin/
-        ├── authentication/
-        │   └── route.ts          # POST — verifies password, sets cookie
+        ├── api-keys/
+        │   └── route.ts          # POST — create Better Auth API key (admin)
         └── signout/
             └── route.ts          # POST — clears cookie, redirects /admin
 ```
@@ -109,15 +104,15 @@ Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell`
 
 The package root (`@authentication`) exports **only client-safe** modules (`PasswordForm`, `AdminPageShell`, `AdminBackLink`, `SignOutForm`, and `verifyKey` from `./core`). Server-only code uses **`import "server-only"`** and **Next server APIs**; it must be imported from **subpaths** so client bundles never traverse those modules.
 
-| Export                                                           | Import from                            | Kind            | Purpose                                             |
-| ---------------------------------------------------------------- | -------------------------------------- | --------------- | --------------------------------------------------- |
-| `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null`  |
-| `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                       |
-| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate (rate limited)               |
-| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)              |
-| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                           |
-| `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                           |
-| `enforceRateLimit`, `getClientIp`, `RATE_LIMIT_*`                | `@authentication/rate-limit`         | server          | Per-IP limits for login, API auth, app routes     |
+| Export                                                           | Import from                            | Kind            | Purpose                                            |
+| ---------------------------------------------------------------- | -------------------------------------- | --------------- | -------------------------------------------------- |
+| `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null` |
+| `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                      |
+| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate (rate limited)              |
+| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)             |
+| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                          |
+| `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                          |
+| `enforceRateLimit`, `getClientIp`, `RATE_LIMIT_*`                | `@authentication/rate-limit`           | server          | Per-IP limits for login, API auth, app routes      |
 
 In generated `apps/web`, replace `@authentication` with the package name `authentication` and the same subpaths (e.g. `authentication/web`).
 
@@ -129,5 +124,4 @@ In generated `apps/web`, replace `@authentication` with the package name `authen
 
 See [DEPLOYMENT-Prism.md](./DEPLOYMENT-Prism.md) for the full list. Admin-specific:
 
-- `PRISM_KEY_WEB` — required; web page password
-- `PRISM_KEY_API` — required; API route key
+- `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` — see [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { SystemSheetData } from "@admin";
 import { serverLogger as logger } from "@logger/server";
+import { checkSession } from "@/lib/auth-gates";
+import { isAdminUser } from "authentication/better-auth/session";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,7 +68,7 @@ function getVercelInfo() {
   };
 }
 
-export async function getSystemSheetData(): Promise<SystemSheetData> {
+async function getSystemSheetData(): Promise<SystemSheetData> {
   const git = await getGitInfo();
   const vercel = getVercelInfo();
 
@@ -102,6 +104,14 @@ export async function getSystemSheetData(): Promise<SystemSheetData> {
 
 export async function GET() {
   try {
+    const session = await checkSession();
+    if (!session?.session || !isAdminUser(session.user)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const data = await getSystemSheetData();
     return NextResponse.json({ success: true, data });
   } catch (error) {

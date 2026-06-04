@@ -10,8 +10,8 @@ import {
   enforceRateLimit,
   getClientIp,
   RATE_LIMIT_WEB_LOGIN,
-} from "./rate-limit";
-import { secureCompare } from "./secure-compare";
+} from "../rate-limit";
+import { secureCompare } from "../secure-compare";
 import { setWebAuthenticationCookie } from "./web";
 
 /**

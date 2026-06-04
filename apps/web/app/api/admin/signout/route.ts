@@ -1,9 +1,10 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { clearWebAuthenticationCookie } from "authentication/web";
+import { auth } from "@/lib/auth";
 
 export async function POST(): Promise<never> {
-  const cookieStore = await cookies();
-  clearWebAuthenticationCookie(cookieStore);
-  redirect("/admin");
+  await auth.api.signOut({
+    headers: await headers(),
+  });
+  redirect("/sign-in");
 }
