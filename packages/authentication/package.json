@@ -9,7 +9,8 @@
     "./admin-page": "./source/admin-page.tsx",
     "./api": "./source/api.ts",
     "./authentication_route": "./source/authentication_route.ts",
-    "./web": "./source/web.ts"
+    "./web": "./source/web.ts",
+    "./rate-limit": "./source/rate-limit.ts"
   },
   "dependencies": {
     "server-only": "^0.0.1"
