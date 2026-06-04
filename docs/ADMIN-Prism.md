@@ -115,6 +115,7 @@ The package root (`@authentication`) exports **only client-safe** modules (`Pass
 | `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)              |
 | `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                           |
 | `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                           |
+| `enforceRateLimit`, `getClientIp`, `RATE_LIMIT_*`                | `@authentication/rate-limit`         | server          | Per-IP limits for login, API auth, app routes     |
 
 In generated `apps/web`, replace `@authentication` with the package name `authentication` and the same subpaths (e.g. `authentication/web`).
 
