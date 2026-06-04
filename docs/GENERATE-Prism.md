@@ -100,6 +100,9 @@ my-app/
   .gitignore
   prism/                    # git submodule
   apps/web/                 # Next.js app (pnpm workspace name: web)
+    config.prism.json       # Prism-standard (app chrome + deployments.dev.port)
+    config.app.json         # Client-specific domain settings
+    library/config/         # Zod loaders
     .env.example            # Committed template
     .env                    # Created on generate (gitignored; edit values)
     docs/index.mdx

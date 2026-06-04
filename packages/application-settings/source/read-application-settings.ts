@@ -1,53 +1,83 @@
 import "server-only";
 
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import {
-  applicationSettingsSchema,
-  type ApplicationSettings,
-} from "./application-settings-schema";
+  APP_CONFIG_FILE_CANDIDATES,
+  LEGACY_APP_JSON_FILE_NAME,
+  PRISM_CONFIG_FILE_CANDIDATES,
+  PRISM_CONFIG_FILE_NAME,
+} from "./config-file-names";
+import {
+  prismAppConfigSchema,
+  type PrismAppConfig,
+} from "./prism-config-schema";
+import { resolveExistingConfigFile } from "./resolve-config-file";
 
-const DEFAULT_FILE_NAME = "app.json";
-
-/**
- * Read and validate `app.json` at the given directory (repository or app root).
- * Call from server code only (`server-only`).
- */
-export function readApplicationSettingsFromDirectory(
-  rootDirectory: string,
-  fileName: string = DEFAULT_FILE_NAME
-): ApplicationSettings {
-  const filePath = join(rootDirectory, fileName);
-  if (!existsSync(filePath)) {
-    throw new Error(
-      `application-settings: missing ${fileName} at ${filePath}. Add app.json with displayName, description, and optional icon.`
-    );
-  }
-  const raw = readFileSync(filePath, "utf8");
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw) as unknown;
-  } catch (cause) {
-    throw new Error(`application-settings: ${filePath} is not valid JSON.`, {
-      cause,
-    });
-  }
-  const result = applicationSettingsSchema.safeParse(parsed);
-  if (!result.success) {
-    throw new Error(
-      `application-settings: invalid ${fileName}:\n${result.error.message}`
-    );
-  }
-  return result.data;
+function readJsonFile(filePath: string): unknown {
+  return JSON.parse(readFileSync(filePath, "utf8")) as unknown;
 }
 
-let cachedApplicationSettings: ApplicationSettings | undefined;
+function readPrismConfigJson(rootDirectory: string): unknown {
+  const prismPath = resolveExistingConfigFile(
+    rootDirectory,
+    PRISM_CONFIG_FILE_CANDIDATES
+  );
+  if (prismPath) {
+    return readJsonFile(prismPath);
+  }
+
+  const legacyAppConfigPath = resolveExistingConfigFile(
+    rootDirectory,
+    APP_CONFIG_FILE_CANDIDATES
+  );
+  if (legacyAppConfigPath) {
+    return readJsonFile(legacyAppConfigPath);
+  }
+
+  const legacyJsonPath = resolveExistingConfigFile(rootDirectory, [
+    LEGACY_APP_JSON_FILE_NAME,
+  ]);
+  if (legacyJsonPath) {
+    return readJsonFile(legacyJsonPath);
+  }
+
+  throw new Error(
+    `application-settings: missing ${PRISM_CONFIG_FILE_NAME} (or legacy prism.config.json / app.config.json / app.json) under ${rootDirectory}. See prism/docs/APP-CONFIG-Prism.md.`
+  );
+}
+
+function extractAppConfig(parsed: unknown): PrismAppConfig {
+  if (parsed && typeof parsed === "object" && "app" in parsed) {
+    const result = prismAppConfigSchema.safeParse(
+      (parsed as { app: unknown }).app
+    );
+    if (result.success) return result.data;
+    throw new Error(
+      `application-settings: invalid ${PRISM_CONFIG_FILE_NAME} app section:\n${result.error.message}`
+    );
+  }
+
+  const result = prismAppConfigSchema.safeParse(parsed);
+  if (result.success) return result.data;
+
+  throw new Error(
+    `application-settings: expected ${PRISM_CONFIG_FILE_NAME} with an app section (displayName, description, icon).`
+  );
+}
 
 /**
- * Reads `app.json` from `process.cwd()` (Next.js server: project root in dev/build).
- * Result is cached at module level — the file never changes at runtime.
+ * Read standard app chrome from `config.prism.json` → `app`.
+ * Falls back to legacy prism.config.json, flat app.config.json, or app.json.
  */
-export function readApplicationSettings(): ApplicationSettings {
+export function readApplicationSettingsFromDirectory(
+  rootDirectory: string
+): PrismAppConfig {
+  return extractAppConfig(readPrismConfigJson(rootDirectory));
+}
+
+let cachedApplicationSettings: PrismAppConfig | undefined;
+
+export function readApplicationSettings(): PrismAppConfig {
   if (!cachedApplicationSettings) {
     cachedApplicationSettings = readApplicationSettingsFromDirectory(
       process.cwd()

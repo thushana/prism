@@ -4,9 +4,11 @@ Every Prism app ships with a password-protected `/admin` section. This doc cover
 
 Naming for admin shell props and the shared title map follows [NAMING.md](../.cursor/commands/NAMING.md) (camelCase props, PascalCase types, `SCREAMING_SNAKE_CASE` for app-level constants such as `ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX`).
 
-## Application settings (`app.json`)
+## Application config
 
-At the **repository root**, Prism apps ship an `app.json` file validated by the **`application-settings`** package (`readApplicationSettings()` from `application-settings`, server-only). Fields:
+At the **Next.js app root** (`apps/web/`), ship **`config.prism.json`** (Prism-standard: app chrome + deployments) and **`config.app.json`** (client-specific domain). See [APP-CONFIG-Prism.md](./APP-CONFIG-Prism.md).
+
+Standard chrome fields in **`config.prism.json` → `app`** (via `readApplicationSettings()`):
 
 | Field         | Purpose                                                                                        |
 | ------------- | ---------------------------------------------------------------------------------------------- |

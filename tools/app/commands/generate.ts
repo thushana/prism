@@ -148,6 +148,7 @@ function buildPrismDependencies(
 ): Record<string, string> {
   if (layout === "prism-monorepo") {
     return {
+      "application-settings": "*",
       database: "*",
       intelligence: "*",
       logger: "*",
@@ -164,6 +165,7 @@ function buildPrismDependencies(
   const filePrefix = "file:../../prism/packages/";
 
   return {
+    "application-settings": `${filePrefix}application-settings`,
     database: `${filePrefix}database`,
     intelligence: `${filePrefix}intelligence`,
     logger: `${filePrefix}logger`,
@@ -221,6 +223,7 @@ function generateWebAppPackageJson(
       "react-dom": "19.2.7",
       dotenv: "^17.4.2",
       "drizzle-orm": "^0.45.2",
+      zod: "^4.3.6",
     },
     devDependencies: {
       "@tailwindcss/postcss": "^4.3.0",
@@ -367,7 +370,12 @@ function generateNextConfig(appRoot: string, layout: GenerateLayout): void {
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // config.app.json + config.prism.json are bundled or read at runtime.
+  outputFileTracingIncludes: {
+    "/*": ["./config.app.json", "./config.prism.json"],
+  },
   transpilePackages: [
+    "application-settings",
     "@prism/utilities",
     "authentication",
     "intelligence",
@@ -788,6 +796,108 @@ child.on("exit", (code) => {
   } catch {
     // Windows may not support chmod; bin still works via node
   }
+}
+
+/** Human-facing title from CLI app name (my-app → My App). */
+function formatDisplayName(appName: string): string {
+  return appName
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/**
+ * Prism manifest files: config.prism.json (platform) + config.app.json (app) + loaders.
+ */
+function generateApplicationManifestFiles(
+  appRoot: string,
+  appName: string
+): void {
+  const displayName = formatDisplayName(appName);
+
+  const prismConfig = {
+    app: {
+      displayName,
+      description: `${displayName} — generated with Prism.`,
+      icon: "layers",
+    },
+    deployments: {
+      dev: {
+        port: 3000,
+      },
+    },
+  };
+  fs.writeFileSync(
+    path.join(appRoot, "config.prism.json"),
+    `${JSON.stringify(prismConfig, null, 2)}\n`,
+    "utf-8"
+  );
+
+  const appConfig = {
+    // Add client-specific domain keys here (e.g. elections, featureFlags).
+  };
+  fs.writeFileSync(
+    path.join(appRoot, "config.app.json"),
+    `${JSON.stringify(appConfig, null, 2)}\n`,
+    "utf-8"
+  );
+
+  const configDir = path.join(appRoot, "library/config");
+  fs.mkdirSync(configDir, { recursive: true });
+
+  const schemaTs = `import { z } from "zod";
+
+/** Client-specific domain config (\`config.app.json\`) — unique per app. */
+export const appConfigSchema = z.object({
+  // e.g. elections: electionsConfigSchema,
+});
+
+export type AppConfig = z.infer<typeof appConfigSchema>;
+`;
+
+  const prismSchemaTs = `import { z } from "zod";
+
+const prismAppSchema = z.object({
+  displayName: z.string().min(1),
+  description: z.string(),
+  icon: z.string().optional(),
+});
+
+/** Prism-standard config (\`config.prism.json\`) — same shape for every Prism app. */
+export const prismConfigSchema = z.object({
+  app: prismAppSchema,
+  deployments: z
+    .object({
+      dev: z
+        .object({
+          port: z.number().int().min(1).max(65535).optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
+
+export type PrismConfig = z.infer<typeof prismConfigSchema>;
+`;
+
+  const indexTs = `import appConfigJson from "../../config.app.json";
+import prismConfigJson from "../../config.prism.json";
+import { appConfigSchema, type AppConfig } from "./schema";
+import { prismConfigSchema, type PrismConfig } from "./prism-schema";
+
+export const appConfig: AppConfig = appConfigSchema.parse(appConfigJson);
+export const prismConfig: PrismConfig = prismConfigSchema.parse(prismConfigJson);
+
+/** Prism-standard app chrome (from config.prism.json → app). */
+export const prismApp = prismConfig.app;
+
+export const DEV_PORT = prismConfig.deployments?.dev?.port ?? 3000;
+`;
+
+  fs.writeFileSync(path.join(configDir, "schema.ts"), schemaTs, "utf-8");
+  fs.writeFileSync(path.join(configDir, "prism-schema.ts"), prismSchemaTs, "utf-8");
+  fs.writeFileSync(path.join(configDir, "index.ts"), indexTs, "utf-8");
 }
 
 function generateAppScaffoldFiles(
@@ -1547,6 +1657,7 @@ export async function runGenerateCommand(
       generateConsumerRepoDocs(repoRoot, appName, templateVars);
       generateConsumerReadme(repoRoot, appName, templateVars);
     }
+    generateApplicationManifestFiles(appRoot, appName);
     generateTemplateFiles(appRoot, appName);
     if (layout === "consumer-workspace") {
       generateAppCliWrapper(appRoot);
