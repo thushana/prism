@@ -6,12 +6,12 @@
 import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyKey } from "./core";
 import {
   enforceRateLimit,
   getClientIp,
   RATE_LIMIT_WEB_LOGIN,
 } from "./rate-limit";
+import { secureCompare } from "./secure-compare";
 import { setWebAuthenticationCookie } from "./web";
 
 /**
@@ -45,7 +45,7 @@ export function createAuthenticationRoute() {
         );
       }
 
-      if (!verifyKey(password, expectedKey)) {
+      if (!secureCompare(password, expectedKey)) {
         return NextResponse.json(
           { success: false, error: "Invalid password" },
           { status: 401 }
@@ -58,6 +58,13 @@ export function createAuthenticationRoute() {
 
       return NextResponse.json({ success: true });
     } catch (error) {
+      if (error instanceof Response && error.status === 429) {
+        return NextResponse.json(
+          { success: false, error: "Too many requests" },
+          { status: 429 }
+        );
+      }
+
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 

@@ -4,12 +4,12 @@
  */
 
 import "server-only";
-import { verifyKey } from "./core";
 import {
   enforceRateLimit,
   getClientIp,
   RATE_LIMIT_API,
 } from "./rate-limit";
+import { secureCompare } from "./secure-compare";
 
 /**
  * Require API authentication via x-prism-api-key header
@@ -17,8 +17,6 @@ import {
  * @throws Response with 401 status if authentication fails
  */
 export function requireApiAuthentication(request: Request): void {
-  enforceRateLimit(`api:${getClientIp(request)}`, RATE_LIMIT_API);
-
   const apiKey = request.headers.get("x-prism-api-key");
   const expectedKey = process.env.PRISM_KEY_API;
 
@@ -26,7 +24,9 @@ export function requireApiAuthentication(request: Request): void {
     throw new Response("Server configuration error", { status: 500 });
   }
 
-  if (!verifyKey(apiKey, expectedKey)) {
+  enforceRateLimit(`api:${getClientIp(request)}`, RATE_LIMIT_API);
+
+  if (!secureCompare(apiKey, expectedKey)) {
     throw new Response("Unauthorized", { status: 401 });
   }
 }
