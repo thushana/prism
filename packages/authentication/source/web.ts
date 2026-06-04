@@ -5,11 +5,14 @@
 
 import "server-only";
 import { cookies } from "next/headers";
-import { createHmac } from "crypto";
-import { verifyKey } from "./core";
+import { createHmac, randomBytes } from "crypto";
 
 const COOKIE_NAME = "prism-admin-authentication";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
+
+function createSessionToken(): string {
+  return randomBytes(32).toString("hex");
+}
 
 /**
  * Sign a cookie value using HMAC-SHA256
@@ -68,13 +71,9 @@ export async function checkWebAuthentication(
   }
 
   const cookie = cookieStore.get(COOKIE_NAME);
-  const cookieValue = verifySignedCookie(cookie?.value, expectedKey);
+  const sessionToken = verifySignedCookie(cookie?.value, expectedKey);
 
-  if (!cookieValue) {
-    return false;
-  }
-
-  return verifyKey(cookieValue, expectedKey);
+  return sessionToken !== null;
 }
 
 /**
@@ -90,7 +89,8 @@ export function setWebAuthenticationCookie(
     throw new Error("PRISM_KEY_WEB environment variable is not set");
   }
 
-  const signedValue = signCookie(expectedKey, expectedKey);
+  const sessionToken = createSessionToken();
+  const signedValue = signCookie(sessionToken, expectedKey);
 
   cookieStore.set(COOKIE_NAME, signedValue, {
     httpOnly: true,
