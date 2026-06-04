@@ -7,6 +7,11 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyKey } from "./core";
+import {
+  enforceRateLimit,
+  getClientIp,
+  RATE_LIMIT_WEB_LOGIN,
+} from "./rate-limit";
 import { setWebAuthenticationCookie } from "./web";
 
 /**
@@ -16,6 +21,11 @@ import { setWebAuthenticationCookie } from "./web";
 export function createAuthenticationRoute() {
   return async function POST(request: NextRequest) {
     try {
+      enforceRateLimit(
+        `web-login:${getClientIp(request)}`,
+        RATE_LIMIT_WEB_LOGIN
+      );
+
       const body = await request.json();
       const { password } = body;
 
