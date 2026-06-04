@@ -35,6 +35,8 @@ export interface GenerateCommandOptions extends BaseCommandOptions {
   name: string;
   force?: boolean;
   path?: string;
+  /** App-wide session gate (proxy) vs admin-only pages. Default: admin */
+  authGate?: "admin" | "app";
 }
 
 /**
@@ -159,6 +161,10 @@ function buildPrismDependencies(
       charts: "*",
       "feature-flags": "*",
       flags: "^4.0.0",
+      "better-auth": "^1.6.14",
+      "@better-auth/drizzle-adapter": "^1.6.14",
+      "@better-auth/api-key": "^1.6.14",
+      zod: "^4.4.3",
     };
   }
 
@@ -176,6 +182,10 @@ function buildPrismDependencies(
     charts: `${filePrefix}charts`,
     "feature-flags": `${filePrefix}feature-flags`,
     flags: "^4.0.0",
+    "better-auth": "^1.6.14",
+    "@better-auth/drizzle-adapter": "^1.6.14",
+    "@better-auth/api-key": "^1.6.14",
+    zod: "^4.4.3",
   };
 }
 
@@ -212,6 +222,7 @@ function generateWebAppPackageJson(
       "db:push": "drizzle-kit push --config=database/drizzle.config.ts",
       "db:studio": "drizzle-kit studio --config=database/drizzle.config.ts",
       "db:seed": "tsx database/seed.ts",
+      "db:seed:admin": "tsx database/seed-admin.ts",
     },
     dependencies: {
       ...buildPrismDependencies(layout),
@@ -378,11 +389,11 @@ const nextConfig: NextConfig = {
     "application-settings",
     "@prism/utilities",
     "authentication",
+    "better-auth",
     "intelligence",
     "logger",
     "ui",
     "admin",
-    "authentication",
     "charts",
     "feature-flags",
   ],
@@ -439,7 +450,14 @@ export default nextConfig;
       : `import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ["authentication"],
+  serverExternalPackages: [
+    "better-auth",
+    "@better-auth/drizzle-adapter",
+    "@better-auth/api-key",
+    "@better-auth/kysely-adapter",
+    "kysely",
+  ],
 };
 
 export default nextConfig;
@@ -718,8 +736,8 @@ jobs:
       DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?sslmode=disable
       DATABASE_URL_UNPOOLED: postgresql://ci:ci@127.0.0.1:5432/ci?sslmode=disable
       GOOGLE_MAPS_API_KEY: ci_dummy_not_used_at_build
-      PRISM_KEY_API: ci_dummy_not_used_at_build
-      PRISM_KEY_WEB: ci_dummy_not_used_at_build
+      BETTER_AUTH_SECRET: ci_dummy_better_auth_secret_32_chars!!
+      BETTER_AUTH_URL: http://localhost:3000
 
     steps:
       - name: Checkout (with Prism submodule)
@@ -965,6 +983,14 @@ function readEnvExampleFromTemplate(): string {
 }
 
 /** Write apps/web/.env.example and .env (same content; .env is gitignored). */
+function writeAuthGateFile(
+  appRoot: string,
+  mode: "admin" | "app" = "admin"
+): void {
+  const content = JSON.stringify({ mode }, null, 2) + "\n";
+  fs.writeFileSync(path.join(appRoot, "auth-gate.json"), content, "utf-8");
+}
+
 function writeAppEnvFiles(appRoot: string): void {
   const envContent = readEnvExampleFromTemplate();
   for (const name of [".env.example", ".env"]) {
@@ -1659,6 +1685,7 @@ export async function runGenerateCommand(
     }
     generateApplicationManifestFiles(appRoot, appName);
     generateTemplateFiles(appRoot, appName);
+    writeAuthGateFile(appRoot, options.authGate ?? "admin");
     if (layout === "consumer-workspace") {
       generateAppCliWrapper(appRoot);
       generateAppScaffoldFiles(appRoot, appName, templateVars);
@@ -1765,6 +1792,11 @@ export function registerGenerateCommand(program: Command): void {
     .option(
       "-p, --path <path>",
       "Consumer repo directory (creates apps/web/ + prism/ submodule)"
+    )
+    .option(
+      "--auth-gate <mode>",
+      "Session gate: admin (default, /admin only) or app (full UI via proxy)",
+      "admin"
     )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {

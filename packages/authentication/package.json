@@ -6,17 +6,37 @@
   "types": "./source/index.ts",
   "exports": {
     ".": "./source/index.ts",
-    "./admin-page": "./source/admin-page.tsx",
+    "./better-auth": "./source/better-auth/server.ts",
+    "./better-auth/session": "./source/better-auth/session.ts",
+    "./gates": "./source/gates.tsx",
     "./api": "./source/api.ts",
-    "./authentication_route": "./source/authentication_route.ts",
-    "./web": "./source/web.ts",
-    "./rate-limit": "./source/rate-limit.ts"
+    "./client": "./source/client.ts",
+    "./admin-page": "./source/legacy/admin-page.tsx",
+    "./api-legacy": "./source/legacy/api-legacy.ts",
+    "./authentication_route": "./source/legacy/authentication_route.ts",
+    "./web": "./source/legacy/web.ts",
+    "./rate-limit": "./source/rate-limit.ts",
+    "./sign-in-page": "./source/sign-in-page.tsx"
   },
   "dependencies": {
-    "server-only": "^0.0.1"
+    "@better-auth/api-key": "^1.6.14",
+    "@better-auth/drizzle-adapter": "^1.6.14",
+    "@prism/utilities": "workspace:*",
+    "better-auth": "^1.6.14",
+    "server-only": "^0.0.1",
+    "ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.45.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@types/node": "^25.0.0",
+    "@types/react": "^19.2.6",
+    "drizzle-orm": "^0.45.2",
     "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   },

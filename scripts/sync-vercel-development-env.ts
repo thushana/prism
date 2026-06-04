@@ -44,8 +44,8 @@ const NEON_ENV_KEYS = [
   "POSTGRES_USER",
   "POSTGRES_PASSWORD",
   "POSTGRES_DATABASE",
-  "PRISM_KEY_WEB",
-  "PRISM_KEY_API",
+  "BETTER_AUTH_SECRET",
+  "BETTER_AUTH_URL",
 ] as const;
 
 type ConsumerContext = {

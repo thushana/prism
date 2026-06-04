@@ -63,10 +63,7 @@ export function getClientIp(request: Request): string {
  * Enforce a sliding-window attempt limit for the given key.
  * @throws Response with 429 when the limit is exceeded
  */
-export function enforceRateLimit(
-  key: string,
-  options: RateLimitOptions
-): void {
+export function enforceRateLimit(key: string, options: RateLimitOptions): void {
   const now = Date.now();
   pruneExpiredBuckets(now);
 

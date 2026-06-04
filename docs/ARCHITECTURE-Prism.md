@@ -139,13 +139,12 @@ System information page plus Prism component demos for admin/sheets routes:
 
 #### Packages/authentication
 
-Shared authentication utilities for API and web authentication:
+Better Auth defaults and legacy shared-secret helpers. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md).
 
-- `source/core.ts` - Shared core verification function
-- `source/api.ts` - API key authentication (header-based)
-- `source/web.ts` - Cookie-based web authentication
-- `source/password-form.tsx` - Password form component
-- `source/authentication_route.ts` - Authentication endpoint factory
+- `source/better-auth/` - `createPrismAuth()` factory
+- `source/gates.tsx` - `createAuthGates()` for pages and sessions
+- `source/api.ts` - `createApiAuthentication()` for API keys
+- `source/legacy/` - deprecated `PRISM_KEY_*` helpers
 
 #### Packages/charts
 
