@@ -5,7 +5,7 @@
 
 import "server-only";
 import { cookies } from "next/headers";
-import { createHmac, randomBytes } from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 
 const COOKIE_NAME = "prism-admin-authentication";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -49,7 +49,16 @@ function verifySignedCookie(
     .update(value)
     .digest("hex");
 
-  if (signature !== expectedSignature) {
+  try {
+    const signatureBuffer = Buffer.from(signature, "hex");
+    const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    if (
+      signatureBuffer.length !== expectedBuffer.length ||
+      !timingSafeEqual(signatureBuffer, expectedBuffer)
+    ) {
+      return null;
+    }
+  } catch {
     return null;
   }
 
