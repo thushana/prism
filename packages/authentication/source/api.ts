@@ -5,6 +5,11 @@
 
 import "server-only";
 import { verifyKey } from "./core";
+import {
+  enforceRateLimit,
+  getClientIp,
+  RATE_LIMIT_API,
+} from "./rate-limit";
 
 /**
  * Require API authentication via x-prism-api-key header
@@ -12,6 +17,8 @@ import { verifyKey } from "./core";
  * @throws Response with 401 status if authentication fails
  */
 export function requireApiAuthentication(request: Request): void {
+  enforceRateLimit(`api:${getClientIp(request)}`, RATE_LIMIT_API);
+
   const apiKey = request.headers.get("x-prism-api-key");
   const expectedKey = process.env.PRISM_KEY_API;
 

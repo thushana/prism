@@ -25,6 +25,8 @@ Two keys exist so API and web surfaces can be rotated independently:
 | `PRISM_KEY_WEB` | Web page cookie auth (`/admin`, password form) |
 | `PRISM_KEY_API` | API route header auth (`x-prism-api-key`)      |
 
+**Rate limits** (in-memory, per client IP, best-effort on serverless): web login — 10 attempts / 15 min; API routes — 120 requests / min. Returns `429 Too Many Requests`. Use Vercel Firewall or similar for stronger protection in production.
+
 ## Route Structure
 
 Generated apps (`prism generate`) receive this structure out of the box:
@@ -109,8 +111,8 @@ The package root (`@authentication`) exports **only client-safe** modules (`Pass
 | ---------------------------------------------------------------- | -------------------------------------- | --------------- | --------------------------------------------------- |
 | `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null`  |
 | `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                       |
-| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate                              |
-| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for `app/api/admin/authentication/route.ts` |
+| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate (rate limited)               |
+| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)              |
 | `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                           |
 | `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                           |
 
