@@ -1,19 +1,15 @@
 import { z } from "zod";
+import {
+  prismAppConfigSchema,
+  type PrismAppConfig,
+} from "./prism-config-schema";
 
-/**
- * App-level settings from the repository root `app.json` (Prism convention).
- * Used for display name, chrome copy, and optional icon token (e.g. Lucide name).
- */
-export const applicationSettingsSchema = z.object({
-  /** Shown in admin section labels and similar chrome (not the npm package name). */
-  displayName: z.string().min(1),
-  /** Short product / app description (e.g. admin home subtitle). */
-  description: z.string(),
-  /**
-   * Optional icon token for shell UI (e.g. Lucide export name as string: `train-front`).
-   * Consumers map this to a component when they render icons.
-   */
-  icon: z.string().optional(),
-});
+/** @deprecated Use prismAppConfigSchema — chrome lives under config.prism.json → app */
+export const applicationAppConfigBaseSchema = prismAppConfigSchema;
 
-export type ApplicationSettings = z.infer<typeof applicationSettingsSchema>;
+export type ApplicationAppConfigBase = PrismAppConfig;
+
+/** @deprecated Use prismAppConfigSchema */
+export const applicationSettingsSchema = prismAppConfigSchema;
+
+export type ApplicationSettings = PrismAppConfig;
