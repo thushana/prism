@@ -39,7 +39,13 @@ function verifySignedCookie(
     return null;
   }
 
-  const [value, signature] = signedValue.split(".");
+  const parts = signedValue.split(".");
+
+  if (parts.length !== 2) {
+    return null;
+  }
+
+  const [value, signature] = parts;
 
   if (!value || !signature) {
     return null;
