@@ -150,6 +150,8 @@ export interface PrismButtonProps {
    * The label stays in the DOM so the CSS transition plays both ways.
    */
   labelHidden?: boolean;
+  /** Max width of the visible label span (default `12rem`). Use `"none"` for full-length labels. */
+  labelMaxWidth?: React.CSSProperties["maxWidth"];
   /** Merge props onto a single inner span (display-only / style-guide); not a native `<button>`. */
   asChild?: boolean;
   className?: string;
@@ -199,6 +201,7 @@ export function PrismButton(
     disabled = false,
     toggled,
     labelHidden = false,
+    labelMaxWidth = "12rem",
     asChild = false,
     className = "",
     children,
@@ -618,7 +621,7 @@ export function PrismButton(
       style={{
         display: "inline-block",
         overflow: "hidden",
-        maxWidth: labelHidden ? 0 : "12rem",
+        maxWidth: labelHidden ? 0 : labelMaxWidth,
         opacity: labelHidden ? 0 : 1,
         // Slower collapse on hide; slightly quicker expand when selected.
         transition: disableMotion
