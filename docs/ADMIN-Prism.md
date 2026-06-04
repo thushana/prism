@@ -16,7 +16,7 @@ At the **repository root**, Prism apps ship an `app.json` file validated by the 
 
 ## How It Works
 
-Authentication uses a **signed cookie** (`prism-admin-authentication`) set against `PRISM_KEY_WEB`. There is no user table — the password _is_ the key. Suitable for internal tools with a single owner or small team.
+Authentication uses a **signed session cookie** (`prism-admin-authentication`). On login, a random session token is stored in the cookie and signed with `PRISM_KEY_WEB`; the password is never written to the cookie. There is no user table — the password _is_ the key. Suitable for internal tools with a single owner or small team.
 
 Two keys exist so API and web surfaces can be rotated independently:
 
