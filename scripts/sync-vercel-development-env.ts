@@ -17,7 +17,7 @@
  * Optional flags: --team=slug --project=name --cwd=relative/path
  */
 
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -183,10 +183,14 @@ function ensureLinked(
   const projectJson = path.join(vercelCwd, ".vercel/project.json");
   if (fs.existsSync(projectJson)) return;
 
-  execSync("vercel", ["link", "-p", project, "--scope", teamSlug, "-y"], {
-    cwd: vercelCwd,
-    stdio: "inherit",
-  });
+  const link = spawnSync(
+    "vercel",
+    ["link", "-p", project, "--scope", teamSlug, "-y"],
+    { cwd: vercelCwd, stdio: "inherit" }
+  );
+  if (link.status !== 0) {
+    process.exit(link.status ?? 1);
+  }
 }
 
 async function main(): Promise<void> {
