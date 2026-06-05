@@ -2,10 +2,10 @@
 
 Prism consumer apps use **two manifest files** at the Next.js app root (`apps/web/`). The `config.*` prefix keeps them adjacent in the file tree.
 
-| File | Owner | Purpose |
-| ---- | ----- | ------- |
-| **`config.prism.json`** | **Prism** | Standard shape for every Prism app: `app` chrome + `deployments` (dev port, future CLI hooks) |
-| **`config.app.json`** | **Client app** | Domain settings unique to this app (elections, feature flags, etc.) |
+| File                    | Owner          | Purpose                                                                                       |
+| ----------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| **`config.prism.json`** | **Prism**      | Standard shape for every Prism app: `app` chrome + `deployments` (dev port, future CLI hooks) |
+| **`config.app.json`**   | **Client app** | Domain settings unique to this app (elections, feature flags, etc.)                           |
 
 ## `config.prism.json`
 
@@ -14,7 +14,8 @@ Same structure for all Prism apps:
 ```json
 {
   "app": {
-    "displayName": "Alameda Elections",
+    "nameIdentifier": "alameda-elections",
+    "nameDisplay": "Alameda Elections",
     "description": "Precinct-level election results map for Alameda County.",
     "icon": "map"
   },
@@ -27,7 +28,13 @@ Same structure for all Prism apps:
 ```
 
 - Validated by `prismConfigBaseSchema` in `application-settings`.
-- Keep `package.json` `dev` script port in sync with `deployments.dev.port`.
+- `app.nameIdentifier` — stable slug for dev hostnames and tooling (e.g. `porch-scope`).
+- `app.nameDisplay` — human-facing name (admin chrome, passkey RP name, page titles).
+- `app.postSignInPath` — optional redirect after sign-in (e.g. `/addresses`; default `/`). Wire via `createAuthGates(auth, { postSignInPath })`.
+- `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to `{nameIdentifier}.localhost` and prints the Prism dev URL on startup.
+- Keep `deployments.dev.port` in sync with any hardcoded kill scripts (e.g. root `dev:kill`).
+- **Local dev URL:** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.
+- Legacy `app.displayName` is still accepted and mapped to `nameDisplay`.
 - `readApplicationSettings()` reads the `app` section for admin chrome and metadata.
 
 ## `config.app.json`
@@ -54,11 +61,11 @@ Each app defines its domain schema in `library/config/schema.ts`.
 
 ### Loading
 
-| Pattern | When |
-| ------- | ---- |
-| JSON import + Zod in `library/config/` | Client + server, static export |
-| `readApplicationSettings()` | Server-only chrome from `config.prism.json` → `app` |
-| `readPrismConfigFromDirectory()` | Full platform config in server scripts |
+| Pattern                                | When                                                |
+| -------------------------------------- | --------------------------------------------------- |
+| JSON import + Zod in `library/config/` | Client + server, static export                      |
+| `readApplicationSettings()`            | Server-only chrome from `config.prism.json` → `app` |
+| `readPrismConfigFromDirectory()`       | Full platform config in server scripts              |
 
 Vercel tracing:
 
@@ -88,10 +95,10 @@ apps/web/
 
 Prism renamed the manifest files so they sort together. **Readers in `application-settings` accept legacy names** until you rename; **JSON imports in `library/config/` do not** — update those when you migrate.
 
-| Current (legacy) | New |
-| ---------------- | --- |
-| `prism.config.json` | `config.prism.json` |
-| `app.config.json` | `config.app.json` |
+| Current (legacy)         | New                                          |
+| ------------------------ | -------------------------------------------- |
+| `prism.config.json`      | `config.prism.json`                          |
+| `app.config.json`        | `config.app.json`                            |
 | `app.json` (chrome only) | Move chrome into `config.prism.json` → `app` |
 
 ### Migration checklist
@@ -105,7 +112,8 @@ Prism renamed the manifest files so they sort together. **Readers in `applicatio
    ```json
    {
      "app": {
-       "displayName": "...",
+       "nameIdentifier": "my-app",
+       "nameDisplay": "...",
        "description": "...",
        "icon": "..."
      },
@@ -113,7 +121,7 @@ Prism renamed the manifest files so they sort together. **Readers in `applicatio
    }
    ```
    Remove `app.json` after merge.
-3. **If `app.config.json` mixed chrome + domain**: move `displayName`, `description`, and `icon` into `config.prism.json` → `app`; leave only domain keys (e.g. `elections`) in `config.app.json`.
+3. **If `app.config.json` mixed chrome + domain**: move `nameDisplay`, `description`, and `icon` into `config.prism.json` → `app`; leave only domain keys (e.g. `elections`) in `config.app.json`.
 4. **Update imports** in `library/config/index.ts`:
    ```typescript
    import appConfigJson from "../../config.app.json";
@@ -132,9 +140,9 @@ Prism renamed the manifest files so they sort together. **Readers in `applicatio
 
 `readApplicationSettings()`, `readPrismConfigFromDirectory()`, and `readApplicationConfigFromDirectory()` resolve files in this order:
 
-| Helper | Candidates |
-| ------ | ---------- |
+| Helper                  | Candidates                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
 | Prism platform / chrome | `config.prism.json` → `prism.config.json` → flat `app.config.json` / `app.json` (chrome only) |
-| Client domain | `config.app.json` → `app.config.json` |
+| Client domain           | `config.app.json` → `app.config.json`                                                         |
 
 Static JSON imports used by Next.js bundles **must** use the new filenames after migration.

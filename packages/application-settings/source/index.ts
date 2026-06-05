@@ -36,3 +36,23 @@ export {
   readPrismConfigBase,
   readPrismConfigFromDirectory,
 } from "./read-prism-config";
+export {
+  buildDevAppOrigins,
+  buildDevAppUrl,
+  buildDevLocalhostHost,
+  resolvePrismBetterAuthUrl,
+  resolveTrustedAuthOrigins,
+  normalizeDevSlug,
+  resolveDevDeployment,
+  resolveDevHost,
+  resolveDevPort,
+  resolveNameIdentifier,
+  resolveDevSlug,
+  type DevDeployment,
+  type DevDeploymentContext,
+} from "./dev-deployment";
+export {
+  loadDevDeploymentFromDirectory,
+  loadPrismConfigFromDirectory,
+  resolveMonorepoPackageName,
+} from "./load-prism-config-sync";

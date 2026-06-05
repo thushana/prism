@@ -20,7 +20,7 @@ describe("readApplicationSettingsFromDirectory", () => {
     "parses repo config.prism.json or legacy manifests",
     () => {
       const settings = readApplicationSettingsFromDirectory(repoRoot);
-      expect(settings.displayName.length).toBeGreaterThan(0);
+      expect(settings.nameDisplay.length).toBeGreaterThan(0);
       expect(settings.description.length).toBeGreaterThan(0);
     }
   );

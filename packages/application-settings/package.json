@@ -5,7 +5,10 @@
   "main": "./source/index.ts",
   "types": "./source/index.ts",
   "exports": {
-    ".": "./source/index.ts"
+    ".": "./source/index.ts",
+    "./dev-deployment": "./source/dev-deployment.ts",
+    "./prism-config-schema": "./source/prism-config-schema.ts",
+    "./load-prism-config-sync": "./source/load-prism-config-sync.ts"
   },
   "dependencies": {
     "server-only": "^0.0.1",

@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "better-auth",
     "@better-auth/drizzle-adapter",
     "@better-auth/api-key",
+    "@better-auth/passkey",
   ],
   outputFileTracingRoot: path.join(__dirname, "../.."),
   async redirects() {

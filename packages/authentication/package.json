@@ -8,6 +8,8 @@
     ".": "./source/index.ts",
     "./better-auth": "./source/better-auth/server.ts",
     "./better-auth/session": "./source/better-auth/session.ts",
+    "./better-auth/schema-passkey": "./source/better-auth/schema-passkey.ts",
+    "./better-auth/passkey-options": "./source/better-auth/passkey-options.ts",
     "./gates": "./source/gates.tsx",
     "./api": "./source/api.ts",
     "./client": "./source/client.ts",
@@ -16,11 +18,13 @@
     "./authentication_route": "./source/legacy/authentication_route.ts",
     "./web": "./source/legacy/web.ts",
     "./rate-limit": "./source/rate-limit.ts",
-    "./sign-in-page": "./source/sign-in-page.tsx"
+    "./sign-in-page": "./source/sign-in-page.tsx",
+    "./passkey-settings": "./source/passkey-settings.tsx"
   },
   "dependencies": {
     "@better-auth/api-key": "^1.6.14",
     "@better-auth/drizzle-adapter": "^1.6.14",
+    "@better-auth/passkey": "^1.6.14",
     "@prism/utilities": "workspace:*",
     "better-auth": "^1.6.14",
     "server-only": "^0.0.1",

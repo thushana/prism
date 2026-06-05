@@ -11,9 +11,7 @@ import {
 } from "./prism-config-schema";
 import { requireExistingConfigFile } from "./resolve-config-file";
 
-export function readPrismConfigFromDirectory(
-  rootDirectory: string
-): unknown {
+export function readPrismConfigFromDirectory(rootDirectory: string): unknown {
   const filePath = requireExistingConfigFile(
     rootDirectory,
     PRISM_CONFIG_FILE_CANDIDATES,

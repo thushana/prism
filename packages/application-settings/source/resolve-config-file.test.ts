@@ -20,14 +20,17 @@ describe("resolveExistingConfigFile", () => {
       JSON.stringify({ current: true })
     );
 
-    expect(
-      resolveExistingConfigFile(dir, PRISM_CONFIG_FILE_CANDIDATES)
-    ).toBe(join(dir, "config.prism.json"));
+    expect(resolveExistingConfigFile(dir, PRISM_CONFIG_FILE_CANDIDATES)).toBe(
+      join(dir, "config.prism.json")
+    );
   });
 
   it("falls back to app.config.json when config.app.json is absent", () => {
     const dir = mkdtempSync(join(tmpdir(), "prism-config-"));
-    writeFileSync(join(dir, "app.config.json"), JSON.stringify({ elections: {} }));
+    writeFileSync(
+      join(dir, "app.config.json"),
+      JSON.stringify({ elections: {} })
+    );
 
     expect(resolveExistingConfigFile(dir, APP_CONFIG_FILE_CANDIDATES)).toBe(
       join(dir, "app.config.json")
