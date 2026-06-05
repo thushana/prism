@@ -30,7 +30,7 @@ Same structure for all Prism apps:
 - Validated by `prismConfigBaseSchema` in `application-settings`.
 - `app.nameIdentifier` — stable slug for dev hostnames and tooling (e.g. `porch-scope`).
 - `app.nameDisplay` — human-facing name (admin chrome, passkey RP name, page titles).
-- `app.postSignInPath` — optional redirect after sign-in (e.g. `/addresses`; default `/`). Wire via `createAuthGates(auth, { postSignInPath })`.
+- `app.signInPathDropOff` — optional redirect after sign-in (e.g. `/addresses`; default `/`). Wire via `createAuthGates(auth, { signInPathDropOff })`.
 - `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to `{nameIdentifier}.localhost` and prints the Prism dev URL on startup.
 - Keep `deployments.dev.port` in sync with any hardcoded kill scripts (e.g. root `dev:kill`).
 - **Local dev URL:** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.

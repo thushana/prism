@@ -916,7 +916,7 @@ export const DEV_HOST = devDeployment.host;
 export const DEV_APP_URL = devDeployment.url;
 export const DEV_APP_ORIGINS = devDeployment.origins;
 
-export const POST_SIGN_IN_PATH = prismConfig.app.postSignInPath ?? "/";
+export const SIGN_IN_PATH_DROP_OFF = prismConfig.app.signInPathDropOff ?? "/";
 `;
 
   fs.writeFileSync(path.join(configDir, "schema.ts"), schemaTs, "utf-8");

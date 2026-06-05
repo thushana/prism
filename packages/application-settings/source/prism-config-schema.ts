@@ -24,7 +24,7 @@ const prismAppConfigInputSchema = z
     description: z.string(),
     icon: z.string().optional(),
     /** Where to send users after a successful sign-in (default `/`). */
-    postSignInPath: z.string().startsWith("/").optional(),
+    signInPathDropOff: z.string().startsWith("/").optional(),
   })
   .superRefine((data, context) => {
     if (!data.nameDisplay?.trim() && !data.displayName?.trim()) {
@@ -40,7 +40,7 @@ const prismAppConfigInputSchema = z
     nameDisplay: (data.nameDisplay ?? data.displayName)!.trim(),
     description: data.description,
     icon: data.icon,
-    postSignInPath: data.postSignInPath,
+    signInPathDropOff: data.signInPathDropOff,
   }));
 
 /** Chrome every Prism app supplies under `config.prism.json` → `app`. */
