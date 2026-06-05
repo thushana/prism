@@ -61,7 +61,6 @@ export default async function AdminAppSystemPage(): Promise<React.JSX.Element> {
 
   return (
     <AdminPageShell
-      backHref="/admin"
       title="System"
       description="Environment, deployment, and dependency overview."
       showSignOut

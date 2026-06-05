@@ -46,6 +46,8 @@ export type PrismPathBarProps = {
       pageTitle: string;
       /** When set, shown as the breadcrumb leaf instead of {@link pageTitle}. */
       pageTitleContent?: React.ReactNode;
+      /** When true, unmapped ancestor prefixes use slug-derived labels. */
+      lenientMissingPrefixes?: boolean;
     }
 );
 
@@ -61,7 +63,10 @@ export function PrismPathBar(props: PrismPathBarProps): React.JSX.Element {
           props.pathname,
           props.titleByPathPrefix,
           props.pageTitle,
-          props.pageTitleContent
+          {
+            pageTitleContent: props.pageTitleContent,
+            lenientMissingPrefixes: props.lenientMissingPrefixes,
+          }
         )
       : (props.segments ?? []);
   const lastIndex = segmentList.length - 1;

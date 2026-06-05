@@ -13,7 +13,6 @@ export default async function AdminSecurityPage(): Promise<React.JSX.Element> {
 
   return (
     <AdminPageShell
-      backHref="/admin"
       title="Security"
       description="Manage passkeys and other sign-in options for your account."
       showSignOut
