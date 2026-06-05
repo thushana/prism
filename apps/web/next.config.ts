@@ -40,6 +40,8 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
       kysely: kyselyShim,
+      react: path.dirname(require.resolve("react/package.json")),
+      "react-dom": path.dirname(require.resolve("react-dom/package.json")),
     };
 
     // Exclude CLI and tools directories from webpack watch mode

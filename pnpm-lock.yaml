@@ -60,8 +60,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       knip:
-        specifier: ^6.15.0
-        version: 6.15.0
+        specifier: ^6.16.0
+        version: 6.16.0
       lint-staged:
         specifier: ^17.0.7
         version: 17.0.7
@@ -92,6 +92,9 @@ importers:
       admin:
         specifier: workspace:*
         version: link:../../packages/admin
+      application-settings:
+        specifier: workspace:*
+        version: link:../../packages/application-settings
       authentication:
         specifier: workspace:*
         version: link:../../packages/authentication
@@ -111,8 +114,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/feature-flags
       flags:
-        specifier: ^4.0.6
-        version: 4.0.6(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^4.1.0
+        version: 4.1.0(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       intelligence:
         specifier: workspace:*
         version: link:../../packages/intelligence
@@ -407,8 +410,8 @@ importers:
         specifier: ^25.0.0
         version: 25.5.0
       flags:
-        specifier: ^4.0.0
-        version: 4.0.5(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^4.1.0
+        version: 4.1.0(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       typescript:
         specifier: ^6.0.0
         version: 6.0.2
@@ -3727,28 +3730,8 @@ packages:
     resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
     engines: {node: '>=10'}
 
-  flags@4.0.5:
-    resolution: {integrity: sha512-SRah0wf4wMT9TTqt0ac5HikBKl2fM0W8q8xKL+p91UpItWg2C5SiRkzvCrgYJgKhZIuEnCFb6pxeLv+Fg+jT6A==}
-    peerDependencies:
-      '@opentelemetry/api': 1.9.1
-      '@sveltejs/kit': '*'
-      next: 16.2.7
-      react: 19.2.7
-      react-dom: 19.2.7
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      '@sveltejs/kit':
-        optional: true
-      next:
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
-  flags@4.0.6:
-    resolution: {integrity: sha512-8Rz/5L8Gkl2+LmlV2gOXx3iJNTYDooa8eGvshFev9nrXtrcvsXa5z/DXdtElHvN15psnSHg+r51lYHge2rCASw==}
+  flags@4.1.0:
+    resolution: {integrity: sha512-vuZFkcyLHs59PQaPhSr+XplS/8Pl+W3f2myAAcS1Z8MA12laUeBSjJbh9d20CevixMaRVoifHF1c5+8hTR0zRA==}
     peerDependencies:
       '@opentelemetry/api': 1.9.1
       '@sveltejs/kit': '*'
@@ -4174,8 +4157,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knip@6.15.0:
-    resolution: {integrity: sha512-uBaKFEGcu/HG4EY2gWFBMr+fBF43Jftoc2riJX51TKME1Z46C8UQIbNEusenYbEWihphxe2PY0Kns0yPvPYz4A==}
+  knip@6.16.0:
+    resolution: {integrity: sha512-znPEmwYmkGHp57VxCQ/k983bVWls74DpRKh/EgYojyssgV2h2dZDvjN3+7WU034LzObjElUVRPoBHq9w/fG1ng==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -8494,17 +8477,7 @@ snapshots:
       locate-path: 6.0.0
       path-exists: 4.0.0
 
-  flags@4.0.5(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
-    dependencies:
-      '@edge-runtime/cookies': 5.0.2
-      jose: 5.10.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.1
-      next: 16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      react: 19.2.7
-      react-dom: 19.2.7(react@19.2.7)
-
-  flags@4.0.6(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  flags@4.1.0(@opentelemetry/api@1.9.1)(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       '@edge-runtime/cookies': 5.0.2
       jose: 5.10.0
@@ -8913,13 +8886,12 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@6.15.0:
+  knip@6.16.0:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
       formatly: 0.3.0
       get-tsconfig: 4.14.0
       jiti: 2.7.0
-      minimist: 1.2.8
       oxc-parser: 0.133.0
       oxc-resolver: 11.20.0
       picomatch: 4.0.4
