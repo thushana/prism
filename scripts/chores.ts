@@ -407,22 +407,13 @@ function runChores(): void {
         ? resolveEmbedderAppRoot(appRoot, prismRoot)
         : null;
       if (prismPkg?.scripts?.["build:web"]) {
-        if (embedderRoot) {
-          results.push({
-            name: "Build (prism web)",
-            status: "skip",
-            detail:
-              "embedder app build validates production; prism/apps/web is a reference shell",
-          });
-        } else {
-          results.push(
-            runStep("Build (prism web)", () => {
-              ensurePrismNodeModulesForQuality(prismRoot, embedderRoot);
-              execInherit("pnpm run build:web", prismRoot);
-              return "pass";
-            })
-          );
-        }
+        results.push(
+          runStep("Build (prism web)", () => {
+            ensurePrismNodeModulesForQuality(prismRoot, embedderRoot);
+            execInherit("pnpm run build:web", prismRoot);
+            return "pass";
+          })
+        );
       }
     }
   }
