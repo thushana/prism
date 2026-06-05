@@ -114,7 +114,7 @@ export function AdminPageShell({
   showSignOut = true,
   className,
 }: AdminPageShellProps): React.JSX.Element {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const normalizedPathname = normalizePathname(pathname);
   const showPathBarExplicit = Boolean(
     explicitPrismPathBarSegments && explicitPrismPathBarSegments.length > 0

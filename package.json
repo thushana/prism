@@ -98,7 +98,8 @@
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "exports": {
     "./ui": "./packages/ui/source/index.ts",

@@ -3,7 +3,6 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { getProxy } from "feature-flags";
 import { getSessionCookie } from "better-auth/cookies";
 import prismConfigJson from "./config.prism.json";
 import {
@@ -11,7 +10,26 @@ import {
   resolveAuthenticationGateMode,
 } from "application-settings/prism-config-schema";
 
-const flagsProxy = getProxy({ paramPrefix: "flag_" });
+function applyFlagPrefixOverrides(request: NextRequest): NextResponse {
+  const overrides: Record<string, string> = {};
+
+  request.nextUrl.searchParams.forEach((value, key) => {
+    if (key.startsWith("flag_")) {
+      overrides[key.slice("flag_".length)] = value;
+    }
+  });
+
+  if (Object.keys(overrides).length === 0) {
+    return NextResponse.next();
+  }
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-prism-flag-overrides", JSON.stringify(overrides));
+
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+}
 
 const authGateMode = resolveAuthenticationGateMode(
   prismConfigBaseSchema.parse(prismConfigJson)
@@ -49,7 +67,7 @@ export function proxy(request: NextRequest): NextResponse {
     return authRedirect;
   }
 
-  return flagsProxy(request);
+  return applyFlagPrefixOverrides(request);
 }
 
 export const config = {

@@ -124,7 +124,11 @@ export function SignInForm({
                   : "Sign in with passkey"
               }
               leadingSlot={
-                <PrismIcon name="passkey" size="small" className="text-current" />
+                <PrismIcon
+                  name="passkey"
+                  size="small"
+                  className="text-current"
+                />
               }
               disabled={busy}
               disableGrow

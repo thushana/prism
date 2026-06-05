@@ -50,9 +50,7 @@ describe("discoverPrismAppRoots", () => {
       JSON.stringify({ app: { nameDisplay: "B", description: "d" } })
     );
 
-    expect(discoverPrismAppRoots(repo).sort()).toEqual(
-      [repo, appsWeb].sort()
-    );
+    expect(discoverPrismAppRoots(repo).sort()).toEqual([repo, appsWeb].sort());
   });
 });
 
@@ -62,7 +60,9 @@ describe("assertAppUsesLibraryDir", () => {
     writeRequiredLibraryFiles(appRoot);
     fs.mkdirSync(path.join(appRoot, "lib"));
 
-    expect(() => assertAppUsesLibraryDir(appRoot)).toThrow(/must not include lib/);
+    expect(() => assertAppUsesLibraryDir(appRoot)).toThrow(
+      /must not include lib/
+    );
   });
 });
 
