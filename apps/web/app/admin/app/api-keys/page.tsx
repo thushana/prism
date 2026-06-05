@@ -1,8 +1,8 @@
 import * as React from "react";
 import { headers } from "next/headers";
 import { AdminPageShell } from "authentication";
-import { requireAdminPage } from "@/lib/auth-gates";
-import { auth } from "@/lib/auth";
+import { requireAdminPage } from "@/library/authentication/authentication-gates";
+import { auth } from "@/library/authentication/authentication";
 import { PrismTypography } from "@ui";
 import { ApiKeysClient } from "./api-keys-client";
 

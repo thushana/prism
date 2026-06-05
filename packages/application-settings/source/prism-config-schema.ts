@@ -23,8 +23,6 @@ const prismAppConfigInputSchema = z
     displayName: z.string().min(1).optional(),
     description: z.string(),
     icon: z.string().optional(),
-    /** Where to send users after a successful sign-in (default `/`). */
-    signInPathDropOff: z.string().startsWith("/").optional(),
   })
   .superRefine((data, context) => {
     if (!data.nameDisplay?.trim() && !data.displayName?.trim()) {
@@ -40,7 +38,6 @@ const prismAppConfigInputSchema = z
     nameDisplay: (data.nameDisplay ?? data.displayName)!.trim(),
     description: data.description,
     icon: data.icon,
-    signInPathDropOff: data.signInPathDropOff,
   }));
 
 /** Chrome every Prism app supplies under `config.prism.json` → `app`. */
@@ -48,9 +45,29 @@ export const prismAppConfigSchema = prismAppConfigInputSchema;
 
 export type PrismAppConfig = z.infer<typeof prismAppConfigSchema>;
 
+/** `admin` — only `/admin/*` is gated; `app` — proxy redirects unauthenticated users to sign-in. */
+export const prismAuthenticationGateModeSchema = z.enum(["admin", "app"]);
+
+export type PrismAuthenticationGateMode = z.infer<
+  typeof prismAuthenticationGateModeSchema
+>;
+
+export const prismAuthenticationConfigSchema = z
+  .object({
+    gateMode: prismAuthenticationGateModeSchema.default("admin"),
+    /** Where to send users after a successful sign-in (default `/`). */
+    signInPathDropOff: z.string().startsWith("/").default("/"),
+  })
+  .optional();
+
+export type PrismAuthenticationConfig = z.infer<
+  typeof prismAuthenticationConfigSchema
+>;
+
 /** Standard Prism platform config shape (all consumer apps). */
 export const prismConfigBaseSchema = z.object({
   app: prismAppConfigSchema,
+  authentication: prismAuthenticationConfigSchema,
   deployments: z
     .object({
       dev: z
@@ -65,3 +82,17 @@ export const prismConfigBaseSchema = z.object({
 });
 
 export type PrismConfigBase = z.infer<typeof prismConfigBaseSchema>;
+
+/** Resolve gate mode from `config.prism.json` → `authentication` (default `admin`). */
+export function resolveAuthenticationGateMode(
+  config: Pick<PrismConfigBase, "authentication">
+): PrismAuthenticationGateMode {
+  return config.authentication?.gateMode === "app" ? "app" : "admin";
+}
+
+/** Resolve post-sign-in redirect from `config.prism.json` → `authentication` (default `/`). */
+export function resolveSignInPathDropOff(
+  config: Pick<PrismConfigBase, "authentication">
+): string {
+  return config.authentication?.signInPathDropOff ?? "/";
+}

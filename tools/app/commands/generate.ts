@@ -14,6 +14,7 @@ import { fileURLToPath, pathToFileURL } from "url";
 import * as LoggerModule from "../../../packages/logger/source/server";
 import type { BaseCommandOptions } from "../../../packages/cli/source/command";
 import chalk from "chalk";
+import { assertAppUsesLibraryDir } from "../../../scripts/assert-app-library-layout";
 
 const serverLogger = LoggerModule.serverLogger;
 
@@ -384,6 +385,8 @@ function generateNextConfig(appRoot: string, layout: GenerateLayout): void {
       ? `import type { NextConfig } from "next";
 import path from "path";
 
+const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
+
 const nextConfig: NextConfig = {
   // config.app.json + config.prism.json are bundled or read at runtime.
   outputFileTracingIncludes: {
@@ -401,7 +404,11 @@ const nextConfig: NextConfig = {
     "charts",
     "feature-flags",
   ],
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      kysely: kyselyShim,
+    },
+  },
   webpack: (config) => {
     const authenticationSource = path.resolve(
       __dirname,
@@ -410,6 +417,7 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias = {
       ...config.resolve.alias,
+      kysely: kyselyShim,
       "@database": path.resolve(__dirname, "${prismPrefix}/database/source"),
       "@intelligence": path.resolve(__dirname, "${prismPrefix}/intelligence/source"),
       "@intelligence/tasks": path.resolve(__dirname, "${prismPrefix}/intelligence/source/tasks"),
@@ -460,6 +468,9 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 `
       : `import type { NextConfig } from "next";
+import path from "path";
+
+const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["authentication"],
@@ -471,6 +482,19 @@ const nextConfig: NextConfig = {
     "@better-auth/passkey",
     "kysely",
   ],
+  outputFileTracingRoot: path.join(__dirname, "../.."),
+  turbopack: {
+    resolveAlias: {
+      kysely: kyselyShim,
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      kysely: kyselyShim,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
@@ -669,6 +693,7 @@ const config: KnipConfig = {
       entry: [
         ...nextAppEntry,
         "database/drizzle.config.ts",
+        "library/**/*.ts",
         "config/**/*.ts",
         "intelligence/tasks/**/*.ts",
         "cli/index.ts",
@@ -678,6 +703,7 @@ const config: KnipConfig = {
         "app/**/*.{ts,tsx}",
         "cli/**/*.{ts,tsx,js}",
         "database/**/*.ts",
+        "library/**/*.ts",
         "intelligence/**/*.ts",
         "config/**/*.ts",
         "scripts/**/*.{ts,cjs,mjs}",
@@ -843,7 +869,8 @@ function formatDisplayName(appName: string): string {
  */
 function generateApplicationManifestFiles(
   appRoot: string,
-  appName: string
+  appName: string,
+  authGate: "admin" | "app" = "admin"
 ): void {
   const displayName = formatDisplayName(appName);
 
@@ -853,6 +880,10 @@ function generateApplicationManifestFiles(
       nameDisplay: displayName,
       description: `${displayName} — generated with Prism.`,
       icon: "layers",
+    },
+    authentication: {
+      gateMode: authGate,
+      signInPathDropOff: "/",
     },
     deployments: {
       dev: {
@@ -897,7 +928,11 @@ export { prismConfigBaseSchema as prismConfigSchema, type PrismConfigBase as Pri
   const indexTs = `import appConfigJson from "../../config.app.json";
 import prismConfigJson from "../../config.prism.json";
 import { resolveDevDeployment } from "application-settings/dev-deployment";
-import { prismConfigBaseSchema } from "application-settings/prism-config-schema";
+import {
+  prismConfigBaseSchema,
+  resolveAuthenticationGateMode,
+  resolveSignInPathDropOff,
+} from "application-settings/prism-config-schema";
 import { appConfigSchema, type AppConfig } from "./schema";
 
 export const appConfig: AppConfig = appConfigSchema.parse(appConfigJson);
@@ -916,7 +951,9 @@ export const DEV_HOST = devDeployment.host;
 export const DEV_APP_URL = devDeployment.url;
 export const DEV_APP_ORIGINS = devDeployment.origins;
 
-export const SIGN_IN_PATH_DROP_OFF = prismConfig.app.signInPathDropOff ?? "/";
+export const SIGN_IN_PATH_DROP_OFF = resolveSignInPathDropOff(prismConfig);
+
+export const AUTH_GATE_MODE = resolveAuthenticationGateMode(prismConfig);
 `;
 
   fs.writeFileSync(path.join(configDir, "schema.ts"), schemaTs, "utf-8");
@@ -990,15 +1027,6 @@ function readEnvExampleFromTemplate(): string {
     throw new Error(`Missing template .env.example at ${envExamplePath}`);
   }
   return fs.readFileSync(envExamplePath, "utf-8");
-}
-
-/** Write apps/web/.env.example and .env (same content; .env is gitignored). */
-function writeAuthGateFile(
-  appRoot: string,
-  mode: "admin" | "app" = "admin"
-): void {
-  const content = JSON.stringify({ mode }, null, 2) + "\n";
-  fs.writeFileSync(path.join(appRoot, "auth-gate.json"), content, "utf-8");
 }
 
 function writeAppEnvFiles(appRoot: string): void {
@@ -1472,6 +1500,7 @@ function copyTemplateFiles(
     "*.db-wal",
     "*.db-shm",
     "data", // Skip data directory (contains database files)
+    "lib", // Legacy Next convention — Prism apps use library/ only
     "package.json", // Skip package.json (generated separately with correct name)
     "tsconfig.json", // Skip tsconfig.json (generated separately with correct paths)
     "next.config.ts", // Skip next.config.ts (generated separately with correct config)
@@ -1693,9 +1722,13 @@ export async function runGenerateCommand(
       generateConsumerRepoDocs(repoRoot, appName, templateVars);
       generateConsumerReadme(repoRoot, appName, templateVars);
     }
-    generateApplicationManifestFiles(appRoot, appName);
+    generateApplicationManifestFiles(
+      appRoot,
+      appName,
+      options.authGate ?? "admin"
+    );
     generateTemplateFiles(appRoot, appName);
-    writeAuthGateFile(appRoot, options.authGate ?? "admin");
+    assertAppUsesLibraryDir(appRoot);
     if (layout === "consumer-workspace") {
       generateAppCliWrapper(appRoot);
       generateAppScaffoldFiles(appRoot, appName, templateVars);

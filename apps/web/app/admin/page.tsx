@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AdminPageShell } from "authentication";
-import { requireAdminPage } from "@/lib/auth-gates";
+import { requireAdminPage } from "@/library/authentication/authentication-gates";
 import { PrismTypography } from "@ui";
 
 export const dynamic = "force-dynamic";

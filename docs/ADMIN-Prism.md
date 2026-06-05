@@ -19,9 +19,9 @@ Standard chrome fields in **`config.prism.json` → `app`** (via `readApplicatio
 
 ## How It Works
 
-Prism’s default is **Better Auth** (email/password sessions in Postgres, **passkeys**, API keys for integrations). See **[AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)** for env vars, app wiring (`lib/auth-gates.ts`), migration, passkey registration, and API key headers.
+Prism’s default is **Better Auth** (email/password sessions in Postgres, **passkeys**, API keys for integrations). See **[AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)** for env vars, app wiring (`library/authentication/authentication-gates.ts`), migration, passkey registration, and API key headers.
 
-Admin pages still use the same gate pattern; import `requireAdminPage` from your app’s `lib/auth-gates.ts` (not the legacy `@authentication/admin-page` shared-secret helper).
+Admin pages still use the same gate pattern; import `requireAdminPage` from your app’s `library/authentication/authentication-gates.ts` (not the legacy `@authentication/admin-page` shared-secret helper).
 
 **Rate limits** (in-memory, per client IP): API routes — 120 requests / min after API key verification. Use Vercel Firewall for stronger production protection.
 

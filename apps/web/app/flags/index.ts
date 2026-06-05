@@ -15,7 +15,7 @@ import {
   createIsAuthenticatedFlag,
   createIsVerboseLoggingFlag,
 } from "feature-flags";
-import { checkSession } from "@/lib/auth-gates";
+import { checkSession } from "@/library/authentication/authentication-gates";
 import { isAdminUser } from "authentication/better-auth/session";
 
 export const identify = createIdentify({

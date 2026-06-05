@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createAuthGates } from "authentication/gates";
-import { auth } from "@/lib/auth";
+import { SIGN_IN_PATH_DROP_OFF } from "@/library/config";
+import { auth } from "@/library/authentication/authentication";
 
 export const {
   checkSession,
@@ -9,4 +10,4 @@ export const {
   requireSessionPage,
   requireSessionApi,
   requireSessionPageOrRedirect,
-} = createAuthGates(auth);
+} = createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF });

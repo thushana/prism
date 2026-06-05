@@ -257,6 +257,8 @@ function syncScripts(): void {
   const isTargetingApp =
     path.resolve(MAIN_PACKAGE_JSON) !== path.resolve(PRISM_PACKAGE_JSON);
   if (isTargetingApp && mergedScripts) {
+    mergedScripts["assert:app-library"] =
+      "tsx prism/scripts/assert-app-library-layout.ts";
     mergedScripts.chores = "tsx prism/scripts/chores.ts";
     mergedScripts.quality = "tsx prism/scripts/quality.ts";
     mergedScripts["quality:quick"] =

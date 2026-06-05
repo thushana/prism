@@ -102,7 +102,13 @@ my-app/
   apps/web/                 # Next.js app (pnpm workspace name: web)
     config.prism.json       # Prism-standard (app chrome + deployments.dev.port)
     config.app.json         # Client-specific domain settings
-    library/config/         # Zod loaders
+    library/                # App-owned shared code (never lib/)
+      authentication/
+        authentication.ts         # Better Auth instance
+        authentication-gates.ts   # requireAdminPage, checkSession, …
+        authentication-api.ts     # requireApiAuthentication
+      kysely-shim.ts        # Webpack alias for @better-auth/kysely-adapter
+      config/               # Zod loaders for config.prism.json + config.app.json
     .env.example            # Committed template
     .env                    # Created on generate (gitignored; edit values)
     docs/index.mdx

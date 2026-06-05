@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { prismConfigBaseSchema } from "./prism-config-schema";
+import {
+  prismConfigBaseSchema,
+  resolveAuthenticationGateMode,
+  resolveSignInPathDropOff,
+} from "./prism-config-schema";
 
 describe("prismConfigBaseSchema", () => {
   it("accepts app + deployments", () => {
@@ -38,5 +42,34 @@ describe("prismConfigBaseSchema", () => {
       deployments: { dev: { port: 1776 } },
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts authentication.gateMode app and signInPathDropOff", () => {
+    const result = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Test",
+        description: "Test app",
+      },
+      authentication: { gateMode: "app", signInPathDropOff: "/dashboard" },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(resolveAuthenticationGateMode(result.data)).toBe("app");
+      expect(resolveSignInPathDropOff(result.data)).toBe("/dashboard");
+    }
+  });
+
+  it("defaults authentication gate mode and signInPathDropOff when omitted", () => {
+    const result = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Test",
+        description: "Test app",
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(resolveAuthenticationGateMode(result.data)).toBe("admin");
+      expect(resolveSignInPathDropOff(result.data)).toBe("/");
+    }
   });
 });

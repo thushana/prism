@@ -5,12 +5,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getProxy } from "feature-flags";
 import { getSessionCookie } from "better-auth/cookies";
-import authGate from "@/auth-gate.json";
+import prismConfigJson from "./config.prism.json";
+import {
+  prismConfigBaseSchema,
+  resolveAuthenticationGateMode,
+} from "application-settings/prism-config-schema";
 
 const flagsProxy = getProxy({ paramPrefix: "flag_" });
 
-const authGateMode: "admin" | "app" =
-  authGate?.mode === "app" ? "app" : "admin";
+const authGateMode = resolveAuthenticationGateMode(
+  prismConfigBaseSchema.parse(prismConfigJson)
+);
 
 function applyAuthRedirect(request: NextRequest): NextResponse | null {
   if (authGateMode !== "app") {
