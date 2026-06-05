@@ -48,10 +48,10 @@ Public self-sign-up is **disabled** in `createPrismAuth` (`disableSignUp: true`)
 
 1. **Instance** — `lib/auth.ts` calls `createPrismAuth({ db, schema, secret, baseURL, trustedOrigins, rpName })`. Passkeys are **on by default** when `rpName` is set (use `readApplicationSettings().nameDisplay` from `config.prism.json`). Include `resolveTrustedAuthOrigins(BETTER_AUTH_URL, DEV_APP_ORIGINS)` so `{nameIdentifier}.localhost` works when `.env` still points at `localhost`.
 2. **Browser client** — `createPrismAuthClient()` uses `window.location.origin` so fetches stay same-origin when users visit `{nameIdentifier}.localhost` while `BETTER_AUTH_URL` is still `localhost`.
-3. **Gates** — `lib/auth-gates.ts` calls `createAuthGates(auth, { postSignInPath: POST_SIGN_IN_PATH })`. `POST_SIGN_IN_PATH` comes from `library/config` (set via `app.postSignInPath` in `config.prism.json`; default `/`).
+3. **Gates** — `lib/auth-gates.ts` calls `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. `SIGN_IN_PATH_DROP_OFF` comes from `library/config` (set via `app.signInPathDropOff` in `config.prism.json`; default `/`).
 4. **API keys** — `lib/api-auth.ts` exports `requireApiAuthentication` (async; use `await` in route handlers).
 5. **Handler** — `app/api/auth/[...all]/route.ts` uses `toNextJsHandler(auth)`.
-6. **Sign-in** — `app/(auth)/sign-in/page.tsx` → `<SignInPage authBaseURL={authEnv.BETTER_AUTH_URL} redirectTo={POST_SIGN_IN_PATH} />`; pre-checks session and redirects if already authenticated.
+6. **Sign-in** — `app/(auth)/sign-in/page.tsx` → `<SignInPage authBaseURL={authEnv.BETTER_AUTH_URL} redirectTo={SIGN_IN_PATH_DROP_OFF} />`; pre-checks session and redirects if already authenticated.
 7. **Admin API keys** — `app/admin/app/api-keys` + `POST /api/admin/api-keys`.
 8. **Passkeys** — `app/admin/app/security` → `<PasskeySettings />`; sign-in page shows **Sign in with passkey** when `passkeys` is enabled (default).
 

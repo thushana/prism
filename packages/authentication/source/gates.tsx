@@ -8,7 +8,7 @@ import { SignInPage } from "./sign-in-page";
 
 export interface AuthGatesOptions {
   signInPath?: string;
-  postSignInPath?: string;
+  signInPathDropOff?: string;
 }
 
 export function createAuthGates(
@@ -16,7 +16,7 @@ export function createAuthGates(
   options: AuthGatesOptions = {}
 ) {
   const signInPath = options.signInPath ?? "/sign-in";
-  const postSignInPath = options.postSignInPath ?? "/";
+  const signInPathDropOff = options.signInPathDropOff ?? "/";
 
   async function checkSession() {
     return getSessionFromAuth(auth);
@@ -25,7 +25,7 @@ export function createAuthGates(
   async function requireAdminPage(): Promise<React.JSX.Element | null> {
     const result = await getSessionFromAuth(auth);
     if (!result?.session) {
-      return <SignInPage redirectTo={postSignInPath} />;
+      return <SignInPage redirectTo={signInPathDropOff} />;
     }
     if (!isAdminUser(result.user)) {
       return (
@@ -42,7 +42,7 @@ export function createAuthGates(
   async function requireSessionPage(): Promise<React.JSX.Element | null> {
     const result = await getSessionFromAuth(auth);
     if (!result?.session) {
-      return <SignInPage redirectTo={postSignInPath} />;
+      return <SignInPage redirectTo={signInPathDropOff} />;
     }
     return null;
   }
