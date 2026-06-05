@@ -4,6 +4,7 @@ import {
   buildPrismPathBarAutoSegmentList,
   normalizePathname,
   listAncestorPathPrefixes,
+  slugPathSegmentToLabel,
 } from "./prism-path-segments";
 
 describe("normalizePathname", () => {
@@ -67,8 +68,29 @@ describe("buildPrismPathBarAutoSegmentList", () => {
       "/admin/prism/components/prism-button",
       titleByPathPrefix,
       "PrismButton",
-      rich
+      { pageTitleContent: rich }
     );
     expect(segments.at(-1)?.label).toBe(rich);
+  });
+
+  it("fills missing ancestor prefixes when lenientMissingPrefixes is true", () => {
+    expect(
+      buildPrismPathBarAutoSegmentList(
+        "/admin/app/security",
+        { "/admin": "Admin" },
+        "Security",
+        { lenientMissingPrefixes: true }
+      )
+    ).toEqual([
+      { label: "Admin", href: "/admin" },
+      { label: "App", href: "/admin/app" },
+      { label: "Security" },
+    ]);
+  });
+});
+
+describe("slugPathSegmentToLabel", () => {
+  it("title-cases hyphenated segments", () => {
+    expect(slugPathSegmentToLabel("api-keys")).toBe("Api Keys");
   });
 });

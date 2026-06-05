@@ -241,7 +241,7 @@ packages/
 | Emoji / icon browsing        | `PrismEmojiPicker`, `PrismIconPicker` (`@ui`)       | inline panel or **`trigger`** + Radix popover          |
 | Charts                       | `LineChart` / `BarChart` (`@charts`)                | Nivo directly                                          |
 | Admin page shell             | `AdminPageShell` (`@authentication`)                | custom `<main>`                                        |
-| Admin back-navigation        | `AdminBackLink` (`@authentication`)                 | raw `<Link>`                                           |
+| Admin path navigation        | `PrismPathBar` via `AdminPageShell` (`@authentication`) | `AdminBackLink` (legacy, no `title`) or raw `<Link>` |
 | Sign-out action              | `SignOutForm` (`@authentication`)                   | custom form                                            |
 | Auth gate (server component) | `requireAdminPage()` (`@authentication/admin-page`) | manual cookie check                                    |
 

@@ -38,20 +38,40 @@ export function listAncestorPathPrefixes(normalizedPath: string): string[] {
   return prefixes;
 }
 
+/** Turn a URL path segment into a readable label (e.g. `api-keys` → `Api Keys`). */
+export function slugPathSegmentToLabel(segment: string): string {
+  return segment
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 function resolveTitleEntry(
   prefix: string,
-  entry: PrismPathBarTitleEntry | undefined
+  entry: PrismPathBarTitleEntry | undefined,
+  lenientMissingPrefixes: boolean
 ): PrismPathBarSegment {
   if (entry === undefined) {
-    throw new Error(
-      `PrismPathBar auto mode: missing titleByPathPrefix["${prefix}"]. Add an entry for every ancestor prefix of the route.`
-    );
+    if (!lenientMissingPrefixes) {
+      throw new Error(
+        `PrismPathBar auto mode: missing titleByPathPrefix["${prefix}"]. Add an entry for every ancestor prefix of the route.`
+      );
+    }
+    const lastSegment = prefix.split("/").filter(Boolean).pop() ?? "";
+    return { label: slugPathSegmentToLabel(lastSegment), href: prefix };
   }
   if (typeof entry === "string") {
     return { label: entry, href: prefix };
   }
   return { label: entry.label, href: entry.href };
 }
+
+export type BuildPrismPathBarAutoSegmentListOptions = {
+  pageTitleContent?: ReactNode;
+  /** When true, unmapped ancestor prefixes use {@link slugPathSegmentToLabel}. */
+  lenientMissingPrefixes?: boolean;
+};
 
 /**
  * Build path bar segments: one segment per ancestor (from map) + leaf (`pageTitle`).
@@ -60,13 +80,29 @@ export function buildPrismPathBarAutoSegmentList(
   pathname: string,
   titleByPathPrefix: Record<string, PrismPathBarTitleEntry>,
   pageTitle: string,
-  pageTitleContent?: ReactNode
+  pageTitleContentOrOptions?: ReactNode | BuildPrismPathBarAutoSegmentListOptions
 ): PrismPathBarSegment[] {
+  const options =
+    pageTitleContentOrOptions !== null &&
+    typeof pageTitleContentOrOptions === "object" &&
+    !("$$typeof" in pageTitleContentOrOptions)
+      ? (pageTitleContentOrOptions as BuildPrismPathBarAutoSegmentListOptions)
+      : {
+          pageTitleContent: pageTitleContentOrOptions as ReactNode | undefined,
+        };
+  const { pageTitleContent, lenientMissingPrefixes = false } = options;
+
   const normalized = normalizePathname(pathname);
   const ancestors = listAncestorPathPrefixes(normalized);
   const segmentList: PrismPathBarSegment[] = [];
   for (const prefix of ancestors) {
-    segmentList.push(resolveTitleEntry(prefix, titleByPathPrefix[prefix]));
+    segmentList.push(
+      resolveTitleEntry(
+        prefix,
+        titleByPathPrefix[prefix],
+        lenientMissingPrefixes
+      )
+    );
   }
   segmentList.push({ label: pageTitleContent ?? pageTitle });
   return segmentList;

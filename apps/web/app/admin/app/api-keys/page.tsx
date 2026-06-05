@@ -30,7 +30,6 @@ export default async function AdminApiKeysPage(): Promise<React.JSX.Element> {
 
   return (
     <AdminPageShell
-      backHref="/admin"
       title="API keys"
       description="Create keys for extensions, cron jobs, or integrations. The raw key is shown once."
       showSignOut

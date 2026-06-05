@@ -7,6 +7,7 @@ import {
   PrismLayoutMain,
   PrismPathBar,
   PrismTypography,
+  normalizePathname,
   type PrismPathBarIcon,
   type PrismPathBarSegment,
   type PrismPathBarTitleEntry,
@@ -76,9 +77,12 @@ export type AdminPageShellProps = {
   prismPathBarTitleByPathPrefix?: Record<string, PrismPathBarTitleEntry>;
   /** Optional icon before path segments (e.g. a Lucide icon component). */
   prismPathBarIcon?: PrismPathBarIcon;
-  /** If provided, renders an AdminBackLink when no path bar is shown. */
+  /**
+   * @deprecated Prefer {@link prismPathBarTitleByPathPrefix}. When set without a path bar map,
+   * seeds the auto path bar ancestor at this href (defaults to `/admin` when omitted).
+   */
   backHref?: string;
-  /** Label for the back link. Defaults to "Admin". */
+  /** Label for the `/admin` (or `backHref`) path bar segment. Defaults to "Admin". */
   backLabel?: string;
   /** Whether to show the Sign out button. Defaults to true. */
   showSignOut?: boolean;
@@ -91,8 +95,8 @@ export type AdminPageShellProps = {
  *
  * Provides:
  *  - Full-viewport padding and a centered {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
- *  - An optional back link (pass backHref when not using {@link PrismPathBar})
- *  - Optional {@link PrismPathBar} (`explicitPrismPathBarSegments` or `prismPathBarTitleByPathPrefix` + `title`)
+ *  - {@link PrismPathBar} slash breadcrumbs on sub-pages when `title` is set (auto from pathname, or explicit segments)
+ *  - Legacy {@link AdminBackLink} only when `backHref` is set without `title` and no path bar is configured
  *  - An optional page title + description header
  *  - A Sign out link in the top-right corner (suppress with showSignOut={false})
  */
@@ -111,11 +115,18 @@ export function AdminPageShell({
   className,
 }: AdminPageShellProps): React.JSX.Element {
   const pathname = usePathname();
+  const normalizedPathname = normalizePathname(pathname);
   const showPathBarExplicit = Boolean(
     explicitPrismPathBarSegments && explicitPrismPathBarSegments.length > 0
   );
+  const autoPathBarTitleByPathPrefix: Record<string, PrismPathBarTitleEntry> = {
+    [normalizePathname(backHref ?? "/admin")]: backLabel,
+    ...prismPathBarTitleByPathPrefix,
+  };
   const showPathBarAuto = Boolean(
-    prismPathBarTitleByPathPrefix && title && !showPathBarExplicit
+    title &&
+      normalizedPathname !== "/admin" &&
+      !showPathBarExplicit
   );
   const hasHeader =
     showPathBarExplicit ||
@@ -125,7 +136,10 @@ export function AdminPageShell({
     titleSlot ||
     showSignOut;
   const showBackLink =
-    Boolean(backHref) && !showPathBarExplicit && !showPathBarAuto;
+    Boolean(backHref) &&
+    !title &&
+    !showPathBarExplicit &&
+    !showPathBarAuto;
 
   return (
     <main className="min-h-screen w-full p-6">
@@ -147,10 +161,11 @@ export function AdminPageShell({
                 <PrismPathBar
                   mode="auto"
                   pathname={pathname}
-                  titleByPathPrefix={prismPathBarTitleByPathPrefix!}
+                  titleByPathPrefix={autoPathBarTitleByPathPrefix}
                   pageTitle={title!}
                   pageTitleContent={pathBarPageTitleContent}
                   icon={prismPathBarIcon}
+                  lenientMissingPrefixes
                 />
               ) : null}
               {showBackLink ? (
