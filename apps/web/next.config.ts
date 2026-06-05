@@ -4,7 +4,17 @@ import path from "path";
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["authentication"],
+  transpilePackages: [
+    "@prism/utilities",
+    "application-settings",
+    "authentication",
+    "database",
+    "feature-flags",
+    "intelligence",
+    "logger",
+    "admin",
+    "ui",
+  ],
   serverExternalPackages: [
     "better-auth",
     "@better-auth/drizzle-adapter",

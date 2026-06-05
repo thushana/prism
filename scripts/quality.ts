@@ -10,6 +10,11 @@
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import {
+  ensurePrismNodeModulesForQuality,
+  hidePrismStandaloneNodeModules,
+  resolveEmbedderAppRoot,
+} from "./embedder-node-modules";
 
 const scriptDir = __dirname;
 const currentDir = path.join(scriptDir, "..");
@@ -32,67 +37,6 @@ if (isInPrism) {
 
 const BASE_QUALITY_CMD =
   "pnpm run format && pnpm run lint && pnpm run typecheck";
-
-/** Embedder apps hoist prism/packages/*; a separate prism/node_modules duplicates types. */
-const PRISM_STANDALONE_NODE_MODULES_DIR = ".prism-node-modules-stash";
-
-function isPrismEmbedderApp(appRoot: string): boolean {
-  return (
-    fs.existsSync(path.join(appRoot, "config.prism.json")) &&
-    fs.existsSync(path.join(PRISM_DIR, "package.json"))
-  );
-}
-
-function prismStandaloneNodeModulesStashPath(appRoot: string): string {
-  return path.join(appRoot, PRISM_STANDALONE_NODE_MODULES_DIR);
-}
-
-function hidePrismStandaloneNodeModules(appRoot: string): void {
-  if (!isPrismEmbedderApp(appRoot)) {
-    return;
-  }
-
-  const nodeModules = path.join(PRISM_DIR, "node_modules");
-  const hidden = prismStandaloneNodeModulesStashPath(appRoot);
-  const legacyHidden = path.join(PRISM_DIR, "node_modules.prism-standalone");
-
-  if (fs.existsSync(legacyHidden) && !fs.existsSync(nodeModules)) {
-    fs.renameSync(legacyHidden, nodeModules);
-  }
-
-  if (fs.existsSync(nodeModules) && fs.existsSync(hidden)) {
-    fs.rmSync(nodeModules, { recursive: true, force: true });
-    console.log(
-      "ℹ️  Removed duplicate prism/node_modules (using existing stash for app typecheck)\n"
-    );
-  } else if (fs.existsSync(nodeModules) && !fs.existsSync(hidden)) {
-    fs.renameSync(nodeModules, hidden);
-    console.log(
-      "ℹ️  Stashed prism/node_modules during app typecheck (avoid duplicate Next/Better Auth types)\n"
-    );
-  }
-}
-
-function ensurePrismStandaloneNodeModules(appRoot: string): void {
-  const nodeModules = path.join(PRISM_DIR, "node_modules");
-  const hidden = prismStandaloneNodeModulesStashPath(appRoot);
-
-  if (fs.existsSync(hidden) && fs.existsSync(nodeModules)) {
-    fs.rmSync(nodeModules, { recursive: true, force: true });
-  }
-
-  if (fs.existsSync(hidden)) {
-    fs.renameSync(hidden, nodeModules);
-    return;
-  }
-
-  if (!fs.existsSync(nodeModules)) {
-    console.log(
-      "ℹ️  Installing prism/node_modules for prism quality checks…\n"
-    );
-    execSync("pnpm install", { cwd: PRISM_DIR, stdio: "inherit" });
-  }
-}
 
 function qualityCmd(cwd: string): string {
   const packageJsonPath = path.join(cwd, "package.json");
@@ -179,7 +123,10 @@ function runQuality(): void {
     // We're in prism, run quality here
     try {
       console.log(`🔷 Running quality in prism: ${currentDir}\n`);
-      ensurePrismStandaloneNodeModules(currentDir);
+      ensurePrismNodeModulesForQuality(
+        currentDir,
+        resolveEmbedderAppRoot(PARENT_OR_APP_DIR, currentDir)
+      );
       runQualityChecks(currentDir, "prism");
       console.log("\n✅ Prism quality checks passed\n");
     } catch (error) {
@@ -191,7 +138,10 @@ function runQuality(): void {
     // We're in a child app, run prism quality if it exists
     try {
       console.log(`🔷 Running quality in prism: ${PRISM_DIR}\n`);
-      ensurePrismStandaloneNodeModules(PARENT_OR_APP_DIR);
+      ensurePrismNodeModulesForQuality(
+        PRISM_DIR,
+        resolveEmbedderAppRoot(PARENT_OR_APP_DIR, PRISM_DIR)
+      );
       runQualityChecks(PRISM_DIR, "prism");
       console.log("\n✅ Prism quality checks passed\n");
     } catch (error) {

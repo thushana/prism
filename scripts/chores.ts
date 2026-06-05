@@ -14,6 +14,11 @@
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import {
+  ensurePrismNodeModulesForQuality,
+  hidePrismStandaloneNodeModules,
+  resolveEmbedderAppRoot,
+} from "./embedder-node-modules";
 
 const scriptDir = __dirname;
 const currentDir = path.join(scriptDir, "..");
@@ -328,6 +333,7 @@ function runChores(): void {
     if (appRoot) {
       results.push(
         runStep("Quality (app)", () => {
+          hidePrismStandaloneNodeModules(appRoot);
           execInherit(APP_QUALITY_CMD, appRoot);
           return "pass";
         })
@@ -337,6 +343,10 @@ function runChores(): void {
     if (prismRoot) {
       results.push(
         runStep("Quality (prism)", () => {
+          ensurePrismNodeModulesForQuality(
+            prismRoot,
+            appRoot ? resolveEmbedderAppRoot(appRoot, prismRoot) : null
+          );
           execInherit(PRISM_QUALITY_CMD, prismRoot);
           return "pass";
         })
@@ -373,6 +383,7 @@ function runChores(): void {
       if (appPkg?.scripts?.build) {
         results.push(
           runStep("Build (app)", () => {
+            hidePrismStandaloneNodeModules(appRoot);
             execInherit("pnpm run build", appRoot);
             return "pass";
           })
@@ -388,13 +399,25 @@ function runChores(): void {
 
     if (prismRoot) {
       const prismPkg = readPackageJson(prismRoot);
+      const embedderRoot = appRoot
+        ? resolveEmbedderAppRoot(appRoot, prismRoot)
+        : null;
       if (prismPkg?.scripts?.["build:web"]) {
-        results.push(
-          runStep("Build (prism web)", () => {
-            execInherit("pnpm run build:web", prismRoot);
-            return "pass";
-          })
-        );
+        if (embedderRoot) {
+          results.push({
+            name: "Build (prism web)",
+            status: "skip",
+            detail: "embedder app build already validates the web stack",
+          });
+        } else {
+          results.push(
+            runStep("Build (prism web)", () => {
+              ensurePrismNodeModulesForQuality(prismRoot, embedderRoot);
+              execInherit("pnpm run build:web", prismRoot);
+              return "pass";
+            })
+          );
+        }
       }
     }
   }
