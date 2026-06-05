@@ -47,8 +47,21 @@ function qualityCmd(cwd: string): string {
   return `${BASE_QUALITY_CMD}${knipStep} && pnpm run test:run`;
 }
 
+function runAppLibraryLayoutCheck(cwd: string): void {
+  const assertScript = path.join(PRISM_DIR, "scripts/assert-app-library-layout.ts");
+  if (!fs.existsSync(assertScript)) {
+    return;
+  }
+
+  execSync(`tsx "${assertScript}" "${cwd}"`, {
+    cwd,
+    stdio: "inherit",
+  });
+}
+
 function runQualityChecks(cwd: string, _projectName: string): void {
   try {
+    runAppLibraryLayoutCheck(cwd);
     execSync(qualityCmd(cwd), {
       cwd,
       stdio: "inherit",

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-const kyselyShim = path.resolve(__dirname, "lib/kysely-shim.ts");
+const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["authentication"],

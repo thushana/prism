@@ -249,6 +249,17 @@ packages/
 
 **Why:** Prism components carry Tailwind class names and conventions that are guaranteed to stay in sync with the design system. Raw HTML or third-party primitives drift silently.
 
+### App shared code (`library/`)
+
+Prism consumer apps keep **all app-owned shared modules** under **`library/`** — auth bindings, config loaders, webpack shims, and future app utilities. **Do not scaffold or add a root `lib/` folder** (that duplicates `library/` and confuses imports).
+
+- `library/authentication/authentication.ts`, `authentication-gates.ts`, `authentication-api.ts` — Better Auth wiring
+- `library/config/` — `config.prism.json` + `config.app.json` loaders
+- `library/kysely-shim.ts` — kysely alias for Better Auth adapter
+- Import via `@/library/...` (same `@/*` alias as the rest of the app)
+
+`prism generate` copies these from `apps/web`, writes `library/config/`, asserts the layout, and skips any stale template `lib/` directory. **`pnpm run assert:app-library`** (also the first step of **`pnpm run quality`**) fails if a root `lib/` appears, required `library/` files are missing, or any `@/lib/` imports remain.
+
 ### Import Path Conventions
 
 - Use @ prefixed package names for shared packages: `import { PrismButton } from "@ui"`
@@ -264,7 +275,7 @@ packages/
 
   // App-specific imports (using @ alias)
   import { MyComponent } from "@/components/MyComponent";
-  import { myUtil } from "@/lib/utils";
+  import { myUtil } from "@/library/utils";
 
   // Relative imports
   import { helper } from "./helper";

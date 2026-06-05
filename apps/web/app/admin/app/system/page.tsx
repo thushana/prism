@@ -2,7 +2,7 @@ import * as React from "react";
 import { SystemSheetPage } from "@admin";
 import type { SystemSheetData } from "@admin";
 import { AdminPageShell } from "authentication";
-import { requireAdminPage } from "@/lib/auth-gates";
+import { requireAdminPage } from "@/library/authentication/authentication-gates";
 import { headers, cookies } from "next/headers";
 import { serverLogger as logger } from "@logger/server";
 import { notFound } from "next/navigation";

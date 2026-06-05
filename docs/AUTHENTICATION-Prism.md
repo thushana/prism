@@ -29,7 +29,7 @@ Legacy helpers remain under `@authentication/web`, `@authentication/admin-page`,
 | Passkey admin UI     | `@authentication/passkey-settings` → `PasskeySettings`                         |
 | Passkey schema SQL   | `@authentication/better-auth/migrations/passkey.sql` (idempotent)              |
 | Template schema      | `apps/web/database/schema/auth.ts` (includes `passkey`; run `db:generate`)     |
-| Template bindings    | `apps/web/lib/auth.ts`, `lib/auth-gates.ts`, `lib/api-auth.ts`                 |
+| Template bindings    | `library/authentication/authentication.ts`, `authentication-gates.ts`, `authentication-api.ts` |
 
 Each app **binds** the factory to its own Drizzle `db`, merged schema, and env. Prism does not use a global singleton auth instance.
 
@@ -46,10 +46,10 @@ Public self-sign-up is **disabled** in `createPrismAuth` (`disableSignUp: true`)
 
 ## App wiring (template / generated apps)
 
-1. **Instance** — `lib/auth.ts` calls `createPrismAuth({ db, schema, secret, baseURL, trustedOrigins, rpName })`. Passkeys are **on by default** when `rpName` is set (use `readApplicationSettings().nameDisplay` from `config.prism.json`). Include `resolveTrustedAuthOrigins(BETTER_AUTH_URL, DEV_APP_ORIGINS)` so `{nameIdentifier}.localhost` works when `.env` still points at `localhost`.
+1. **Instance** — `library/authentication/authentication.ts` calls `createPrismAuth({ db, schema, secret, baseURL, trustedOrigins, rpName })`. Passkeys are **on by default** when `rpName` is set (use `readApplicationSettings().nameDisplay` from `config.prism.json`). Include `resolveTrustedAuthOrigins(BETTER_AUTH_URL, DEV_APP_ORIGINS)` so `{nameIdentifier}.localhost` works when `.env` still points at `localhost`.
 2. **Browser client** — `createPrismAuthClient()` uses `window.location.origin` so fetches stay same-origin when users visit `{nameIdentifier}.localhost` while `BETTER_AUTH_URL` is still `localhost`.
-3. **Gates** — `lib/auth-gates.ts` calls `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. `SIGN_IN_PATH_DROP_OFF` comes from `library/config` (set via `app.signInPathDropOff` in `config.prism.json`; default `/`).
-4. **API keys** — `lib/api-auth.ts` exports `requireApiAuthentication` (async; use `await` in route handlers).
+3. **Gates** — `library/authentication/authentication-gates.ts` calls `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. `SIGN_IN_PATH_DROP_OFF` comes from `library/config` (set via `authentication.signInPathDropOff` in `config.prism.json`; default `/`).
+4. **API keys** — `library/authentication/authentication-api.ts` exports `requireApiAuthentication` (async; use `await` in route handlers).
 5. **Handler** — `app/api/auth/[...all]/route.ts` uses `toNextJsHandler(auth)`.
 6. **Sign-in** — `app/(auth)/sign-in/page.tsx` → `<SignInPage authBaseURL={authEnv.BETTER_AUTH_URL} redirectTo={SIGN_IN_PATH_DROP_OFF} />`; pre-checks session and redirects if already authenticated.
 7. **Admin API keys** — `app/admin/app/api-keys` + `POST /api/admin/api-keys`.
@@ -72,9 +72,20 @@ Passkeys use the [`@better-auth/passkey`](https://www.better-auth.com/docs/plugi
 
 Disable passkeys for an app: omit `rpName` in `createPrismAuth`, or pass `<SignInPage passkeys={false} />`.
 
-## Gate modes (`auth-gate.json`)
+## Authentication (`config.prism.json` → `authentication`)
 
-Set at `prism generate` time with `--auth-gate admin|app` (default `admin`).
+Set at `prism generate` time with `--auth-gate admin|app` (default `admin`). Stored in **`config.prism.json`**:
+
+```json
+{
+  "authentication": {
+    "gateMode": "admin",
+    "signInPathDropOff": "/admin"
+  }
+}
+```
+
+Consumer apps export **`AUTH_GATE_MODE`** and **`SIGN_IN_PATH_DROP_OFF`** from `library/config` via `resolveAuthenticationGateMode()` and `resolveSignInPathDropOff()`.
 
 | Mode    | Behavior                                                                                                                                              |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,7 +99,7 @@ Proxy cookie checks are not a security boundary — always enforce in layouts an
 Same three-line gate as before; import from the app binding:
 
 ```typescript
-import { requireAdminPage } from "@/lib/auth-gates";
+import { requireAdminPage } from "@/library/authentication/authentication-gates";
 
 const gate = await requireAdminPage();
 if (gate) return gate;
@@ -97,7 +108,7 @@ if (gate) return gate;
 ## API routes
 
 ```typescript
-import { requireApiAuthentication } from "@/lib/api-auth";
+import { requireApiAuthentication } from "@/library/authentication/authentication-api";
 
 export async function POST(request: Request) {
   await requireApiAuthentication(request);
@@ -127,12 +138,12 @@ Prism rate limits (`@authentication/rate-limit`) still wrap API key verification
 Use after bumping the `prism` submodule to a commit that includes Better Auth defaults.
 
 1. `pnpm install` from the **host app root** (not only inside `prism/`).
-2. Add `lib/auth.ts`, `lib/auth-gates.ts`, `lib/api-auth.ts` (copy from `apps/web` template).
+2. Add `library/authentication/authentication.ts`, `authentication-gates.ts`, `authentication-api.ts` (copy from `apps/web` template).
 3. Add `app/api/auth/[...all]/route.ts`, `app/(auth)/sign-in/page.tsx`.
 4. Run auth schema migration on Neon; bootstrap admin user.
-5. Replace `requireAdminPage` import: `authentication/admin-page` → `@/lib/auth-gates`.
-6. Replace `checkWebAuthentication` → `checkSession` from `@/lib/auth-gates`.
-7. Replace `requireApiAuthentication`: use `@/lib/api-auth` and **await**; switch header to `x-api-key`.
+5. Replace `requireAdminPage` import: `authentication/admin-page` → `@/library/authentication/authentication-gates`.
+6. Replace `checkWebAuthentication` → `checkSession` from `@/library/authentication/authentication-gates`.
+7. Replace `requireApiAuthentication`: use `@/library/authentication/authentication-api` and **await**; switch header to `x-api-key`.
 8. Update extension/CORS if applicable (`x-api-key`, not `x-prism-api-key`).
 9. Set `BETTER_AUTH_*` in Vercel/local env; remove `PRISM_KEY_*`.
 10. Remove `app/api/admin/authentication/route.ts`; update sign-out to Better Auth.
@@ -141,7 +152,7 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 - Admin-only gate (no root layout auth).
 - Preserve cron ladder on `GET …/measure/automated`: `x-vercel-cron` → `CRON_SECRET` → `requireApiAuthentication`.
-- Fix `app/flags/index.ts` to use `@/lib/auth-gates` + `authCheck`.
+- Fix `app/flags/index.ts` to use `@/library/authentication/authentication-gates` + `authCheck`.
 
 ### porch-scope notes
 
@@ -150,8 +161,7 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 ## `prism generate`
 
-- `--auth-gate admin|app`
-- Writes `auth-gate.json`
+- `--auth-gate admin|app` — writes `authentication.gateMode` into `config.prism.json`
 - Adds `better-auth`, `@better-auth/passkey`, adapters, `zod` to dependencies
 - CI dummy env: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`
 

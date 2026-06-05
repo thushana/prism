@@ -901,9 +901,9 @@ import * as fs from "fs";
 import * as path from "path";
 
 function loadConfig() {
-  const configPath = path.join(process.cwd(), "config.json");
+  const configPath = path.join(process.cwd(), "config.app.json");
   if (!fs.existsSync(configPath)) {
-    throw new Error("config.json not found");
+    throw new Error("config.app.json not found");
   }
   return JSON.parse(fs.readFileSync(configPath, "utf-8"));
 }

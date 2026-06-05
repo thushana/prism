@@ -19,6 +19,10 @@ Same structure for all Prism apps:
     "description": "Precinct-level election results map for Alameda County.",
     "icon": "map"
   },
+  "authentication": {
+    "gateMode": "admin",
+    "signInPathDropOff": "/"
+  },
   "deployments": {
     "dev": {
       "port": 1776
@@ -30,7 +34,8 @@ Same structure for all Prism apps:
 - Validated by `prismConfigBaseSchema` in `application-settings`.
 - `app.nameIdentifier` — stable slug for dev hostnames and tooling (e.g. `porch-scope`).
 - `app.nameDisplay` — human-facing name (admin chrome, passkey RP name, page titles).
-- `app.signInPathDropOff` — optional redirect after sign-in (e.g. `/addresses`; default `/`). Wire via `createAuthGates(auth, { signInPathDropOff })`.
+- `authentication.gateMode` — `admin` (only `/admin/*` gated) or `app` (proxy redirects to `/sign-in`). Default `admin`.
+- `authentication.signInPathDropOff` — redirect after sign-in (default `/`). Wire via `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md).
 - `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to `{nameIdentifier}.localhost` and prints the Prism dev URL on startup.
 - Keep `deployments.dev.port` in sync with any hardcoded kill scripts (e.g. root `dev:kill`).
 - **Local dev URL:** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.
@@ -85,10 +90,16 @@ outputFileTracingIncludes: {
 apps/web/
   config.prism.json      # Prism-standard: app chrome + deployments
   config.app.json        # Client-specific domain
-  library/config/
-    schema.ts            # config.app.json Zod schema
-    prism-schema.ts      # config.prism.json Zod schema
-    index.ts
+  library/               # App-owned shared code (never lib/)
+    authentication/
+      authentication.ts
+      authentication-gates.ts
+      authentication-api.ts
+    kysely-shim.ts
+    config/
+      schema.ts          # config.app.json Zod schema
+      prism-schema.ts    # config.prism.json Zod schema
+      index.ts
 ```
 
 ## Upgrading existing projects
@@ -99,6 +110,10 @@ Prism renamed the manifest files so they sort together. **Readers in `applicatio
 | ------------------------ | -------------------------------------------- |
 | `prism.config.json`      | `config.prism.json`                          |
 | `app.config.json`        | `config.app.json`                            |
+| `config.json` (domain)   | `config.app.json`                            |
+| `auth-gate.json`         | `config.prism.json` → `authentication`       |
+| `app.signInPathDropOff`  | `config.prism.json` → `authentication.signInPathDropOff` |
+| `lib/` (app root)        | `library/` (auth, config, shims)             |
 | `app.json` (chrome only) | Move chrome into `config.prism.json` → `app` |
 
 ### Migration checklist
@@ -107,6 +122,7 @@ Prism renamed the manifest files so they sort together. **Readers in `applicatio
    ```bash
    mv prism.config.json config.prism.json   # if present
    mv app.config.json config.app.json       # if present
+   mv config.json config.app.json           # if present (e.g. TimeTraveler legacy)
    ```
 2. **If you still have `app.json`** (flat chrome): merge into `config.prism.json`:
    ```json

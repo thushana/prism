@@ -3,7 +3,7 @@
  *
  *   SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD='…' pnpm run db:seed:admin
  *
- * Creates the auth instance directly (bypassing lib/auth.ts which uses server-only).
+ * Creates the auth instance directly (bypassing library/authentication/authentication.ts which uses server-only).
  * Re-running for an existing email resets the password and ensures role=admin.
  */
 

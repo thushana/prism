@@ -56,6 +56,7 @@ const config: KnipConfig = {
         "cli/**/*.{ts,js}",
         "config/**/*.{ts,tsx}",
         "database/**/*.{ts,tsx}",
+        "library/**/*.ts",
         "intelligence/**/*.ts",
       ],
       paths: webPaths,

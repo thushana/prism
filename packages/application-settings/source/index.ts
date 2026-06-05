@@ -20,8 +20,14 @@ export {
 } from "./config-file-names";
 export {
   prismAppConfigSchema,
+  prismAuthenticationConfigSchema,
+  prismAuthenticationGateModeSchema,
   prismConfigBaseSchema,
+  resolveAuthenticationGateMode,
+  resolveSignInPathDropOff,
   type PrismAppConfig,
+  type PrismAuthenticationConfig,
+  type PrismAuthenticationGateMode,
   type PrismConfigBase,
 } from "./prism-config-schema";
 export {

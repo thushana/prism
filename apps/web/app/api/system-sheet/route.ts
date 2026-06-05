@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { SystemSheetData } from "@admin";
 import { serverLogger as logger } from "@logger/server";
-import { checkSession } from "@/lib/auth-gates";
+import { checkSession } from "@/library/authentication/authentication-gates";
 import { isAdminUser } from "authentication/better-auth/session";
 
 export const dynamic = "force-dynamic";

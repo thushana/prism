@@ -1,7 +1,7 @@
 import * as React from "react";
 import { PasskeySettings } from "authentication/passkey-settings";
 import { AdminPageShell } from "authentication";
-import { requireAdminPage } from "@/lib/auth-gates";
+import { requireAdminPage } from "@/library/authentication/authentication-gates";
 import { authEnv } from "@/config/auth";
 
 export const dynamic = "force-dynamic";

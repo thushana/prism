@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { auth } from "@/library/authentication/authentication";
 import { isAdminUser } from "authentication/better-auth/session";
 
 export async function POST(request: Request): Promise<Response> {
