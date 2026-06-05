@@ -54,7 +54,9 @@ function readPackageName(directory: string): string | undefined {
 }
 
 /** Walk up from the app root to find the monorepo root `package.json` name. */
-export function resolveMonorepoPackageName(appRoot: string): string | undefined {
+export function resolveMonorepoPackageName(
+  appRoot: string
+): string | undefined {
   let directory = appRoot;
   const appPackageName = readPackageName(appRoot);
 

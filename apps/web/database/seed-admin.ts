@@ -68,10 +68,7 @@ async function resetAdminPassword(
     .update(account)
     .set({ password: hashedPassword })
     .where(
-      and(
-        eq(account.userId, existing.id),
-        eq(account.providerId, "credential")
-      )
+      and(eq(account.userId, existing.id), eq(account.providerId, "credential"))
     );
   await db
     .update(user)

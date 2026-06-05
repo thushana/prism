@@ -124,9 +124,7 @@ export function AdminPageShell({
     ...prismPathBarTitleByPathPrefix,
   };
   const showPathBarAuto = Boolean(
-    title &&
-      normalizedPathname !== "/admin" &&
-      !showPathBarExplicit
+    title && normalizedPathname !== "/admin" && !showPathBarExplicit
   );
   const hasHeader =
     showPathBarExplicit ||
@@ -136,10 +134,7 @@ export function AdminPageShell({
     titleSlot ||
     showSignOut;
   const showBackLink =
-    Boolean(backHref) &&
-    !title &&
-    !showPathBarExplicit &&
-    !showPathBarAuto;
+    Boolean(backHref) && !title && !showPathBarExplicit && !showPathBarAuto;
 
   return (
     <main className="min-h-screen w-full p-6">
