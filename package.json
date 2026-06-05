@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present run build",
-    "build:web": "pnpm --filter web run build",
+    "build:web": "CI=true pnpm --filter web run build",
     "clean": "rm -rf js scripts/*.js *.tsbuildinfo apps/*/.next apps/*/node_modules/.cache",
     "assert:app-library": "tsx scripts/assert-app-library-layout.ts",
     "chores": "tsx scripts/chores.ts",
