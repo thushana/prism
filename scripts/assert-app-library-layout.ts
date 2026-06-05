@@ -122,17 +122,12 @@ function main(): void {
       `✅ library/ layout OK (${appRoots.map((r) => path.relative(repoRoot, r) || ".").join(", ")})`
     );
   } catch (error) {
-    console.error(
-      error instanceof Error ? error.message : String(error)
-    );
+    console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
 
 const entry = process.argv[1];
-if (
-  entry &&
-  import.meta.url === pathToFileURL(path.resolve(entry)).href
-) {
+if (entry && import.meta.url === pathToFileURL(path.resolve(entry)).href) {
   main();
 }

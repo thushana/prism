@@ -93,7 +93,7 @@ async function main() {
   } catch (err) {
     if (!isUserExistsError(err)) throw err;
 
-    const userId = await resetAdminPassword(email, password);
+    const userId = await resetAdminPassword(email!, password!);
     console.log(`Admin password reset: ${email}`, userId);
   }
 }

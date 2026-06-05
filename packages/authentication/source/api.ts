@@ -9,6 +9,15 @@ import { enforceRateLimit, getClientIp, RATE_LIMIT_API } from "./rate-limit";
 
 const DEFAULT_API_KEY_HEADER = "x-api-key";
 
+type VerifyApiKeyResult = { valid: boolean };
+
+type VerifyApiKey = (input: {
+  body: {
+    key: string;
+    permissions?: Record<string, string[]>;
+  };
+}) => Promise<VerifyApiKeyResult>;
+
 export interface ApiAuthenticationOptions {
   headerName?: string;
   permissions?: Record<string, string[]>;
@@ -28,7 +37,9 @@ export function createApiAuthentication(
       throw new Response("Unauthorized", { status: 401 });
     }
 
-    const result = await auth.api.verifyApiKey({
+    const verifyApiKey = (auth.api as unknown as { verifyApiKey: VerifyApiKey })
+      .verifyApiKey;
+    const result = await verifyApiKey({
       body: {
         key,
         permissions: options.permissions,

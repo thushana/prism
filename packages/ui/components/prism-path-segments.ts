@@ -16,8 +16,8 @@ export type PrismPathBarTitleEntry =
 export type PrismPathBarSegment = { label: ReactNode; href?: string };
 
 /** Strip query/hash, ensure leading `/`, drop trailing slash except root. */
-export function normalizePathname(raw: string): string {
-  const noQuery = raw.trim().split(/[?#]/)[0] ?? "";
+export function normalizePathname(raw: string | null | undefined): string {
+  const noQuery = (raw ?? "").trim().split(/[?#]/)[0] ?? "";
   let p = noQuery;
   if (!p.startsWith("/")) p = `/${p}`;
   if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
@@ -80,7 +80,9 @@ export function buildPrismPathBarAutoSegmentList(
   pathname: string,
   titleByPathPrefix: Record<string, PrismPathBarTitleEntry>,
   pageTitle: string,
-  pageTitleContentOrOptions?: ReactNode | BuildPrismPathBarAutoSegmentListOptions
+  pageTitleContentOrOptions?:
+    | ReactNode
+    | BuildPrismPathBarAutoSegmentListOptions
 ): PrismPathBarSegment[] {
   const options =
     pageTitleContentOrOptions !== null &&

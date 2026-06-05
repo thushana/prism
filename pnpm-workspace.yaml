@@ -8,6 +8,8 @@ strictPeerDependencies: false
 minimumReleaseAge: false
 
 overrides:
+  "@better-auth/core": 1.6.14
+  "@opentelemetry/api": 1.9.1
   esbuild: ^0.27.2
   flatted: ">=3.4.2"
   lodash: ^4.17.24
