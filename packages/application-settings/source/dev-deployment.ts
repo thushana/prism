@@ -37,7 +37,10 @@ export function buildDevAppUrl(host: string, port: number): string {
 }
 
 /** Origins allowed for local API CORS (canonical host + legacy localhost). */
-export function buildDevAppOrigins(host: string, port: number): readonly string[] {
+export function buildDevAppOrigins(
+  host: string,
+  port: number
+): readonly string[] {
   const origins = new Set<string>([buildDevAppUrl(host, port)]);
   if (host !== "localhost" && !host.startsWith("localhost:")) {
     origins.add(`http://localhost:${port}`);
@@ -82,7 +85,11 @@ export function resolvePrismBetterAuthUrl(
       env.hostname === "localhost" || env.hostname === "127.0.0.1";
     const canonicalIsPrismLocalhost = canonical.hostname.endsWith(".localhost");
 
-    if (envIsLoopback && canonicalIsPrismLocalhost && urlsSharePort(env, canonical)) {
+    if (
+      envIsLoopback &&
+      canonicalIsPrismLocalhost &&
+      urlsSharePort(env, canonical)
+    ) {
       return fallback;
     }
   } catch {

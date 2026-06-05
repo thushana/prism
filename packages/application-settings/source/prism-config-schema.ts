@@ -13,10 +13,7 @@ const NAME_IDENTIFIER_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const prismAppConfigInputSchema = z
   .object({
     /** Stable slug for URLs and tooling (e.g. `porch-scope`). */
-    nameIdentifier: z
-      .string()
-      .regex(NAME_IDENTIFIER_PATTERN)
-      .optional(),
+    nameIdentifier: z.string().regex(NAME_IDENTIFIER_PATTERN).optional(),
     /** Human-facing app name (e.g. `Porch Scope`). */
     nameDisplay: z.string().min(1).optional(),
     /** @deprecated Use `nameDisplay`. */

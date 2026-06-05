@@ -106,15 +106,15 @@ apps/web/
 
 Prism renamed the manifest files so they sort together. **Readers in `application-settings` accept legacy names** until you rename; **JSON imports in `library/config/` do not** — update those when you migrate.
 
-| Current (legacy)         | New                                          |
-| ------------------------ | -------------------------------------------- |
-| `prism.config.json`      | `config.prism.json`                          |
-| `app.config.json`        | `config.app.json`                            |
-| `config.json` (domain)   | `config.app.json`                            |
-| `auth-gate.json`         | `config.prism.json` → `authentication`       |
+| Current (legacy)         | New                                                      |
+| ------------------------ | -------------------------------------------------------- |
+| `prism.config.json`      | `config.prism.json`                                      |
+| `app.config.json`        | `config.app.json`                                        |
+| `config.json` (domain)   | `config.app.json`                                        |
+| `auth-gate.json`         | `config.prism.json` → `authentication`                   |
 | `app.signInPathDropOff`  | `config.prism.json` → `authentication.signInPathDropOff` |
-| `lib/` (app root)        | `library/` (auth, config, shims)             |
-| `app.json` (chrome only) | Move chrome into `config.prism.json` → `app` |
+| `lib/` (app root)        | `library/` (auth, config, shims)                         |
+| `app.json` (chrome only) | Move chrome into `config.prism.json` → `app`             |
 
 ### Migration checklist
 

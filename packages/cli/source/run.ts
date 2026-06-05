@@ -427,10 +427,9 @@ export async function runRunCommand(options: RunCommandOptions): Promise<void> {
       `     ${chalk.bold("DEV URL")} - ${devBaseUrl} (${deployment.host})`
     );
   } catch (error) {
-    log.warn(
-      `No config.prism.json dev deployment; using ${devBaseUrl}`,
-      { error }
-    );
+    log.warn(`No config.prism.json dev deployment; using ${devBaseUrl}`, {
+      error,
+    });
   }
 
   log.info(`\n${chalk.bold("🎛️  SERVERS")}`);

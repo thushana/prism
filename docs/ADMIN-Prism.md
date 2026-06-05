@@ -10,12 +10,12 @@ At the **Next.js app root** (`apps/web/`), ship **`config.prism.json`** (Prism-s
 
 Standard chrome fields in **`config.prism.json` → `app`** (via `readApplicationSettings()`):
 
-| Field         | Purpose                                                                                        |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| `nameDisplay` | Human-facing app name (e.g. admin section label above application links).                      |
-| `nameIdentifier` | Stable slug (e.g. `porch-scope`) for dev hostnames (`{nameIdentifier}.localhost`).          |
-| `description` | Short product description (e.g. `AdminPageShell` subtitle on `/admin` and `/admin/app`).       |
-| `icon`        | Optional string token for shell icons (e.g. Lucide export name); map in UI when you render it. |
+| Field            | Purpose                                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| `nameDisplay`    | Human-facing app name (e.g. admin section label above application links).                      |
+| `nameIdentifier` | Stable slug (e.g. `porch-scope`) for dev hostnames (`{nameIdentifier}.localhost`).             |
+| `description`    | Short product description (e.g. `AdminPageShell` subtitle on `/admin` and `/admin/app`).       |
+| `icon`           | Optional string token for shell icons (e.g. Lucide export name); map in UI when you render it. |
 
 ## How It Works
 

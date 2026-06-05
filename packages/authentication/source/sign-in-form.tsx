@@ -1,9 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { PrismButton, PrismTypography } from "@ui";
+import { PrismButton, PrismIcon, PrismTypography } from "@ui";
 import { cn } from "@utilities";
 import { createPrismAuthClient } from "./client";
+
+const signInFieldLabelClassName = "mb-1.5 block cursor-pointer";
+
+const signInFieldClassName = cn(
+  "box-border h-9 w-full rounded-md border border-input bg-background px-3 py-1 font-mono text-sm font-normal shadow-xs transition-colors",
+  "placeholder:text-muted-foreground",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+  "disabled:cursor-not-allowed disabled:opacity-50"
+);
 
 interface SignInFormProps {
   error?: string;
@@ -27,6 +36,7 @@ export function SignInForm({
   );
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isPasskeySubmitting, setIsPasskeySubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | undefined>(
@@ -99,20 +109,63 @@ export function SignInForm({
           <PrismTypography role="headline" size="regular" as="h1">
             Sign in
           </PrismTypography>
+        </div>
+
+        {passkeys ? (
+          <div className="space-y-4">
+            <PrismButton
+              type="button"
+              variant="plain"
+              color={{ palette: "default", swatchPrimary: "blue" }}
+              shape="rectangleRounded"
+              label={
+                isPasskeySubmitting
+                  ? "Waiting for passkey…"
+                  : "Sign in with passkey"
+              }
+              leadingSlot={
+                <PrismIcon name="passkey" size="small" className="text-current" />
+              }
+              disabled={busy}
+              disableGrow
+              className="w-full"
+              onClick={() => void handlePasskeySignIn()}
+            />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  or
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {(submitError || error) && (
           <PrismTypography
             role="body"
-            size="regular"
-            color={{ semanticText: "muted" }}
-            className="mt-2"
+            size="small"
+            color={{ semanticText: "destructive" }}
           >
-            Use your account email and password{passkeys ? " or a passkey" : ""}
+            {submitError || error}
           </PrismTypography>
-        </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-2 block cursor-pointer">
-              <PrismTypography role="label" size="regular" as="span">
+            <label htmlFor="email" className={signInFieldLabelClassName}>
+              <PrismTypography
+                role="overline"
+                size="small"
+                fontWeight={900}
+                textTransform="uppercase"
+                color={{ semanticText: "muted" }}
+                as="span"
+              >
                 Email
               </PrismTypography>
             </label>
@@ -125,55 +178,70 @@ export function SignInForm({
               onChange={(e) => setEmail(e.target.value)}
               disabled={busy}
               className={cn(
-                "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors",
-                "placeholder:text-muted-foreground",
-                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                "disabled:cursor-not-allowed disabled:opacity-50",
+                signInFieldClassName,
                 (submitError || error) && "border-destructive"
               )}
               placeholder="you@example.com"
               required
-              autoFocus
+              autoFocus={!passkeys}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-2 block cursor-pointer">
-              <PrismTypography role="label" size="regular" as="span">
+            <label htmlFor="password" className={signInFieldLabelClassName}>
+              <PrismTypography
+                role="overline"
+                size="small"
+                fontWeight={900}
+                textTransform="uppercase"
+                color={{ semanticText: "muted" }}
+                as="span"
+              >
                 Password
               </PrismTypography>
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete={
-                passkeys ? "current-password webauthn" : "current-password"
-              }
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={busy}
-              className={cn(
-                "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors",
-                "placeholder:text-muted-foreground",
-                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-                (submitError || error) && "border-destructive"
-              )}
-              placeholder="Password"
-              required
-            />
+            <div className="relative h-9">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={
+                  passkeys ? "current-password webauthn" : "current-password"
+                }
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={busy}
+                className={cn(
+                  signInFieldClassName,
+                  "pr-10",
+                  (submitError || error) && "border-destructive"
+                )}
+                placeholder="Password"
+                required
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                disabled={busy}
+                onClick={() => setShowPassword((visible) => !visible)}
+                className={cn(
+                  "absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center",
+                  "rounded-sm text-muted-foreground hover:text-foreground",
+                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  "disabled:pointer-events-none disabled:opacity-50"
+                )}
+              >
+                <PrismIcon
+                  iconStyle="lucide"
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={14}
+                  weight="thin"
+                  className="pointer-events-none shrink-0 text-current"
+                />
+              </button>
+            </div>
           </div>
-
-          {(submitError || error) && (
-            <PrismTypography
-              role="body"
-              size="small"
-              color={{ semanticText: "destructive" }}
-            >
-              {submitError || error}
-            </PrismTypography>
-          )}
 
           <PrismButton
             type="submit"
@@ -181,42 +249,14 @@ export function SignInForm({
             color={{ palette: "default", swatchPrimary: "blue" }}
             shape="rectangleRounded"
             label={isSubmitting ? "Signing in…" : "Sign in"}
+            leadingSlot={
+              <PrismIcon name="login" size="small" className="text-current" />
+            }
             disabled={busy}
             disableGrow
             className="w-full"
           />
         </form>
-
-        {passkeys && (
-          <div className="space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  or
-                </span>
-              </div>
-            </div>
-
-            <PrismButton
-              type="button"
-              variant="plain"
-              color={{ palette: "default", swatchPrimary: "blue" }}
-              shape="rectangleRounded"
-              label={
-                isPasskeySubmitting
-                  ? "Waiting for passkey…"
-                  : "Sign in with passkey"
-              }
-              disabled={busy}
-              disableGrow
-              className="w-full"
-              onClick={() => void handlePasskeySignIn()}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

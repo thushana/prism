@@ -18,17 +18,17 @@ Legacy helpers remain under `@authentication/web`, `@authentication/admin-page`,
 
 ## Prism-owned pieces
 
-| Piece                | Location                                                                       |
-| -------------------- | ------------------------------------------------------------------------------ |
-| Auth factory         | `@authentication/better-auth` → `createPrismAuth()`                            |
-| Session helpers      | `@authentication/better-auth/session`                                          |
-| Gate factory         | `@authentication/gates` → `createAuthGates(auth)`                              |
-| API key gate factory | `@authentication/api` → `createApiAuthentication(auth)`                        |
-| Client               | `@authentication/client` → `createPrismAuthClient()` (includes passkey client) |
-| Sign-in UI           | `@authentication` → `SignInPage` / `SignInForm` (email + passkey)              |
-| Passkey admin UI     | `@authentication/passkey-settings` → `PasskeySettings`                         |
-| Passkey schema SQL   | `@authentication/better-auth/migrations/passkey.sql` (idempotent)              |
-| Template schema      | `apps/web/database/schema/auth.ts` (includes `passkey`; run `db:generate`)     |
+| Piece                | Location                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| Auth factory         | `@authentication/better-auth` → `createPrismAuth()`                                            |
+| Session helpers      | `@authentication/better-auth/session`                                                          |
+| Gate factory         | `@authentication/gates` → `createAuthGates(auth)`                                              |
+| API key gate factory | `@authentication/api` → `createApiAuthentication(auth)`                                        |
+| Client               | `@authentication/client` → `createPrismAuthClient()` (includes passkey client)                 |
+| Sign-in UI           | `@authentication` → `SignInPage` / `SignInForm` (email + passkey)                              |
+| Passkey admin UI     | `@authentication/passkey-settings` → `PasskeySettings`                                         |
+| Passkey schema SQL   | `@authentication/better-auth/migrations/passkey.sql` (idempotent)                              |
+| Template schema      | `apps/web/database/schema/auth.ts` (includes `passkey`; run `db:generate`)                     |
 | Template bindings    | `library/authentication/authentication.ts`, `authentication-gates.ts`, `authentication-api.ts` |
 
 Each app **binds** the factory to its own Drizzle `db`, merged schema, and env. Prism does not use a global singleton auth instance.
