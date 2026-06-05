@@ -119,11 +119,11 @@ pnpm run tools run dev --verbose
    - Host project deployments page
    - Drizzle Studio (`https://local.drizzle.studio`)
    - System sheet page (`/admin/app/system`)
-   - Main application (`http://localhost:3000`)
+   - Main application (`http://{nameIdentifier}.localhost:{port}` from `config.prism.json`, e.g. `http://porch-scope.localhost:9876`)
 
 **Options:**
 
-- `-p, --port <port>` - Port for dev server (default: 3000)
+- `-p, --port <port>` - Port override (default from `config.prism.json` → `deployments.dev.port`)
 - `-d, --drizzle-port <port>` - Port for Drizzle Studio (default: 4983)
 - `-v, --verbose` - Enable verbose logging
 - `--debug` - Enable debug logging

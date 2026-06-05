@@ -101,6 +101,7 @@ const config: KnipConfig = {
         "better-auth",
         "@better-auth/drizzle-adapter",
         "@better-auth/api-key",
+        "@better-auth/passkey",
       ],
     },
     "packages/ui": {

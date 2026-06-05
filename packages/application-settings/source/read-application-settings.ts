@@ -61,7 +61,7 @@ function extractAppConfig(parsed: unknown): PrismAppConfig {
   if (result.success) return result.data;
 
   throw new Error(
-    `application-settings: expected ${PRISM_CONFIG_FILE_NAME} with an app section (displayName, description, icon).`
+    `application-settings: expected ${PRISM_CONFIG_FILE_NAME} with an app section (nameDisplay, description, icon).`
   );
 }
 

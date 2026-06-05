@@ -9,7 +9,8 @@ import authGate from "@/auth-gate.json";
 
 const flagsProxy = getProxy({ paramPrefix: "flag_" });
 
-const authGateMode: "admin" | "app" = authGate?.mode === "app" ? "app" : "admin";
+const authGateMode: "admin" | "app" =
+  authGate?.mode === "app" ? "app" : "admin";
 
 function applyAuthRedirect(request: NextRequest): NextResponse | null {
   if (authGateMode !== "app") {

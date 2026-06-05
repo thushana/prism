@@ -164,6 +164,7 @@ function buildPrismDependencies(
       "better-auth": "^1.6.14",
       "@better-auth/drizzle-adapter": "^1.6.14",
       "@better-auth/api-key": "^1.6.14",
+      "@better-auth/passkey": "^1.6.14",
       zod: "^4.4.3",
     };
   }
@@ -185,6 +186,7 @@ function buildPrismDependencies(
     "better-auth": "^1.6.14",
     "@better-auth/drizzle-adapter": "^1.6.14",
     "@better-auth/api-key": "^1.6.14",
+    "@better-auth/passkey": "^1.6.14",
     zod: "^4.4.3",
   };
 }
@@ -204,7 +206,9 @@ function generateWebAppPackageJson(
     private: true,
     ...(packageManager ? { packageManager } : {}),
     scripts: {
-      dev: useWebpack ? "next dev --webpack" : "next dev",
+      dev: useWebpack
+        ? "tsx ../../prism/scripts/run-next-dev.ts --webpack"
+        : "tsx ../../prism/scripts/run-next-dev.ts",
       build: useWebpack ? "next build --webpack" : "next build",
       start: "next start",
       lint: "eslint app cli scripts tests",
@@ -443,6 +447,14 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  serverExternalPackages: [
+    "better-auth",
+    "@better-auth/drizzle-adapter",
+    "@better-auth/api-key",
+    "@better-auth/kysely-adapter",
+    "@better-auth/passkey",
+    "kysely",
+  ],
 };
 
 export default nextConfig;
@@ -456,6 +468,7 @@ const nextConfig: NextConfig = {
     "@better-auth/drizzle-adapter",
     "@better-auth/api-key",
     "@better-auth/kysely-adapter",
+    "@better-auth/passkey",
     "kysely",
   ],
 };
@@ -836,7 +849,8 @@ function generateApplicationManifestFiles(
 
   const prismConfig = {
     app: {
-      displayName,
+      nameIdentifier: appName,
+      nameDisplay: displayName,
       description: `${displayName} — generated with Prism.`,
       icon: "layers",
     },
@@ -876,45 +890,41 @@ export type AppConfig = z.infer<typeof appConfigSchema>;
 
   const prismSchemaTs = `import { z } from "zod";
 
-const prismAppSchema = z.object({
-  displayName: z.string().min(1),
-  description: z.string(),
-  icon: z.string().optional(),
-});
-
-/** Prism-standard config (\`config.prism.json\`) — same shape for every Prism app. */
-export const prismConfigSchema = z.object({
-  app: prismAppSchema,
-  deployments: z
-    .object({
-      dev: z
-        .object({
-          port: z.number().int().min(1).max(65535).optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-});
-
-export type PrismConfig = z.infer<typeof prismConfigSchema>;
+/** Prism-standard config (\`config.prism.json\`) — validated via application-settings. */
+export { prismConfigBaseSchema as prismConfigSchema, type PrismConfigBase as PrismConfig } from "application-settings/prism-config-schema";
 `;
 
   const indexTs = `import appConfigJson from "../../config.app.json";
 import prismConfigJson from "../../config.prism.json";
+import { resolveDevDeployment } from "application-settings/dev-deployment";
+import { prismConfigBaseSchema } from "application-settings/prism-config-schema";
 import { appConfigSchema, type AppConfig } from "./schema";
-import { prismConfigSchema, type PrismConfig } from "./prism-schema";
 
 export const appConfig: AppConfig = appConfigSchema.parse(appConfigJson);
-export const prismConfig: PrismConfig = prismConfigSchema.parse(prismConfigJson);
+
+export const prismConfig = prismConfigBaseSchema.parse(prismConfigJson);
 
 /** Prism-standard app chrome (from config.prism.json → app). */
 export const prismApp = prismConfig.app;
 
-export const DEV_PORT = prismConfig.deployments?.dev?.port ?? 3000;
+export const devDeployment = resolveDevDeployment(prismConfig, {
+  monorepoPackageName: "${appName}",
+});
+
+export const DEV_PORT = devDeployment.port;
+export const DEV_HOST = devDeployment.host;
+export const DEV_APP_URL = devDeployment.url;
+export const DEV_APP_ORIGINS = devDeployment.origins;
+
+export const POST_SIGN_IN_PATH = prismConfig.app.postSignInPath ?? "/";
 `;
 
   fs.writeFileSync(path.join(configDir, "schema.ts"), schemaTs, "utf-8");
-  fs.writeFileSync(path.join(configDir, "prism-schema.ts"), prismSchemaTs, "utf-8");
+  fs.writeFileSync(
+    path.join(configDir, "prism-schema.ts"),
+    prismSchemaTs,
+    "utf-8"
+  );
   fs.writeFileSync(path.join(configDir, "index.ts"), indexTs, "utf-8");
 }
 

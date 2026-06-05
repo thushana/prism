@@ -7,5 +7,6 @@
 export * from "./core";
 export * from "./sign-in-form";
 export * from "./sign-in-page";
+export * from "./passkey-settings";
 export * from "./admin-layout";
 export * from "./sign-out-form";

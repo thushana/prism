@@ -30,16 +30,24 @@ export function PasskeySettings({
   React.useEffect(() => {
     let cancelled = false;
 
-    authClient.passkey.listUserPasskeys().then((result) => {
-      if (cancelled) return;
-      if (result.error) {
-        setError(result.error.message ?? "Could not load passkeys.");
+    authClient.passkey
+      .listUserPasskeys()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.error) {
+          setError(result.error.message ?? "Could not load passkeys.");
+          setPasskeys([]);
+        } else {
+          setPasskeys(result.data ?? []);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError("Could not load passkeys.");
         setPasskeys([]);
-      } else {
-        setPasskeys(result.data ?? []);
-      }
-      setIsLoading(false);
-    });
+        setIsLoading(false);
+      });
 
     return () => {
       cancelled = true;

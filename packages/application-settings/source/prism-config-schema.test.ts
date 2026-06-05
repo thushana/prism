@@ -5,13 +5,32 @@ describe("prismConfigBaseSchema", () => {
   it("accepts app + deployments", () => {
     const result = prismConfigBaseSchema.safeParse({
       app: {
-        displayName: "Test",
+        nameIdentifier: "alameda-elections",
+        nameDisplay: "Alameda Elections",
         description: "Test app",
         icon: "layers",
       },
       deployments: { dev: { port: 1776 } },
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.app.nameDisplay).toBe("Alameda Elections");
+      expect(result.data.app.nameIdentifier).toBe("alameda-elections");
+    }
+  });
+
+  it("maps legacy displayName to nameDisplay", () => {
+    const result = prismConfigBaseSchema.safeParse({
+      app: {
+        displayName: "Legacy App",
+        description: "Test app",
+      },
+      deployments: { dev: { port: 3000 } },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.app.nameDisplay).toBe("Legacy App");
+    }
   });
 
   it("requires app section", () => {

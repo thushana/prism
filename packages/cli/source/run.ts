@@ -17,6 +17,8 @@ import * as https from "https";
 import * as LoggerModule from "@logger/server";
 const serverLogger = LoggerModule.serverLogger;
 const setCLIMode = LoggerModule.setCLIMode;
+import { buildDevAppUrl } from "application-settings/dev-deployment";
+import { loadDevDeploymentFromDirectory } from "application-settings/load-prism-config-sync";
 import type { BaseCommandOptions } from "./command";
 import { displayBanner } from "./command";
 import { chalk } from "./styling";
@@ -83,12 +85,11 @@ function findAppRoot(): { appRoot: string; isChildApp: boolean } {
 /**
  * Kill all running dev servers and drizzle studio
  */
-function killDevServers(): void {
+function killDevServers(extraPorts: number[] = []): void {
   log.info(`     ${chalk.bold("🔪 KILLING")} - All running dev servers...`);
 
   try {
-    // Kill processes on common ports
-    const ports = [3000, 4983]; // Next.js default, Drizzle Studio default
+    const ports = [3000, 4983, ...extraPorts];
     for (const port of ports) {
       try {
         execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, {
@@ -314,10 +315,11 @@ async function waitForService(
  * Open browser tabs
  */
 async function openBrowserTabs(
-  port: string = "3000",
+  devBaseUrl: string,
   _drizzlePort: string = "4983",
   hasDrizzle: boolean = true
 ): Promise<void> {
+  const devBase = devBaseUrl.replace(/\/+$/, "");
   log.info(`     ${chalk.bold("🌐 OPENING")} - Browser tabs...`);
 
   const hostDashboard = process.env.HOST_PROJECT_DASHBOARD;
@@ -351,23 +353,20 @@ async function openBrowserTabs(
     }
   }
 
-  // Wait for localhost server to be ready, then open system-sheet and main app
   log.info(`     ${chalk.bold("⏳ WAITING")} - For dev server to be ready...`);
-  const serverReady = await waitForService(`http://localhost:${port}`);
+  const serverReady = await waitForService(devBase);
   if (serverReady) {
     log.info(`     ${chalk.bold("✅ READY")} - Dev server is running`);
-    // Open system-sheet page before the main app
-    openBrowser(`http://localhost:${port}/admin/app/system`);
+    openBrowser(`${devBase}/admin/app/system`);
 
     setTimeout(() => {
-      // Open localhost last (the actual app)
-      openBrowser(`http://localhost:${port}`);
+      openBrowser(devBase);
     }, 500);
   } else {
     log.warn("Dev server did not become ready, opening anyway...");
-    openBrowser(`http://localhost:${port}/admin/app/system`);
+    openBrowser(`${devBase}/admin/app/system`);
     setTimeout(() => {
-      openBrowser(`http://localhost:${port}`);
+      openBrowser(devBase);
     }, 500);
   }
 }
@@ -416,19 +415,32 @@ export async function runRunCommand(options: RunCommandOptions): Promise<void> {
   // Give browser time to start
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  log.info(`\n${chalk.bold("🎛️  SERVERS")}`);
-  // Kill existing servers
-  killDevServers();
+  let devBaseUrl = `http://localhost:${options.port ?? "3000"}`;
+  let devPort = Number(options.port ?? "3000");
+  try {
+    const deployment = loadDevDeploymentFromDirectory(appRoot);
+    devPort = options.port ? Number(options.port) : deployment.port;
+    devBaseUrl = options.port
+      ? buildDevAppUrl(deployment.host, devPort)
+      : deployment.url;
+    log.info(
+      `     ${chalk.bold("DEV URL")} - ${devBaseUrl} (${deployment.host})`
+    );
+  } catch (error) {
+    log.warn(
+      `No config.prism.json dev deployment; using ${devBaseUrl}`,
+      { error }
+    );
+  }
 
-  // Wait a moment for processes to fully terminate
+  log.info(`\n${chalk.bold("🎛️  SERVERS")}`);
+  const drizzlePort = options.drizzlePort || "4983";
+  killDevServers([devPort, Number(drizzlePort)]);
+
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Start dev server
-  const port = options.port || "3000";
-  startDevServer(appRoot, isChildApp, port);
+  startDevServer(appRoot, isChildApp, String(devPort));
 
-  // Start drizzle studio (may not be available)
-  const drizzlePort = options.drizzlePort || "4983";
   let hasDrizzle = false;
   try {
     startDrizzleStudio(appRoot, isChildApp, drizzlePort);
@@ -438,8 +450,7 @@ export async function runRunCommand(options: RunCommandOptions): Promise<void> {
   }
 
   log.info(`\n${chalk.bold("🌐 BROWSER")}`);
-  // Open browser tabs (wait for services to be ready)
-  await openBrowserTabs(port, drizzlePort, hasDrizzle);
+  await openBrowserTabs(devBaseUrl, drizzlePort, hasDrizzle);
 
   log.info(`\n${chalk.bold("✅ READY")} - Development environment started!`);
   log.info("Press Ctrl+C to stop all servers");
@@ -459,7 +470,10 @@ export function registerRunCommand(
     .description(
       "Kill existing servers, start dev environment, and open browser tabs"
     )
-    .option("-p, --port <port>", "Port for dev server (default: 3000)", "3000")
+    .option(
+      "-p, --port <port>",
+      "Port for dev server (overrides config.prism.json deployments.dev.port)"
+    )
     .option(
       "-d, --drizzle-port <port>",
       "Port for Drizzle Studio (default: 4983)",

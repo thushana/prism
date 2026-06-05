@@ -12,13 +12,14 @@ Standard chrome fields in **`config.prism.json` → `app`** (via `readApplicatio
 
 | Field         | Purpose                                                                                        |
 | ------------- | ---------------------------------------------------------------------------------------------- |
-| `displayName` | Human-facing app name (e.g. admin section label above application links).                      |
+| `nameDisplay` | Human-facing app name (e.g. admin section label above application links).                      |
+| `nameIdentifier` | Stable slug (e.g. `porch-scope`) for dev hostnames (`{nameIdentifier}.localhost`).          |
 | `description` | Short product description (e.g. `AdminPageShell` subtitle on `/admin` and `/admin/app`).       |
 | `icon`        | Optional string token for shell icons (e.g. Lucide export name); map in UI when you render it. |
 
 ## How It Works
 
-Prism’s default is **Better Auth** (email/password sessions in Postgres, API keys for integrations). See **[AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)** for env vars, app wiring (`lib/auth-gates.ts`), migration, and API key headers.
+Prism’s default is **Better Auth** (email/password sessions in Postgres, **passkeys**, API keys for integrations). See **[AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md)** for env vars, app wiring (`lib/auth-gates.ts`), migration, passkey registration, and API key headers.
 
 Admin pages still use the same gate pattern; import `requireAdminPage` from your app’s `lib/auth-gates.ts` (not the legacy `@authentication/admin-page` shared-secret helper).
 
@@ -36,6 +37,10 @@ app/
 │   │   ├── page.tsx              # Admin / App hub
 │   │   ├── system/
 │   │   │   └── page.tsx          # Admin / App / System (system sheet)
+│   │   ├── security/
+│   │   │   └── page.tsx          # Admin / App / Security (passkeys)
+│   │   ├── api-keys/
+│   │   │   └── page.tsx          # Admin / App / API keys
 │   │   └── components/
 │   │       └── page.tsx          # Admin / App / Components (app-specific)
 │   └── prism/

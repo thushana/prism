@@ -19,6 +19,11 @@ const adminSections = [
       "Create keys for extensions and integrations (x-api-key header).",
     href: "/admin/app/api-keys",
   },
+  {
+    title: "Security",
+    description: "Manage passkeys and other sign-in options for your account.",
+    href: "/admin/app/security",
+  },
 ];
 
 export default async function AdminHomePage(): Promise<React.JSX.Element> {
