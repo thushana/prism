@@ -41,7 +41,7 @@ const config: KnipConfig = {
       entry: ["scripts/*.ts"],
       project: ["scripts/**/*.ts"],
       ignoreBinaries: ["drizzle-kit", "lsof", "pkill"],
-      ignoreDependencies: ["husky", "swr", "lightningcss", "concurrently"],
+      ignoreDependencies: ["swr", "lightningcss", "concurrently"],
       drizzle: { config: [] },
     },
     "apps/web": {
@@ -64,8 +64,6 @@ const config: KnipConfig = {
         "@prism/utilities",
         "@radix-ui/react-slot",
         "admin",
-        "authentication",
-        "better-auth",
         "database",
         "intelligence",
         "lightningcss",
@@ -73,7 +71,7 @@ const config: KnipConfig = {
         "tailwindcss",
         "tw-animate-css",
         "ui",
-        // Satisfy ui optional peers for PrismMap at build time (loaded in packages/ui)
+        // Optional ui peers for PrismMap (bundled via packages/ui, not imported in apps/web)
         "mapbox-gl",
         "@types/google.maps",
       ],
@@ -95,15 +93,7 @@ const config: KnipConfig = {
         "@ui": ["../ui/source"],
         "@utilities": ["../utilities/source"],
       },
-      ignoreDependencies: [
-        "ui",
-        "@prism/utilities",
-        "drizzle-orm",
-        "better-auth",
-        "@better-auth/drizzle-adapter",
-        "@better-auth/api-key",
-        "@better-auth/passkey",
-      ],
+      ignoreDependencies: ["ui", "@prism/utilities"],
     },
     "packages/ui": {
       paths: {
@@ -120,6 +110,7 @@ const config: KnipConfig = {
     "packages/cli": {
       paths: loggerPathsFromPackage,
       ignoreDependencies: ["@types/inquirer", "logger"],
+      ignoreBinaries: ["open", "xdg-open"],
     },
     "packages/intelligence": {
       paths: loggerPathsFromPackage,

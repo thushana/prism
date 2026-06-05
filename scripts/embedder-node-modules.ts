@@ -40,7 +40,12 @@ export function hidePrismStandaloneNodeModules(appRoot: string): void {
   }
 
   if (fs.existsSync(nodeModules) && fs.existsSync(hidden)) {
-    fs.rmSync(nodeModules, { recursive: true, force: true });
+    fs.rmSync(nodeModules, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
     console.log(
       "ℹ️  Removed duplicate prism/node_modules (using existing stash for app checks)\n"
     );
@@ -62,7 +67,12 @@ export function ensurePrismStandaloneNodeModules(appRoot: string): void {
   const hidden = prismStandaloneNodeModulesStashPath(appRoot);
 
   if (fs.existsSync(hidden) && fs.existsSync(nodeModules)) {
-    fs.rmSync(nodeModules, { recursive: true, force: true });
+    fs.rmSync(nodeModules, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   }
 
   if (fs.existsSync(hidden)) {

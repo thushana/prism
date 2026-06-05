@@ -101,8 +101,12 @@ function section(title: string): void {
   console.log(`\n━━━ ${title} ━━━\n`);
 }
 
-function execInherit(command: string, cwd: string): void {
-  execSync(command, { cwd, stdio: "inherit", env: process.env });
+function execInherit(
+  command: string,
+  cwd: string,
+  env: NodeJS.ProcessEnv = process.env
+): void {
+  execSync(command, { cwd, stdio: "inherit", env });
 }
 
 function execCapture(
@@ -407,7 +411,8 @@ function runChores(): void {
           results.push({
             name: "Build (prism web)",
             status: "skip",
-            detail: "embedder app build already validates the web stack",
+            detail:
+              "embedder app build validates production; prism/apps/web is a reference shell",
           });
         } else {
           results.push(
