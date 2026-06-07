@@ -29,6 +29,7 @@ import {
   prismLucideStrokeDraw,
   prismLucideStrokeDrawReset,
 } from "../source/prism-lucide-stroke-draw";
+import { useMaterialSymbolsFontReady } from "../source/use-material-symbols-font-ready";
 
 export type PrismIconStyle = "material" | "lucide";
 
@@ -300,6 +301,7 @@ export function PrismIcon({
 }: PrismIconProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
   const epochRef = useRef(0);
+  const materialFontReady = useMaterialSymbolsFontReady();
 
   const useLucide = iconStyle === "lucide";
 
@@ -568,7 +570,16 @@ export function PrismIcon({
         ...(useLucide
           ? { transformOrigin: "center" }
           : {
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: sizePx,
+              height: sizePx,
+              minWidth: sizePx,
+              minHeight: sizePx,
+              overflow: "hidden",
               fontSize: `${sizePx}px`,
+              lineHeight: 1,
               fontFeatureSettings: '"liga" 1',
               fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' ${weightValue}, 'GRAD' 0, 'opsz' ${opsz}`,
               transformOrigin: "center",
@@ -576,6 +587,7 @@ export function PrismIcon({
               ...gradientClipStyle,
             }),
       }}
+      aria-hidden
     >
       {useLucide && lucideIcon ? (
         <PrismLucideIconGlyph
@@ -585,9 +597,9 @@ export function PrismIcon({
           filled={filled}
           glyphPaint={glyphPaint}
         />
-      ) : (
+      ) : materialFontReady ? (
         name
-      )}
+      ) : null}
     </span>
   );
 }
