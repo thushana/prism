@@ -6,7 +6,7 @@ export function createGoogleRouteEndpointPinContent(options: {
   label: string;
   fillColor: string;
   fillOpacity: number;
-}): HTMLElement {
+}): google.maps.marker.PinElement {
   const pin = new google.maps.marker.PinElement({
     background: options.fillColor,
     borderColor: "#ffffff",
@@ -14,8 +14,8 @@ export function createGoogleRouteEndpointPinContent(options: {
     glyphColor: "#ffffff",
     scale: 0.85,
   });
-  pin.element.style.opacity = String(options.fillOpacity);
-  return pin.element;
+  pin.style.opacity = String(options.fillOpacity);
+  return pin;
 }
 
 export function createGoogleRouteEndpointMarker(options: {
@@ -26,13 +26,15 @@ export function createGoogleRouteEndpointMarker(options: {
   fillOpacity: number;
   zIndex: number;
 }): GoogleAdvancedMarker {
-  return new google.maps.marker.AdvancedMarkerElement({
+  const pin = createGoogleRouteEndpointPinContent(options);
+  const marker = new google.maps.marker.AdvancedMarkerElement({
     map: options.map,
     position: options.position,
-    content: createGoogleRouteEndpointPinContent(options),
     zIndex: options.zIndex,
     gmpClickable: false,
   });
+  marker.append(pin);
+  return marker;
 }
 
 export function updateGoogleRouteEndpointMarker(
@@ -47,7 +49,7 @@ export function updateGoogleRouteEndpointMarker(
 ): void {
   marker.position = options.position;
   marker.zIndex = options.zIndex;
-  marker.content = createGoogleRouteEndpointPinContent(options);
+  marker.replaceChildren(createGoogleRouteEndpointPinContent(options));
 }
 
 export function detachGoogleAdvancedMarker(marker: GoogleAdvancedMarker): void {
