@@ -7,8 +7,9 @@ import { createPrismAuthClient } from "./client";
 
 const signInFieldLabelClassName = "mb-1.5 block cursor-pointer";
 
+// text-base (16px): iOS Safari auto-zooms focused inputs below 16px.
 const signInFieldClassName = cn(
-  "box-border h-9 w-full rounded-md border border-input bg-background px-3 py-1 font-mono text-sm font-normal shadow-xs transition-colors",
+  "box-border h-9 w-full rounded-md border border-input bg-background px-3 py-1 font-mono text-base font-normal shadow-xs transition-colors",
   "placeholder:text-muted-foreground",
   "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
   "disabled:cursor-not-allowed disabled:opacity-50"

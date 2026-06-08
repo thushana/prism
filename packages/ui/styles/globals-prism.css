@@ -157,6 +157,28 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body), var(--font-satoshi), system-ui, sans-serif;
   }
+
+  /*
+   * iOS Safari auto-zooms focused inputs when font-size < 16px.
+   * Touch devices only — keeps desktop admin fields at their designed size.
+   */
+  @media (hover: none) and (pointer: coarse) {
+    :is(input, textarea, select):not(
+      :is(
+        [type="checkbox"],
+        [type="radio"],
+        [type="range"],
+        [type="file"],
+        [type="hidden"],
+        [type="button"],
+        [type="submit"],
+        [type="reset"],
+        [type="color"]
+      )
+    ) {
+      font-size: 16px !important;
+    }
+  }
   h1,
   h2,
   h3,
