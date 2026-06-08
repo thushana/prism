@@ -33,10 +33,6 @@ export function useMaterialSymbolsFontReady(): boolean {
   const [ready, setReady] = useState(materialSymbolsFontReady);
 
   useEffect(() => {
-    if (materialSymbolsFontReady) {
-      setReady(true);
-      return;
-    }
     void ensureMaterialSymbolsFont().then(() => setReady(true));
   }, []);
 
