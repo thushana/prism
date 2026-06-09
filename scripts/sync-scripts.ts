@@ -10,6 +10,8 @@
 
 import fs from "fs";
 import path from "path";
+import { discoverPrismAppRoots } from "./assert-app-library-layout";
+import { readBuildOutputFromAppRoot } from "./read-consumer-build-output";
 
 // Detect if we're running from prism or parent project
 const scriptDir = __dirname;
@@ -74,6 +76,12 @@ function syncScripts(): void {
 
   // Determine the main project root for path checks
   const mainProjectRoot = path.dirname(MAIN_PACKAGE_JSON);
+  const consumerAppRoot =
+    discoverPrismAppRoots(mainProjectRoot).find((root) =>
+      root.endsWith(`${path.sep}apps${path.sep}web`)
+    ) ?? mainProjectRoot;
+  const buildOutput = readBuildOutputFromAppRoot(consumerAppRoot);
+  const isStaticConsumer = buildOutput === "static";
   const appsWebPackageJsonPath = path.join(
     mainProjectRoot,
     "apps/web/package.json"
@@ -113,6 +121,12 @@ function syncScripts(): void {
     if (!(key in mergedScripts)) {
       // Adapt prism scripts to work in the main project context
       let adaptedValue = value;
+
+      // Skip database scripts for static consumers
+      if (isStaticConsumer && key.startsWith("database:")) {
+        skippedScripts.push(key);
+        continue;
+      }
 
       // Skip database:* scripts if db:* versions already exist
       if (
@@ -265,6 +279,18 @@ function syncScripts(): void {
       "pnpm run format && pnpm run lint && pnpm run typecheck";
     mergedScripts["vercel:env:sync-development"] =
       "tsx prism/scripts/sync-vercel-development-env.ts";
+    mergedScripts["prism:sync:scaffold"] =
+      "tsx prism/scripts/sync-scaffold-from-prism.ts";
+
+    if (isStaticConsumer) {
+      for (const key of Object.keys(mergedScripts)) {
+        if (key.startsWith("database:")) {
+          delete mergedScripts[key];
+          removedScripts.push(key);
+        }
+      }
+      delete mergedScripts["test:assert-layout"];
+    }
   }
 
   // Sort scripts alphabetically

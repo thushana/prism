@@ -7,14 +7,25 @@
 import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
+import { isStaticBuildAppRoot } from "./read-consumer-build-output";
 
-/** Required under each Prism app root (same list as prism generate). */
-export const REQUIRED_LIBRARY_FILES = [
+/** Required for all Prism apps regardless of output mode. */
+export const REQUIRED_LIBRARY_FILES_COMMON = [
+  "library/config/index.ts",
+] as const;
+
+/** Required only for server-mode (auth + DB wired) apps. */
+export const REQUIRED_LIBRARY_FILES_SERVER = [
   "library/authentication/authentication.ts",
   "library/authentication/authentication-gates.ts",
   "library/authentication/authentication-api.ts",
   "library/kysely-shim.ts",
-  "library/config/index.ts",
+] as const;
+
+/** @deprecated Use REQUIRED_LIBRARY_FILES_COMMON + REQUIRED_LIBRARY_FILES_SERVER */
+export const REQUIRED_LIBRARY_FILES = [
+  ...REQUIRED_LIBRARY_FILES_SERVER,
+  ...REQUIRED_LIBRARY_FILES_COMMON,
 ] as const;
 
 const LEGACY_LIB_IMPORT = /@\/lib\//;
@@ -37,6 +48,14 @@ export function discoverPrismAppRoots(repoRoot: string): string[] {
   return [...new Set(roots)];
 }
 
+export function requiredLibraryFilesForAppRoot(appRoot: string): string[] {
+  const required: string[] = [...REQUIRED_LIBRARY_FILES_COMMON];
+  if (!isStaticBuildAppRoot(appRoot)) {
+    required.push(...REQUIRED_LIBRARY_FILES_SERVER);
+  }
+  return required;
+}
+
 export function assertAppUsesLibraryDir(appRoot: string): void {
   const legacyLibDir = path.join(appRoot, "lib");
   if (fs.existsSync(legacyLibDir)) {
@@ -45,7 +64,7 @@ export function assertAppUsesLibraryDir(appRoot: string): void {
     );
   }
 
-  const missing = REQUIRED_LIBRARY_FILES.filter(
+  const missing = requiredLibraryFilesForAppRoot(appRoot).filter(
     (relativePath) => !fs.existsSync(path.join(appRoot, relativePath))
   );
   if (missing.length > 0) {

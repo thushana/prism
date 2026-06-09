@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   prismConfigBaseSchema,
   resolveAuthenticationGateMode,
+  resolveBuildOutput,
   resolveSignInPathDropOff,
+  isStaticBuild,
 } from "./prism-config-schema";
 
 describe("prismConfigBaseSchema", () => {
@@ -70,6 +72,33 @@ describe("prismConfigBaseSchema", () => {
     if (result.success) {
       expect(resolveAuthenticationGateMode(result.data)).toBe("admin");
       expect(resolveSignInPathDropOff(result.data)).toBe("/");
+    }
+  });
+
+  it("accepts build.output static and defaults omitted build to server", () => {
+    const staticResult = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Static App",
+        description: "Static export",
+      },
+      build: { output: "static" },
+    });
+    expect(staticResult.success).toBe(true);
+    if (staticResult.success) {
+      expect(resolveBuildOutput(staticResult.data)).toBe("static");
+      expect(isStaticBuild(staticResult.data)).toBe(true);
+    }
+
+    const serverDefault = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Server App",
+        description: "Server app",
+      },
+    });
+    expect(serverDefault.success).toBe(true);
+    if (serverDefault.success) {
+      expect(resolveBuildOutput(serverDefault.data)).toBe("server");
+      expect(isStaticBuild(serverDefault.data)).toBe(false);
     }
   });
 });

@@ -38,6 +38,8 @@ export interface GenerateCommandOptions extends BaseCommandOptions {
   path?: string;
   /** App-wide session gate (proxy) vs admin-only pages. Default: admin */
   authGate?: "admin" | "app";
+  /** Static export scaffold (no auth/DB). */
+  static?: boolean;
 }
 
 /**
@@ -91,7 +93,7 @@ function prismPackagesPrefix(layout: GenerateLayout): string {
 /**
  * Create directory structure
  */
-function createDirectoryStructure(targetDir: string): void {
+function createDirectoryStructure(targetDir: string, isStatic = false): void {
   const dirs = [
     "app",
     "app/system-sheet",
@@ -100,8 +102,7 @@ function createDirectoryStructure(targetDir: string): void {
     "ui/styles",
     "docs",
     "config",
-    "database",
-    "database/migrations",
+    ...(isStatic ? [] : ["database", "database/migrations"]),
     "intelligence/tasks",
     "cli",
     "scripts",
@@ -147,59 +148,93 @@ function readPrismPackageManager(prismRoot: string | null): string | undefined {
 }
 
 function buildPrismDependencies(
-  layout: GenerateLayout
+  layout: GenerateLayout,
+  isStatic = false
 ): Record<string, string> {
   if (layout === "prism-monorepo") {
-    return {
+    const deps: Record<string, string> = {
       "application-settings": "*",
-      database: "*",
       intelligence: "*",
       logger: "*",
       ui: "*",
       "@prism/utilities": "*",
-      admin: "*",
-      authentication: "*",
       charts: "*",
-      "feature-flags": "*",
+      zod: "^4.4.3",
+    };
+    if (!isStatic) {
+      Object.assign(deps, {
+        database: "*",
+        admin: "*",
+        authentication: "*",
+        "feature-flags": "*",
+        flags: "^4.0.0",
+        "better-auth": "^1.6.14",
+        "@better-auth/drizzle-adapter": "^1.6.14",
+        "@better-auth/api-key": "^1.6.14",
+        "@better-auth/passkey": "^1.6.14",
+      });
+    }
+    return deps;
+  }
+
+  const filePrefix = "file:../../prism/packages/";
+
+  const deps: Record<string, string> = {
+    "application-settings": `${filePrefix}application-settings`,
+    intelligence: `${filePrefix}intelligence`,
+    logger: `${filePrefix}logger`,
+    ui: `${filePrefix}ui`,
+    "@prism/utilities": `${filePrefix}utilities`,
+    charts: `${filePrefix}charts`,
+    zod: "^4.4.3",
+  };
+  if (!isStatic) {
+    Object.assign(deps, {
+      database: `${filePrefix}database`,
+      admin: `${filePrefix}admin`,
+      authentication: `${filePrefix}authentication`,
+      "feature-flags": `${filePrefix}feature-flags`,
       flags: "^4.0.0",
       "better-auth": "^1.6.14",
       "@better-auth/drizzle-adapter": "^1.6.14",
       "@better-auth/api-key": "^1.6.14",
       "@better-auth/passkey": "^1.6.14",
-      zod: "^4.4.3",
-    };
+    });
   }
-
-  const filePrefix = "file:../../prism/packages/";
-
-  return {
-    "application-settings": `${filePrefix}application-settings`,
-    database: `${filePrefix}database`,
-    intelligence: `${filePrefix}intelligence`,
-    logger: `${filePrefix}logger`,
-    ui: `${filePrefix}ui`,
-    "@prism/utilities": `${filePrefix}utilities`,
-    admin: `${filePrefix}admin`,
-    authentication: `${filePrefix}authentication`,
-    charts: `${filePrefix}charts`,
-    "feature-flags": `${filePrefix}feature-flags`,
-    flags: "^4.0.0",
-    "better-auth": "^1.6.14",
-    "@better-auth/drizzle-adapter": "^1.6.14",
-    "@better-auth/api-key": "^1.6.14",
-    "@better-auth/passkey": "^1.6.14",
-    zod: "^4.4.3",
-  };
+  return deps;
 }
 
 function generateWebAppPackageJson(
   appRoot: string,
   appName: string,
   layout: GenerateLayout,
-  prismRoot: string | null
+  prismRoot: string | null,
+  isStatic = false
 ): void {
   const useWebpack = layout === "consumer-workspace";
   const packageManager = readPrismPackageManager(prismRoot);
+
+  const dbScripts = isStatic
+    ? {}
+    : {
+        "db:generate":
+          "drizzle-kit generate --config=database/drizzle.config.ts",
+        "db:migrate": "drizzle-kit migrate --config=database/drizzle.config.ts",
+        "db:push": "drizzle-kit push --config=database/drizzle.config.ts",
+        "db:studio": "drizzle-kit studio --config=database/drizzle.config.ts",
+        "db:seed": "tsx database/seed.ts",
+        "db:seed:admin": "tsx database/seed-admin.ts",
+      };
+
+  const serverRuntimeDeps = isStatic
+    ? {}
+    : {
+        "@neondatabase/serverless": "^1.0.2",
+        dotenv: "^17.4.2",
+        "drizzle-orm": "^0.45.2",
+      };
+
+  const serverDevDeps = isStatic ? {} : { "drizzle-kit": "^0.31.10" };
 
   const packageJson = {
     name: layout === "consumer-workspace" ? "web" : appName,
@@ -222,23 +257,16 @@ function generateWebAppPackageJson(
       "test:run": "vitest run",
       "quality:ci":
         "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
-      "db:generate": "drizzle-kit generate --config=database/drizzle.config.ts",
-      "db:migrate": "drizzle-kit migrate --config=database/drizzle.config.ts",
-      "db:push": "drizzle-kit push --config=database/drizzle.config.ts",
-      "db:studio": "drizzle-kit studio --config=database/drizzle.config.ts",
-      "db:seed": "tsx database/seed.ts",
-      "db:seed:admin": "tsx database/seed-admin.ts",
+      ...dbScripts,
     },
     dependencies: {
-      ...buildPrismDependencies(layout),
-      "@neondatabase/serverless": "^1.0.2",
+      ...buildPrismDependencies(layout, isStatic),
       "@radix-ui/react-slot": "^1.2.4",
       "mapbox-gl": "^3.16.0",
       next: "16.2.7",
       react: "19.2.7",
       "react-dom": "19.2.7",
-      dotenv: "^17.4.2",
-      "drizzle-orm": "^0.45.2",
+      ...serverRuntimeDeps,
       zod: "^4.3.6",
     },
     devDependencies: {
@@ -248,7 +276,6 @@ function generateWebAppPackageJson(
       "@types/react": "^19.2.16",
       "@types/react-dom": "^19.2.3",
       commander: "^15.0.0",
-      "drizzle-kit": "^0.31.10",
       eslint: "^10.4.1",
       "eslint-config-next": "16.2.7",
       lightningcss: "^1.32.0",
@@ -260,6 +287,7 @@ function generateWebAppPackageJson(
       "tw-animate-css": "^1.4.0",
       typescript: "^6.0.3",
       vitest: "^4.1.8",
+      ...serverDevDeps,
     },
   };
 
@@ -365,9 +393,10 @@ function generatePackageJson(
   appRoot: string,
   appName: string,
   layout: GenerateLayout,
-  prismRoot: string | null
+  prismRoot: string | null,
+  isStatic = false
 ): void {
-  generateWebAppPackageJson(appRoot, appName, layout, prismRoot);
+  generateWebAppPackageJson(appRoot, appName, layout, prismRoot, isStatic);
 
   if (layout === "consumer-workspace") {
     generateConsumerRepoPackageJson(repoRoot, appName, prismRoot);
@@ -377,12 +406,61 @@ function generatePackageJson(
 /**
  * Generate next.config.ts
  */
-function generateNextConfig(appRoot: string, layout: GenerateLayout): void {
+function generateNextConfig(
+  appRoot: string,
+  layout: GenerateLayout,
+  isStatic = false
+): void {
   const prismPrefix = prismPackagesPrefix(layout);
 
   const nextConfig =
-    layout === "consumer-workspace"
+    layout === "consumer-workspace" && isStatic
       ? `import type { NextConfig } from "next";
+import path from "path";
+
+const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/*": ["./config.app.json", "./config.prism.json"],
+  },
+  output: "export",
+  images: {
+    unoptimized: true,
+  },
+  transpilePackages: [
+    "application-settings",
+    "@prism/utilities",
+    "charts",
+    "logger",
+    "ui",
+  ],
+  turbopack: {},
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@logger": path.resolve(__dirname, "${prismPrefix}/logger/source"),
+      "@logger/client": path.resolve(
+        __dirname,
+        "${prismPrefix}/logger/source/client"
+      ),
+      "@logger/server": path.resolve(
+        __dirname,
+        "${prismPrefix}/logger/source/server"
+      ),
+      "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
+      "@utilities": path.resolve(
+        __dirname,
+        "${prismPrefix}/utilities/source"
+      ),
+    };
+    config.resolve.symlinks = true;
+    return config;
+  },
+};
+
+export default nextConfig;
+`
+      : layout === "consumer-workspace"
+        ? `import type { NextConfig } from "next";
 import path from "path";
 
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
@@ -467,7 +545,7 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 `
-      : `import type { NextConfig } from "next";
+        : `import type { NextConfig } from "next";
 import path from "path";
 
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
@@ -870,17 +948,19 @@ function formatDisplayName(appName: string): string {
 function generateApplicationManifestFiles(
   appRoot: string,
   appName: string,
-  authGate: "admin" | "app" = "admin"
+  authGate: "admin" | "app" = "admin",
+  isStatic = false
 ): void {
   const displayName = formatDisplayName(appName);
 
-  const prismConfig = {
+  const prismConfig: Record<string, unknown> = {
     app: {
       nameIdentifier: appName,
       nameDisplay: displayName,
       description: `${displayName} — generated with Prism.`,
       icon: "layers",
     },
+    ...(isStatic ? { build: { output: "static" } } : {}),
     authentication: {
       gateMode: authGate,
       signInPathDropOff: "/",
@@ -1469,7 +1549,8 @@ function getTemplatesDir(): string {
 function copyTemplateFiles(
   sourceDir: string,
   targetDir: string,
-  vars: Record<string, string>
+  vars: Record<string, string>,
+  isStatic = false
 ): void {
   if (!fs.existsSync(sourceDir)) {
     log.error(`Template source directory not found: ${sourceDir}`);
@@ -1501,6 +1582,15 @@ function copyTemplateFiles(
     "*.db-shm",
     "data", // Skip data directory (contains database files)
     "lib", // Legacy Next convention — Prism apps use library/ only
+    ...(isStatic
+      ? [
+          "database",
+          "library/authentication",
+          "library/kysely-shim.ts",
+          "config/auth.ts",
+          "proxy.ts",
+        ]
+      : []),
     "package.json", // Skip package.json (generated separately with correct name)
     "tsconfig.json", // Skip tsconfig.json (generated separately with correct paths)
     "next.config.ts", // Skip next.config.ts (generated separately with correct config)
@@ -1555,7 +1645,11 @@ function copyTemplateFiles(
 /**
  * Generate all template files from apps/web directory
  */
-function generateTemplateFiles(targetDir: string, appName: string): void {
+function generateTemplateFiles(
+  targetDir: string,
+  appName: string,
+  isStatic = false
+): void {
   // Both monorepo and standalone use the same import style (@ui, @database, etc.)
   // Standalone uses file: dependencies, so imports are identical
   const vars = {
@@ -1568,8 +1662,10 @@ function generateTemplateFiles(targetDir: string, appName: string): void {
   };
 
   const templateSourceDir = getTemplatesDir();
-  copyTemplateFiles(templateSourceDir, targetDir, vars);
-  writeAppEnvFiles(targetDir);
+  copyTemplateFiles(templateSourceDir, targetDir, vars, isStatic);
+  if (!isStatic) {
+    writeAppEnvFiles(targetDir);
+  }
 }
 
 /**
@@ -1693,8 +1789,10 @@ export async function runGenerateCommand(
     const installRoot = layout === "consumer-workspace" ? repoRoot : appRoot;
     const dbCommandRoot = layout === "consumer-workspace" ? repoRoot : appRoot;
 
+    const isStatic = options.static === true;
+
     log.info("Creating directory structure...");
-    createDirectoryStructure(appRoot);
+    createDirectoryStructure(appRoot, isStatic);
 
     log.info("Generating template files...");
     const consumerPrismRoot =
@@ -1705,10 +1803,11 @@ export async function runGenerateCommand(
       appRoot,
       appName,
       layout,
-      inMonorepo ? prismRoot : consumerPrismRoot
+      inMonorepo ? prismRoot : consumerPrismRoot,
+      isStatic
     );
     generateTsConfig(appRoot, layout);
-    generateNextConfig(appRoot, layout);
+    generateNextConfig(appRoot, layout, isStatic);
     generateNvmrc(repoRoot);
     const templateVars = { APP_NAME: appName };
 
@@ -1725,9 +1824,10 @@ export async function runGenerateCommand(
     generateApplicationManifestFiles(
       appRoot,
       appName,
-      options.authGate ?? "admin"
+      options.authGate ?? "admin",
+      isStatic
     );
-    generateTemplateFiles(appRoot, appName);
+    generateTemplateFiles(appRoot, appName, isStatic);
     assertAppUsesLibraryDir(appRoot);
     if (layout === "consumer-workspace") {
       generateAppCliWrapper(appRoot);
@@ -1736,7 +1836,9 @@ export async function runGenerateCommand(
     patchGlobalsCss(appRoot, layout);
 
     log.info(
-      "Environment: apps/web/.env.example + apps/web/.env (edit before db:push)"
+      isStatic
+        ? "Environment: static export — no DATABASE_URL required"
+        : "Environment: apps/web/.env.example + apps/web/.env (edit before db:push)"
     );
 
     const pm = detectPackageManager();
@@ -1757,34 +1859,36 @@ export async function runGenerateCommand(
       }
     }
 
-    log.info("Generating database migrations...");
-    try {
-      execSync(`${pm} run db:generate`, {
-        cwd: dbCommandRoot,
-        stdio: "inherit",
-      });
-    } catch {
-      log.warn("Drizzle generate failed (this is okay if schema is empty)");
-    }
+    if (!isStatic) {
+      log.info("Generating database migrations...");
+      try {
+        execSync(`${pm} run db:generate`, {
+          cwd: dbCommandRoot,
+          stdio: "inherit",
+        });
+      } catch {
+        log.warn("Drizzle generate failed (this is okay if schema is empty)");
+      }
 
-    log.info("Applying database migrations...");
-    try {
-      execSync(`${pm} run db:migrate`, {
-        cwd: dbCommandRoot,
-        stdio: "inherit",
-      });
-    } catch {
-      log.warn("Drizzle migrate failed (this is okay if no migrations)");
-    }
+      log.info("Applying database migrations...");
+      try {
+        execSync(`${pm} run db:migrate`, {
+          cwd: dbCommandRoot,
+          stdio: "inherit",
+        });
+      } catch {
+        log.warn("Drizzle migrate failed (this is okay if no migrations)");
+      }
 
-    log.info("Seeding database...");
-    try {
-      execSync(`${pm} run db:seed`, {
-        cwd: dbCommandRoot,
-        stdio: "inherit",
-      });
-    } catch {
-      log.warn("Seed failed (this is okay if seed script has issues)");
+      log.info("Seeding database...");
+      try {
+        execSync(`${pm} run db:seed`, {
+          cwd: dbCommandRoot,
+          stdio: "inherit",
+        });
+      } catch {
+        log.warn("Seed failed (this is okay if seed script has issues)");
+      }
     }
 
     log.info("Initializing git repository...");
@@ -1840,6 +1944,11 @@ export function registerGenerateCommand(program: Command): void {
       "--auth-gate <mode>",
       "Session gate: admin (default, /admin only) or app (full UI via proxy)",
       "admin"
+    )
+    .option(
+      "--static",
+      "Static export scaffold (build.output: static, no auth/DB)",
+      false
     )
     .action(async (name: string, options: GenerateCommandOptions) => {
       try {

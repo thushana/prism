@@ -9,6 +9,13 @@
 
 import fs from "fs";
 import path from "path";
+import { discoverPrismAppRoots } from "./assert-app-library-layout";
+import {
+  filterDependencyNamesForBuildOutput,
+  SERVER_ONLY_DEV_PACKAGES,
+  SERVER_ONLY_RUNTIME_PACKAGES,
+} from "./sync-dependency-allowlist";
+import { readBuildOutputFromAppRoot } from "./read-consumer-build-output";
 
 const scriptDirectoryPath = __dirname;
 const isRunningFromInsidePrismRepository =
@@ -99,6 +106,51 @@ function writePackageJsonFile(filePath: string, data: PackageJson): void {
   fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
+function resolveConsumerAppRoot(
+  parentProjectRootDirectoryPath: string
+): string {
+  const appRoots = discoverPrismAppRoots(parentProjectRootDirectoryPath);
+  const appsWeb = path.join(parentProjectRootDirectoryPath, "apps", "web");
+  if (appRoots.includes(path.resolve(appsWeb))) {
+    return appsWeb;
+  }
+  return appRoots[0] ?? parentProjectRootDirectoryPath;
+}
+
+function reportStaleServerPackages(
+  parentPackageJson: PackageJson,
+  buildOutput: "static" | "server"
+): void {
+  if (buildOutput !== "static") {
+    return;
+  }
+
+  const stale: string[] = [];
+  const allDeps = {
+    ...(parentPackageJson.dependencies ?? {}),
+    ...(parentPackageJson.devDependencies ?? {}),
+  };
+
+  for (const packageName of [
+    ...SERVER_ONLY_RUNTIME_PACKAGES,
+    ...SERVER_ONLY_DEV_PACKAGES,
+  ]) {
+    if (allDeps[packageName]) {
+      stale.push(packageName);
+    }
+  }
+
+  if (stale.length > 0) {
+    console.log(
+      "ℹ️  Static build: server-only packages still in manifest (not removed automatically):\n"
+    );
+    for (const name of stale) {
+      console.log(`   - ${name}`);
+    }
+    console.log("");
+  }
+}
+
 function synchronizeDependencyVersions(
   shouldWriteUpdatesToParentPackageJson: boolean
 ): void {
@@ -122,6 +174,21 @@ function synchronizeDependencyVersions(
     parentApplicationPackageJsonPath
   );
 
+  const consumerAppRoot = resolveConsumerAppRoot(
+    parentProjectRootDirectoryPath
+  );
+  const buildOutput = readBuildOutputFromAppRoot(consumerAppRoot);
+  reportStaleServerPackages(parentPackageJson, buildOutput);
+
+  const runtimePackageNames = filterDependencyNamesForBuildOutput(
+    REFERENCE_WEB_APPLICATION_RUNTIME_DEPENDENCY_PACKAGE_NAMES,
+    buildOutput
+  );
+  const devPackageNames = filterDependencyNamesForBuildOutput(
+    REFERENCE_WEB_APPLICATION_DEVELOPMENT_DEPENDENCY_PACKAGE_NAMES,
+    buildOutput
+  );
+
   const referenceRuntimeDependencies = referencePackageJson.dependencies ?? {};
   const referenceDevelopmentDependencies =
     referencePackageJson.devDependencies ?? {};
@@ -135,7 +202,7 @@ function synchronizeDependencyVersions(
   const versionDriftDescriptionLines: string[] = [];
   const skippedSynchronizationDescriptionLines: string[] = [];
 
-  for (const packageName of REFERENCE_WEB_APPLICATION_RUNTIME_DEPENDENCY_PACKAGE_NAMES) {
+  for (const packageName of runtimePackageNames) {
     const referenceVersionRange = referenceRuntimeDependencies[packageName];
     if (referenceVersionRange === undefined) {
       skippedSynchronizationDescriptionLines.push(
@@ -154,7 +221,7 @@ function synchronizeDependencyVersions(
     }
   }
 
-  for (const packageName of REFERENCE_WEB_APPLICATION_DEVELOPMENT_DEPENDENCY_PACKAGE_NAMES) {
+  for (const packageName of devPackageNames) {
     const referenceVersionRange = referenceDevelopmentDependencies[packageName];
     if (referenceVersionRange === undefined) {
       skippedSynchronizationDescriptionLines.push(

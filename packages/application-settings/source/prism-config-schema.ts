@@ -61,9 +61,22 @@ export type PrismAuthenticationConfig = z.infer<
   typeof prismAuthenticationConfigSchema
 >;
 
+export const prismBuildOutputSchema = z.enum(["static", "server"]);
+
+export type PrismBuildOutput = z.infer<typeof prismBuildOutputSchema>;
+
+export const prismBuildConfigSchema = z
+  .object({
+    output: prismBuildOutputSchema.default("server"),
+  })
+  .optional();
+
+export type PrismBuildConfig = z.infer<typeof prismBuildConfigSchema>;
+
 /** Standard Prism platform config shape (all consumer apps). */
 export const prismConfigBaseSchema = z.object({
   app: prismAppConfigSchema,
+  build: prismBuildConfigSchema,
   authentication: prismAuthenticationConfigSchema,
   deployments: z
     .object({
@@ -92,4 +105,15 @@ export function resolveSignInPathDropOff(
   config: Pick<PrismConfigBase, "authentication">
 ): string {
   return config.authentication?.signInPathDropOff ?? "/";
+}
+
+/** Resolve build output from `config.prism.json` → `build` (default `server`). */
+export function resolveBuildOutput(
+  config: Pick<PrismConfigBase, "build">
+): PrismBuildOutput {
+  return config.build?.output ?? "server";
+}
+
+export function isStaticBuild(config: Pick<PrismConfigBase, "build">): boolean {
+  return resolveBuildOutput(config) === "static";
 }

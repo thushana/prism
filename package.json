@@ -47,6 +47,7 @@
     "setup": "pnpm link --global && pnpm run prism:sync",
     "prism:sync:commands": "tsx scripts/sync-commands.ts",
     "prism:sync:git": "tsx scripts/sync-git.ts",
+    "prism:sync:scaffold": "tsx scripts/sync-scaffold-from-prism.ts",
     "prism:sync:scripts": "tsx scripts/sync-scripts.ts",
     "generate:colors": "pnpm --filter ui run generate:colors",
     "knip": "knip --dependencies",

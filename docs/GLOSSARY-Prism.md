@@ -114,6 +114,20 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 **Related**: CLI Tool, Child App
 
+## Static build
+
+**Definition**: A Prism consumer with `config.prism.json` → `build.output: "static"`. Used for Next.js static export sites with no auth/DB runtime.
+
+**Context**: Sync, layout assert, and dependency allowlists skip server-only scaffold. Generate with `prism generate my-app --path ../my-app --static`.
+
+**Related**: Server build, Sync, Child App
+
+## Server build
+
+**Definition**: Default Prism consumer mode (`build.output: "server"` or omitted). Full auth/DB scaffold, Drizzle scripts, and server dependency sync.
+
+**Related**: Static build, Sync
+
 ## System Sheet
 
 **Definition**: A password-protected admin page that displays system information, health status, and diagnostics.
