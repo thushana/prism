@@ -23,6 +23,9 @@ Same structure for all Prism apps:
     "gateMode": "admin",
     "signInPathDropOff": "/"
   },
+  "build": {
+    "output": "server"
+  },
   "deployments": {
     "dev": {
       "port": 1776
@@ -36,11 +39,32 @@ Same structure for all Prism apps:
 - `app.nameDisplay` — human-facing name (admin chrome, passkey RP name, page titles).
 - `authentication.gateMode` — `admin` (only `/admin/*` gated) or `app` (proxy redirects to `/sign-in`). Default `admin`.
 - `authentication.signInPathDropOff` — redirect after sign-in (default `/`). Wire via `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md).
+- `build.output` — `server` (default) or `static`. Static consumers skip auth/DB scaffold requirements during sync and quality checks. See [SYNC-Prism.md](./SYNC-Prism.md).
 - `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to `{nameIdentifier}.localhost` and prints the Prism dev URL on startup.
 - Keep `deployments.dev.port` in sync with any hardcoded kill scripts (e.g. root `dev:kill`).
 - **Local dev URL:** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.
 - Legacy `app.displayName` is still accepted and mapped to `nameDisplay`.
 - `readApplicationSettings()` reads the `app` section for admin chrome and metadata.
+
+### Static export example
+
+For static sites (no auth/DB at runtime), set `build.output` to `static`. The `authentication` block is optional metadata for future use but is not required for layout checks:
+
+```json
+{
+  "app": {
+    "nameIdentifier": "alameda-elections",
+    "nameDisplay": "Alameda Elections",
+    "description": "Precinct-level election results map for Alameda County.",
+    "icon": "map"
+  },
+  "build": { "output": "static" },
+  "authentication": { "gateMode": "admin", "signInPathDropOff": "/" },
+  "deployments": { "dev": { "port": 1776 } }
+}
+```
+
+Pair with `output: "export"` in `next.config.ts`. Use `prism generate my-app --path ../my-app --static` for a static-first scaffold.
 
 ## `config.app.json`
 

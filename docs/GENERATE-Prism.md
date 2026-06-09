@@ -62,7 +62,21 @@ prism generate my-app
 
 # Overwrite existing directory
 prism generate my-app --path ../my-app --force
+
+# Static export (no auth/DB scaffold)
+prism generate my-app --path ../my-app --static
 ```
+
+### Static export (`--static`)
+
+Use `--static` for sites that ship as static export (`output: "export"`) with no auth or database at runtime:
+
+- Writes `"build": { "output": "static" }` in `config.prism.json`
+- Omits `database/`, `library/authentication/`, `config/auth.ts`, and Drizzle scripts
+- Generates `next.config.ts` with `output: "export"` and a minimal `transpilePackages` set
+- Skips `db:generate`, `db:migrate`, and `db:seed` during generate
+
+Server-mode consumers (default) include full auth/DB scaffold.
 
 ## What Gets Generated
 

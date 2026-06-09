@@ -54,14 +54,56 @@ describe("discoverPrismAppRoots", () => {
   });
 });
 
+function writeStaticLibraryFiles(appRoot: string): void {
+  const fullPath = path.join(appRoot, "library/config/index.ts");
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+  fs.writeFileSync(fullPath, "export {};\n", "utf-8");
+}
+
+function writePrismConfig(
+  appRoot: string,
+  buildOutput?: "static" | "server"
+): void {
+  const config: Record<string, unknown> = {
+    app: { nameDisplay: "Test", description: "Test app" },
+  };
+  if (buildOutput) {
+    config.build = { output: buildOutput };
+  }
+  fs.writeFileSync(
+    path.join(appRoot, "config.prism.json"),
+    JSON.stringify(config),
+    "utf-8"
+  );
+}
+
 describe("assertAppUsesLibraryDir", () => {
   it("throws when lib/ exists", () => {
     const appRoot = makeTempDir();
     writeRequiredLibraryFiles(appRoot);
+    writePrismConfig(appRoot, "server");
     fs.mkdirSync(path.join(appRoot, "lib"));
 
     expect(() => assertAppUsesLibraryDir(appRoot)).toThrow(
       /must not include lib/
+    );
+  });
+
+  it("passes for static app with only library/config/index.ts", () => {
+    const appRoot = makeTempDir();
+    writeStaticLibraryFiles(appRoot);
+    writePrismConfig(appRoot, "static");
+
+    expect(() => assertAppUsesLibraryDir(appRoot)).not.toThrow();
+  });
+
+  it("fails for server app missing auth/DB library files", () => {
+    const appRoot = makeTempDir();
+    writeStaticLibraryFiles(appRoot);
+    writePrismConfig(appRoot, "server");
+
+    expect(() => assertAppUsesLibraryDir(appRoot)).toThrow(
+      /missing required library files/
     );
   });
 });

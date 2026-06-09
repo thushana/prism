@@ -105,6 +105,19 @@ function sync(): void {
       console.log("   ⚠️  No package.json found in prism root, skipping...");
     }
 
+    console.log("\n");
+
+    // Sync scaffold files (mode-aware)
+    console.log("Step 7: Syncing scaffold from prism/apps/web...\n");
+    const syncScaffoldPath = path.join(
+      scriptDir,
+      "sync-scaffold-from-prism.ts"
+    );
+    execSync(`tsx ${syncScaffoldPath}`, {
+      cwd: APP_ROOT,
+      stdio: "inherit",
+    });
+
     console.log("\n✅ Prism sync complete!");
   } catch (error) {
     console.error("❌ Sync failed");
