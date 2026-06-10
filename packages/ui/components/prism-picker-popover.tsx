@@ -58,6 +58,19 @@ const POPOVER_BASE_STYLE: CSSProperties = {
 const POPOVER_CONTENT_CLASS =
   "rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg outline-none";
 
+const POPOVER_FIT_CONTENT_STYLE: CSSProperties = {
+  zIndex: 2147483000,
+  boxSizing: "border-box",
+  width: "max-content",
+  minWidth: "auto",
+  maxWidth: PICKER_POPOVER_WIDTH_CSS,
+  maxHeight: PICKER_POPOVER_MAX_HEIGHT_CSS,
+  display: "flex",
+  flexDirection: "column",
+  minHeight: 0,
+  overflow: "hidden",
+};
+
 export function PrismPickerPopover({
   trigger,
   children,
@@ -65,17 +78,20 @@ export function PrismPickerPopover({
   onOpenChange,
   contentClassName,
   contentStyle,
+  fitContent = false,
 }: {
   trigger: ReactNode;
   children: ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contentClassName?: string;
-  /** Caller may override only height/maxHeight; width is locked. */
+  /** Caller may override only height/maxHeight; width is locked unless `fitContent`. */
   contentStyle?: Pick<CSSProperties, "height" | "maxHeight">;
+  /** Shrink popover width to the widest menu item instead of the default picker width. */
+  fitContent?: boolean;
 }) {
   const mergedStyle: CSSProperties = {
-    ...POPOVER_BASE_STYLE,
+    ...(fitContent ? POPOVER_FIT_CONTENT_STYLE : POPOVER_BASE_STYLE),
     ...(contentStyle ?? {}),
   };
   return (
