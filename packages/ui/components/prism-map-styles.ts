@@ -57,6 +57,10 @@ export const PRISM_MAP_GOOGLE_ROADMAP_BASE: google.maps.MapOptions = {
   mapTypeId: "roadmap",
   disableDefaultUI: true,
   zoomControl: true,
+  /** Re-enable after `disableDefaultUI` so users can leave north-up. */
+  rotateControl: true,
+  headingInteractionEnabled: true,
+  tiltInteractionEnabled: true,
   gestureHandling: "greedy",
 };
 
