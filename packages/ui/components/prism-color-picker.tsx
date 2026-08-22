@@ -1035,8 +1035,7 @@ export function PrismColorPicker({
                             paletteId,
                             family,
                             gradientShadeNum as
-                              | MaterialShadeKey
-                              | TailwindNumericShade
+                              MaterialShadeKey | TailwindNumericShade
                           ) ?? "#737373";
                         const foreground =
                           approximateRelativeLuminanceFromCssColor(paint) <

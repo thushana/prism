@@ -161,8 +161,7 @@ export function PrismMapMapbox({
         container: el,
         style: style as string | import("mapbox-gl").StyleSpecification,
         projection: mapboxExtra?.projection as
-          | import("mapbox-gl").ProjectionSpecification
-          | undefined,
+          import("mapbox-gl").ProjectionSpecification | undefined,
         attributionControl: false,
       });
 
@@ -279,8 +278,7 @@ export function PrismMapMapbox({
     const mapboxgl = mapboxglRef.current;
     if (!mapboxgl) return;
     const src = mapInstance.getSource("prism-map-routes") as
-      | import("mapbox-gl").GeoJSONSource
-      | undefined;
+      import("mapbox-gl").GeoJSONSource | undefined;
     if (!src) return;
 
     routesByIdRef.current.clear();
@@ -291,8 +289,7 @@ export function PrismMapMapbox({
     src.setData(buildRouteFeatureCollection(routes));
 
     const endpointSrc = mapInstance.getSource("prism-map-endpoints") as
-      | import("mapbox-gl").GeoJSONSource
-      | undefined;
+      import("mapbox-gl").GeoJSONSource | undefined;
     endpointSrc?.setData(buildRouteEndpointFeatureCollection(routes));
 
     if (routes.length === 0) {

@@ -4,10 +4,7 @@
  */
 
 export type PrismMotionPlaybackMode =
-  | "loop"
-  | "once"
-  | "hover"
-  | "occasionally";
+  "loop" | "once" | "hover" | "occasionally";
 
 /**
  * Same union as {@link PrismMotionPlaybackMode}; kept for emoji/Noto call sites and public API
@@ -16,11 +13,7 @@ export type PrismMotionPlaybackMode =
 export type PrismEmojiAnimationMode = PrismMotionPlaybackMode;
 
 export type PrismMotionDurationName =
-  | "glacial"
-  | "slow"
-  | "regular"
-  | "fast"
-  | "speedy";
+  "glacial" | "slow" | "regular" | "fast" | "speedy";
 
 export const PRISM_MOTION_DURATION_SEC: Record<
   PrismMotionDurationName,

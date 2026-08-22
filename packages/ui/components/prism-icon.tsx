@@ -42,11 +42,7 @@ export type PrismIconSizeName = PrismSize;
  * These five names are a curated ladder; pass a number for any other axis value.
  */
 export type PrismIconWeightName =
-  | "light"
-  | "thin"
-  | "regular"
-  | "bold"
-  | "heavy";
+  "light" | "thin" | "regular" | "bold" | "heavy";
 
 /** Filled variant: **FILL** axis `1` when `"on"`. */
 export type PrismIconFillMode = "on" | "off";

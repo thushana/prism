@@ -37,7 +37,9 @@ function ensureMaterialSymbolsFont(): Promise<void> {
   return materialSymbolsFontPromise;
 }
 
-function subscribeMaterialSymbolsFontReady(onStoreChange: () => void): () => void {
+function subscribeMaterialSymbolsFontReady(
+  onStoreChange: () => void
+): () => void {
   listeners.add(onStoreChange);
   void ensureMaterialSymbolsFont();
   return () => {

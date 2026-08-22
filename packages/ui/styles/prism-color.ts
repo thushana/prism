@@ -74,11 +74,7 @@ export type PrismPaletteId = "default" | "tailwind" | (string & {});
 
 /** Material numeric ramp + accent keys (see `color-values.ts`). Tailwind ramps use numeric shades only. */
 export type PrismDefaultPaletteShadeKey =
-  | number
-  | "a100"
-  | "a200"
-  | "a400"
-  | "a700";
+  number | "a100" | "a200" | "a400" | "a700";
 
 /**
  * Theme text roles for {@link prismColorSpecToTypographyPaint} / {@link PrismTypography}.

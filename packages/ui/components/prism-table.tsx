@@ -93,9 +93,7 @@ export type PrismTableSortComparison = "alphabetical" | "numeric";
  *   percentage approximation.)
  */
 export type PrismTableColumnWidthStrategy =
-  | "auto"
-  | "equal"
-  | "stretchRemainder";
+  "auto" | "equal" | "stretchRemainder";
 
 type RegisteredHead = {
   sortable: boolean;

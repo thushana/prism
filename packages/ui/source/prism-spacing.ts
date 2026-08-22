@@ -3,11 +3,7 @@
  * and {@link PrismButton} padding multipliers. Same five names everywhere.
  */
 export type PrismSpacing =
-  | "tight"
-  | "compact"
-  | "regular"
-  | "comfortable"
-  | "airy";
+  "tight" | "compact" | "regular" | "comfortable" | "airy";
 
 /** Multiplier applied to the button base padding recipe (see {@link PrismButton}). */
 export const PRISM_BUTTON_SPACING_MULTIPLIER: Record<PrismSpacing, number> = {

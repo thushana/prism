@@ -650,16 +650,16 @@ export function TypeScalePreview({
               ? "light"
               : undefined;
   const customTextTransform:
-    | NonNullable<PrismTypographyProps["textTransform"]>
-    | undefined = selectedOptions.has("sentenceCase")
-    ? "sentenceCase"
-    : selectedOptions.has("uppercase")
-      ? "uppercase"
-      : selectedOptions.has("lowercase")
-        ? "lowercase"
-        : selectedOptions.has("capitalize")
-          ? "capitalize"
-          : undefined;
+    NonNullable<PrismTypographyProps["textTransform"]> | undefined =
+    selectedOptions.has("sentenceCase")
+      ? "sentenceCase"
+      : selectedOptions.has("uppercase")
+        ? "uppercase"
+        : selectedOptions.has("lowercase")
+          ? "lowercase"
+          : selectedOptions.has("capitalize")
+            ? "capitalize"
+            : undefined;
   const customTextAlign: "left" | "center" | "right" | "justify" | undefined =
     selectedOptions.has("alignJustified")
       ? "justify"

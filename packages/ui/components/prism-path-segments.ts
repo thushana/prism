@@ -81,8 +81,7 @@ export function buildPrismPathBarAutoSegmentList(
   titleByPathPrefix: Record<string, PrismPathBarTitleEntry>,
   pageTitle: string,
   pageTitleContentOrOptions?:
-    | ReactNode
-    | BuildPrismPathBarAutoSegmentListOptions
+    ReactNode | BuildPrismPathBarAutoSegmentListOptions
 ): PrismPathBarSegment[] {
   const options =
     pageTitleContentOrOptions !== null &&
