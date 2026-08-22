@@ -69,9 +69,7 @@ function segmentSlot(
 }
 
 export type PrismEmojiPickerPreview =
-  | "native"
-  | "googleNotoColor"
-  | "googleNotoAnimated";
+  "native" | "googleNotoColor" | "googleNotoAnimated";
 
 export interface PrismEmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;

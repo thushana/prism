@@ -22,13 +22,7 @@ import {
 export type PrismCodeBlockMode = "card" | "transparent";
 
 export type PrismCodeBlockHighlightLanguage =
-  | "tsx"
-  | "ts"
-  | "js"
-  | "html"
-  | "markdown"
-  | "css"
-  | "json";
+  "tsx" | "ts" | "js" | "html" | "markdown" | "css" | "json";
 
 export type PrismCodeBlockProps = {
   children: string;
@@ -559,8 +553,7 @@ function PrismCodeBlock({
 
   const normalizedLanguage = language?.trim();
   const languageKey = normalizedLanguage?.toLowerCase() as
-    | PrismCodeBlockHighlightLanguage
-    | undefined;
+    PrismCodeBlockHighlightLanguage | undefined;
   const highlighter = languageKey ? HIGH_LIGHTERS[languageKey] : undefined;
   const copyLabel = normalizedLanguage
     ? `Copy ${normalizedLanguage}`

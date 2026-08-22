@@ -66,23 +66,12 @@ export type PrismTypographyFont = "sans" | "serif" | "mono";
 export type PrismTypographyFontWeightPreset = PrismIconWeightName;
 
 export type PrismTypographyAnimationZone =
-  | "whole"
-  | "line"
-  | "word"
-  | "character"
-  | "none";
+  "whole" | "line" | "word" | "character" | "none";
 
 export type PrismTypographyAnimationKind = "fadeIn" | "moveIn" | "none";
 
 type PrismTypographyElement =
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "p"
-  | "span";
+  "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span";
 
 const DEFAULT_ELEMENT: Record<
   PrismTypographyRole,

@@ -25,9 +25,7 @@ export type { PrismEmojiAnimationMode } from "../source/prism-motion";
 
 /** Named size steps match {@link PRISM_ICON_SIZE_NAME_TO_PX} in `prism-icon.tsx` (20 / 24 / 28 / 48 / 64). */
 export type PrismEmojiStyle =
-  | "native"
-  | "googleNotoColor"
-  | "googleNotoAnimated";
+  "native" | "googleNotoColor" | "googleNotoAnimated";
 
 /**
  * Base URL without trailing slash. In TimeTraveler, default
@@ -97,8 +95,7 @@ function rememberGifHeadProbeResult(url: string, outcome: GifHeadProbeOutcome) {
   // Prevent unbounded growth in long-lived sessions.
   while (gifHeadProbeResults.size > GIF_HEAD_PROBE_CACHE_MAX) {
     const firstKey = gifHeadProbeResults.keys().next().value as
-      | string
-      | undefined;
+      string | undefined;
     if (!firstKey) break;
     gifHeadProbeResults.delete(firstKey);
   }
@@ -251,7 +248,7 @@ export function emojiToCodepointKey(emoji: string): string | null {
   if (!firstCluster) return null;
 
   const codepoints: number[] = [];
-  for (let i = 0; i < firstCluster.length; ) {
+  for (let i = 0; i < firstCluster.length;) {
     const cp = firstCluster.codePointAt(i);
     if (cp === undefined) break;
     codepoints.push(cp);
