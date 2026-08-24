@@ -132,7 +132,7 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 **Definition**: A password-protected admin page that displays system information, health status, and diagnostics.
 
-**Context**: Implemented in the `admin` package (`SystemSheetPage`). Uses web authentication (`PRISM_KEY_WEB`) for access control.
+**Context**: Implemented in the `admin` package (`SystemSheetPage`). Access is gated by the app’s Better Auth session (admin role), not legacy shared-secret keys.
 
 **Related**: Authentication, Package
 
@@ -188,6 +188,6 @@ Domain-specific terms, concepts, and abbreviations used in the Prism framework.
 
 **Definition**: The `packages/authentication` package that provides authentication utilities for API and web routes.
 
-**Context**: Supports API authentication via `PRISM_KEY_API` header and web authentication via `PRISM_KEY_WEB` cookie. Used for protecting admin routes and pages.
+**Context**: Better Auth factory (`createPrismAuth`), session gates, API keys (`x-api-key`), and passkeys. Legacy `PRISM_KEY_*` helpers remain under `source/legacy/` during migration.
 
 **Related**: Package, System Sheet

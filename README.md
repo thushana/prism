@@ -111,37 +111,18 @@ pnpm run dev:web
 
 ## Tech Stack
 
-### Core
+Exact versions live in root [`package.json`](./package.json) and each workspace’s `package.json`. After dependency bumps, run **`pnpm outdated`** or **`pnpm run chores`** — do not copy version numbers into this file (see [DOCS-Prism.md](./docs/DOCS-Prism.md)).
 
-- **Framework**: Next.js 16.0.3 (App Router)
-- **Language**: TypeScript 5.9.3 (target: ES2022)
-- **Styling**: Tailwind CSS 4.1.17
-- **Monorepo**: pnpm workspaces
-
-### Apps
-
-- **apps/web**: Sample Next.js application (reference implementation)
-- **apps/\***: Generated apps (created via `prism generate <name>` or `pnpm run prism generate <name>`)
-
-### Packages
-
-- **packages/ui**: Shared UI components (PrismButton, PrismCard, PrismIcon, layout wrappers, read-only chip class bundles, …)
-  - Radix UI primitives
-  - Class Variance Authority for variants
-  - Material Symbols Rounded icons (via Google Fonts)
-- **packages/database**: Database layer
-  - Drizzle ORM 0.44.7
-  - Neon PostgreSQL with @neondatabase/serverless
-- **packages/utilities**: Shared utility functions
-  - `cn()` - Tailwind class name merger
-
-### Development
-
-- **Testing**: Vitest 4.0.10 with React Testing Library
-- **Linting**: ESLint 9.39.1 with Next.js config
-- **Formatting**: Prettier 3.6.2
-- **Git Hooks**: Husky 9.1.7 with lint-staged
-- **Fonts**: Satoshi (variable font) via `next/font/local`
+| Layer | Stack |
+| ----- | ----- |
+| Framework | Next.js (App Router), `--webpack` dev/build |
+| Language | TypeScript (strict, ES2022 target) |
+| Styling | Tailwind CSS 4 |
+| Monorepo | pnpm workspaces |
+| Database | Drizzle ORM + Neon PostgreSQL |
+| Auth | Better Auth (`packages/authentication`) |
+| Testing | Vitest |
+| Lint / format | ESLint + Prettier |
 
 ## Testing
 

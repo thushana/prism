@@ -113,7 +113,7 @@ The package root (`@authentication`) exports **only client-safe** modules (`Pass
 | ---------------------------------------------------------------- | -------------------------------------- | --------------- | -------------------------------------------------- |
 | `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null` |
 | `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                      |
-| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-prism-api-key` gate (rate limited)              |
+| `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-api-key` gate (rate limited); legacy subpath docs may say `x-prism-api-key` |
 | `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)             |
 | `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                          |
 | `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                          |
