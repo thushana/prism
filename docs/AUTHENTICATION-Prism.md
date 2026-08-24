@@ -165,6 +165,18 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 - Adds `better-auth`, `@better-auth/passkey`, adapters, `zod` to dependencies
 - CI dummy env: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`
 
+## Dependency versions (Better Auth)
+
+**Authoritative pins:** `packages/authentication/package.json`, `apps/web/package.json`, and embedder overrides — not this doc.
+
+| Package | Current policy | Why |
+| ------- | -------------- | --- |
+| `better-auth` + `@better-auth/*` | Pinned to **1.6.30** (exact, not `^`) | Security floor (≥1.6.22) without the **1.7** schema / account-identity migration |
+| Embedder parent | `pnpm.overrides` in host `package.json` | Keeps `file:prism/packages/authentication` on the same `@better-auth/core` as the app |
+| Prism monorepo | `pnpm-workspace.yaml` `overrides` | Same pins for `next`, `better-auth`, and plugins across workspaces |
+
+**Do not bump to 1.7** in a routine chores pass. Better Auth 1.7 requires a dedicated migration: upgrade all `@better-auth/*` together, run `npx auth migrate` / `npx auth generate`, backfill account identity, then deploy packages and schema together. See the [1.7 upgrade guide](https://www.better-auth.com/docs/guides/1-7-upgrade-guide).
+
 ## Next.js build notes
 
 - `createPrismAuth` uses `better-auth/minimal` (Drizzle adapter only; avoids pulling Kysely).

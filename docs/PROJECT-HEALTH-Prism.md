@@ -69,6 +69,25 @@ Same as [TimeTraveler](https://github.com/thushana/timetraveler): **`husky`** in
 - **`@typescript-eslint`** may warn about TypeScript versions newer than its declared range until upstream catches up—track upgrades rather than silencing blindly.
 - **Dependabot** handles most version bumps weekly; the ritual below is for drift you still want to eyeball (submodule SHA, shared ranges, audits, dead code).
 
+### Deferred upgrades (not routine chores)
+
+These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
+
+| Upgrade | Status | What to plan for |
+| ------- | ------ | ---------------- |
+| **better-auth 1.7** | Held at **1.6.30** | Schema migration, account-identity backfill, all `@better-auth/*` bumped together. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
+| **TypeScript 7** | Held at **6.x** | `typescript-eslint` peer range is `<6.1.0` today; TS 7 removes deprecated `tsconfig` options (`ignoreDeprecations`, `baseUrl`, old `moduleResolution`, …). See checklist below. |
+
+#### TypeScript 7 checklist (when ready)
+
+1. **Wait for toolchain** — `@typescript-eslint/*` and any Compiler-API consumers must support TS 7 (or pin classic TS 6 for those tools only).
+2. **Audit every `tsconfig.json`** — remove `ignoreDeprecations: "6.0"`; fix `baseUrl` (rewrite `paths` relative to the config file); confirm `moduleResolution: "bundler"` and `target: "ES2022"` (or later).
+3. **Bump `typescript`** in root + every workspace (`apps/web`, `packages/*`, `extension`, embedder root).
+4. **Verify** — `pnpm run typecheck` (app + `cd prism && pnpm run typecheck`), `pnpm run lint`, `pnpm run test:run`, `pnpm run build` in both trees.
+5. **Known good news** — a trial bump to TS 7.0.2 on this repo passed **typecheck** with no source changes; breakage is expected in **config + tooling**, not app logic.
+
+Recent security/tooling floor (Aug 2026): **next ≥16.3.2**, **better-auth 1.6.30**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
+
 ## 6. Monthly dependency & code health ritual
 
 **Time budget:** ~10–15 minutes at the app root (e.g. TimeTraveler). **Quarterly:** add the extras at the end.
