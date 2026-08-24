@@ -13,9 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": "."
+    "noEmit": true
   },
   "include": ["source/**/*", "../ui/mapbox-gl-css.d.ts"],
   "exclude": ["node_modules"]
