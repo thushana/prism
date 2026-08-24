@@ -10,9 +10,7 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "isolatedModules": true,
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0"
+    "isolatedModules": true
   },
   "include": ["source/**/*"]
 }
