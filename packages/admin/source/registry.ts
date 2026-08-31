@@ -103,7 +103,7 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
   "prism-select": {
     title: "PrismSelect",
     description:
-      "Select: PrismButton trigger + popover options (not the OS select).",
+      "Select: PrismButton trigger + popover options; supports multiple.",
     Demo: PrismSelectDemo,
   },
   "prism-table": {

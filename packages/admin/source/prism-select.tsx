@@ -418,9 +418,27 @@ function formatPrismSelectDemoSnippet(
 }
 
 /** Uncontrolled {@link PrismSelect} for read-only matrix rows (own local value). */
-function DemoSelect(props: Omit<PrismSelectProps, "value" | "onValueChange">) {
+function DemoSelect(
+  props: Omit<
+    Extract<PrismSelectProps, { multiple?: false }>,
+    "value" | "onValueChange" | "multiple"
+  >
+) {
   const [value, setValue] = useState("");
   return <PrismSelect value={value} onValueChange={setValue} {...props} />;
+}
+
+/** Uncontrolled multi {@link PrismSelect} for demo matrix rows. */
+function DemoMultiSelect(
+  props: Omit<
+    Extract<PrismSelectProps, { multiple: true }>,
+    "value" | "onValueChange" | "multiple"
+  >
+) {
+  const [value, setValue] = useState<string[]>([]);
+  return (
+    <PrismSelect multiple value={value} onValueChange={setValue} {...props} />
+  );
 }
 
 /** One row of the static variants matrix: overline title + wrapped selects. */
@@ -444,6 +462,16 @@ function Row({ title, children }: { title: string; children: ReactNode }) {
 function SelectVariantsMatrix() {
   return (
     <div className="space-y-6">
+      <Row title="multiple (empty = All)">
+        {SPECTRUM_SELECTS.slice(0, 6).map(({ swatchPrimary, title }) => (
+          <DemoMultiSelect
+            key={swatchPrimary}
+            title={title}
+            color={{ palette: "default", swatchPrimary }}
+            options={SPECTRUM_OPTIONS}
+          />
+        ))}
+      </Row>
       <Row title='shape="pill"'>
         {SPECTRUM_SELECTS.map(({ swatchPrimary, title }) => (
           <DemoSelect

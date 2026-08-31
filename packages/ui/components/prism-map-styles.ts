@@ -1,16 +1,29 @@
 /// <reference types="google.maps" />
 
 /**
- * Reference JSON styling for Prism Google maps (high contrast, labels off).
- * Not passed at runtime when a Map ID is set — recreate this palette in Cloud Console
- * on your {@link PRISM_MAP_GOOGLE_MAP_ID} / `GOOGLE_MAPS_MAP_ID`.
+ * Grayscale basemap: street + park labels only (no restaurants, stores, etc.).
+ *
+ * Installed via {@link applyPrismGoogleMapsBasemapStyle} (StyledMapType) for DEMO.
+ * For production, import onto `GOOGLE_MAPS_MAP_ID` in Cloud Console Map Styles.
  */
 export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
+  /** Desaturate the whole basemap. */
+  { stylers: [{ saturation: -100 }] },
   { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ color: "#eeeeee" }],
+  },
   {
     featureType: "poi",
     elementType: "geometry",
     stylers: [{ color: "#eeeeee" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#e0e0e0" }],
   },
   {
     featureType: "road",
@@ -23,24 +36,69 @@ export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
     stylers: [{ color: "#dadada" }],
   },
   {
-    featureType: "transit.line",
+    featureType: "transit",
     elementType: "geometry",
     stylers: [{ color: "#e5e5e5" }],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "geometry",
-    stylers: [{ color: "#eeeeee" }],
   },
   {
     featureType: "water",
     elementType: "geometry",
     stylers: [{ color: "#c9c9c9" }],
   },
-  /** Last: hide every basemap label (street names, POI names, transit text, admin, water). */
+
+  /** Hide every label / POI icon, then re-enable streets + parks only. */
   {
-    featureType: "all",
     elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    elementType: "labels.icon",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "poi.business",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "transit",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+
+  {
+    featureType: "road",
+    elementType: "labels",
+    stylers: [{ visibility: "on" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#616161" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.stroke",
+    stylers: [{ color: "#f5f5f5" }],
+  },
+
+  {
+    featureType: "poi.park",
+    elementType: "labels",
+    stylers: [{ visibility: "on" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#6b6b6b" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.stroke",
+    stylers: [{ color: "#f5f5f5" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.icon",
     stylers: [{ visibility: "off" }],
   },
 ];

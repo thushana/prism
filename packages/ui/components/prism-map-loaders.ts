@@ -10,6 +10,7 @@
 /// <reference types="google.maps" />
 
 import {
+  PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
   PRISM_MAP_GOOGLE_MAP_ID,
   PRISM_MAP_GOOGLE_ROADMAP_BASE,
 } from "./prism-map-styles";
@@ -21,19 +22,48 @@ export function resolvePrismGoogleMapsMapId(): string {
   return mapIdOverride ?? PRISM_MAP_GOOGLE_MAP_ID;
 }
 
+/** True when the key endpoint provided a Cloud Map ID (not the local DEMO fallback). */
+export function hasPrismGoogleMapsCloudMapId(): boolean {
+  return Boolean(mapIdOverride);
+}
+
 /**
- * Map options for Advanced Markers. Omits `styles` — with a Map ID, appearance is set in Cloud Console
- * (see {@link PRISM_MAP_GOOGLE_GRAYSCALE_STYLES} as a reference palette).
+ * Map options for Advanced Markers + grayscale basemap.
+ *
+ * Always sets a Map ID (Advanced Markers require it). Basemap styling:
+ * - Cloud Map ID → style in Console (import {@link PRISM_MAP_GOOGLE_GRAYSCALE_STYLES})
+ * - DEMO → {@link applyPrismGoogleMapsBasemapStyle} installs that JSON as a StyledMapType
  */
 export function resolvePrismGoogleMapsOptions(
   options: google.maps.MapOptions = {}
 ): google.maps.MapOptions {
   const { styles: _styles, mapId: _mapId, ...rest } = options;
+
   return {
     ...PRISM_MAP_GOOGLE_ROADMAP_BASE,
     ...rest,
     mapId: resolvePrismGoogleMapsMapId(),
   };
+}
+
+/**
+ * After `new google.maps.Map(...)`: grayscale StyledMapType when using DEMO
+ * (no Cloud Map ID). Street + park labels only; businesses/transit labels off.
+ */
+export function applyPrismGoogleMapsBasemapStyle(map: google.maps.Map): void {
+  if (hasPrismGoogleMapsCloudMapId()) {
+    return;
+  }
+  try {
+    const styled = new google.maps.StyledMapType(
+      PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
+      { name: "Grayscale" }
+    );
+    map.mapTypes.set("prism_grayscale", styled);
+    map.setMapTypeId("prism_grayscale" as google.maps.MapTypeId);
+  } catch {
+    // Vector DEMO may reject this — import the JSON onto GOOGLE_MAPS_MAP_ID.
+  }
 }
 
 function isGoogleMapsMapReady(): boolean {

@@ -18,7 +18,7 @@ import {
   updateGoogleRouteEndpointMarker,
   type GoogleAdvancedMarker,
 } from "./prism-map-google-markers";
-import { resolvePrismGoogleMapsOptions } from "./prism-map-loaders";
+import { resolvePrismGoogleMapsOptions, applyPrismGoogleMapsBasemapStyle } from "./prism-map-loaders";
 import {
   ROUTE_ENDPOINT_LABEL,
   collectMapEndpointMarkers,
@@ -96,6 +96,7 @@ export function PrismMapGoogle({
             containerRef.current,
             mapInitOptions
           );
+          applyPrismGoogleMapsBasemapStyle(mapRef.current);
           mapRef.current.addListener("click", () => {
             onRouteSelectionRef.current?.(null);
           });
