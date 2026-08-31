@@ -10,6 +10,7 @@ import { PrismIconDemo } from "./prism-icon";
 import { PrismLayoutDemo } from "./prism-layout";
 import { PrismMapDemo } from "./prism-map";
 import { PrismPathBarDemo } from "./prism-path-bar";
+import { PrismSelectDemo } from "./prism-select";
 import { PrismTableDemo } from "./prism-table";
 import { PrismTypographyDemo } from "./prism-typography";
 
@@ -25,6 +26,7 @@ export type PrismAdminComponentSlug =
   | "prism-layout"
   | "prism-map"
   | "prism-path-bar"
+  | "prism-select"
   | "prism-table"
   | "prism-typography";
 
@@ -97,6 +99,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     title: "PrismPathBar",
     description: "Breadcrumbs: mapped path or fixed segments.",
     Demo: PrismPathBarDemo,
+  },
+  "prism-select": {
+    title: "PrismSelect",
+    description:
+      "Select: PrismButton trigger + popover options (not the OS select).",
+    Demo: PrismSelectDemo,
   },
   "prism-table": {
     title: "PrismTable",
