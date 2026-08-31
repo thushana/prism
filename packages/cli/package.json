@@ -9,24 +9,24 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
+    "@types/inquirer": "^9.0.10",
     "application-settings": "file:../application-settings",
-    "@types/inquirer": "^9.0.9",
     "chalk": "^5.6.2",
     "commander": "^15.0.0",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.4.2",
     "inquirer": "^13.3.2",
     "material-ui-colors": "^1.0.0",
-    "string-width": "^8.2.0"
+    "string-width": "^8.2.2"
   },
   "peerDependencies": {
     "logger": "*"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",
-    "@vitest/ui": "^4.1.1",
+    "@vitest/ui": "^4.1.11",
     "logger": "file:../logger",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

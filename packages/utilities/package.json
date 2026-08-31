@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "tailwind-merge": "^3.5.0"
+    "date-fns": "^4.4.0",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "test": "vitest",

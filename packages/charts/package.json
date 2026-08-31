@@ -8,22 +8,22 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "@nivo/core": "^0.99.0",
     "@nivo/bar": "^0.99.0",
-    "@nivo/line": "^0.99.0",
     "@nivo/colors": "^0.99.0",
-    "@nivo/tooltip": "^0.99.0",
-    "@nivo/theming": "^0.99.0"
+    "@nivo/core": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/theming": "^0.99.0",
+    "@nivo/tooltip": "^0.99.0"
   },
   "peerDependencies": {
     "next": "^16.0.0",
     "react": "^19.0.0"
   },
   "devDependencies": {
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.18",
+    "jsdom": "^29.0.0",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.5",
-    "jsdom": "^29.0.0"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
