@@ -11,6 +11,7 @@ export * from "./prism-map";
 export * from "./prism-map-loaders";
 export * from "./prism-map-styles";
 export * from "./prism-button";
+export * from "./prism-select";
 export * from "./prism-code-block";
 export * from "./prism-color-picker";
 export * from "./prism-color-picker-clipboard";
