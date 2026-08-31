@@ -37,12 +37,12 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@neondatabase/serverless": "^1.0.2",
+    "@neondatabase/serverless": "^1.1.0",
     "@types/node": "^25.0.0",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.18",
     "drizzle-orm": "^0.45.2",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

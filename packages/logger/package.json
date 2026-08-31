@@ -10,15 +10,15 @@
     "./server": "./source/server.ts"
   },
   "dependencies": {
-    "winston": "^3.17.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^4.1.11",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.1",
-    "@vitejs/plugin-react": "^6.0.2"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "test": "vitest",

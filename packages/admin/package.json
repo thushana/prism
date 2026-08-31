@@ -8,9 +8,9 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
+    "@prism/utilities": "file:../utilities",
     "lucide-react": "^1.17.0",
-    "ui": "file:../ui",
-    "@prism/utilities": "file:../utilities"
+    "ui": "file:../ui"
   },
   "peerDependencies": {
     "next": "^16.0.0",
@@ -18,9 +18,9 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.0",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.18",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
