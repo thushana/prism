@@ -20,7 +20,12 @@ export function loadAuthEnv() {
     return result.data;
   }
 
-  if (process.env.CI === "true") {
+  const allowFallback =
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.CI === "true" ||
+    process.env.CI === "1";
+
+  if (allowFallback) {
     return CI_FALLBACK;
   }
 

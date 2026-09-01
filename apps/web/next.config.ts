@@ -34,12 +34,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       kysely: kyselyShim,
+      "@ui": path.resolve(__dirname, "../../packages/ui/source"),
+      "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
     },
   },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
       kysely: kyselyShim,
+      "@ui": path.resolve(__dirname, "../../packages/ui/source"),
+      "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
     };
 
     // Exclude CLI and tools directories from webpack watch mode

@@ -5,7 +5,8 @@
   "main": "./source/index.ts",
   "types": "./source/index.ts",
   "exports": {
-    ".": "./source/index.ts"
+    ".": "./source/index.ts",
+    "./map": "./source/map.ts"
   },
   "scripts": {
     "generate:colors": "node scripts/generate-material-colors.js",

@@ -15,6 +15,7 @@
     "incremental": true,
     "paths": {
       "@ui": ["../ui/source"],
+      "@ui/map": ["../ui/source/map.ts"],
       "@utilities": ["../utilities/source"]
     }
   },
