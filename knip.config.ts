@@ -15,6 +15,7 @@ const webPaths = {
   "@logger": ["../../packages/logger/source"],
   "@logger/*": ["../../packages/logger/source/*"],
   "@ui": ["../../packages/ui/source"],
+  "@ui/map": ["../../packages/ui/source/map.ts"],
   "@utilities": ["../../packages/utilities/source"],
   "@admin": ["../../packages/admin/source"],
   "@authentication": ["../../packages/authentication/source"],

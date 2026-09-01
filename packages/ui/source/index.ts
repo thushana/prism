@@ -8,4 +8,3 @@ export * from "./prism-swatch-line";
 export * from "./prism-button-presets";
 export * from "./prism-motion";
 export * from "./prism-icon-lucide-resolve";
-export { gsap } from "gsap";

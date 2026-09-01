@@ -6,18 +6,28 @@ import * as schema from "./schema";
 // Load environment variables from .env
 config({ path: ".env", opsOff: true } as any);
 
-const CI_FALLBACK_DATABASE_URL =
-  "postgresql://ci:ci@127.0.0.1:5432/ci?sslmode=disable";
+/** Placeholder only during `next build` when env vars are not injected at compile time. */
+const BUILD_DATABASE_URL =
+  "postgresql://build:build@127.0.0.1:5432/build?sslmode=disable";
 
-const databaseUrl =
-  process.env.DATABASE_URL ??
-  (process.env.CI === "true" ? CI_FALLBACK_DATABASE_URL : undefined);
+function resolveDatabaseUrl(): string {
+  const configured = process.env.DATABASE_URL?.trim();
+  if (configured) return configured;
 
-if (!databaseUrl) {
+  // Never treat VERCEL=1 as a build signal — it is also set at runtime.
+  const allowBuildFallback =
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.CI === "true" ||
+    process.env.CI === "1";
+
+  if (allowBuildFallback) {
+    return BUILD_DATABASE_URL;
+  }
+
   throw new Error("DATABASE_URL environment variable is required");
 }
 
-const sql = neon(databaseUrl);
+const sql = neon(resolveDatabaseUrl());
 export const db = drizzle({ client: sql, schema });
 
 // Export schema for convenience

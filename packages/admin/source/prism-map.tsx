@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { PrismTypography } from "@ui";
 import {
   PrismMap,
-  PrismTypography,
   createFetchKeyGoogleMapsLoader,
   createFetchMapboxTokenLoader,
   PRISM_MAP_MAPBOX_STYLE_DEFAULT,
   type PrismMapRoute,
-} from "@ui";
+} from "@ui/map";
 
 const googleLoader = createFetchKeyGoogleMapsLoader("/api/maps/key");
 const mapboxTokenLoader = createFetchMapboxTokenLoader(
