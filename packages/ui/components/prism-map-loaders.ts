@@ -10,7 +10,6 @@
 /// <reference types="google.maps" />
 
 import {
-  PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
   PRISM_MAP_GOOGLE_MAP_ID,
   PRISM_MAP_GOOGLE_ROADMAP_BASE,
 } from "./prism-map-styles";
@@ -28,11 +27,13 @@ export function hasPrismGoogleMapsCloudMapId(): boolean {
 }
 
 /**
- * Map options for Advanced Markers + grayscale basemap.
+ * Map options for Advanced Markers.
  *
- * Always sets a Map ID (Advanced Markers require it). Basemap styling:
- * - Cloud Map ID → style in Console (import {@link PRISM_MAP_GOOGLE_GRAYSCALE_STYLES})
- * - DEMO → {@link applyPrismGoogleMapsBasemapStyle} installs that JSON as a StyledMapType
+ * Always sets a Map ID (Advanced Markers require it). Google forbids custom
+ * `StyledMapType` / `styles` when `mapId` is present — style the basemap in
+ * Cloud Console (import `PRISM_MAP_GOOGLE_GRAYSCALE_STYLES` onto
+ * `GOOGLE_MAPS_MAP_ID`). Strips caller `styles` / `mapId` so they cannot fight
+ * this contract.
  */
 export function resolvePrismGoogleMapsOptions(
   options: google.maps.MapOptions = {}
@@ -47,23 +48,13 @@ export function resolvePrismGoogleMapsOptions(
 }
 
 /**
- * After `new google.maps.Map(...)`: grayscale StyledMapType when using DEMO
- * (no Cloud Map ID). Street + park labels only; businesses/transit labels off.
+ * Kept for call-site stability. No-op: maps always use a `mapId` (DEMO or Cloud),
+ * and Google Maps rejects custom map types when `mapId` is set.
+ *
+ * @see https://developers.google.com/maps/documentation/javascript/styling#cloud_tooling
  */
-export function applyPrismGoogleMapsBasemapStyle(map: google.maps.Map): void {
-  if (hasPrismGoogleMapsCloudMapId()) {
-    return;
-  }
-  try {
-    const styled = new google.maps.StyledMapType(
-      PRISM_MAP_GOOGLE_GRAYSCALE_STYLES,
-      { name: "Grayscale" }
-    );
-    map.mapTypes.set("prism_grayscale", styled);
-    map.setMapTypeId("prism_grayscale" as google.maps.MapTypeId);
-  } catch {
-    // Vector DEMO may reject this — import the JSON onto GOOGLE_MAPS_MAP_ID.
-  }
+export function applyPrismGoogleMapsBasemapStyle(_map: google.maps.Map): void {
+  // Intentionally empty — see JSDoc.
 }
 
 function isGoogleMapsMapReady(): boolean {
