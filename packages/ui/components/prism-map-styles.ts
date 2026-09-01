@@ -3,8 +3,9 @@
 /**
  * Grayscale basemap: street + park labels only (no restaurants, stores, etc.).
  *
- * Installed via {@link applyPrismGoogleMapsBasemapStyle} (StyledMapType) for DEMO.
- * For production, import onto `GOOGLE_MAPS_MAP_ID` in Cloud Console Map Styles.
+ * Reference palette for Cloud Console Map Styles — associate with
+ * `GOOGLE_MAPS_MAP_ID`. Cannot be applied at runtime when a `mapId` is set
+ * (Advanced Markers require `mapId`).
  */
 export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
   /** Desaturate the whole basemap. */
