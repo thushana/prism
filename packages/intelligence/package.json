@@ -15,11 +15,11 @@
     "./tasks/registry": "./source/tasks/registry.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.64",
-    "@ai-sdk/gateway": "^3.0.80",
-    "@ai-sdk/google": "^3.0.53",
-    "@ai-sdk/openai": "^3.0.48",
-    "ai": "^6.0.130",
+    "@ai-sdk/anthropic": "^4.0.49",
+    "@ai-sdk/gateway": "^4.0.73",
+    "@ai-sdk/google": "^4.0.63",
+    "@ai-sdk/openai": "^4.0.57",
+    "ai": "^7.0.91",
     "logger": "file:../logger",
     "server-only": "^0.0.1",
     "zod": "^4.5.4"
