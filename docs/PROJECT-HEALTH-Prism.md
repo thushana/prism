@@ -75,7 +75,7 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 
 | Upgrade | Status | What to plan for |
 | ------- | ------ | ---------------- |
-| **better-auth 1.7** | Held at **1.6.30** | Schema migration, account-identity backfill, all `@better-auth/*` bumped together. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
+| **better-auth 1.7** | ✅ On **1.7.2** | Ensure your DB has `account.issuer` + unique `(issuer, accountId)` index. Prefer `npx auth migrate plan/apply`; see [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
 | **TypeScript 7** | Held at **6.x** | `typescript-eslint` peer range is `<6.1.0` today; TS 7 removes deprecated `tsconfig` options (`ignoreDeprecations`, `baseUrl`, old `moduleResolution`, …). See checklist below. |
 
 #### TypeScript 7 checklist (when ready)

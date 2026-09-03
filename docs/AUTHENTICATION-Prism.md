@@ -171,11 +171,29 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 | Package | Current policy | Why |
 | ------- | -------------- | --- |
-| `better-auth` + `@better-auth/*` | Pinned to **1.6.30** (exact, not `^`) | Security floor (≥1.6.22) without the **1.7** schema / account-identity migration |
+| `better-auth` + `@better-auth/*` | Pinned to **1.7.2** (exact, not `^`) | Includes the **1.7** account identity changes (`issuer` + unique compound index) and CLI-supported migration path |
 | Embedder parent | `pnpm.overrides` in host `package.json` | Keeps `file:prism/packages/authentication` on the same `@better-auth/core` as the app |
 | Prism monorepo | `pnpm-workspace.yaml` `overrides` | Same pins for `next`, `better-auth`, and plugins across workspaces |
 
-**Do not bump to 1.7** in a routine chores pass. Better Auth 1.7 requires a dedicated migration: upgrade all `@better-auth/*` together, run `npx auth migrate` / `npx auth generate`, backfill account identity, then deploy packages and schema together. See the [1.7 upgrade guide](https://www.better-auth.com/docs/guides/1-7-upgrade-guide).
+### Better Auth 1.7 migration notes
+
+Better Auth 1.7 introduces **account identity** fields on `account`:
+
+- New required column **`issuer`**
+- Unique compound index on **(`issuer`, `accountId`)**
+
+Better Auth 1.7 uses `issuer` as the identity namespace (e.g. `local:credential` for email+password accounts).
+
+**Recommended (populated DB):**
+
+```bash
+npx auth migrate plan
+npx auth migrate apply
+```
+
+After the CLI migration, record the change in your ORM migration history so future deploys don’t try to re-apply it.
+
+**Fallback (simple Postgres-only apps):** this repo also carries a manual Drizzle migration (`apps/web/database/migrations/0028_better_auth_account_identity.sql`) that adds/backfills `issuer` and creates the compound index. Prefer the Better Auth CLI when you have multiple providers or any chance of identity collisions.
 
 ## Next.js build notes
 
