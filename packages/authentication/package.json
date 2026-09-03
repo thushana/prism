@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@neondatabase/serverless": "^1.1.0",
-    "@types/node": "^25.0.0",
+    "@types/node": "^26.4.1",
     "@types/react": "^19.2.18",
     "drizzle-orm": "^0.45.2",
     "typescript": "^7.0.0",

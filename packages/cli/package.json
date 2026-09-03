@@ -22,7 +22,7 @@
     "logger": "*"
   },
   "devDependencies": {
-    "@types/node": "^25.0.0",
+    "@types/node": "^26.4.1",
     "@vitest/ui": "^5.0.0",
     "logger": "file:../logger",
     "typescript": "^7.0.0",
