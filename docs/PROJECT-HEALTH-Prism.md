@@ -76,7 +76,8 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 | Upgrade | Status | What to plan for |
 | ------- | ------ | ---------------- |
 | **better-auth 1.7** | ✅ On **1.7.2** | Ensure your DB has `account.issuer` + unique `(issuer, accountId)` index. Prefer `npx auth migrate plan/apply`; see [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
-| **TypeScript 7** | Held at **6.x** | `typescript-eslint` peer range is `<6.1.0` today; TS 7 removes deprecated `tsconfig` options (`ignoreDeprecations`, `baseUrl`, old `moduleResolution`, …). See checklist below. |
+| **Vitest 5** | ✅ On **5.0.0** | Watch for new Vitest/Vite config-loader warnings; prefer `.mts` configs (or suppress with `VITE_CONFIG_NATIVE_IGNORE_WARNING=true`) rather than ignoring real failures. |
+| **TypeScript 7** | ✅ On **7.0.2** (with TS6 sidecar for ESLint) | `typescript-eslint` peer range may lag; keep `@typescript/typescript6` hooked for ESLint until peers widen. TS 7 also hard-errors some deprecated `tsconfig` options — see checklist below. |
 
 #### TypeScript 7 checklist (when ready)
 
@@ -86,7 +87,7 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 4. **Verify** — `pnpm run typecheck` (app + `cd prism && pnpm run typecheck`), `pnpm run lint`, `pnpm run test:run`, `pnpm run build` in both trees.
 5. **Known good news** — a trial bump to TS 7.0.2 on this repo passed **typecheck** with no source changes; breakage is expected in **config + tooling**, not app logic.
 
-Recent security/tooling floor (Aug 2026): **next ≥16.3.2**, **better-auth 1.6.30**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
+Recent security/tooling floor (Aug 2026): **next ≥16.3.2**, **better-auth 1.7.2**, **vitest 5.0.0**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
 
 ## 6. Monthly dependency & code health ritual
 
