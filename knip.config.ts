@@ -43,7 +43,12 @@ const config: KnipConfig = {
       entry: ["scripts/*.ts"],
       project: ["scripts/**/*.ts"],
       ignoreBinaries: ["drizzle-kit", "pkill"],
-      ignoreDependencies: ["swr", "lightningcss", "concurrently"],
+      ignoreDependencies: [
+        "swr",
+        "lightningcss",
+        "concurrently",
+        "@typescript/typescript6",
+      ],
       drizzle: { config: [] },
     },
     "apps/web": {

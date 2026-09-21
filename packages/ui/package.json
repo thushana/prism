@@ -4,7 +4,9 @@
   "private": true,
   "main": "./source/index.ts",
   "types": "./source/index.ts",
-  "sideEffects": ["**/*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./source/index.ts",
     "./map": "./source/map.ts",

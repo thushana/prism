@@ -109,15 +109,15 @@ Pages with complex custom layouts (e.g., full-width tools) skip `AdminPageShell`
 
 The package root (`@authentication`) exports **only client-safe** modules (`PasswordForm`, `AdminPageShell`, `AdminBackLink`, `SignOutForm`, and `verifyKey` from `./core`). Server-only code uses **`import "server-only"`** and **Next server APIs**; it must be imported from **subpaths** so client bundles never traverse those modules.
 
-| Export                                                           | Import from                            | Kind            | Purpose                                            |
-| ---------------------------------------------------------------- | -------------------------------------- | --------------- | -------------------------------------------------- |
-| `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null` |
-| `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                      |
+| Export                                                           | Import from                            | Kind            | Purpose                                                                        |
+| ---------------------------------------------------------------- | -------------------------------------- | --------------- | ------------------------------------------------------------------------------ |
+| `requireAdminPage()`                                             | `@authentication/admin-page`           | async server fn | Cookie check; returns `<PasswordForm />` or `null`                             |
+| `checkWebAuthentication`, `clearWebAuthenticationCookie`, …      | `@authentication/web`                  | server          | Cookie signing / verification                                                  |
 | `requireApiAuthentication`                                       | `@authentication/api`                  | server          | `x-api-key` gate (rate limited); legacy subpath docs may say `x-prism-api-key` |
-| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)             |
-| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                          |
-| `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                          |
-| `enforceRateLimit`, `getClientIp`, `RATE_LIMIT_*`                | `@authentication/rate-limit`           | server          | Per-IP limits for login, API auth, app routes      |
+| `createAuthenticationRoute`                                      | `@authentication/authentication_route` | server          | Factory for login route (rate limited)                                         |
+| `AdminPageShell`, `AdminBackLink`, `SignOutForm`, `PasswordForm` | `@authentication`                      | client          | Admin UI chrome and forms                                                      |
+| `verifyKey`                                                      | `@authentication`                      | isomorphic      | Shared key equality check                                                      |
+| `enforceRateLimit`, `getClientIp`, `RATE_LIMIT_*`                | `@authentication/rate-limit`           | server          | Per-IP limits for login, API auth, app routes                                  |
 
 In generated `apps/web`, replace `@authentication` with the package name `authentication` and the same subpaths (e.g. `authentication/web`).
 

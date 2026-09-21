@@ -73,11 +73,11 @@ Same as [TimeTraveler](https://github.com/thushana/timetraveler): **`husky`** in
 
 These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 
-| Upgrade | Status | What to plan for |
-| ------- | ------ | ---------------- |
-| **better-auth 1.7** | ✅ On **1.7.2** | Ensure your DB has `account.issuer` + unique `(issuer, accountId)` index. Prefer `npx auth migrate plan/apply`; see [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
-| **Vitest 5** | ✅ On **5.0.0** | Watch for new Vitest/Vite config-loader warnings; prefer `.mts` configs (or suppress with `VITE_CONFIG_NATIVE_IGNORE_WARNING=true`) rather than ignoring real failures. |
-| **TypeScript 7** | ✅ On **7.0.2** (with TS6 sidecar for ESLint) | `typescript-eslint` peer range may lag; keep `@typescript/typescript6` hooked for ESLint until peers widen. TS 7 also hard-errors some deprecated `tsconfig` options — see checklist below. |
+| Upgrade             | Status                                        | What to plan for                                                                                                                                                                            |
+| ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **better-auth 1.7** | ✅ On **1.7.2**                               | Ensure your DB has `account.issuer` + unique `(issuer, accountId)` index. Prefer `npx auth migrate plan/apply`; see [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md).                   |
+| **Vitest 5**        | ✅ On **5.0.0**                               | Watch for new Vitest/Vite config-loader warnings; prefer `.mts` configs (or suppress with `VITE_CONFIG_NATIVE_IGNORE_WARNING=true`) rather than ignoring real failures.                     |
+| **TypeScript 7**    | ✅ On **7.0.2** (with TS6 sidecar for ESLint) | `typescript-eslint` peer range may lag; keep `@typescript/typescript6` hooked for ESLint until peers widen. TS 7 also hard-errors some deprecated `tsconfig` options — see checklist below. |
 
 #### TypeScript 7 checklist (when ready)
 

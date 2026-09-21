@@ -304,7 +304,6 @@ export function PrismIcon({
 
   useEffect(() => {
     if (!useLucide) {
-      setLucideIcon(null);
       return;
     }
     let cancelled = false;
@@ -330,9 +329,11 @@ export function PrismIcon({
     };
   }, [useLucide, name]);
 
+  const activeLucideIcon = useLucide ? lucideIcon : null;
+
   const strokeDraw = Boolean(
     useLucide &&
-    lucideIcon &&
+    activeLucideIcon &&
     motionProp &&
     !motionProp.disabled &&
     motionProp.draw === "stroke"
@@ -583,7 +584,7 @@ export function PrismIcon({
         }
       }
     };
-  }, [name, motionProp, strokeDraw, lucideIcon]);
+  }, [name, motionProp, strokeDraw, activeLucideIcon]);
 
   return (
     <span
@@ -618,9 +619,9 @@ export function PrismIcon({
       aria-hidden
     >
       {useLucide ? (
-        lucideIcon ? (
+        activeLucideIcon ? (
           <PrismLucideIconGlyph
-            icon={lucideIcon}
+            icon={activeLucideIcon}
             sizePx={sizePx}
             weight={weight}
             filled={filled}

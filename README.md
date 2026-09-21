@@ -113,16 +113,16 @@ pnpm run dev:web
 
 Exact versions live in root [`package.json`](./package.json) and each workspace’s `package.json`. After dependency bumps, run **`pnpm outdated`** or **`pnpm run chores`** — do not copy version numbers into this file (see [DOCS-Prism.md](./docs/DOCS-Prism.md)).
 
-| Layer | Stack |
-| ----- | ----- |
-| Framework | Next.js (App Router), `--webpack` dev/build |
-| Language | TypeScript (strict, ES2022 target) |
-| Styling | Tailwind CSS 4 |
-| Monorepo | pnpm workspaces |
-| Database | Drizzle ORM + Neon PostgreSQL |
-| Auth | Better Auth (`packages/authentication`) |
-| Testing | Vitest |
-| Lint / format | ESLint + Prettier |
+| Layer         | Stack                                       |
+| ------------- | ------------------------------------------- |
+| Framework     | Next.js (App Router), `--webpack` dev/build |
+| Language      | TypeScript (strict, ES2022 target)          |
+| Styling       | Tailwind CSS 4                              |
+| Monorepo      | pnpm workspaces                             |
+| Database      | Drizzle ORM + Neon PostgreSQL               |
+| Auth          | Better Auth (`packages/authentication`)     |
+| Testing       | Vitest                                      |
+| Lint / format | ESLint + Prettier                           |
 
 ## Testing
 
