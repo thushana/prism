@@ -18,7 +18,10 @@ import {
   updateGoogleRouteEndpointMarker,
   type GoogleAdvancedMarker,
 } from "./prism-map-google-markers";
-import { resolvePrismGoogleMapsOptions, applyPrismGoogleMapsBasemapStyle } from "./prism-map-loaders";
+import {
+  resolvePrismGoogleMapsOptions,
+  applyPrismGoogleMapsBasemapStyle,
+} from "./prism-map-loaders";
 import {
   ROUTE_ENDPOINT_LABEL,
   collectMapEndpointMarkers,

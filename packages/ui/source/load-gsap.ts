@@ -21,10 +21,12 @@ export function getGsapIfLoaded(): GsapModule["gsap"] | undefined {
   return loaded?.gsap;
 }
 
-let splitPending: Promise<{
-  gsap: GsapModule["gsap"];
-  SplitText: typeof import("gsap/SplitText").SplitText;
-}> | undefined;
+let splitPending:
+  | Promise<{
+      gsap: GsapModule["gsap"];
+      SplitText: typeof import("gsap/SplitText").SplitText;
+    }>
+  | undefined;
 
 export function loadGsapSplitText(): Promise<{
   gsap: GsapModule["gsap"];

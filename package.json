@@ -38,8 +38,8 @@
     "dev:web": "pnpm --filter web run dev",
     "format": "prettier --write . --log-level warn",
     "format:check": "prettier --check . --log-level warn",
-    "lint": "eslint \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\"",
-    "lint:fix": "eslint \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\" --fix",
+    "lint": "node scripts/run-eslint.cjs \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\"",
+    "lint:fix": "node scripts/run-eslint.cjs \"packages/*/source/**/*.{ts,tsx}\" \"packages/*/components/**/*.{ts,tsx}\" \"packages/*/styles/**/*.{ts,tsx}\" \"apps/*/app/**/*.{ts,tsx}\" \"apps/*/config/**/*.{ts,tsx}\" \"tools/app/**/*.ts\" --fix",
     "precommit": "pnpm run build",
     "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) { try { require('husky').install() } catch { process.exit(0) } }\"",
     "prism": "pnpm --filter tools run start --",
@@ -71,15 +71,15 @@
   },
   "lint-staged": {
     "apps/**/*.{ts,tsx,js,jsx,mjs}": [
-      "eslint --fix",
+      "node scripts/run-eslint.cjs --fix",
       "prettier --write"
     ],
     "packages/**/*.{ts,tsx,js,jsx,mjs}": [
-      "eslint --fix",
+      "node scripts/run-eslint.cjs --fix",
       "prettier --write"
     ],
     "tools/**/*.{ts,tsx,js,jsx,mjs}": [
-      "eslint --fix",
+      "node scripts/run-eslint.cjs --fix",
       "prettier --write"
     ],
     "**/*.{json,md}": [
@@ -91,16 +91,17 @@
     "swr": "^2.5.1"
   },
   "devDependencies": {
+    "@typescript/typescript6": "^6.0.2",
     "concurrently": "^10.0.5",
-    "eslint": "^10.9.1",
-    "eslint-config-next": "16.3.4",
+    "eslint": "^10.11.0",
+    "eslint-config-next": "16.3.5",
     "husky": "^9.1.7",
-    "knip": "^6.34.0",
-    "lint-staged": "^17.4.1",
-    "prettier": "^3.9.6",
-    "tsx": "^4.23.13",
+    "knip": "^6.37.0",
+    "lint-staged": "^17.5.1",
+    "prettier": "^3.9.8",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   },
   "exports": {
     "./ui": "./packages/ui/source/index.ts",
