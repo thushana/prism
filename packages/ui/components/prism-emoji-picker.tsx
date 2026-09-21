@@ -2,8 +2,6 @@
 
 import { cn } from "@utilities";
 import type { EmojiMartData } from "@emoji-mart/data";
-import emojiMartData from "@emoji-mart/data";
-import emojiMartEn from "@emoji-mart/data/i18n/en.json";
 import type { LucideIcon } from "lucide-react";
 import {
   Clapperboard,
@@ -20,11 +18,16 @@ import {
 } from "lucide-react";
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type JSX,
   type ReactNode,
 } from "react";
+import {
+  loadEmojiMartCatalog,
+  type EmojiMartCatalog,
+} from "../source/load-emoji-mart-data";
 import { PrismButton } from "./prism-button";
 import { PrismEmoji, type PrismEmojiStyle } from "./prism-emoji";
 import {
@@ -32,16 +35,6 @@ import {
   usePickerPopupState,
 } from "./prism-picker-popover";
 import { PrismTypography } from "./prism-typography";
-
-const DATA = emojiMartData as EmojiMartData;
-
-const ALIASES_BY_TARGET: Record<string, string[]> = (() => {
-  const out: Record<string, string[]> = {};
-  for (const [alias, target] of Object.entries(DATA.aliases)) {
-    (out[target] ??= []).push(alias);
-  }
-  return out;
-})();
 
 /** Larger than {@link PrismEmoji}’s `gigantic` (64px); numeric `size` is supported on {@link PrismEmoji}. */
 const PICKER_GRID_COLUMNS = 8;
@@ -99,6 +92,7 @@ function previewToEmojiStyle(
 
 function emojiIdMatchesQuery(
   data: EmojiMartData,
+  aliasesByTarget: Record<string, string[]>,
   id: string,
   query: string
 ): boolean {
@@ -107,7 +101,7 @@ function emojiIdMatchesQuery(
   const e = data.emojis[id];
   if (!e) return false;
   const tokens = q.split(/\s+/).filter(Boolean);
-  const aliasKeys = ALIASES_BY_TARGET[id] ?? [];
+  const aliasKeys = aliasesByTarget[id] ?? [];
   const hay = [id, e.name, ...e.keywords, ...aliasKeys, ...(e.emoticons ?? [])]
     .join(" ")
     .toLowerCase();
@@ -125,9 +119,11 @@ const PREVIEW_OPTIONS: {
 ];
 const PREVIEW_COUNT = PREVIEW_OPTIONS.length;
 
-function categoryTitle(categoryId: string): string {
-  const cat = emojiMartEn.categories as Record<string, string>;
-  return cat[categoryId] ?? categoryId;
+function categoryTitle(
+  categoryId: string,
+  categoryTitles: Record<string, string>
+): string {
+  return categoryTitles[categoryId] ?? categoryId;
 }
 
 function PrismEmojiPickerPanel({
@@ -139,27 +135,64 @@ function PrismEmojiPickerPanel({
   onPick: (emoji: string) => void;
   className?: string;
 }): JSX.Element {
+  const [catalog, setCatalog] = useState<EmojiMartCatalog | null>(null);
   const [preview, setPreview] =
     useState<PrismEmojiPickerPreview>(defaultPreview);
   const [search, setSearch] = useState("");
-  const [activeCategoryId, setActiveCategoryId] = useState(
-    () => DATA.categories[0]?.id ?? "people"
-  );
+  const [activeCategoryId, setActiveCategoryId] = useState("people");
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadEmojiMartCatalog().then((next) => {
+      if (cancelled) return;
+      setCatalog(next);
+      setActiveCategoryId((current) =>
+        next.data.categories.some((c) => c.id === current)
+          ? current
+          : (next.data.categories[0]?.id ?? "people")
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const DATA = catalog?.data;
   const emojiStyle = previewToEmojiStyle(preview);
-  const catCount = DATA.categories.length;
+  const catCount = DATA?.categories.length ?? 0;
 
   const emojiIds = useMemo(() => {
+    if (!DATA || !catalog) return [];
     const q = search.trim();
     if (q) {
       return Object.keys(DATA.emojis).filter((id) =>
-        emojiIdMatchesQuery(DATA, id, q)
+        emojiIdMatchesQuery(DATA, catalog.aliasesByTarget, id, q)
       );
     }
     const cat = DATA.categories.find((c) => c.id === activeCategoryId);
     return cat?.emojis ?? [];
-  }, [search, activeCategoryId]);
+  }, [DATA, catalog, search, activeCategoryId]);
 
   const handlePick = useCallback((emoji: string) => onPick(emoji), [onPick]);
+
+  if (!DATA || !catalog) {
+    return (
+      <div
+        className={cn(
+          "flex min-h-40 w-full items-center justify-center",
+          className
+        )}
+      >
+        <PrismTypography
+          role="body"
+          size="small"
+          color={{ semanticText: "muted" }}
+        >
+          Loading emoji…
+        </PrismTypography>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -230,7 +263,7 @@ function PrismEmojiPickerPanel({
               <PrismButton
                 key={c.id}
                 type="button"
-                label={categoryTitle(c.id)}
+                label={categoryTitle(c.id, catalog.categoryTitles)}
                 variant="icon"
                 icon={Icon}
                 iconOnly

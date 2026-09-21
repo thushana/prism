@@ -4,6 +4,9 @@ import path from "path";
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["ui", "lucide-react", "gsap"],
+  },
   transpilePackages: [
     "@prism/utilities",
     "application-settings",
@@ -36,6 +39,10 @@ const nextConfig: NextConfig = {
       kysely: kyselyShim,
       "@ui": path.resolve(__dirname, "../../packages/ui/source"),
       "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
+      "@ui/pickers": path.resolve(
+        __dirname,
+        "../../packages/ui/source/pickers.ts"
+      ),
     },
   },
   webpack: (config) => {
@@ -44,6 +51,10 @@ const nextConfig: NextConfig = {
       kysely: kyselyShim,
       "@ui": path.resolve(__dirname, "../../packages/ui/source"),
       "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
+      "@ui/pickers": path.resolve(
+        __dirname,
+        "../../packages/ui/source/pickers.ts"
+      ),
     };
 
     // Exclude CLI and tools directories from webpack watch mode

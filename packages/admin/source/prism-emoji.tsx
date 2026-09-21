@@ -5,7 +5,6 @@ import {
   PrismCodeBlock,
   PrismColorPicker,
   PrismEmoji,
-  PrismEmojiPicker,
   PrismTypography,
   prismColorPickerClipboardColorProp,
   type PartialPrismColorSpec,
@@ -14,6 +13,7 @@ import {
   type PrismEmojiSize,
   type PrismEmojiStyle,
 } from "@ui";
+import { PrismEmojiPicker } from "@ui/pickers";
 import { Smile } from "lucide-react";
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { PrismPlaygroundOptionLabel } from "./playground-option-label";

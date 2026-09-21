@@ -419,6 +419,9 @@ function generateNextConfig(
 import path from "path";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["ui", "lucide-react", "gsap"],
+  },
   outputFileTracingIncludes: {
     "/*": ["./config.app.json", "./config.prism.json"],
   },
@@ -447,6 +450,11 @@ const nextConfig: NextConfig = {
         "${prismPrefix}/logger/source/server"
       ),
       "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
+      "@ui/map": path.resolve(__dirname, "${prismPrefix}/ui/source/map.ts"),
+      "@ui/pickers": path.resolve(
+        __dirname,
+        "${prismPrefix}/ui/source/pickers.ts"
+      ),
       "@utilities": path.resolve(
         __dirname,
         "${prismPrefix}/utilities/source"
@@ -466,6 +474,9 @@ import path from "path";
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["ui", "lucide-react", "gsap"],
+  },
   // config.app.json + config.prism.json are bundled or read at runtime.
   outputFileTracingIncludes: {
     "/*": ["./config.app.json", "./config.prism.json"],
@@ -504,6 +515,11 @@ const nextConfig: NextConfig = {
       "@logger/client": path.resolve(__dirname, "${prismPrefix}/logger/source/client"),
       "@logger/server": path.resolve(__dirname, "${prismPrefix}/logger/source/server"),
       "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
+      "@ui/map": path.resolve(__dirname, "${prismPrefix}/ui/source/map.ts"),
+      "@ui/pickers": path.resolve(
+        __dirname,
+        "${prismPrefix}/ui/source/pickers.ts"
+      ),
       "@utilities": path.resolve(__dirname, "${prismPrefix}/utilities/source"),
       "@admin": path.resolve(__dirname, "${prismPrefix}/admin/source"),
       "feature-flags": path.resolve(__dirname, "${prismPrefix}/feature-flags/source"),
@@ -551,6 +567,9 @@ import path from "path";
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["ui", "lucide-react", "gsap"],
+  },
   transpilePackages: ["authentication"],
   serverExternalPackages: [
     "better-auth",
@@ -613,6 +632,8 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
     "@intelligence/tasks/*": [`${prismPrefix}/intelligence/source/tasks/*`],
     "@intelligence/client": [`${prismPrefix}/intelligence/source/client`],
     "@ui": [`${prismPrefix}/ui/source`],
+    "@ui/map": [`${prismPrefix}/ui/source/map.ts`],
+    "@ui/pickers": [`${prismPrefix}/ui/source/pickers.ts`],
     "@utilities": [`${prismPrefix}/utilities/source`],
     "@admin": [`${prismPrefix}/admin/source`],
     "@authentication": [`${prismPrefix}/authentication/source`],
@@ -1189,7 +1210,7 @@ This matches [ARCHITECTURE-Prism.md](../prism/docs/ARCHITECTURE-Prism.md) and ap
 - **Next.js app** under **\`apps/web/\`**
 - **Dependencies**: \`file:../../prism/packages/...\` in \`apps/web/package.json\`
 - **TypeScript paths**: \`../../prism/packages/*/source\` in \`apps/web/tsconfig.json\`
-- **Next.js**: \`--webpack\` dev/build; \`transpilePackages\` + webpack aliases in \`apps/web/next.config.ts\`
+- **Next.js**: \`--webpack\` dev/build; \`transpilePackages\` + webpack aliases in \`apps/web/next.config.ts\`; keep \`experimental.optimizePackageImports\` for \`ui\`, \`lucide-react\`, and \`gsap\` so layout chrome stays out of first-load JS (see [UI-Prism.md](../prism/docs/UI-Prism.md))
 - **Styles**: Prism globals imported from \`apps/web/ui/styles/globals.css\`
 
 ## Layout

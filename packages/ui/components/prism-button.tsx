@@ -9,7 +9,7 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
-import { gsap } from "gsap";
+import { getGsapIfLoaded, loadGsap } from "../source/load-gsap";
 import {
   PrismColor,
   type PartialPrismColorSpec,
@@ -224,27 +224,33 @@ export function PrismButton(
   React.useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
+    // Keep GSAP off first-load for static buttons (nav, disabled grow, etc.).
     if (!shouldGrow) {
-      gsap.set(el, { scale: 1 });
+      el.style.removeProperty("transform");
       return;
     }
-    if (effectiveHovered) {
-      gsap.to(el, {
-        scale: 1.1,
-        duration: resolvePrismMotionDurationSeconds(0.3),
-        ease: "back.out(1.56)",
-        overwrite: true,
-      });
-    } else {
-      gsap.to(el, {
-        scale: 1,
-        duration: resolvePrismMotionDurationSeconds("speedy"),
-        ease: "power2.out",
-        overwrite: true,
-      });
-    }
+    let cancelled = false;
+    void loadGsap().then(({ gsap }) => {
+      if (cancelled) return;
+      if (effectiveHovered) {
+        gsap.to(el, {
+          scale: 1.1,
+          duration: resolvePrismMotionDurationSeconds(0.3),
+          ease: "back.out(1.56)",
+          overwrite: true,
+        });
+      } else {
+        gsap.to(el, {
+          scale: 1,
+          duration: resolvePrismMotionDurationSeconds("speedy"),
+          ease: "power2.out",
+          overwrite: true,
+        });
+      }
+    });
     return () => {
-      gsap.killTweensOf(el);
+      cancelled = true;
+      getGsapIfLoaded()?.killTweensOf(el);
     };
   }, [effectiveHovered, shouldGrow]);
 
@@ -348,16 +354,18 @@ export function PrismButton(
 
     const run = () => {
       if (cancelled || iconDrawDoneRef.current) return;
-      const result = prismLucideStrokeDraw(el, {
+      void prismLucideStrokeDraw(el, {
         durationSec: resolvePrismMotionDurationSeconds("regular"),
+      }).then((result) => {
+        if (cancelled) return;
+        if (result === "drawn") {
+          iconDrawDoneRef.current = true;
+          return;
+        }
+        if (result === "retry" && attempts++ < LUCIDE_DRAW_MAX_ATTEMPTS) {
+          frameId = requestAnimationFrame(run);
+        }
       });
-      if (result === "drawn") {
-        iconDrawDoneRef.current = true;
-        return;
-      }
-      if (result === "retry" && attempts++ < LUCIDE_DRAW_MAX_ATTEMPTS) {
-        frameId = requestAnimationFrame(run);
-      }
     };
 
     frameId = requestAnimationFrame(run);
@@ -382,7 +390,7 @@ export function PrismButton(
       const elements = el.querySelectorAll<SVGGeometryElement>(
         PRISM_LUCIDE_DRAW_SVG_SELECTOR
       );
-      gsap.killTweensOf(elements);
+      getGsapIfLoaded()?.killTweensOf(elements);
     };
   }, [shouldDrawIcon]);
 

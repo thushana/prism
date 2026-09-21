@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { ChevronDown, Copy, Palette, X } from "lucide-react";
-import { gsap } from "gsap";
 import { cn } from "@utilities";
+import { getGsapIfLoaded, loadGsap } from "../source/load-gsap";
 
 import {
   approximateRelativeLuminanceFromCssColor,
@@ -499,18 +499,26 @@ export function PrismColorPicker({
     if (!root) return;
     const pills = root.querySelectorAll("[data-loop-pill]");
     if (!pills.length) return;
-    gsap.killTweensOf(pills);
-    gsap.fromTo(
-      pills,
-      { opacity: 0, scale: 0.82 },
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 0.22,
-        stagger: 0.04,
-        ease: "power2.out",
-      }
-    );
+    let cancelled = false;
+    void loadGsap().then(({ gsap }) => {
+      if (cancelled) return;
+      gsap.killTweensOf(pills);
+      gsap.fromTo(
+        pills,
+        { opacity: 0, scale: 0.82 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.22,
+          stagger: 0.04,
+          ease: "power2.out",
+        }
+      );
+    });
+    return () => {
+      cancelled = true;
+      getGsapIfLoaded()?.killTweensOf(pills);
+    };
   }, [
     hasActiveColorLoop,
     loopPreviewPaints,

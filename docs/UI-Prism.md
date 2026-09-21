@@ -350,7 +350,7 @@ Admin demo: **`/admin/prism/components/prism-icon`** — **`PrismIconDemo`** fro
 
 ### PrismEmojiPicker / PrismIconPicker
 
-Both are **browse-and-select** panels for **`@emoji-mart/data`** emoji ids (**`PrismEmojiPicker`**) or Material Symbols ligature names (**`PrismIconPicker`** / **`PRISM_MATERIAL_ICONS_ROUND_NAMES`**).
+Both are **browse-and-select** panels for **`@emoji-mart/data`** emoji ids (**`PrismEmojiPicker`**) or Material Symbols ligature names (**`PrismIconPicker`** / **`PRISM_MATERIAL_ICONS_ROUND_NAMES`**). Import them from **`@ui/pickers`**, not **`@ui`**.
 
 - **Inline:** omit **`trigger`** — render the panel where you mount the component (e.g. journey overlay embedding).
 - **Popover:** pass **`trigger`** (`ReactNode`, typically **`PrismButton`**) — the panel opens in a **`@radix-ui/react-popover`** anchored to the trigger. Optional **`open`** / **`onOpenChange`** for controlled mode; otherwise open state is internal. Selecting an item calls **`onEmojiSelect`** / **`onIconSelect`** and closes an uncontrolled popover automatically.
@@ -917,3 +917,6 @@ This keeps one list of option names (camelCase) and avoids drift between labels,
 5. **Consistent styling** - Use Tailwind utilities and theme variables
 6. **Type safety** - All components are fully typed with TypeScript
 7. **Never hardcode package paths** - Apps should work identically in monorepo and standalone contexts
+8. **Keep first-load JS small** — `@ui` is a barrel. Webpack still tree-shakes unused modules when `packages/ui/package.json` marks CSS as the only side effects (`"sideEffects": ["**/*.css"]`), but **do not add static imports of GSAP, `lucide-react`’s `icons` map, or `@emoji-mart/data` into layout chrome**. Those load on demand inside PrismIcon / PrismButton / PrismTypography / PrismEmojiPicker. Import **emoji and icon pickers** from **`@ui/pickers`** (not `@ui`) so the Lucide catalog and emoji-mart JSON stay off every page. Generated apps include `experimental.optimizePackageImports: ["ui", "lucide-react", "gsap"]` in `next.config.ts` (`prism generate`); keep that list if you edit the config by hand.
+
+Maps stay on `@ui/map` and load `mapbox-gl` via `import()`. Do not re-export map from the main `@ui` entry.

@@ -1,4 +1,4 @@
-import { gsap } from "gsap";
+import { loadGsap } from "./load-gsap";
 
 /** Geometry nodes Lucide stroke-draw can animate (paths, lines, etc.). */
 export const PRISM_LUCIDE_DRAW_SVG_SELECTOR =
@@ -26,14 +26,15 @@ export type PrismLucideStrokeDrawResult = "drawn" | "retry" | "none";
  * Measure Lucide SVG strokes and run GSAP dash-offset draw-in.
  * `retry` when nodes exist but are not yet measurable (defer with rAF).
  */
-export function prismLucideStrokeDraw(
+export async function prismLucideStrokeDraw(
   root: HTMLElement,
   options: {
     durationSec: number;
     ease?: string;
     onComplete?: () => void;
   }
-): PrismLucideStrokeDrawResult {
+): Promise<PrismLucideStrokeDrawResult> {
+  const { gsap } = await loadGsap();
   const nodes = root.querySelectorAll<SVGGeometryElement>(
     PRISM_LUCIDE_DRAW_SVG_SELECTOR
   );

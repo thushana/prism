@@ -27,13 +27,11 @@ export function hasPrismGoogleMapsCloudMapId(): boolean {
 }
 
 /**
- * Map options for Advanced Markers.
+ * Map options for Advanced Markers (vector map — Ctrl-drag / pinch heading).
  *
- * Always sets a Map ID (Advanced Markers require it). Google forbids custom
- * `StyledMapType` / `styles` when `mapId` is present — style the basemap in
- * Cloud Console (import `PRISM_MAP_GOOGLE_GRAYSCALE_STYLES` onto
- * `GOOGLE_MAPS_MAP_ID`). Strips caller `styles` / `mapId` so they cannot fight
- * this contract.
+ * Always sets a Map ID. Google ignores runtime `styles` when `mapId` is set —
+ * hide basemap house numbers via Cloud Console Map Style on
+ * `GOOGLE_MAPS_MAP_ID` (import `PRISM_MAP_GOOGLE_GRAYSCALE_STYLES`).
  */
 export function resolvePrismGoogleMapsOptions(
   options: google.maps.MapOptions = {}
@@ -48,8 +46,8 @@ export function resolvePrismGoogleMapsOptions(
 }
 
 /**
- * Kept for call-site stability. No-op: maps always use a `mapId` (DEMO or Cloud),
- * and Google Maps rejects custom map types when `mapId` is set.
+ * No-op when a `mapId` is present (Cloud or DEMO). Style the basemap in Cloud
+ * Console instead.
  *
  * @see https://developers.google.com/maps/documentation/javascript/styling#cloud_tooling
  */

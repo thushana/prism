@@ -1,11 +1,14 @@
 /// <reference types="google.maps" />
 
 /**
- * Grayscale basemap: street + park labels only (no restaurants, stores, etc.).
+ * Grayscale basemap: street names + park labels only.
+ *
+ * House / parcel address numbers stay off (`administrative.land_parcel`) so
+ * visit pins can show the only street numbers on the map.
  *
  * Reference palette for Cloud Console Map Styles — associate with
- * `GOOGLE_MAPS_MAP_ID`. Cannot be applied at runtime when a `mapId` is set
- * (Advanced Markers require `mapId`).
+ * `GOOGLE_MAPS_MAP_ID`. Runtime `styles` cannot combine with a vector `mapId`
+ * (required for Advanced Markers and Ctrl-drag heading).
  */
 export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
   /** Desaturate the whole basemap. */
@@ -47,13 +50,39 @@ export const PRISM_MAP_GOOGLE_GRAYSCALE_STYLES: google.maps.MapTypeStyle[] = [
     stylers: [{ color: "#c9c9c9" }],
   },
 
-  /** Hide every label / POI icon, then re-enable streets + parks only. */
+  /** Hide every label / POI icon, then re-enable street names + parks only. */
   {
     elementType: "labels",
     stylers: [{ visibility: "off" }],
   },
   {
     elementType: "labels.icon",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "administrative",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  /** Basemap house numbers — visit pins supply the numbers we care about. */
+  {
+    featureType: "administrative.land_parcel",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "administrative.land_parcel",
+    elementType: "labels.text",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "administrative.neighborhood",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels",
     stylers: [{ visibility: "off" }],
   },
   {
@@ -116,10 +145,14 @@ export const PRISM_MAP_GOOGLE_ROADMAP_BASE: google.maps.MapOptions = {
   mapTypeId: "roadmap",
   disableDefaultUI: true,
   zoomControl: true,
-  /** Re-enable after `disableDefaultUI` so users can leave north-up. */
+  /** Re-enable after `disableDefaultUI` — Shift-drag / control rotates heading. */
   rotateControl: true,
   headingInteractionEnabled: true,
-  tiltInteractionEnabled: true,
+  /** Keep the camera flat (no 3D tilt). */
+  tiltInteractionEnabled: false,
+  tilt: 0,
+  /** Vector required for heading (DEMO or Cloud mapId). */
+  renderingType: "VECTOR" as google.maps.RenderingType,
   gestureHandling: "greedy",
 };
 
