@@ -156,7 +156,7 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 ### porch-scope notes
 
-- App-wide gate: root `layout.tsx` uses `requireSessionPage()` (not `requireAdminPage`).
+- App-wide gate: `proxy.ts` session-cookie redirect + root `layout.tsx` `requireSessionPageOrRedirect()` (not UI-only `requireSessionPage()`).
 - Chrome extension: Better Auth key from `/admin/app/api-keys`, header `x-api-key`.
 
 ## `prism generate`
