@@ -1,8 +1,8 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
+import { useEffect, useRef, useState } from "react";
+import { getGsapIfLoaded, loadGsap } from "../source/load-gsap";
 
 import { cn } from "@utilities";
 import type { PrismSize } from "../source/prism-size";
@@ -23,7 +23,6 @@ import {
   prismColorSpecToIconGlyphPaint,
   type PartialPrismColorSpec,
 } from "../styles/prism-color";
-import { resolveLucideIconByName } from "../source/prism-icon-lucide-resolve";
 import {
   PRISM_LUCIDE_DRAW_SVG_SELECTOR,
   prismLucideStrokeDraw,
@@ -202,14 +201,14 @@ function resolveRotateInDeg(m: PrismIconMotionProps): number {
  * Match {@link PrismButton} Lucide stroke-draw: measure every matched geometry node, set dash,
  * then tween — not embedded in a parent timeline (reliable with nested `svg` paths).
  */
-function runStrokeDrawGsap(
+async function runStrokeDrawGsap(
   root: HTMLElement,
   durationSec: number,
   ease: string,
   /** Fires after the last staggered segment finishes (or immediately if there are no paths). */
   onComplete?: () => void
-): void {
-  const result = prismLucideStrokeDraw(root, {
+): Promise<void> {
+  const result = await prismLucideStrokeDraw(root, {
     durationSec,
     ease,
     onComplete,
@@ -222,6 +221,7 @@ function resetStrokeDashInline(root: HTMLElement): void {
 }
 
 function runIconEntranceFromTo(
+  gsap: typeof import("gsap").gsap,
   el: HTMLElement,
   presetIn: PrismIconMotionPreset,
   durationSec: number,
@@ -300,8 +300,35 @@ export function PrismIcon({
   const materialFontReady = useMaterialSymbolsFontReady();
 
   const useLucide = iconStyle === "lucide";
+  const [lucideIcon, setLucideIcon] = useState<LucideIcon | null>(null);
 
-  const lucideIcon = useLucide ? resolveLucideIconByName(name) : null;
+  useEffect(() => {
+    if (!useLucide) {
+      setLucideIcon(null);
+      return;
+    }
+    let cancelled = false;
+    void import("../source/prism-icon-lucide-resolve").then((mod) => {
+      if (cancelled) return;
+      const icon = mod.resolveLucideIconByName(name);
+      if (
+        !icon &&
+        (
+          globalThis as unknown as {
+            process?: { env?: { NODE_ENV?: string } };
+          }
+        ).process?.env?.NODE_ENV !== "production"
+      ) {
+        console.warn(
+          `[PrismIcon] No Lucide icon for name "${name}". Use a Lucide id (e.g. gem, layout-grid).`
+        );
+      }
+      setLucideIcon(icon);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [useLucide, name]);
 
   const strokeDraw = Boolean(
     useLucide &&
@@ -344,214 +371,219 @@ export function PrismIcon({
     const el = rootRef.current;
     if (!m || m.disabled || !el) return;
 
-    if (prefersReducedMotion()) {
-      gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
-      if (strokeDraw) resetStrokeDashInline(el);
-      return;
-    }
-
-    epochRef.current += 1;
-    const epoch = epochRef.current;
-    const done = () => epochRef.current !== epoch;
-
-    const killAllTweens = () => {
-      gsap.killTweensOf(el);
-      if (strokeDraw) {
-        const stroked = el.querySelectorAll<SVGGeometryElement>(
-          PRISM_LUCIDE_DRAW_SVG_SELECTOR
-        );
-        gsap.killTweensOf(stroked);
-      }
-    };
-
     let cancelled = false;
     let innerCleanup: (() => void) | undefined;
+    let rafId = 0;
 
-    const run = () => {
-      if (cancelled || done()) return;
-      killAllTweens();
+    const start = (gsap: typeof import("gsap").gsap) => {
+      if (cancelled) return;
 
-      const playback = m.playback ?? "once";
-      const presetIn = m.presetIn ?? "fadeScale";
-      const durIn = resolvePrismMotionDurationSeconds(
-        m.durationIn ?? "regular"
-      );
-      const easeIn = resolvePrismMotionEaseGsap(m.easeIn);
-
-      if (playback === "once") {
-        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
-        runIconEntranceFromTo(el, presetIn, durIn, m);
-        innerCleanup = () => {
-          if (done()) return;
-          if (m.presetOut === "fadeScale") {
-            const outDur = resolvePrismMotionDurationSeconds(
-              m.durationOut ?? "speedy"
-            );
-            killAllTweens();
-            gsap.to(el, {
-              opacity: 0,
-              duration: outDur,
-              ease: resolvePrismMotionEaseGsap(m.easeIn),
-            });
-          } else {
-            killAllTweens();
-          }
-        };
+      if (prefersReducedMotion()) {
+        gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+        if (strokeDraw) resetStrokeDashInline(el);
         return;
       }
 
-      if (playback === "loop") {
-        const pulseDur = Math.max(
-          0.15,
-          resolvePrismMotionDurationSeconds(m.durationIn ?? "regular") * 0.35
+      epochRef.current += 1;
+      const epoch = epochRef.current;
+      const done = () => epochRef.current !== epoch;
+
+      const killAllTweens = () => {
+        gsap.killTweensOf(el);
+        if (strokeDraw) {
+          const stroked = el.querySelectorAll<SVGGeometryElement>(
+            PRISM_LUCIDE_DRAW_SVG_SELECTOR
+          );
+          gsap.killTweensOf(stroked);
+        }
+      };
+
+      const run = () => {
+        if (cancelled || done()) return;
+        killAllTweens();
+
+        const playback = m.playback ?? "once";
+        const presetIn = m.presetIn ?? "fadeScale";
+        const durIn = resolvePrismMotionDurationSeconds(
+          m.durationIn ?? "regular"
         );
-        const peak = resolvePeakScale(m);
-        const startPulse = () => {
-          if (done()) return;
-          gsap.to(el, {
-            scale: peak,
-            duration: pulseDur,
-            yoyo: true,
-            repeat: -1,
-            ease: "sine.inOut",
-          });
-        };
-        if (presetIn !== "none") {
-          let entranceDone = false;
-          let strokeDone = !strokeDraw;
-          const tryStartPulse = () => {
-            if (done() || !entranceDone || !strokeDone) return;
-            startPulse();
+        const easeIn = resolvePrismMotionEaseGsap(m.easeIn);
+
+        if (playback === "once") {
+          if (strokeDraw) void runStrokeDrawGsap(el, durIn, easeIn);
+          runIconEntranceFromTo(gsap, el, presetIn, durIn, m);
+          innerCleanup = () => {
+            if (done()) return;
+            if (m.presetOut === "fadeScale") {
+              const outDur = resolvePrismMotionDurationSeconds(
+                m.durationOut ?? "speedy"
+              );
+              killAllTweens();
+              gsap.to(el, {
+                opacity: 0,
+                duration: outDur,
+                ease: resolvePrismMotionEaseGsap(m.easeIn),
+              });
+            } else {
+              killAllTweens();
+            }
           };
-          if (strokeDraw) {
-            runStrokeDrawGsap(el, durIn, easeIn, () => {
-              strokeDone = true;
+          return;
+        }
+
+        if (playback === "loop") {
+          const pulseDur = Math.max(
+            0.15,
+            resolvePrismMotionDurationSeconds(m.durationIn ?? "regular") * 0.35
+          );
+          const peak = resolvePeakScale(m);
+          const startPulse = () => {
+            if (done()) return;
+            gsap.to(el, {
+              scale: peak,
+              duration: pulseDur,
+              yoyo: true,
+              repeat: -1,
+              ease: "sine.inOut",
+            });
+          };
+          if (presetIn !== "none") {
+            let entranceDone = false;
+            let strokeDone = !strokeDraw;
+            const tryStartPulse = () => {
+              if (done() || !entranceDone || !strokeDone) return;
+              startPulse();
+            };
+            if (strokeDraw) {
+              void runStrokeDrawGsap(el, durIn, easeIn, () => {
+                strokeDone = true;
+                tryStartPulse();
+              });
+            }
+            runIconEntranceFromTo(gsap, el, presetIn, durIn, m, () => {
+              entranceDone = true;
               tryStartPulse();
             });
-          }
-          runIconEntranceFromTo(el, presetIn, durIn, m, () => {
-            entranceDone = true;
-            tryStartPulse();
-          });
-        } else {
-          gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
-          if (strokeDraw) {
-            runStrokeDrawGsap(el, durIn, easeIn, () => {
-              if (done()) return;
-              startPulse();
-            });
           } else {
-            startPulse();
+            gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+            if (strokeDraw) {
+              void runStrokeDrawGsap(el, durIn, easeIn, () => {
+                if (done()) return;
+                startPulse();
+              });
+            } else {
+              startPulse();
+            }
           }
+          innerCleanup = () => {
+            killAllTweens();
+          };
+          return;
         }
-        innerCleanup = () => {
-          killAllTweens();
-        };
-        return;
-      }
 
-      if (playback === "hover") {
-        gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
-        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
-        if (presetIn !== "none") {
-          runIconEntranceFromTo(el, presetIn, durIn, m);
+        if (playback === "hover") {
+          gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+          if (strokeDraw) void runStrokeDrawGsap(el, durIn, easeIn);
+          if (presetIn !== "none") {
+            runIconEntranceFromTo(gsap, el, presetIn, durIn, m);
+          }
+          const durHover = resolvePrismMotionDurationSeconds(
+            m.durationIn ?? "fast"
+          );
+          const peak = resolvePeakScale(m);
+          const hoverEase = resolvePrismMotionEaseGsap(m.easeIn);
+          const onEnter = () => {
+            gsap.to(el, {
+              scale: peak,
+              duration: durHover,
+              ease: hoverEase,
+              overwrite: true,
+            });
+          };
+          const onLeave = () => {
+            gsap.to(el, {
+              scale: 1,
+              duration: resolvePrismMotionDurationSeconds("speedy"),
+              ease: hoverEase,
+              overwrite: true,
+            });
+          };
+          el.addEventListener("pointerenter", onEnter);
+          el.addEventListener("pointerleave", onLeave);
+          innerCleanup = () => {
+            el.removeEventListener("pointerenter", onEnter);
+            el.removeEventListener("pointerleave", onLeave);
+            killAllTweens();
+          };
+          return;
         }
-        const durHover = resolvePrismMotionDurationSeconds(
-          m.durationIn ?? "fast"
-        );
-        const peak = resolvePeakScale(m);
-        const hoverEase = resolvePrismMotionEaseGsap(m.easeIn);
-        const onEnter = () => {
-          gsap.to(el, {
-            scale: peak,
-            duration: durHover,
-            ease: hoverEase,
-            overwrite: true,
-          });
-        };
-        const onLeave = () => {
-          gsap.to(el, {
-            scale: 1,
-            duration: resolvePrismMotionDurationSeconds("speedy"),
-            ease: hoverEase,
-            overwrite: true,
-          });
-        };
-        el.addEventListener("pointerenter", onEnter);
-        el.addEventListener("pointerleave", onLeave);
-        innerCleanup = () => {
-          el.removeEventListener("pointerenter", onEnter);
-          el.removeEventListener("pointerleave", onLeave);
-          killAllTweens();
-        };
-        return;
-      }
 
-      if (playback === "occasionally") {
-        gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
-        if (strokeDraw) runStrokeDrawGsap(el, durIn, easeIn);
-        if (presetIn !== "none") {
-          runIconEntranceFromTo(el, presetIn, durIn, m);
-        }
-        let timeoutId: number | undefined;
-        const peak = resolvePeakScale(m);
-        const burstEase = resolvePrismMotionEaseGsap(m.easeIn);
-        const burst = () => {
-          if (done()) return;
-          gsap
-            .timeline()
-            .to(el, { scale: peak, duration: 0.12, ease: burstEase })
-            .to(el, { scale: 1, duration: 0.2, ease: burstEase });
-        };
-        const schedule = () => {
-          if (done()) return;
-          const delay =
-            PRISM_ICON_OCCASIONAL_MIN_MS +
-            Math.random() * PRISM_ICON_OCCASIONAL_JITTER_MS;
-          timeoutId = window.setTimeout(() => {
+        if (playback === "occasionally") {
+          gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
+          if (strokeDraw) void runStrokeDrawGsap(el, durIn, easeIn);
+          if (presetIn !== "none") {
+            runIconEntranceFromTo(gsap, el, presetIn, durIn, m);
+          }
+          let timeoutId: number | undefined;
+          const peak = resolvePeakScale(m);
+          const burstEase = resolvePrismMotionEaseGsap(m.easeIn);
+          const burst = () => {
             if (done()) return;
-            burst();
-            schedule();
-          }, delay);
-        };
-        schedule();
+            gsap
+              .timeline()
+              .to(el, { scale: peak, duration: 0.12, ease: burstEase })
+              .to(el, { scale: 1, duration: 0.2, ease: burstEase });
+          };
+          const schedule = () => {
+            if (done()) return;
+            const delay =
+              PRISM_ICON_OCCASIONAL_MIN_MS +
+              Math.random() * PRISM_ICON_OCCASIONAL_JITTER_MS;
+            timeoutId = window.setTimeout(() => {
+              if (done()) return;
+              burst();
+              schedule();
+            }, delay);
+          };
+          schedule();
+          innerCleanup = () => {
+            if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+            killAllTweens();
+          };
+          return;
+        }
+
         innerCleanup = () => {
-          if (timeoutId !== undefined) window.clearTimeout(timeoutId);
           killAllTweens();
         };
-        return;
-      }
-
-      innerCleanup = () => {
-        killAllTweens();
       };
+
+      if (strokeDraw) {
+        rafId = requestAnimationFrame(run);
+      } else {
+        run();
+      }
     };
 
-    let rafId = 0;
-    if (strokeDraw) {
-      rafId = requestAnimationFrame(run);
-    } else {
-      run();
-    }
+    void loadGsap().then(({ gsap }) => start(gsap));
 
     return () => {
       cancelled = true;
       if (strokeDraw) cancelAnimationFrame(rafId);
       innerCleanup?.();
+      const gsap = getGsapIfLoaded();
+      if (gsap) {
+        gsap.killTweensOf(el);
+        if (strokeDraw) {
+          gsap.killTweensOf(
+            el.querySelectorAll<SVGGeometryElement>(
+              PRISM_LUCIDE_DRAW_SVG_SELECTOR
+            )
+          );
+        }
+      }
     };
   }, [name, motionProp, strokeDraw, lucideIcon]);
-
-  if (useLucide && !lucideIcon) {
-    const nodeEnv = (
-      globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } }
-    ).process?.env?.NODE_ENV;
-    if (nodeEnv !== "production") {
-      console.warn(
-        `[PrismIcon] No Lucide icon for name "${name}". Use a Lucide id (e.g. gem, layout-grid).`
-      );
-    }
-    return null;
-  }
 
   return (
     <span
@@ -585,14 +617,16 @@ export function PrismIcon({
       }}
       aria-hidden
     >
-      {useLucide && lucideIcon ? (
-        <PrismLucideIconGlyph
-          icon={lucideIcon}
-          sizePx={sizePx}
-          weight={weight}
-          filled={filled}
-          glyphPaint={glyphPaint}
-        />
+      {useLucide ? (
+        lucideIcon ? (
+          <PrismLucideIconGlyph
+            icon={lucideIcon}
+            sizePx={sizePx}
+            weight={weight}
+            filled={filled}
+            glyphPaint={glyphPaint}
+          />
+        ) : null
       ) : materialFontReady ? (
         name
       ) : null}

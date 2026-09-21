@@ -186,6 +186,8 @@ pnpm run knip:exports         # quarterly only (unused exports; local only)
 - **`knip`** — unlisted/unused deps and orphan files (see root `knip.config.ts` in app and prism).
 - **`knip:exports`** — tighter export surface; noisier, run occasionally not every month.
 
+Keep knip `ignoreDependencies` / `ignoreBinaries` lists short. Stale ignores show up as knip **configuration hints**; delete them instead of growing the ignore list.
+
 ### 6. Verify before you commit (5 min) **(report)** / **(verify)** after apply
 
 Chores runs **knip → quality (app + prism) → build** so all tests finish before any production build.

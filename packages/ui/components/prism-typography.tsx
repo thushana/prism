@@ -13,7 +13,6 @@
 
 import {
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   type CSSProperties,
@@ -22,8 +21,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { gsap } from "gsap";
-import { SplitText } from "gsap/SplitText";
+import { loadGsapSplitText } from "../source/load-gsap";
 import { cn } from "@utilities";
 import {
   PRISM_ICON_WEIGHT_NAME_TO_VALUE,
@@ -37,8 +35,6 @@ import {
 import { prismTypographySentenceCaseFromIdentifier } from "./prism-typography-sentence-case";
 
 export { prismTypographySentenceCaseFromIdentifier };
-
-gsap.registerPlugin(SplitText);
 
 export const PRISM_TYPOGRAPHY_ROLES = [
   "display",
@@ -178,9 +174,16 @@ function splitTextTypeForZone(
   return null;
 }
 
+type PrismSplitText = {
+  revert: () => void;
+  chars: Element[];
+  words: Element[];
+  lines: Element[];
+};
+
 function targetsForSplit(
   zone: ResolvedAnimationZone,
-  split: SplitText
+  split: PrismSplitText
 ): Element[] {
   if (zone === "line") return split.lines;
   if (zone === "word") return split.words;
@@ -352,14 +355,14 @@ export function PrismTypography({
 
   const innerRef = useRef<HTMLElement | null>(null);
   const playedRef = useRef(false);
-  const ctxRef = useRef<gsap.Context | null>(null);
-  const splitRef = useRef<SplitText | null>(null);
+  const ctxRef = useRef<{ revert: () => void } | null>(null);
+  const splitRef = useRef<PrismSplitText | null>(null);
 
   useEffect(() => {
     playedRef.current = false;
   }, [animationZoneResolved, animationKindResolved, displayChildren]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     ctxRef.current?.revert();
     ctxRef.current = null;
     splitRef.current?.revert();
@@ -376,48 +379,56 @@ export function PrismTypography({
     const el = innerRef.current;
     if (!el) return;
 
-    const y = yForZone(animationZoneResolved, animationKindResolved);
+    let cancelled = false;
+    void loadGsapSplitText().then(({ gsap, SplitText }) => {
+      if (cancelled) return;
+      const y = yForZone(animationZoneResolved, animationKindResolved);
 
-    if (animationZoneResolved === "whole") {
-      ctxRef.current = gsap.context(() => {
-        gsap.set(el, y ? { opacity: 0, y } : { opacity: 0 });
-      }, el);
-      return () => {
-        ctxRef.current?.revert();
-        ctxRef.current = null;
-      };
-    }
+      if (animationZoneResolved === "whole") {
+        ctxRef.current = gsap.context(() => {
+          gsap.set(el, y ? { opacity: 0, y } : { opacity: 0 });
+        }, el);
+        return;
+      }
 
-    if (!isPlainText(displayChildren)) return;
+      if (!isPlainText(displayChildren)) return;
 
-    const splitType = splitTextTypeForZone(animationZoneResolved);
-    if (!splitType) return;
+      const splitType = splitTextTypeForZone(animationZoneResolved);
+      if (!splitType) return;
 
-    const split = SplitText.create(el, {
-      type: splitType,
-      autoSplit: true,
-      aria: "auto",
-      onSplit: (self) => {
-        splitRef.current = self;
-        if (playedRef.current) return;
-        const nextTargets = targetsForSplit(animationZoneResolved, self);
-        const yNext = yForZone(animationZoneResolved, animationKindResolved);
-        if (nextTargets.length)
-          gsap.set(
-            nextTargets,
-            yNext ? { opacity: 0, y: yNext } : { opacity: 0 }
+      const split = SplitText.create(el, {
+        type: splitType,
+        autoSplit: true,
+        aria: "auto",
+        onSplit: (self) => {
+          splitRef.current = self as PrismSplitText;
+          if (playedRef.current) return;
+          const nextTargets = targetsForSplit(
+            animationZoneResolved,
+            self as PrismSplitText
           );
-      },
-    });
-    splitRef.current = split;
+          const yNext = yForZone(animationZoneResolved, animationKindResolved);
+          if (nextTargets.length)
+            gsap.set(
+              nextTargets,
+              yNext ? { opacity: 0, y: yNext } : { opacity: 0 }
+            );
+        },
+      });
+      splitRef.current = split as PrismSplitText;
 
-    const targets = targetsForSplit(animationZoneResolved, split);
-    ctxRef.current = gsap.context(() => {
-      if (targets.length)
-        gsap.set(targets, y ? { opacity: 0, y } : { opacity: 0 });
-    }, el);
+      const targets = targetsForSplit(
+        animationZoneResolved,
+        split as PrismSplitText
+      );
+      ctxRef.current = gsap.context(() => {
+        if (targets.length)
+          gsap.set(targets, y ? { opacity: 0, y } : { opacity: 0 });
+      }, el);
+    });
 
     return () => {
+      cancelled = true;
       ctxRef.current?.revert();
       ctxRef.current = null;
       splitRef.current?.revert();
@@ -437,71 +448,95 @@ export function PrismTypography({
     const el = innerRef.current;
     if (!el) return;
 
+    let cancelled = false;
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry?.isIntersecting || playedRef.current) return;
-        if (prefersReducedMotion()) {
-          playedRef.current = true;
-          observer.disconnect();
-          ctxRef.current?.revert();
-          ctxRef.current = null;
-          splitRef.current?.revert();
-          splitRef.current = null;
-          gsap.set(el, { opacity: 1, y: 0 });
-          return;
-        }
-
-        playedRef.current = true;
-        observer.disconnect();
-
-        ctxRef.current?.revert();
-        ctxRef.current = gsap.context(() => {
-          const y = yForZone(animationZoneResolved, animationKindResolved);
-
-          if (animationZoneResolved === "whole") {
-            gsap.fromTo(el, y ? { opacity: 0, y } : { opacity: 0 }, {
-              opacity: 1,
-              ...(y ? { y: 0 } : {}),
-              duration: DURATION_WHOLE,
-              ease: EASE_OUT,
-            });
+        void loadGsapSplitText().then(({ gsap }) => {
+          if (cancelled || playedRef.current) return;
+          if (prefersReducedMotion()) {
+            playedRef.current = true;
+            observer.disconnect();
+            ctxRef.current?.revert();
+            ctxRef.current = null;
+            splitRef.current?.revert();
+            splitRef.current = null;
+            gsap.set(el, { opacity: 1, y: 0 });
             return;
           }
 
-          const split = splitRef.current;
-          if (!split) return;
+          const runPlayback = (attemptsLeft: number) => {
+            if (cancelled || playedRef.current) return;
 
-          const targets = targetsForSplit(animationZoneResolved, split);
-          if (!targets.length) return;
+            if (animationZoneResolved === "whole") {
+              playedRef.current = true;
+              observer.disconnect();
+              ctxRef.current?.revert();
+              ctxRef.current = gsap.context(() => {
+                const y = yForZone(
+                  animationZoneResolved,
+                  animationKindResolved
+                );
+                gsap.fromTo(el, y ? { opacity: 0, y } : { opacity: 0 }, {
+                  opacity: 1,
+                  ...(y ? { y: 0 } : {}),
+                  duration: DURATION_WHOLE,
+                  ease: EASE_OUT,
+                });
+              }, el);
+              return;
+            }
 
-          const stagger =
-            animationZoneResolved === "line"
-              ? STAGGER_LINE
-              : animationZoneResolved === "word"
-                ? STAGGER_WORD
-                : STAGGER_CHAR;
-          const duration =
-            animationZoneResolved === "line"
-              ? DURATION_LINE
-              : animationZoneResolved === "word"
-                ? DURATION_WORD
-                : DURATION_CHAR;
+            const split = splitRef.current;
+            if (!split) {
+              if (attemptsLeft > 0) {
+                requestAnimationFrame(() => runPlayback(attemptsLeft - 1));
+              }
+              return;
+            }
 
-          gsap.fromTo(targets, y ? { opacity: 0, y } : { opacity: 0 }, {
-            opacity: 1,
-            ...(y ? { y: 0 } : {}),
-            duration,
-            stagger,
-            ease: EASE_OUT,
-          });
-        }, el);
+            const targets = targetsForSplit(animationZoneResolved, split);
+            if (!targets.length) return;
+
+            playedRef.current = true;
+            observer.disconnect();
+            ctxRef.current?.revert();
+            ctxRef.current = gsap.context(() => {
+              const y = yForZone(animationZoneResolved, animationKindResolved);
+              const stagger =
+                animationZoneResolved === "line"
+                  ? STAGGER_LINE
+                  : animationZoneResolved === "word"
+                    ? STAGGER_WORD
+                    : STAGGER_CHAR;
+              const duration =
+                animationZoneResolved === "line"
+                  ? DURATION_LINE
+                  : animationZoneResolved === "word"
+                    ? DURATION_WORD
+                    : DURATION_CHAR;
+
+              gsap.fromTo(targets, y ? { opacity: 0, y } : { opacity: 0 }, {
+                opacity: 1,
+                ...(y ? { y: 0 } : {}),
+                duration,
+                stagger,
+                ease: EASE_OUT,
+              });
+            }, el);
+          };
+
+          // Wait for the setup effect's SplitText.create when zones need it.
+          runPlayback(60);
+        });
       },
       { threshold: IO_THRESHOLD, rootMargin: IO_ROOT_MARGIN }
     );
 
     observer.observe(el);
     return () => {
+      cancelled = true;
       observer.disconnect();
       ctxRef.current?.revert();
       ctxRef.current = null;

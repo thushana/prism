@@ -16,6 +16,7 @@
     "paths": {
       "@ui": ["../ui/source"],
       "@ui/map": ["../ui/source/map.ts"],
+      "@ui/pickers": ["../ui/source/pickers.ts"],
       "@utilities": ["../utilities/source"]
     }
   },

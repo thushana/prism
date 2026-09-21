@@ -4,9 +4,11 @@
   "private": true,
   "main": "./source/index.ts",
   "types": "./source/index.ts",
+  "sideEffects": ["**/*.css"],
   "exports": {
     ".": "./source/index.ts",
-    "./map": "./source/map.ts"
+    "./map": "./source/map.ts",
+    "./pickers": "./source/pickers.ts"
   },
   "scripts": {
     "generate:colors": "node scripts/generate-material-colors.js",
@@ -16,6 +18,7 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
+  "sideEffects": false,
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "@prism/utilities": "file:../utilities",

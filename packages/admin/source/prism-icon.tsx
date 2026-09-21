@@ -5,12 +5,14 @@ import {
   PrismCodeBlock,
   PrismColorPicker,
   PrismIcon,
-  PrismIconPicker,
   PrismTypography,
-  PRISM_MATERIAL_ICONS_ROUND_NAMES,
   prismColorPickerClipboardColorProp,
-  resolveLucideIdByName,
 } from "@ui";
+import {
+  PrismIconPicker,
+  PRISM_MATERIAL_ICONS_ROUND_NAMES,
+  resolveLucideIdByName,
+} from "@ui/pickers";
 import type {
   PartialPrismColorSpec,
   PrismIconEntranceRotatePreset,

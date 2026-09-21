@@ -16,6 +16,7 @@ const webPaths = {
   "@logger/*": ["../../packages/logger/source/*"],
   "@ui": ["../../packages/ui/source"],
   "@ui/map": ["../../packages/ui/source/map.ts"],
+  "@ui/pickers": ["../../packages/ui/source/pickers.ts"],
   "@utilities": ["../../packages/utilities/source"],
   "@admin": ["../../packages/admin/source"],
   "@authentication": ["../../packages/authentication/source"],
@@ -41,7 +42,7 @@ const config: KnipConfig = {
     ".": {
       entry: ["scripts/*.ts"],
       project: ["scripts/**/*.ts"],
-      ignoreBinaries: ["drizzle-kit", "lsof", "pkill"],
+      ignoreBinaries: ["drizzle-kit", "pkill"],
       ignoreDependencies: ["swr", "lightningcss", "concurrently"],
       drizzle: { config: [] },
     },
@@ -72,9 +73,6 @@ const config: KnipConfig = {
         "tailwindcss",
         "tw-animate-css",
         "ui",
-        // Optional ui peers for PrismMap (bundled via packages/ui, not imported in apps/web)
-        "mapbox-gl",
-        "@types/google.maps",
       ],
       drizzle: { config: [] },
     },
@@ -85,6 +83,7 @@ const config: KnipConfig = {
     "packages/admin": {
       paths: {
         "@ui": ["../ui/source"],
+        "@ui/pickers": ["../ui/source/pickers.ts"],
         "@utilities": ["../utilities/source"],
       },
       ignoreDependencies: ["ui", "@prism/utilities"],
@@ -101,7 +100,6 @@ const config: KnipConfig = {
         "@utilities": ["../utilities/source"],
       },
       ignoreDependencies: [
-        "clsx",
         "tailwind-merge",
         "@types/mapbox-gl",
         "@prism/utilities",
@@ -111,7 +109,7 @@ const config: KnipConfig = {
     "packages/cli": {
       paths: loggerPathsFromPackage,
       ignoreDependencies: ["@types/inquirer", "logger"],
-      ignoreBinaries: ["open", "xdg-open"],
+      ignoreBinaries: ["xdg-open"],
     },
     "packages/intelligence": {
       paths: loggerPathsFromPackage,
