@@ -22,11 +22,11 @@
     "./passkey-settings": "./source/passkey-settings.tsx"
   },
   "dependencies": {
-    "@better-auth/api-key": "1.7.2",
-    "@better-auth/drizzle-adapter": "1.7.2",
-    "@better-auth/passkey": "1.7.2",
+    "@better-auth/api-key": "1.7.7",
+    "@better-auth/drizzle-adapter": "1.7.7",
+    "@better-auth/passkey": "1.7.7",
     "@prism/utilities": "workspace:*",
-    "better-auth": "1.7.2",
+    "better-auth": "1.7.7",
     "server-only": "^0.0.1",
     "ui": "workspace:*"
   },
@@ -42,7 +42,7 @@
     "@types/react": "^19.2.18",
     "drizzle-orm": "^0.45.2",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

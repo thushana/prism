@@ -171,7 +171,7 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 | Package                          | Current policy                          | Why                                                                                                               |
 | -------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `better-auth` + `@better-auth/*` | Pinned to **1.7.2** (exact, not `^`)    | Includes the **1.7** account identity changes (`issuer` + unique compound index) and CLI-supported migration path |
+| `better-auth` + `@better-auth/*` | Pinned to **1.7.7** (exact, not `^`)    | Includes the **1.7** account identity changes (`issuer` + unique compound index) and CLI-supported migration path |
 | Embedder parent                  | `pnpm.overrides` in host `package.json` | Keeps `file:prism/packages/authentication` on the same `@better-auth/core` as the app                             |
 | Prism monorepo                   | `pnpm-workspace.yaml` `overrides`       | Same pins for `next`, `better-auth`, and plugins across workspaces                                                |
 

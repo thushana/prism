@@ -26,7 +26,7 @@
     "@vitest/ui": "^5.0.0",
     "logger": "file:../logger",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
