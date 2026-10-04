@@ -93,15 +93,15 @@
   "devDependencies": {
     "@typescript/typescript6": "^6.0.2",
     "concurrently": "^10.0.5",
-    "eslint": "^10.11.0",
-    "eslint-config-next": "16.3.5",
+    "eslint": "^10.12.0",
+    "eslint-config-next": "16.3.8",
     "husky": "^9.1.7",
-    "knip": "^6.37.0",
-    "lint-staged": "^17.5.1",
-    "prettier": "^3.9.8",
+    "knip": "^6.39.0",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.3"
   },
   "exports": {
     "./ui": "./packages/ui/source/index.ts",
