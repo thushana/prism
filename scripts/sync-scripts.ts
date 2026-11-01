@@ -106,6 +106,8 @@ function syncScripts(): void {
         mergedScripts[`db:${key.replace("database:", "")}`]) ||
       value.includes("-w tools") ||
       value.includes("-w apps/") ||
+      // Prism monorepo `*:web` / `--filter web` — no `web` workspace on consumers
+      (!hasAppsWebLayout && value.includes("--filter web")) ||
       ((key === "test" || key === "test:run") &&
         value.includes("--workspaces")) ||
       (key === "dev:setup" &&
@@ -181,6 +183,12 @@ function syncScripts(): void {
       }
 
       if (key === "prism" || key === "tools") {
+        skippedScripts.push(key);
+        continue;
+      }
+
+      // Skip Prism monorepo scripts that target a `web` workspace consumers lack
+      if (!hasAppsWebLayout && value.includes("--filter web")) {
         skippedScripts.push(key);
         continue;
       }
@@ -282,6 +290,12 @@ function syncScripts(): void {
     mergedScripts["prism:sync:scaffold"] =
       "tsx prism/scripts/sync-scaffold-from-prism.ts";
 
+    // Vitest layout harness lives under prism/; consumers use assert:app-library.
+    if (mergedScripts["test:assert-layout"]) {
+      delete mergedScripts["test:assert-layout"];
+      removedScripts.push("test:assert-layout");
+    }
+
     if (isStaticConsumer) {
       for (const key of Object.keys(mergedScripts)) {
         if (key.startsWith("database:")) {
@@ -289,7 +303,6 @@ function syncScripts(): void {
           removedScripts.push(key);
         }
       }
-      delete mergedScripts["test:assert-layout"];
     }
   }
 
