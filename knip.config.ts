@@ -113,7 +113,7 @@ const config: KnipConfig = {
     },
     "packages/cli": {
       paths: loggerPathsFromPackage,
-      ignoreDependencies: ["@types/inquirer", "logger"],
+      ignoreDependencies: ["logger"],
       ignoreBinaries: ["xdg-open"],
     },
     "packages/intelligence": {
