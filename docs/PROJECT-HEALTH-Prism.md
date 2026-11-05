@@ -75,7 +75,7 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 
 | Upgrade             | Status                                        | What to plan for                                                                                                                                                                            |
 | ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **better-auth 1.7** | ✅ On **1.7.7**                               | 1.7.3+ dropped required `account.issuer` — keep Drizzle without it or apps 500 on auth. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
+| **better-auth 1.7** | ✅ On **1.7.18**                              | 1.7.3+ dropped required `account.issuer` — keep Drizzle without it or apps 500 on auth. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md). |
 | **Vitest 5**        | ✅ On **5.0.3**                               | Watch for new Vitest/Vite config-loader warnings; prefer `.mts` configs (or suppress with `VITE_CONFIG_NATIVE_IGNORE_WARNING=true`) rather than ignoring real failures.                     |
 | **TypeScript 7**    | ✅ On **7.0.2** (with TS6 sidecar for ESLint) | `typescript-eslint` peer range may lag; keep `@typescript/typescript6` hooked for ESLint until peers widen. TS 7 also hard-errors some deprecated `tsconfig` options — see checklist below. |
 
@@ -87,7 +87,7 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 4. **Verify** — `pnpm run typecheck` (app + `cd prism && pnpm run typecheck`), `pnpm run lint`, `pnpm run test:run`, `pnpm run build` in both trees.
 5. **Known good news** — a trial bump to TS 7.0.2 on this repo passed **typecheck** with no source changes; breakage is expected in **config + tooling**, not app logic.
 
-Recent security/tooling floor (Oct 2026): **next ≥16.3.8**, **better-auth 1.7.7**, **vitest 5.0.3**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
+Recent security/tooling floor (Oct 2026): **next ≥16.3.8**, **better-auth 1.7.18**, **vitest 5.0.3**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
 
 ## 6. Monthly dependency & code health ritual
 
