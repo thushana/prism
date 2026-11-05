@@ -6,7 +6,6 @@ import {
   boolean,
   integer,
   index,
-  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -51,8 +50,8 @@ export const account = pgTable(
   {
     id: text("id").primaryKey(),
     accountId: text("account_id").notNull(),
-    // Better Auth 1.7: account identity namespace for uniqueness across providers.
-    issuer: text("issuer").notNull(),
+    // Better Auth 1.7.3+: keyed by (providerId, accountId). Do not add required
+    // `issuer` — 1.7.0–1.7.2 briefly required it and BA throws SCHEMA_MISMATCH.
     providerId: text("provider_id").notNull(),
     userId: text("user_id")
       .notNull()
@@ -69,13 +68,7 @@ export const account = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [
-    index("account_userId_idx").on(table.userId),
-    uniqueIndex("account_issuer_accountId_unique").on(
-      table.issuer,
-      table.accountId
-    ),
-  ]
+  (table) => [index("account_userId_idx").on(table.userId)]
 );
 
 export const verification = pgTable(
