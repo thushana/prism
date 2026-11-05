@@ -92,16 +92,16 @@
   },
   "devDependencies": {
     "@typescript/typescript6": "^6.0.2",
-    "concurrently": "^10.0.5",
-    "eslint": "^10.13.0",
-    "eslint-config-next": "16.4.3",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.14.0",
+    "eslint-config-next": "16.4.5",
     "husky": "^9.1.7",
-    "knip": "^6.44.0",
+    "knip": "^6.44.1",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "exports": {
     "./ui": "./packages/ui/source/index.ts",
