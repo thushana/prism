@@ -17,7 +17,7 @@ overrides:
   vite: 8.2.2
   next: 16.4.5
   eslint-config-next: 16.4.5
-  lucide-react: 1.17.0
+  lucide-react: 1.68.0
   react: 19.3.1
   react-dom: 19.3.1
   undici: '>=8.12.2'
@@ -212,8 +212,8 @@ importers:
         specifier: file:../utilities
         version: file:packages/utilities
       lucide-react:
-        specifier: 1.17.0
-        version: 1.17.0(react@19.3.1)
+        specifier: 1.68.0
+        version: 1.68.0(@types/react@19.2.18)(react@19.3.1)
       next:
         specifier: 16.4.5
         version: 16.4.5(@babel/core@7.29.7)(@types/node@26.4.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -512,8 +512,8 @@ importers:
         specifier: ^3.15.0
         version: 3.15.0
       lucide-react:
-        specifier: 1.17.0
-        version: 1.17.0(react@19.3.1)
+        specifier: 1.68.0
+        version: 1.68.0(@types/react@19.2.18)(react@19.3.1)
       mapbox-gl:
         specifier: ^3.0.0
         version: 3.23.1
@@ -4282,10 +4282,14 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@1.17.0:
-    resolution: {integrity: sha512-9FA9evdox/JQL5PT57fdA1x/yg8T7knJ98+zjTL3UfKza6pflQUUh3XtaQIHKvnsJw1lmsEyHVlt5jchYxOQ5w==}
+  lucide-react@1.68.0:
+    resolution: {integrity: sha512-9i7NKWm2QlOprMhcwkhBOlIt9zB7cp2GIyFY+oMue0EsprolUFxva5rkdBbyfs4k1eejpa0JRnRgVOGiart+Xg==}
     peerDependencies:
+      '@types/react': '*'
       react: 19.3.1
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -8866,9 +8870,11 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@1.17.0(react@19.3.1):
+  lucide-react@1.68.0(@types/react@19.2.18)(react@19.3.1):
     dependencies:
       react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.2.18
 
   magic-string@0.30.21:
     dependencies:
@@ -9792,7 +9798,7 @@ snapshots:
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       gsap: 3.15.0
-      lucide-react: 1.17.0(react@19.3.1)
+      lucide-react: 1.68.0(@types/react@19.2.18)(react@19.3.1)
       next: 16.4.5(@babel/core@7.29.7)(@types/node@26.4.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react: 19.3.1
       tailwind-merge: 3.7.0
