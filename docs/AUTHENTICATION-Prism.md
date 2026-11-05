@@ -171,29 +171,17 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 
 | Package                          | Current policy                          | Why                                                                                                               |
 | -------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `better-auth` + `@better-auth/*` | Pinned to **1.7.7** (exact, not `^`)    | Includes the **1.7** account identity changes (`issuer` + unique compound index) and CLI-supported migration path |
+| `better-auth` + `@better-auth/*` | Pinned to **1.7.7** (exact, not `^`)    | Post-1.7.3 account schema (providerId + accountId; no required `issuer`) |
 | Embedder parent                  | `pnpm.overrides` in host `package.json` | Keeps `file:prism/packages/authentication` on the same `@better-auth/core` as the app                             |
 | Prism monorepo                   | `pnpm-workspace.yaml` `overrides`       | Same pins for `next`, `better-auth`, and plugins across workspaces                                                |
 
 ### Better Auth 1.7 migration notes
 
-Better Auth 1.7 introduces **account identity** fields on `account`:
+Better Auth **1.7.0–1.7.2** briefly required `account.issuer` + unique `(issuer, accountId)`. **1.7.3+** removed that; accounts are keyed by `(providerId, accountId)` again (same as 1.6).
 
-- New required column **`issuer`**
-- Unique compound index on **(`issuer`, `accountId`)**
+Do **not** add a required `issuer` column to Drizzle — Better Auth will throw `SCHEMA_MISMATCH` / `unexpected-required-column` and every auth page will 500.
 
-Better Auth 1.7 uses `issuer` as the identity namespace (e.g. `local:credential` for email+password accounts).
-
-**Recommended (populated DB):**
-
-```bash
-npx auth migrate plan
-npx auth migrate apply
-```
-
-After the CLI migration, record the change in your ORM migration history so future deploys don’t try to re-apply it.
-
-**Fallback (simple Postgres-only apps):** this repo also carries a manual Drizzle migration (`apps/web/database/migrations/0028_better_auth_account_identity.sql`) that adds/backfills `issuer` and creates the compound index. Prefer the Better Auth CLI when you have multiple providers or any chance of identity collisions.
+If a database already applied the short-lived 1.7.0–1.7.2 column, relax it (drop `NOT NULL` / drop the compound unique index) per the [1.7 upgrade guide](https://www.better-auth.com/docs/guides/1-7-upgrade-guide). The host migration `0028_better_auth_account_identity.sql` is a no-op stub documenting this.
 
 ## Next.js build notes
 
