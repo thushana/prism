@@ -249,8 +249,10 @@ export function PrismMapMapbox({
             return;
           }
           const feat = feats[0]!;
-          const routeId = (feat.properties as { routeId?: string } | null)
-            ?.routeId;
+          // mapbox-gl 3.34+ GeoJSONFeature typings omit inherited `properties` under TS 7
+          const routeId = (
+            feat as { properties?: { routeId?: string } | null }
+          ).properties?.routeId;
           if (routeId === undefined) return;
           const r = routesByIdRef.current.get(routeId);
           if (r) onRouteSelectionRef.current?.(r);
