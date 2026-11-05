@@ -9,7 +9,6 @@
     ".": "./source/index.ts"
   },
   "dependencies": {
-    "@types/inquirer": "^9.0.10",
     "application-settings": "file:../application-settings",
     "chalk": "^5.6.2",
     "commander": "^15.0.0",
@@ -26,7 +25,7 @@
     "@vitest/ui": "^5.0.0",
     "logger": "file:../logger",
     "typescript": "^7.0.0",
-    "vitest": "^5.0.3"
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

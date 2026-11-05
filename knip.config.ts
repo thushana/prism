@@ -106,14 +106,13 @@ const config: KnipConfig = {
       },
       ignoreDependencies: [
         "tailwind-merge",
-        "@types/mapbox-gl",
         "@prism/utilities",
         "mapbox-gl",
       ],
     },
     "packages/cli": {
       paths: loggerPathsFromPackage,
-      ignoreDependencies: ["@types/inquirer", "logger"],
+      ignoreDependencies: ["logger"],
       ignoreBinaries: ["xdg-open"],
     },
     "packages/intelligence": {
