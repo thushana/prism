@@ -1336,7 +1336,10 @@ function PrismTableCell({
       {...props}
     >
       <div
-        className={cn("min-w-0", !swatchBodyInkActive && tonePaint.className)}
+        className={cn(
+          "w-full min-w-0 overflow-hidden",
+          !swatchBodyInkActive && tonePaint.className
+        )}
         style={wrapperStyle}
       >
         {children}
