@@ -15,6 +15,12 @@ export const HUSKY_POST_MERGE = `#!/usr/bin/env sh
 pnpm exec tsx prism/scripts/sync-commands.ts --quiet
 `;
 
+/** Strip Cursor Agent attribution trailers injected before hooks. */
+export const HUSKY_COMMIT_MSG = `#!/usr/bin/env sh
+tmp=$(mktemp)
+grep -viE "^(Co-authored-by: Cursor|Made-with: Cursor)" "$1" > "$tmp" && mv "$tmp" "$1"
+`;
+
 export const LINT_STAGED_RC = `/**
  * Pre-commit hooks (consumer apps/web layout).
  * @type {import('lint-staged').Configuration}
@@ -52,6 +58,10 @@ export function ensureConsumerHusky(repoRoot: string): void {
   const postMergePath = path.join(huskyDir, "post-merge");
   fs.writeFileSync(postMergePath, HUSKY_POST_MERGE, "utf-8");
   chmodExecutable(postMergePath);
+
+  const commitMsgPath = path.join(huskyDir, "commit-msg");
+  fs.writeFileSync(commitMsgPath, HUSKY_COMMIT_MSG, "utf-8");
+  chmodExecutable(commitMsgPath);
 
   fs.writeFileSync(
     path.join(repoRoot, ".lintstagedrc.cjs"),

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Strip Cursor attribution trailers (injected before hooks by Cursor Agent).
+tmp=$(mktemp)
+grep -viE "^(Co-authored-by: Cursor|Made-with: Cursor)" "$1" > "$tmp" && mv "$tmp" "$1"
