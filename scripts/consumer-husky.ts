@@ -21,7 +21,8 @@ tmp=$(mktemp)
 grep -viE "^(Co-authored-by: Cursor|Made-with: Cursor)" "$1" > "$tmp" && mv "$tmp" "$1"
 `;
 
-export const LINT_STAGED_RC = `/**
+/** Generated apps with `apps/web/` + that package’s ESLint config. */
+export const LINT_STAGED_RC_APPS_WEB = `/**
  * Pre-commit hooks (consumer apps/web layout).
  * @type {import('lint-staged').Configuration}
  */
@@ -38,12 +39,33 @@ module.exports = {
 };
 `;
 
+/** Flat embedders (TimeTraveler): root `app/` + `scripts/run-eslint.cjs`. */
+export const LINT_STAGED_RC_FLAT = `/** @type {import('lint-staged').Configuration} */
+module.exports = {
+  "*.{ts,tsx,mjs,js,cjs}": [
+    "prettier --write",
+    "node scripts/run-eslint.cjs --fix --max-warnings 0",
+  ],
+  "*.{json,css,md,mdx,yml,yaml}": ["prettier --write"],
+};
+`;
+
+/** @deprecated Prefer layout-aware helpers; kept for callers that expect apps/web. */
+export const LINT_STAGED_RC = LINT_STAGED_RC_APPS_WEB;
+
 function chmodExecutable(filePath: string): void {
   try {
     fs.chmodSync(filePath, 0o755);
   } catch {
     // Windows may not support chmod
   }
+}
+
+function lintStagedRcForRepo(repoRoot: string): string {
+  const hasAppsWeb = fs.existsSync(
+    path.join(repoRoot, "apps/web/package.json")
+  );
+  return hasAppsWeb ? LINT_STAGED_RC_APPS_WEB : LINT_STAGED_RC_FLAT;
 }
 
 /** Write .husky hooks and .lintstagedrc.cjs (idempotent). */
@@ -65,7 +87,7 @@ export function ensureConsumerHusky(repoRoot: string): void {
 
   fs.writeFileSync(
     path.join(repoRoot, ".lintstagedrc.cjs"),
-    LINT_STAGED_RC,
+    lintStagedRcForRepo(repoRoot),
     "utf-8"
   );
 }
