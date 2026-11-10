@@ -12,7 +12,7 @@ export default async function Home() {
           <PrismCardTitle className="text-4xl">web</PrismCardTitle>
         </PrismCardHeader>
         <PrismCardContent className="flex flex-col gap-4">
-          <p className="text-muted-foreground">💎 Prism-powered app</p>
+          <p className="text-muted-foreground">💎 Prism Powered App</p>
         </PrismCardContent>
       </PrismCard>
     </div>
