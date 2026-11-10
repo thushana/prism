@@ -11,6 +11,8 @@ export default defineConfig([
     "build/**",
     "node_modules/**",
     "*.tsbuildinfo",
+    // CJS bin wrapper for `pnpm link` — keep require(); real CLI is cli/index.ts
+    "cli/index.js",
   ]),
   {
     settings: {

@@ -247,8 +247,9 @@ function generateWebAppPackageJson(
         : "tsx ../../prism/scripts/run-next-dev.ts",
       build: useWebpack ? "next build --webpack" : "next build",
       start: "next start",
-      lint: "eslint app cli scripts tests",
-      "lint:fix": "eslint app cli scripts tests --fix",
+      lint: 'eslint --no-error-on-unmatched-pattern app cli tests "scripts/**/*.{ts,tsx,js,mjs,cjs}"',
+      "lint:fix":
+        'eslint --no-error-on-unmatched-pattern app cli tests "scripts/**/*.{ts,tsx,js,mjs,cjs}" --fix',
       format: 'prettier --write "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
       "format:check":
         'prettier --check "app/**/*.{ts,tsx}" "*.{ts,tsx}" "*.{js,mjs}"',
