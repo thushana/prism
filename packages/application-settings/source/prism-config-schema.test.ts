@@ -25,6 +25,34 @@ describe("prismConfigBaseSchema", () => {
     }
   });
 
+  it("accepts optional app.reservedSubdomainLabels", () => {
+    const result = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Test",
+        description: "Test app",
+        reservedSubdomainLabels: ["observer", "jurisdictions"],
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.app.reservedSubdomainLabels).toEqual([
+        "observer",
+        "jurisdictions",
+      ]);
+    }
+  });
+
+  it("rejects invalid reservedSubdomainLabels entries", () => {
+    const result = prismConfigBaseSchema.safeParse({
+      app: {
+        nameDisplay: "Test",
+        description: "Test app",
+        reservedSubdomainLabels: ["Bad_Label"],
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("maps legacy displayName to nameDisplay", () => {
     const result = prismConfigBaseSchema.safeParse({
       app: {

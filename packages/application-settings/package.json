@@ -8,7 +8,8 @@
     ".": "./source/index.ts",
     "./dev-deployment": "./source/dev-deployment.ts",
     "./prism-config-schema": "./source/prism-config-schema.ts",
-    "./load-prism-config-sync": "./source/load-prism-config-sync.ts"
+    "./load-prism-config-sync": "./source/load-prism-config-sync.ts",
+    "./reserved-subdomain-labels": "./source/reserved-subdomain-labels.ts"
   },
   "dependencies": {
     "server-only": "^0.0.1",

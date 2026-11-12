@@ -31,6 +31,10 @@ export {
   type PrismConfigBase,
 } from "./prism-config-schema";
 export {
+  PRISM_RESERVED_SUBDOMAIN_LABELS,
+  resolveReservedSubdomainLabels,
+} from "./reserved-subdomain-labels";
+export {
   readApplicationSettings,
   readApplicationSettingsFromDirectory,
 } from "./read-application-settings";

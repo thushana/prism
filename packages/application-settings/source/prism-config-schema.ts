@@ -20,6 +20,13 @@ const prismAppConfigInputSchema = z
     displayName: z.string().min(1).optional(),
     description: z.string(),
     icon: z.string().optional(),
+    /**
+     * Extra hostname left-of-dot labels reserved for this app
+     * (merged with Prism defaults + `nameIdentifier`).
+     */
+    reservedSubdomainLabels: z
+      .array(z.string().regex(NAME_IDENTIFIER_PATTERN))
+      .optional(),
   })
   .superRefine((data, context) => {
     if (!data.nameDisplay?.trim() && !data.displayName?.trim()) {
@@ -35,6 +42,7 @@ const prismAppConfigInputSchema = z
     nameDisplay: (data.nameDisplay ?? data.displayName)!.trim(),
     description: data.description,
     icon: data.icon,
+    reservedSubdomainLabels: data.reservedSubdomainLabels,
   }));
 
 /** Chrome every Prism app supplies under `config.prism.json` → `app`. */
