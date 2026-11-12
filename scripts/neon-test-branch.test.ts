@@ -1,10 +1,66 @@
 import { describe, expect, it } from "vitest";
-import { formatEnvValue, upsertEnvKeys } from "./neon-test-branch";
+import {
+  formatEnvValue,
+  shouldDestroyTestBranch,
+  upsertEnvKeys,
+} from "./neon-test-branch";
 
 describe("formatEnvValue", () => {
   it("quotes values that contain dotenv-breaking characters", () => {
     expect(formatEnvValue("plain")).toBe("plain");
     expect(formatEnvValue("p@ss#word")).toBe('"p@ss#word"');
+  });
+});
+
+describe("shouldDestroyTestBranch", () => {
+  it("destroys after a successful run by default", () => {
+    expect(
+      shouldDestroyTestBranch({
+        testsPassed: true,
+        keep: false,
+        destroyOnFail: false,
+      })
+    ).toBe(true);
+  });
+
+  it("keeps the branch after failure so it can be inspected", () => {
+    expect(
+      shouldDestroyTestBranch({
+        testsPassed: false,
+        keep: false,
+        destroyOnFail: false,
+      })
+    ).toBe(false);
+  });
+
+  it("honors --keep even when tests pass", () => {
+    expect(
+      shouldDestroyTestBranch({
+        testsPassed: true,
+        keep: true,
+        destroyOnFail: false,
+      })
+    ).toBe(false);
+  });
+
+  it("honors --destroy-on-fail for CI cleanup", () => {
+    expect(
+      shouldDestroyTestBranch({
+        testsPassed: false,
+        keep: false,
+        destroyOnFail: true,
+      })
+    ).toBe(true);
+  });
+
+  it("lets --keep win over --destroy-on-fail", () => {
+    expect(
+      shouldDestroyTestBranch({
+        testsPassed: false,
+        keep: true,
+        destroyOnFail: true,
+      })
+    ).toBe(false);
   });
 });
 

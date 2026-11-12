@@ -55,13 +55,14 @@ Requires the [Neon CLI](https://neon.com/docs/cli/quickstart) authenticated loca
 
 | Command | Effect |
 | ------- | ------ |
+| `pnpm neon:test run` | **Default loop:** ensure → migrate → `test:integration` → **destroy on success**; **keep on failure** so you can inspect |
 | `pnpm neon:test ensure` | Create copy-on-write branch `test` if missing; upsert `DATABASE_URL_TEST*` into `apps/web/.env` (or `./.env`) without printing secrets |
 | `pnpm neon:test reset` | Reset `test` from its parent, then re-wire env |
 | `pnpm neon:test migrate` | Run `db:migrate` with `DATABASE_URL_UNPOOLED` set from the test branch |
 | `pnpm neon:test status` | Branch existence + whether env keys are set (no URLs) |
 | `pnpm neon:test destroy` | Delete the branch and remove `DATABASE_URL_TEST*` from `.env` |
 
-Typical integration loop: `ensure` → `migrate` → `pnpm run test:integration` → `destroy` when finished.
+On success the branch is deleted. On failure it is kept (env URLs remain) until you `pnpm neon:test destroy`. Use `--keep` to retain even after green runs; `--destroy-on-fail` for CI that must always clean up.
 
 ## Production Notes
 

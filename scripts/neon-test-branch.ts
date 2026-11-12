@@ -7,17 +7,19 @@
  * secrets.
  *
  * Usage (consumer repo root, Neon CLI authenticated):
- *   pnpm neon:test ensure
- *   pnpm neon:test reset
- *   pnpm neon:test status
- *   pnpm neon:test migrate    # drizzle migrate against the test branch
- *   pnpm neon:test destroy
+ *   pnpm neon:test run       # ensure → migrate → tests → destroy on success; keep on failure
+ *   pnpm neon:test run --keep
+ *   pnpm neon:test run --destroy-on-fail
+ *   pnpm neon:test ensure | reset | migrate | status | destroy
  *
  * Options:
  *   --project-id=prj_…   Neon project (else NEON_PROJECT_ID / single-project CLI)
  *   --name=test          Branch name (default: test)
  *   --parent=main        Parent branch (default: project default)
  *   --env-file=path      .env to update (default: apps/web/.env or ./.env)
+ *   --keep               With `run`: always leave the branch (even on success)
+ *   --destroy-on-fail    With `run`: destroy even when tests fail
+ *   --command=…          With `run`: override test command (default: test:integration)
  */
 
 import { execFileSync, execSync } from "node:child_process";
@@ -31,7 +33,14 @@ const DEFAULT_BRANCH_NAME = "test";
 const POOLED_KEY = "DATABASE_URL_TEST";
 const UNPOOLED_KEY = "DATABASE_URL_TEST_UNPOOLED";
 
-type Command = "ensure" | "reset" | "destroy" | "status" | "migrate" | "help";
+type Command =
+  | "ensure"
+  | "reset"
+  | "destroy"
+  | "status"
+  | "migrate"
+  | "run"
+  | "help";
 
 function resolveConsumerRoot(): string {
   const parentOfPrism = path.resolve(PRISM_ROOT, "..");
@@ -48,6 +57,10 @@ function parseFlag(name: string): string | undefined {
   const prefix = `--${name}=`;
   const arg = process.argv.find((value) => value.startsWith(prefix));
   return arg?.slice(prefix.length);
+}
+
+function hasFlag(name: string): boolean {
+  return process.argv.includes(`--${name}`);
 }
 
 function resolveEnvFile(consumerRoot: string): string {
@@ -93,6 +106,22 @@ export function formatEnvValue(value: string): string {
     return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
   }
   return value;
+}
+
+/** Whether `neon:test run` should tear down the disposable branch. */
+export function shouldDestroyTestBranch({
+  testsPassed,
+  keep,
+  destroyOnFail,
+}: {
+  testsPassed: boolean;
+  keep: boolean;
+  destroyOnFail: boolean;
+}): boolean {
+  if (keep) {
+    return false;
+  }
+  return testsPassed || destroyOnFail;
 }
 
 /** Upsert KEY=value lines; never logs values. Returns whether the file changed. */
@@ -357,6 +386,7 @@ function printHelp(): void {
   console.log(`Prism Neon test branch
 
 Commands:
+  run       ensure → migrate → tests → destroy on success; keep on failure (inspect)
   ensure    Create branch if missing, then wire DATABASE_URL_TEST* into .env
   reset     Reset branch from parent, then re-wire .env
   destroy   Delete branch and remove DATABASE_URL_TEST* from .env
@@ -368,7 +398,44 @@ Options:
   --name=test      Branch name (default: test)
   --parent=…       Parent branch for create (default: project default)
   --env-file=…     Path to .env (default: apps/web/.env or ./.env)
+  --keep           With run: never destroy (even on success)
+  --destroy-on-fail With run: destroy even when tests fail
+  --command=…      With run: shell command (default: pnpm run test:integration)
 `);
+}
+
+function runIntegrationCommand(consumerRoot: string): void {
+  const override = parseFlag("command");
+  const hasWebFilter = fs.existsSync(
+    path.join(consumerRoot, "apps/web/package.json")
+  );
+  const command =
+    override ??
+    (hasWebFilter
+      ? "pnpm --filter web run test:integration"
+      : "pnpm run test:integration");
+  console.log(`Running: ${command}`);
+  execSync(command, {
+    cwd: consumerRoot,
+    stdio: "inherit",
+    env: process.env,
+  });
+}
+
+function destroyAndClearEnv(
+  envFile: string,
+  projectId: string,
+  branchName: string
+): void {
+  if (branchExists(projectId, branchName)) {
+    destroyBranch(projectId, branchName);
+  } else {
+    console.log(`Branch "${branchName}" already absent.`);
+  }
+  writeEnvKeys(envFile, {
+    [POOLED_KEY]: null,
+    [UNPOOLED_KEY]: null,
+  });
 }
 
 function runMigrate(consumerRoot: string, envFile: string): void {
@@ -413,7 +480,15 @@ function main(): void {
   const command = raw as Command;
   if (
     !(
-      ["ensure", "reset", "destroy", "status", "migrate", "help"] as string[]
+      [
+        "ensure",
+        "reset",
+        "destroy",
+        "status",
+        "migrate",
+        "run",
+        "help",
+      ] as string[]
     ).includes(command)
   ) {
     console.error(`Unknown command: ${raw}`);
@@ -434,6 +509,8 @@ function main(): void {
   const branchName = parseFlag("name") ?? DEFAULT_BRANCH_NAME;
   const parent = parseFlag("parent");
   const projectId = resolveProjectId(envFile, envKeys);
+  const keepBranch = hasFlag("keep");
+  const destroyOnFail = hasFlag("destroy-on-fail");
 
   if (command === "status") {
     const exists = branchExists(projectId, branchName);
@@ -463,7 +540,7 @@ function main(): void {
     }
     wireEnv(envFile, projectId, branchName, envKeys);
     console.log(
-      `Ready. Run migrations with: pnpm neon:test migrate\nThen: pnpm run test:integration`
+      `Ready. Prefer: pnpm neon:test run  (destroys on success; keeps on failure)\nOr: pnpm neon:test migrate && pnpm --filter web run test:integration`
     );
     return;
   }
@@ -480,16 +557,50 @@ function main(): void {
   }
 
   if (command === "destroy") {
-    if (branchExists(projectId, branchName)) {
-      destroyBranch(projectId, branchName);
-    } else {
-      console.log(`Branch "${branchName}" already absent.`);
-    }
-    writeEnvKeys(envFile, {
-      [POOLED_KEY]: null,
-      [UNPOOLED_KEY]: null,
-    });
+    destroyAndClearEnv(envFile, projectId, branchName);
     return;
+  }
+
+  if (command === "run") {
+    let testFailed: unknown;
+    try {
+      if (!branchExists(projectId, branchName)) {
+        createBranch(projectId, branchName, parent);
+      } else {
+        console.log(`Branch "${branchName}" already exists.`);
+      }
+      wireEnv(envFile, projectId, branchName, envKeys);
+      runMigrate(consumerRoot, envFile);
+      runIntegrationCommand(consumerRoot);
+    } catch (error) {
+      testFailed = error;
+      console.error("neon:test run failed before or during tests.");
+    } finally {
+      const shouldDestroy = shouldDestroyTestBranch({
+        testsPassed: !testFailed,
+        keep: keepBranch,
+        destroyOnFail,
+      });
+      if (shouldDestroy) {
+        try {
+          destroyAndClearEnv(envFile, projectId, branchName);
+        } catch (destroyError) {
+          console.error("Failed to destroy test branch after run.");
+          console.error(destroyError);
+          if (!testFailed) {
+            process.exit(1);
+          }
+        }
+      } else {
+        const reason = keepBranch
+          ? "--keep"
+          : "failure — inspect, then pnpm neon:test destroy";
+        console.log(`Keeping Neon branch "${branchName}" (${reason}).`);
+      }
+    }
+    if (testFailed) {
+      process.exit(1);
+    }
   }
 }
 
