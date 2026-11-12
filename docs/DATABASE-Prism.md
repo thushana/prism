@@ -43,8 +43,25 @@ Do not mix **`push`** and **`migrate`** on the same database without understandi
 
 - **`DATABASE_URL`** — Required at runtime (pooled Neon URL is typical for the app).
 - **`DATABASE_URL_UNPOOLED`** — Preferred for **drizzle-kit** (generate / migrate / push / studio); configs fall back to `DATABASE_URL` if unset ([`packages/database/drizzle.config.ts`](../packages/database/drizzle.config.ts), [`apps/web/database/drizzle.config.ts`](../apps/web/database/drizzle.config.ts)).
+- **`DATABASE_URL_TEST` / `DATABASE_URL_TEST_UNPOOLED`** — Disposable Neon branch for Vitest integration projects. Never point these at production.
 
 Production/staging: set both in the host (e.g. Vercel). See [DEPLOYMENT-Prism.md](./DEPLOYMENT-Prism.md).
+
+## Disposable `test` branch (`pnpm neon:test`)
+
+Prism ships a first-class Neon helper at [`scripts/neon-test-branch.ts`](../scripts/neon-test-branch.ts) (consumer script: `pnpm neon:test`). It wraps the Neon CLI so apps do not invent one-off fork scripts.
+
+Requires the [Neon CLI](https://neon.com/docs/cli/quickstart) authenticated locally. Optional: `NEON_PROJECT_ID` in `.env`, or `--project-id=…` / a single-project Neon account.
+
+| Command | Effect |
+| ------- | ------ |
+| `pnpm neon:test ensure` | Create copy-on-write branch `test` if missing; upsert `DATABASE_URL_TEST*` into `apps/web/.env` (or `./.env`) without printing secrets |
+| `pnpm neon:test reset` | Reset `test` from its parent, then re-wire env |
+| `pnpm neon:test migrate` | Run `db:migrate` with `DATABASE_URL_UNPOOLED` set from the test branch |
+| `pnpm neon:test status` | Branch existence + whether env keys are set (no URLs) |
+| `pnpm neon:test destroy` | Delete the branch and remove `DATABASE_URL_TEST*` from `.env` |
+
+Typical integration loop: `ensure` → `migrate` → `pnpm run test:integration` → `destroy` when finished.
 
 ## Production Notes
 

@@ -111,7 +111,10 @@ function syncScripts(): void {
       ((key === "test" || key === "test:run") &&
         value.includes("--workspaces")) ||
       (key === "dev:setup" &&
-        !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh")))
+        !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh"))) ||
+      (path.resolve(MAIN_PACKAGE_JSON) !==
+        path.resolve(PRISM_PACKAGE_JSON) &&
+        (key === "dev:kill" || key === "dev:all"))
     ) {
       delete mergedScripts[key];
       removedScripts.push(key);
@@ -152,6 +155,16 @@ function syncScripts(): void {
       if (
         key === "dev:setup" &&
         !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh"))
+      ) {
+        skippedScripts.push(key);
+        continue;
+      }
+
+      // Prism sample helpers target :3000; consumer apps choose their own ports.
+      if (
+        path.resolve(MAIN_PACKAGE_JSON) !==
+          path.resolve(PRISM_PACKAGE_JSON) &&
+        (key === "dev:kill" || key === "dev:all")
       ) {
         skippedScripts.push(key);
         continue;
@@ -245,6 +258,9 @@ function syncScripts(): void {
       if (key === "vercel:env:sync-development") {
         adaptedValue = "tsx prism/scripts/sync-vercel-development-env.ts";
       }
+      if (key === "neon:test") {
+        adaptedValue = "tsx prism/scripts/neon-test-branch.ts";
+      }
 
       // quality script is smart and handles both app and prism automatically
 
@@ -287,6 +303,7 @@ function syncScripts(): void {
       "pnpm run format && pnpm run lint && pnpm run typecheck";
     mergedScripts["vercel:env:sync-development"] =
       "tsx prism/scripts/sync-vercel-development-env.ts";
+    mergedScripts["neon:test"] = "tsx prism/scripts/neon-test-branch.ts";
     mergedScripts["prism:sync:scaffold"] =
       "tsx prism/scripts/sync-scaffold-from-prism.ts";
 
