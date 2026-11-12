@@ -31,7 +31,7 @@ module.exports = {
     const files = filenames.map((f) => JSON.stringify(f)).join(" ");
     return [
       \`prettier --write \${files}\`,
-      \`eslint --config apps/web/eslint.config.mjs --fix --max-warnings 0 \${files}\`,
+      \`node prism/scripts/run-eslint.cjs --config apps/web/eslint.config.mjs --fix --max-warnings 0 \${files}\`,
     ];
   },
   "apps/web/**/*.{json,css,md,mdx,yml,yaml}": ["prettier --write"],
