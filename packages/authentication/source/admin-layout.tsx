@@ -94,7 +94,7 @@ export type AdminPageShellProps = {
  * Consistent outer shell for all admin pages.
  *
  * Provides:
- *  - Full-viewport padding and a centered {@link PrismLayoutMain} column (same width as `.content-main` / 1280px)
+ *  - Vertical page padding and a centered {@link PrismLayoutMain} column (`.content-main` / 1280px + side inset)
  *  - {@link PrismPathBar} slash breadcrumbs on sub-pages when `title` is set (auto from pathname, or explicit segments)
  *  - Legacy {@link AdminBackLink} only when `backHref` is set without `title` and no path bar is configured
  *  - An optional page title + description header
@@ -137,7 +137,7 @@ export function AdminPageShell({
     Boolean(backHref) && !title && !showPathBarExplicit && !showPathBarAuto;
 
   return (
-    <main className="min-h-screen w-full p-6">
+    <main className="min-h-screen w-full py-6">
       <PrismLayoutMain
         className={["flex w-full flex-col gap-8", className]
           .filter(Boolean)

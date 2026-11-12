@@ -6,7 +6,10 @@
  * - graphics-main: xl (1280px)
  * - graphics-large: 2xl (1536px)
  * - graphics-full: edge to edge (100%)
- * - breakout-full: break out of container to full viewport width (with horizontal padding)
+ * - breakout-full: break out of container to full viewport width
+ *
+ * Content/graphics bands (except graphics-full) use padding-inline: 1.5rem so
+ * viewports narrower than max-width still have comfortable side inset.
  *
  * Layout wrapper reference bars (for system sheet): .layout-wrapper-bar + width + color modifiers
  */
@@ -75,21 +78,25 @@
     width: 100%;
     max-width: 640px;
     margin-inline: auto;
+    padding-inline: 1.5rem;
   }
   .content-main {
     width: 100%;
     max-width: 1280px;
     margin-inline: auto;
+    padding-inline: 1.5rem;
   }
   .graphics-main {
     width: 100%;
     max-width: 1280px;
     margin-inline: auto;
+    padding-inline: 1.5rem;
   }
   .graphics-large {
     width: 100%;
     max-width: 1536px;
     margin-inline: auto;
+    padding-inline: 1.5rem;
   }
   .graphics-full {
     width: 100%;

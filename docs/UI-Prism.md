@@ -512,7 +512,7 @@ import { PrismTypography } from "@ui";
 
 ### Layout Wrappers
 
-Named width wrappers for content vs graphics (defined in `styles/layout-wrappers.css`). Widths use Tailwind breakpoint values (px), centered with `margin-inline: auto` except graphics-full:
+Named width wrappers for content vs graphics (defined in `styles/layout-wrappers.css`). Widths use Tailwind breakpoint values (px), centered with `margin-inline: auto` except graphics-full. Content/graphics bands (except graphics-full) include `1.5rem` horizontal padding so narrower viewports stay inset.
 
 - **`.content-text`** – sm 640px. Use for narrow text columns, captions.
 - **`.content-main`** – xl 1280px. Use for main content, headers, controls.
