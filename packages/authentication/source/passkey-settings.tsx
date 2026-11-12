@@ -9,11 +9,17 @@ interface PasskeySettingsProps {
   /** Better Auth base URL; omit for same-origin. */
   authBaseURL?: string;
   className?: string;
+  /**
+   * When nested under a parent section title (e.g. account “Passwords & Passkeys”),
+   * omit the built-in heading and helper copy.
+   */
+  embedded?: boolean;
 }
 
 export function PasskeySettings({
   authBaseURL,
   className,
+  embedded = false,
 }: PasskeySettingsProps) {
   const authClient = React.useMemo(
     () => createPrismAuthClient(authBaseURL),
@@ -84,19 +90,21 @@ export function PasskeySettings({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="space-y-1">
-        <PrismTypography role="title" size="large" as="h2">
-          Passkeys
-        </PrismTypography>
-        <PrismTypography
-          role="body"
-          size="regular"
-          color={{ semanticText: "muted" }}
-        >
-          Sign in with Face ID, Touch ID, or a security key after registering a
-          passkey while signed in.
-        </PrismTypography>
-      </div>
+      {embedded ? null : (
+        <div className="space-y-1">
+          <PrismTypography role="title" size="large" as="h2">
+            Passkeys
+          </PrismTypography>
+          <PrismTypography
+            role="body"
+            size="regular"
+            color={{ semanticText: "muted" }}
+          >
+            Sign in with Face ID, Touch ID, or a security key after registering
+            a passkey while signed in.
+          </PrismTypography>
+        </div>
+      )}
 
       {error && (
         <PrismTypography
@@ -135,22 +143,26 @@ export function PasskeySettings({
                 <PrismTypography role="body" size="regular" as="p">
                   {item.name ?? "Passkey"}
                 </PrismTypography>
-                {item.createdAt && (
+                {item.createdAt ? (
                   <PrismTypography
-                    role="body"
+                    role="overline"
                     size="small"
                     color={{ semanticText: "muted" }}
+                    className="mt-1"
                   >
                     Added {new Date(item.createdAt).toLocaleDateString()}
                   </PrismTypography>
-                )}
+                ) : null}
               </div>
               <PrismButton
                 type="button"
-                variant="plain"
+                variant="icon"
                 color={{ palette: "default", swatchPrimary: "red" }}
-                shape="rectangleRounded"
-                label={deletingId === item.id ? "Removing…" : "Remove"}
+                materialSymbol="delete"
+                label={deletingId === item.id ? "Removing passkey" : "Remove"}
+                iconOnly
+                line="none"
+                paint="backgroundNone"
                 disabled={deletingId !== null}
                 disableGrow
                 onClick={() => void handleDeletePasskey(item.id)}
@@ -162,9 +174,10 @@ export function PasskeySettings({
 
       <PrismButton
         type="button"
-        variant="plain"
+        variant="icon"
         color={{ palette: "default", swatchPrimary: "blue" }}
         shape="rectangleRounded"
+        materialSymbol="passkey"
         label={isAdding ? "Waiting for device…" : "Add passkey"}
         disabled={isAdding || isLoading}
         disableGrow

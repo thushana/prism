@@ -24,6 +24,11 @@ const adminSections = [
     description: "Manage passkeys and other sign-in options for your account.",
     href: "/admin/app/security",
   },
+  {
+    title: "Prism Components",
+    description: "Live @ui playgrounds — button, typography, icon, and more.",
+    href: "/admin/prism/components",
+  },
 ];
 
 export default async function AdminHomePage(): Promise<React.JSX.Element> {

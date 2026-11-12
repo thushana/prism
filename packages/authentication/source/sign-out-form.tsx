@@ -3,13 +3,54 @@
 import * as React from "react";
 import { PrismButton } from "@ui";
 
+export type SignOutFormAppearance = "text" | "button" | "frameless";
+
 /**
  * Form that POSTs to /api/admin/signout to clear the authentication cookie.
- * Renders as a text-style admin action (no fill).
+ *
+ * - `appearance="text"` — quiet admin chrome (default)
+ * - `appearance="button"` — filled control
+ * - `appearance="frameless"` — monochrome rectangle, no line (account chrome)
  */
-export function SignOutForm(): React.JSX.Element {
-  return (
-    <form action="/api/admin/signout" method="POST" className="inline">
+export function SignOutForm({
+  appearance = "text",
+  segmentPosition,
+}: {
+  appearance?: SignOutFormAppearance;
+  segmentPosition?: "first" | "middle" | "last";
+} = {}): React.JSX.Element {
+  let button: React.JSX.Element;
+
+  if (appearance === "frameless") {
+    button = (
+      <PrismButton
+        type="submit"
+        variant="icon"
+        color={{ palette: "default", swatchPrimary: "grey" }}
+        materialSymbol="logout"
+        label="Sign out"
+        shape="rectangle"
+        line="none"
+        gap="none"
+        segmentPosition={segmentPosition}
+        paint="monochrome"
+        disableGrow
+      />
+    );
+  } else if (appearance === "button") {
+    button = (
+      <PrismButton
+        type="submit"
+        variant="icon"
+        shape="rectangleRounded"
+        color={{ palette: "default", swatchPrimary: "grey" }}
+        materialSymbol="logout"
+        label="Sign out"
+        disableGrow
+      />
+    );
+  } else {
+    button = (
       <PrismButton
         type="submit"
         variant="plain"
@@ -22,6 +63,12 @@ export function SignOutForm(): React.JSX.Element {
         size="small"
         className="py-0! px-1! text-muted-foreground! hover:text-foreground!"
       />
+    );
+  }
+
+  return (
+    <form action="/api/admin/signout" method="POST" className="inline">
+      {button}
     </form>
   );
 }

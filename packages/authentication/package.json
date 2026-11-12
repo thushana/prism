@@ -19,7 +19,8 @@
     "./web": "./source/legacy/web.ts",
     "./rate-limit": "./source/rate-limit.ts",
     "./sign-in-page": "./source/sign-in-page.tsx",
-    "./passkey-settings": "./source/passkey-settings.tsx"
+    "./passkey-settings": "./source/passkey-settings.tsx",
+    "./change-password-form": "./source/change-password-form.tsx"
   },
   "dependencies": {
     "@better-auth/api-key": "1.7.18",

@@ -629,6 +629,8 @@ export function PrismButton(
       style={{
         display: "inline-block",
         overflow: "hidden",
+        // gap="none" sets lineHeight: 1 on the control; keep label taller so descenders are not clipped.
+        lineHeight: 1.25,
         maxWidth: labelHidden ? 0 : labelMaxWidth,
         opacity: labelHidden ? 0 : 1,
         // Slower collapse on hide; slightly quicker expand when selected.
