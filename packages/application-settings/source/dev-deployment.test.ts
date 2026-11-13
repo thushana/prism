@@ -12,6 +12,7 @@ const baseConfig: PrismConfigBase = {
     nameDisplay: "Test",
     description: "Test app",
     icon: undefined,
+    reservedSubdomainLabels: undefined,
   },
 };
 

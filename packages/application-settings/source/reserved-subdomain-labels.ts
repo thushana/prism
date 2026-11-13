@@ -35,7 +35,9 @@ function normalizeLabel(value: string): string {
  * Effective denylist = Prism defaults ∪ `app.reservedSubdomainLabels` ∪ `app.nameIdentifier`.
  */
 export function resolveReservedSubdomainLabels(
-  app: Pick<PrismAppConfig, "nameIdentifier" | "reservedSubdomainLabels">
+  app: Partial<
+    Pick<PrismAppConfig, "nameIdentifier" | "reservedSubdomainLabels">
+  > = {}
 ): ReadonlySet<string> {
   const labels = new Set<string>(PRISM_RESERVED_SUBDOMAIN_LABELS);
 
