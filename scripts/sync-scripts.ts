@@ -112,9 +112,11 @@ function syncScripts(): void {
         value.includes("--workspaces")) ||
       (key === "dev:setup" &&
         !fs.existsSync(path.join(mainProjectRoot, "scripts/setup-hosts.sh"))) ||
+      // Strip only Prism's monorepo :3000 helpers — keep consumer-owned port killers.
       (path.resolve(MAIN_PACKAGE_JSON) !==
         path.resolve(PRISM_PACKAGE_JSON) &&
-        (key === "dev:kill" || key === "dev:all"))
+        (key === "dev:kill" || key === "dev:all") &&
+        value === prismScripts[key])
     ) {
       delete mergedScripts[key];
       removedScripts.push(key);
