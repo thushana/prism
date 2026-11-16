@@ -45,8 +45,14 @@ const EMPTY_GRADIENT_SWATCHES: PrismSwatchKey[] = [];
 const PRISM_COLOR_PICKER_TRIGGER_PADDING = 10;
 /** Matches {@link PrismButton} normal-size flex gap (6 × size scale at `normal`). */
 const PRISM_COLOR_PICKER_TRIGGER_GAP = 6;
-/** Pill radius: same intent as PrismButton default `baseRadius` when not rectangle / rectangle-rounded. */
-const PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL = 9999;
+/** Trigger corner radius — aligned with {@link PrismButton} `shape` radii. */
+const PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS = {
+  pill: 9999,
+  rectangle: 0,
+  rectangleRounded: 6,
+} as const;
+
+export type PrismColorPickerShape = keyof typeof PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS;
 /** Horizontal gap between the trigger and the copy control (pixels). */
 const PRISM_COLOR_PICKER_LAYOUT_GAP = 8;
 /** Lucide stroke icons on the main trigger (aligned with PrismButton). */
@@ -146,6 +152,11 @@ export type PrismColorPickerProps = {
   showColorCode?: boolean;
   /** When true, shows the copy control beside the trigger (clipboard: `color={{ … }}` + resolved token comment). */
   showCopyButton?: boolean;
+  /**
+   * Trigger corner style (same vocabulary as {@link PrismButton} `shape`).
+   * @default `"pill"`
+   */
+  shape?: PrismColorPickerShape;
   id?: string;
   disabled?: boolean;
 };
@@ -155,6 +166,7 @@ export function PrismColorPicker({
   onColorChange,
   showColorCode = false,
   showCopyButton = false,
+  shape = "pill",
   id,
   disabled = false,
 }: PrismColorPickerProps) {
@@ -717,6 +729,8 @@ export function PrismColorPicker({
     : approximateRelativeLuminanceFromCssColor(triggerBackgroundToken) <
       PRISM_TINTED_SURFACE_MAX_LUMA;
 
+  const triggerBorderRadius = PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS[shape];
+
   const triggerInlineStyle: React.CSSProperties =
     isGradientMode && gradientPreviewPair
       ? {
@@ -724,14 +738,14 @@ export function PrismColorPicker({
           color: "#ffffff",
           padding: PRISM_COLOR_PICKER_TRIGGER_PADDING,
           gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
-          borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
+          borderRadius: triggerBorderRadius,
         }
       : {
           backgroundColor: triggerBackgroundToken,
           color: triggerTextColor,
           padding: PRISM_COLOR_PICKER_TRIGGER_PADDING,
           gap: PRISM_COLOR_PICKER_TRIGGER_GAP,
-          borderRadius: PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS_PILL,
+          borderRadius: triggerBorderRadius,
         };
 
   return (

@@ -337,12 +337,10 @@ export function PrismButton(
   const hoverForegroundValue =
     inverted && !isGradient ? baseHoverBackground : baseHoverForeground;
 
-  const showPrismGlyph =
-    Boolean(materialSymbol) && (variant === "icon" || iconOnly);
-  const showLucideGlyph =
-    Boolean(IconComponent) &&
-    !materialSymbol &&
-    (variant === "icon" || iconOnly);
+  // Show a leading glyph whenever one is provided — not only on `variant="icon"`.
+  // (Plain / outlined buttons with `materialSymbol` or Lucide `icon` need this.)
+  const showPrismGlyph = Boolean(materialSymbol);
+  const showLucideGlyph = Boolean(IconComponent) && !materialSymbol;
   const shouldDrawIcon =
     showLucideGlyph && !disableMotion && !disableIconMotion;
   React.useEffect(() => {
