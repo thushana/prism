@@ -159,11 +159,20 @@ Use after bumping the `prism` submodule to a commit that includes Better Auth de
 - App-wide gate: `proxy.ts` session-cookie redirect + root `layout.tsx` `requireSessionPageOrRedirect()` (not UI-only `requireSessionPage()`).
 - Chrome extension: Better Auth key from `/admin/app/api-keys`, header `x-api-key`.
 
+## Vercel env fail-closed
+
+Missing `BETTER_AUTH_*` / `DATABASE_URL` used to ship as a **READY** deploy (build used CI dummies) and 500 at runtime. Prism now:
+
+1. **`allowBuildEnvFallback()`** (`application-settings/build-env-fallback`) — dummy secrets only for local/`CI` builds; **never when `VERCEL` is set**
+2. **`assertRequiredVercelEnv()`** — called from `next.config` and `pnpm run assert:required-env` before `next build`; refuses the Vercel build with a clear message
+3. Consumers can pass `additionalKeys` (TimeTraveler adds `GOOGLE_MAPS_API_KEY`) or `--extra=KEY` / `PRISM_ASSERT_ADDITIONAL_ENV_KEYS`
+
 ## `prism generate`
 
 - `--auth-gate admin|app` — writes `authentication.gateMode` into `config.prism.json`
 - Adds `better-auth`, `@better-auth/passkey`, adapters, `zod` to dependencies
-- CI dummy env: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`
+- CI dummy env: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (local/`CI` only — not on Vercel)
+- Wires `assert:required-env` into the generated `build` script
 
 ## Dependency versions (Better Auth)
 

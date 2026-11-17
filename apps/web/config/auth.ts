@@ -1,14 +1,13 @@
 import { z } from "zod";
+import {
+  PRISM_BUILD_AUTH_ENV_FALLBACK,
+  allowBuildEnvFallback,
+} from "application-settings/build-env-fallback";
 
 const AuthEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url(),
 });
-
-const CI_FALLBACK = {
-  BETTER_AUTH_SECRET: "ci_dummy_better_auth_secret_32_chars!!",
-  BETTER_AUTH_URL: "http://localhost:3000",
-} as const;
 
 export function loadAuthEnv() {
   const result = AuthEnvSchema.safeParse({
@@ -20,13 +19,8 @@ export function loadAuthEnv() {
     return result.data;
   }
 
-  const allowFallback =
-    process.env.NEXT_PHASE === "phase-production-build" ||
-    process.env.CI === "true" ||
-    process.env.CI === "1";
-
-  if (allowFallback) {
-    return CI_FALLBACK;
+  if (allowBuildEnvFallback()) {
+    return PRISM_BUILD_AUTH_ENV_FALLBACK;
   }
 
   throw new Error(

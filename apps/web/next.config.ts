@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 import { createRequire } from "node:module";
 import path from "path";
+import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+
+assertRequiredVercelEnv();
 
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");

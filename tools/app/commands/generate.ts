@@ -245,7 +245,16 @@ function generateWebAppPackageJson(
       dev: useWebpack
         ? "tsx ../../prism/scripts/run-next-dev.ts --webpack"
         : "tsx ../../prism/scripts/run-next-dev.ts",
-      build: useWebpack ? "next build --webpack" : "next build",
+      "assert:required-env": isStatic
+        ? "node -e \"process.exit(0)\""
+        : "tsx ../../prism/scripts/assert-required-env.ts",
+      build: isStatic
+        ? useWebpack
+          ? "next build --webpack"
+          : "next build"
+        : useWebpack
+          ? "pnpm run assert:required-env && next build --webpack"
+          : "pnpm run assert:required-env && next build",
       start: "next start",
       lint: 'eslint --no-error-on-unmatched-pattern app cli tests "scripts/**/*.{ts,tsx,js,mjs,cjs}"',
       "lint:fix":
@@ -472,6 +481,9 @@ export default nextConfig;
         ? `import type { NextConfig } from "next";
 import { createRequire } from "node:module";
 import path from "path";
+import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+
+assertRequiredVercelEnv();
 
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
@@ -570,6 +582,9 @@ export default nextConfig;
         : `import type { NextConfig } from "next";
 import { createRequire } from "node:module";
 import path from "path";
+import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+
+assertRequiredVercelEnv();
 
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");

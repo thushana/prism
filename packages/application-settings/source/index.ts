@@ -66,3 +66,14 @@ export {
   loadPrismConfigFromDirectory,
   resolveMonorepoPackageName,
 } from "./load-prism-config-sync";
+export {
+  PRISM_BUILD_AUTH_ENV_FALLBACK,
+  PRISM_BUILD_DATABASE_URL_FALLBACK,
+  allowBuildEnvFallback,
+} from "./build-env-fallback";
+export {
+  PRISM_REQUIRED_VERCEL_ENV_KEYS,
+  assertRequiredVercelEnv,
+  collectRequiredVercelEnvProblems,
+  type AssertRequiredVercelEnvOptions,
+} from "./assert-required-vercel-env";

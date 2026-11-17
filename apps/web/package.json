@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "tsx ../../scripts/run-next-dev.ts --webpack",
-    "build": "next build --webpack",
+    "assert:required-env": "tsx ../../scripts/assert-required-env.ts",
+    "build": "pnpm run assert:required-env && next build --webpack",
     "start": "next start",
     "lint": "eslint app",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"*.{ts,tsx}\" \"*.{js,mjs}\"",

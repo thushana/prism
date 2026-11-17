@@ -258,6 +258,11 @@ function syncScripts(): void {
       if (key === "vercel:env:sync-development") {
         adaptedValue = "tsx prism/scripts/sync-vercel-development-env.ts";
       }
+      if (key === "assert:required-env") {
+        adaptedValue = isStaticConsumer
+          ? 'node -e "process.exit(0)"'
+          : "tsx prism/scripts/assert-required-env.ts";
+      }
       if (key === "neon:test") {
         adaptedValue = "tsx prism/scripts/neon-test-branch.ts";
       }

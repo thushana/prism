@@ -25,6 +25,7 @@
     "build:web": "CI=true pnpm --filter web run build",
     "clean": "rm -rf js scripts/*.js *.tsbuildinfo apps/*/.next apps/*/node_modules/.cache",
     "assert:app-library": "tsx scripts/assert-app-library-layout.ts",
+    "assert:required-env": "tsx scripts/assert-required-env.ts",
     "chores": "tsx scripts/chores.ts",
     "clean:directories": "tsx scripts/clean-directories.ts",
     "database:generate": "drizzle-kit generate --config=packages/database/drizzle.config.ts",

@@ -1,27 +1,21 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { config } from "dotenv";
+import {
+  PRISM_BUILD_DATABASE_URL_FALLBACK,
+  allowBuildEnvFallback,
+} from "application-settings/build-env-fallback";
 import * as schema from "./schema";
 
 // Load environment variables from .env
-config({ path: ".env", opsOff: true } as any);
-
-/** Placeholder only during `next build` when env vars are not injected at compile time. */
-const BUILD_DATABASE_URL =
-  "postgresql://build:build@127.0.0.1:5432/build?sslmode=disable";
+config({ path: ".env", opsOff: true } as Parameters<typeof config>[0]);
 
 function resolveDatabaseUrl(): string {
   const configured = process.env.DATABASE_URL?.trim();
   if (configured) return configured;
 
-  // Never treat VERCEL=1 as a build signal — it is also set at runtime.
-  const allowBuildFallback =
-    process.env.NEXT_PHASE === "phase-production-build" ||
-    process.env.CI === "true" ||
-    process.env.CI === "1";
-
-  if (allowBuildFallback) {
-    return BUILD_DATABASE_URL;
+  if (allowBuildEnvFallback()) {
+    return PRISM_BUILD_DATABASE_URL_FALLBACK;
   }
 
   throw new Error("DATABASE_URL environment variable is required");
