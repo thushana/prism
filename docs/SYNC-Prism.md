@@ -10,15 +10,15 @@ The exact step order is implemented in [`scripts/sync.ts`](../scripts/sync.ts); 
 
 From the **root of your application** (the directory that contains the `prism/` submodule), package scripts typically include:
 
-| Script                             | Role                                                                                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm run prism:sync`              | Full pipeline: git submodule, scripts, Cursor commands, dependency range alignment, `pnpm install`, then mode-aware scaffold sync.                 |
-| `pnpm run prism:sync:git`          | Submodule update only.                                                                                                                             |
+| Script                             | Role                                                                                                                                                                       |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm run prism:sync`              | Full pipeline: git submodule, scripts, Cursor commands, dependency range alignment, `pnpm install`, then mode-aware scaffold sync.                                         |
+| `pnpm run prism:sync:git`          | Submodule update only.                                                                                                                                                     |
 | `pnpm run prism:sync:scaffold`     | Copy **safe** scaffold shards from `prism/apps/web` (auth schema overwrite; seed-if-missing for wiring; never domain schema/seeds). Flags: `--only=auth-schema`, `--diff`. |
-| `pnpm run prism:sync:scripts`      | Merge scripts from Prism’s workspace `package.json` into the parent `package.json`.                                                                |
-| `pnpm run prism:sync:commands`     | Copy Cursor command files into the parent repo.                                                                                                    |
-| `pnpm run prism:sync:hooks`        | Ensure Husky **`.husky/pre-commit`** + **`.husky/post-merge`** (Prism consumer standard).                                                          |
-| `pnpm run prism:sync:dependencies` | **Dry run:** print drift between parent `package.json` and `prism/apps/web/package.json` for an allowlisted set of packages. Does not write files. |
+| `pnpm run prism:sync:scripts`      | Merge scripts from Prism’s workspace `package.json` into the parent `package.json`.                                                                                        |
+| `pnpm run prism:sync:commands`     | Copy Cursor command files into the parent repo.                                                                                                                            |
+| `pnpm run prism:sync:hooks`        | Ensure Husky **`.husky/pre-commit`** + **`.husky/post-merge`** (Prism consumer standard).                                                                                  |
+| `pnpm run prism:sync:dependencies` | **Dry run:** print drift between parent `package.json` and `prism/apps/web/package.json` for an allowlisted set of packages. Does not write files.                         |
 
 Dependency alignment during `prism:sync` runs the same logic as `sync-dependencies.ts` with `--update`, so the parent’s allowlisted ranges match the reference Next app in Prism (`apps/web`).
 
@@ -28,20 +28,20 @@ Dependency alignment during `prism:sync` runs the same logic as `sync-dependenci
 
 Sync tooling reads `config.prism.json` → `build.output`:
 
-| Mode                   | Layout assert                                                                            | Scaffold copy                                                             | Dependency sync                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Mode                   | Layout assert                                                                            | Scaffold copy                                                                                                                                                                   | Dependency sync                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | **`server`** (default) | Requires `library/authentication/*`, `library/kysely-shim.ts`, `library/config/index.ts` | Safe shards: overwrite `database/schema/auth.ts` + `prism-schema.ts`; seed auth/DB wiring if missing; **never** overwrite domain `database/schema.ts` / seeds / customized auth | Full allowlist including `drizzle-orm`, `flags`, `dotenv`, `drizzle-kit` |
-| **`static`**           | Requires only `library/config/index.ts`                                                  | Copies shared config scaffold only; reports stale server files if present | Skips server-only packages from allowlist                                |
+| **`static`**           | Requires only `library/config/index.ts`                                                  | Copies shared config scaffold only; reports stale server files if present                                                                                                       | Skips server-only packages from allowlist                                |
 
 Static consumers still run `pnpm prism:sync` on every upgrade — no manual cherry-picking.
 
 ### Scaffold shards (server consumers)
 
-| Path | Default sync |
-| --- | --- |
-| `library/config/prism-schema.ts` | Overwrite |
-| `database/schema/auth.ts` | Overwrite (Better Auth lockstep) |
-| Auth wiring, `database/db.ts`, drizzle config, sample seeds | Seed **if missing** only |
+| Path                                                         | Default sync                                                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `library/config/prism-schema.ts`                             | Overwrite                                                    |
+| `database/schema/auth.ts`                                    | Overwrite (Better Auth lockstep)                             |
+| Auth wiring, `database/db.ts`, drizzle config, sample seeds  | Seed **if missing** only                                     |
 | `database/schema.ts`, existing seeds, customized auth/config | Never overwrite — print a merge hint when drifted from Prism |
 
 Use `pnpm run prism:sync:scaffold -- --only=auth-schema` to pull only the auth Drizzle schema. Use `--diff` to preview without writing.

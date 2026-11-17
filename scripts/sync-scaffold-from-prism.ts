@@ -294,7 +294,9 @@ export function syncScaffoldFromPrism(
 
 function main(): void {
   const args = process.argv.slice(2).filter((arg) => arg.startsWith("--"));
-  const positional = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
+  const positional = process.argv
+    .slice(2)
+    .filter((arg) => !arg.startsWith("--"));
   const options = parseScaffoldOptions(args);
   const repoRoot = path.resolve(positional[0] ?? process.cwd());
   syncScaffoldFromPrism(repoRoot, options);

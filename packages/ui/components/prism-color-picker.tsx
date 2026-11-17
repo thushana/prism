@@ -52,7 +52,8 @@ const PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS = {
   rectangleRounded: 6,
 } as const;
 
-export type PrismColorPickerShape = keyof typeof PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS;
+export type PrismColorPickerShape =
+  keyof typeof PRISM_COLOR_PICKER_TRIGGER_BORDER_RADIUS;
 /** Horizontal gap between the trigger and the copy control (pixels). */
 const PRISM_COLOR_PICKER_LAYOUT_GAP = 8;
 /** Lucide stroke icons on the main trigger (aligned with PrismButton). */

@@ -34,13 +34,7 @@ const POOLED_KEY = "DATABASE_URL_TEST";
 const UNPOOLED_KEY = "DATABASE_URL_TEST_UNPOOLED";
 
 type Command =
-  | "ensure"
-  | "reset"
-  | "destroy"
-  | "status"
-  | "migrate"
-  | "run"
-  | "help";
+  "ensure" | "reset" | "destroy" | "status" | "migrate" | "run" | "help";
 
 function resolveConsumerRoot(): string {
   const parentOfPrism = path.resolve(PRISM_ROOT, "..");
@@ -178,7 +172,9 @@ function writeEnvKeys(
   envFile: string,
   updates: Record<string, string | null>
 ): void {
-  const previous = fs.existsSync(envFile) ? fs.readFileSync(envFile, "utf8") : "";
+  const previous = fs.existsSync(envFile)
+    ? fs.readFileSync(envFile, "utf8")
+    : "";
   const { next, changed } = upsertEnvKeys(previous, updates);
   if (!changed) {
     console.log(`No .env changes (${path.relative(process.cwd(), envFile)})`);
@@ -232,11 +228,8 @@ function resolveProjectId(
   if (fromEnv) return fromEnv;
 
   const projects = neonJson(["projects", "list"]) as
-    | { id?: string }[]
-    | { projects?: { id?: string }[] };
-  const list = Array.isArray(projects)
-    ? projects
-    : (projects.projects ?? []);
+    { id?: string }[] | { projects?: { id?: string }[] };
+  const list = Array.isArray(projects) ? projects : (projects.projects ?? []);
   const ids = list
     .map((project) => project.id)
     .filter((id): id is string => typeof id === "string" && id.length > 0);
@@ -259,8 +252,7 @@ function resolveProjectId(
 
 function listBranchNames(projectId: string): string[] {
   const raw = neonJson(["branches", "list", "--project-id", projectId]) as
-    | { name?: string }[]
-    | { branches?: { name?: string }[] };
+    { name?: string }[] | { branches?: { name?: string }[] };
   const list = Array.isArray(raw) ? raw : (raw.branches ?? []);
   return list
     .map((branch) => branch.name)
@@ -361,14 +353,7 @@ function resetBranch(projectId: string, branchName: string): void {
   console.log(`Resetting Neon branch "${branchName}" from parent…`);
   execFileSync(
     "neon",
-    [
-      "branches",
-      "reset",
-      branchName,
-      "--project-id",
-      projectId,
-      "--parent",
-    ],
+    ["branches", "reset", branchName, "--project-id", projectId, "--parent"],
     { stdio: "inherit" }
   );
 }
@@ -443,9 +428,7 @@ function runMigrate(consumerRoot: string, envFile: string): void {
   const unpooled = keys[UNPOOLED_KEY]?.trim();
   const pooled = keys[POOLED_KEY]?.trim();
   if (!unpooled) {
-    console.error(
-      `${UNPOOLED_KEY} missing. Run: pnpm neon:test ensure`
-    );
+    console.error(`${UNPOOLED_KEY} missing. Run: pnpm neon:test ensure`);
     process.exit(1);
   }
 
