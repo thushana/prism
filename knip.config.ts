@@ -42,7 +42,7 @@ const config: KnipConfig = {
     ".": {
       entry: ["scripts/*.ts"],
       project: ["scripts/**/*.ts"],
-      ignoreBinaries: ["drizzle-kit", "pkill"],
+      ignoreBinaries: ["drizzle-kit", "neon", "pkill"],
       ignoreDependencies: [
         "swr",
         "lightningcss",
@@ -104,7 +104,7 @@ const config: KnipConfig = {
       paths: {
         "@utilities": ["../utilities/source"],
       },
-      ignoreDependencies: ["tailwind-merge", "@prism/utilities", "mapbox-gl"],
+      ignoreDependencies: ["tailwind-merge", "@prism/utilities"],
     },
     "packages/cli": {
       paths: loggerPathsFromPackage,
