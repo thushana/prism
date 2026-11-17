@@ -83,7 +83,8 @@ export async function promptSelect<T>(
     },
   ]);
 
-  return result.selected;
+  // inquirer wraps answers in Prettify<>; cast keeps the caller's T intact under TS 7.
+  return result.selected as T;
 }
 
 /**

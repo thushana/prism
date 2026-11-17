@@ -22,9 +22,7 @@ describe("collectRequiredVercelEnvProblems", () => {
       collectRequiredVercelEnvProblems({
         env: { VERCEL: "1", VERCEL_ENV: "production" },
       })
-    ).toEqual([
-      "missing: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL",
-    ]);
+    ).toEqual(["missing: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL"]);
   });
 
   it("includes consumer additional keys", () => {
@@ -73,6 +71,8 @@ describe("assertRequiredVercelEnv", () => {
   });
 
   it("passes when complete", () => {
-    expect(() => assertRequiredVercelEnv({ env: { ...complete } })).not.toThrow();
+    expect(() =>
+      assertRequiredVercelEnv({ env: { ...complete } })
+    ).not.toThrow();
   });
 });

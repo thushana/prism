@@ -246,7 +246,7 @@ function generateWebAppPackageJson(
         ? "tsx ../../prism/scripts/run-next-dev.ts --webpack"
         : "tsx ../../prism/scripts/run-next-dev.ts",
       "assert:required-env": isStatic
-        ? "node -e \"process.exit(0)\""
+        ? 'node -e "process.exit(0)"'
         : "tsx ../../prism/scripts/assert-required-env.ts",
       build: isStatic
         ? useWebpack
