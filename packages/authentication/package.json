@@ -23,11 +23,11 @@
     "./change-password-form": "./source/change-password-form.tsx"
   },
   "dependencies": {
-    "@better-auth/api-key": "1.7.18",
-    "@better-auth/drizzle-adapter": "1.7.18",
-    "@better-auth/passkey": "1.7.18",
+    "@better-auth/api-key": "1.7.25",
+    "@better-auth/drizzle-adapter": "1.7.25",
+    "@better-auth/passkey": "1.7.25",
     "@prism/utilities": "workspace:*",
-    "better-auth": "1.7.18",
+    "better-auth": "1.7.25",
     "server-only": "^0.0.1",
     "ui": "workspace:*"
   },
@@ -40,7 +40,7 @@
   "devDependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@types/node": "^26.4.1",
-    "@types/react": "^19.2.18",
+    "@types/react": "19.3.0",
     "drizzle-orm": "^0.45.2",
     "typescript": "^7.0.0",
     "vitest": "^5.1.0"

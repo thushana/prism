@@ -26,8 +26,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gsap": "^3.15.0",
-    "lucide-react": "^1.69.0",
-    "mapbox-gl": "^3.34.2",
+    "lucide-react": "^1.74.0",
+    "mapbox-gl": "^3.35.0",
     "maplibre-gl": "^5.24.1",
     "tailwind-merge": "^3.6.0"
   },
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
     "@types/google.maps": "^3.66.9",
-    "@types/react": "^19.2.18",
+    "@types/react": "19.3.0",
     "material-ui-colors": "^1.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.0",
