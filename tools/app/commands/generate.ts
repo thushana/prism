@@ -470,9 +470,12 @@ export default nextConfig;
 `
       : layout === "consumer-workspace"
         ? `import type { NextConfig } from "next";
+import { createRequire } from "node:module";
 import path from "path";
 
+const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
+const kyselyOriginal = require.resolve("kysely");
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -496,6 +499,7 @@ const nextConfig: NextConfig = {
   ],
   turbopack: {
     resolveAlias: {
+      "kysely-original": kyselyOriginal,
       kysely: kyselyShim,
     },
   },
@@ -507,7 +511,8 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias = {
       ...config.resolve.alias,
-      kysely: kyselyShim,
+      "kysely-original": kyselyOriginal,
+      kysely$: kyselyShim,
       "@database": path.resolve(__dirname, "${prismPrefix}/database/source"),
       "@intelligence": path.resolve(__dirname, "${prismPrefix}/intelligence/source"),
       "@intelligence/tasks": path.resolve(__dirname, "${prismPrefix}/intelligence/source/tasks"),
@@ -563,9 +568,12 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 `
         : `import type { NextConfig } from "next";
+import { createRequire } from "node:module";
 import path from "path";
 
+const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
+const kyselyOriginal = require.resolve("kysely");
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -583,13 +591,15 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../.."),
   turbopack: {
     resolveAlias: {
+      "kysely-original": kyselyOriginal,
       kysely: kyselyShim,
     },
   },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
-      kysely: kyselyShim,
+      "kysely-original": kyselyOriginal,
+      kysely$: kyselyShim,
     };
     return config;
   },

@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
+import { createRequire } from "node:module";
 import path from "path";
 
+const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
+const kyselyOriginal = require.resolve("kysely");
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -36,19 +39,17 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
+      "kysely-original": kyselyOriginal,
+      // Exact package name only — shim re-exports via kysely-original.
       kysely: kyselyShim,
-      "@ui": path.resolve(__dirname, "../../packages/ui/source"),
-      "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
-      "@ui/pickers": path.resolve(
-        __dirname,
-        "../../packages/ui/source/pickers.ts"
-      ),
     },
   },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
-      kysely: kyselyShim,
+      "kysely-original": kyselyOriginal,
+      // Exact match so the shim's `kysely-original` import is not redirected.
+      kysely$: kyselyShim,
       "@ui": path.resolve(__dirname, "../../packages/ui/source"),
       "@ui/map": path.resolve(__dirname, "../../packages/ui/source/map.ts"),
       "@ui/pickers": path.resolve(

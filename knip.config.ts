@@ -78,6 +78,8 @@ const config: KnipConfig = {
         "tailwindcss",
         "tw-animate-css",
         "ui",
+        // Webpack alias target used by library/kysely-shim.ts
+        "kysely-original",
       ],
       drizzle: { config: [] },
     },
