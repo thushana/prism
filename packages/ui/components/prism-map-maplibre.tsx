@@ -58,12 +58,34 @@ function applyFit(
   map.fitBounds(bounds, { padding: 40, duration: 0, maxZoom: 14 });
 }
 
+/**
+ * Point MapLibre at a real HTTP(S) worker. Under Next/webpack, the default worker
+ * URL resolves empty (`file://` → rejected), which yields "Worker failed to load"
+ * and a basemap stuck on low-zoom Natural Earth.
+ */
+function ensureMapLibreWorkerUrl(
+  maplibregl: MapLibreModule,
+  workerUrl?: string
+) {
+  if (typeof window === "undefined") return;
+
+  // Always set before constructing a Map. MapLibre's defaultWorkerUrl() uses
+  // `import.meta.url` + `./maplibre-gl-worker.mjs`; under Next/webpack that is
+  // often empty or a 404 under `/_next/static/chunks/`, which yields
+  // "Worker failed to load". Do not use `new URL(asset, import.meta.url)` here —
+  // webpack rewrites it to `new __webpack_require__.U(...)`, which is unreliable.
+  // Host apps should sync `maplibre-gl-worker.mjs` to `public/maplibre/`.
+  maplibregl.setWorkerUrl(workerUrl ?? "/maplibre/maplibre-gl-worker.mjs");
+}
+
 export type PrismMapMaplibreProps = {
   routes: PrismMapRoute[];
   polygons?: PrismMapPolygon[];
   autoFit?: boolean;
   loadMapLibreGl?: () => Promise<void>;
   style?: string | object;
+  /** Override MapLibre worker URL (default `/maplibre/maplibre-gl-worker.mjs`). */
+  workerUrl?: string;
   onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
   onMapLoadError?: (message: string) => void;
 };
@@ -74,6 +96,7 @@ export function PrismMapMaplibre({
   autoFit = true,
   loadMapLibreGl,
   style = PRISM_MAP_MAPLIBRE_STYLE_DEFAULT,
+  workerUrl,
   onRouteSelectionChange,
   onMapLoadError,
 }: PrismMapMaplibreProps) {
@@ -86,6 +109,7 @@ export function PrismMapMaplibre({
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   const onMapLoadErrorRef = useRef(onMapLoadError);
   const mapLoadErrorReportedRef = useRef(false);
+  const styleLoadedRef = useRef(false);
   const lastContentSigRef = useRef("");
   const [mapInstance, setMapInstance] = useState<
     import("maplibre-gl").Map | null
@@ -111,6 +135,7 @@ export function PrismMapMaplibre({
         const maplibregl = await import("maplibre-gl");
         maplibreRef.current = maplibregl;
         await import("maplibre-gl/dist/maplibre-gl.css");
+        ensureMapLibreWorkerUrl(maplibregl, workerUrl);
 
         if (cancelled) return;
 
@@ -124,10 +149,26 @@ export function PrismMapMaplibre({
           "top-right"
         );
 
-        map.on("error", () => {
+        map.on("error", (event) => {
           if (cancelled || mapLoadErrorReportedRef.current) return;
+          const err = event.error;
+          const message =
+            err instanceof Error
+              ? err.message
+              : typeof err === "string"
+                ? err
+                : "MapLibre map failed to load";
+          // Tile/sprite/source faults after style load are common and non-fatal —
+          // do not blank the map behind a permanent error overlay. Still surface
+          // worker URL failures (they leave the basemap stuck on Natural Earth).
+          if (
+            styleLoadedRef.current &&
+            !/Worker failed to load/i.test(message)
+          ) {
+            return;
+          }
           mapLoadErrorReportedRef.current = true;
-          onMapLoadErrorRef.current?.("MapLibre map failed to load");
+          onMapLoadErrorRef.current?.(message);
         });
 
         map.on("load", () => {
@@ -135,6 +176,7 @@ export function PrismMapMaplibre({
             map.remove();
             return;
           }
+          styleLoadedRef.current = true;
 
           routesByIdRef.current.clear();
           for (const r of routesRef.current) {
@@ -241,6 +283,7 @@ export function PrismMapMaplibre({
     return () => {
       cancelled = true;
       mapLoadErrorReportedRef.current = false;
+      styleLoadedRef.current = false;
       lastContentSigRef.current = "";
       setMapInstance((prev) => {
         prev?.remove();
@@ -248,7 +291,7 @@ export function PrismMapMaplibre({
       });
       maplibreRef.current = null;
     };
-  }, [loadMapLibreGl, style]);
+  }, [loadMapLibreGl, style, workerUrl]);
 
   useEffect(() => {
     if (!mapInstance?.loaded()) return;

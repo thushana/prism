@@ -130,7 +130,7 @@ Multi-vendor map for **encoded overview polylines** and **GeoJSON Polygon / Mult
 
 **Mapbox:** **`mapboxAccessToken`** + **`mapbox.style`** (default **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**). **`mapbox-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMapbox`**.
 
-**MapLibre:** optional **`maplibre.style`** (default **`PRISM_MAP_MAPLIBRE_STYLE_DEFAULT`** = OpenFreeMap liberty — token-free). **`maplibre-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMaplibre`**. Prefer MapLibre when you want OSM-style basemaps without a Mapbox/Google key.
+**MapLibre:** optional **`maplibre.style`** (default **`PRISM_MAP_MAPLIBRE_STYLE_DEFAULT`** = OpenFreeMap liberty — token-free). **`maplibre-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMaplibre`**. Prefer MapLibre when you want OSM-style basemaps without a Mapbox/Google key. Next/webpack apps must serve the MapLibre worker (empty worker URL → “Worker failed to load” and no zoomed tiles): sync `maplibre-gl/dist/maplibre-gl-worker.mjs` to **`public/maplibre/`**, or pass **`maplibre.workerUrl`**.
 
 **Polyline decoding:** **`decodeEncodedPolyline`** from **`@ui`** — pure implementation, no Google Geometry library.
 

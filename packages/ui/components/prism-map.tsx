@@ -88,6 +88,8 @@ export type PrismMapProps =
       loadMapLibreGl?: () => Promise<void>;
       maplibre?: {
         style?: string | import("maplibre-gl").StyleSpecification;
+        /** MapLibre worker URL; default `/maplibre/maplibre-gl-worker.mjs`. */
+        workerUrl?: string;
       };
     });
 
@@ -152,6 +154,7 @@ export function PrismMap(props: PrismMapProps) {
       autoFit={autoFit}
       loadMapLibreGl={props.loadMapLibreGl}
       style={props.maplibre?.style}
+      workerUrl={props.maplibre?.workerUrl}
       onRouteSelectionChange={onRouteSelectionChange}
       onMapLoadError={onMapLoadError}
     />
