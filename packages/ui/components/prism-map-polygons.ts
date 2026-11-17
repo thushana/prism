@@ -30,7 +30,8 @@ export function buildPolygonFeatureCollection(
   return {
     type: "FeatureCollection",
     features: polygons.map((polygon) => {
-      const strokeColor = polygon.strokeColor ?? polygon.fillColor ?? DEFAULT_STROKE;
+      const strokeColor =
+        polygon.strokeColor ?? polygon.fillColor ?? DEFAULT_STROKE;
       return {
         type: "Feature" as const,
         id: polygon.id,

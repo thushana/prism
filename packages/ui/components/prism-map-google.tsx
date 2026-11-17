@@ -50,7 +50,10 @@ function padLatLngBounds(
   );
 }
 
-function contentSignature(routes: PrismMapRoute[], polygons: PrismMapPolygon[]) {
+function contentSignature(
+  routes: PrismMapRoute[],
+  polygons: PrismMapPolygon[]
+) {
   return mapOverlayContentSignature(
     routeGeometrySignatureParts(routes),
     polygons
@@ -119,7 +122,9 @@ export function PrismMapGoogle({
         } else {
           mapRef.current.setOptions(mapInitOptions);
           if (!dataLayerRef.current) {
-            dataLayerRef.current = new google.maps.Data({ map: mapRef.current });
+            dataLayerRef.current = new google.maps.Data({
+              map: mapRef.current,
+            });
           }
         }
 

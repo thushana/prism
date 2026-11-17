@@ -78,7 +78,10 @@ export type PrismMapMapboxProps = {
   onMapLoadError?: (message: string) => void;
 };
 
-function contentSignature(routes: PrismMapRoute[], polygons: PrismMapPolygon[]) {
+function contentSignature(
+  routes: PrismMapRoute[],
+  polygons: PrismMapPolygon[]
+) {
   return mapOverlayContentSignature(
     routeGeometrySignatureParts(routes),
     polygons
