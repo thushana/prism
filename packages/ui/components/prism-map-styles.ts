@@ -158,3 +158,7 @@ export const PRISM_MAP_GOOGLE_ROADMAP_BASE: google.maps.MapOptions = {
 
 export const PRISM_MAP_MAPBOX_STYLE_DEFAULT =
   "mapbox://styles/mapbox/light-v11";
+
+/** Token-free OpenFreeMap liberty style for MapLibre. */
+export const PRISM_MAP_MAPLIBRE_STYLE_DEFAULT =
+  "https://tiles.openfreemap.org/styles/liberty";

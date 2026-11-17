@@ -122,15 +122,17 @@ import {
 
 ### PrismMap
 
-Dual-vendor map for **encoded overview polylines**: **Google Maps JavaScript API** or **Mapbox GL JS**. The public API is a **discriminated union** on **`vendor: "google" | "mapbox"`** — shared “peer” props sit at the top level; anything vendor-specific lives only under **`google`** or **`mapbox`** (see the file-level JSDoc in `packages/ui/components/prism-map.tsx`).
+Multi-vendor map for **encoded overview polylines** and **GeoJSON Polygon / MultiPolygon** overlays: **Google Maps JavaScript API**, **Mapbox GL JS**, or **MapLibre GL**. The public API is a **discriminated union** on **`vendor: "google" | "mapbox" | "maplibre"`** — shared “peer” props sit at the top level; anything vendor-specific lives only under **`google`**, **`mapbox`**, or **`maplibre`** (see the file-level JSDoc in `packages/ui/components/prism-map.tsx`).
 
-**Peer props (both vendors):** **`routes`**: `PrismMapRoute[]` (`id`, `encodedPolyline`, `strokeColor`, optional `strokeOpacity`, `strokeWeight`, optional **`stackOrder`** for draw order — Google `zIndex`, Mapbox `line-sort-key`). **`autoFit`** (default on), **`shell`**: `"none"` \| `"card"`, **`title`**, **`headerAction`**, **`minHeightPx`**, **`loadingSlot`**, **`errorSlot`**, **`emptySlot`**, **`className`**, **`mapClassName`**.
+**Peer props (all vendors):** **`routes?`**: `PrismMapRoute[]` (`id`, `encodedPolyline`, `strokeColor`, optional stroke/stack fields). **`polygons?`**: `PrismMapPolygon[]` (`id`, `geometry` as GeoJSON Polygon/MultiPolygon, optional `fillColor` / `fillOpacity` / stroke fields). At least one of `routes` / `polygons` should be non-empty (otherwise `emptySlot`). **`autoFit`** (default on), **`shell`**: `"none"` \| `"card"`, **`title`**, **`headerAction`**, **`minHeightPx`**, **`loadingSlot`**, **`errorSlot`**, **`emptySlot`**, **`className`**, **`mapClassName`**, **`onMapLoadError`**.
 
-**Google:** **`loadGoogleMaps`**: `() => Promise<void>` — typically **`createFetchKeyGoogleMapsLoader(apiKeyJsonUrl)`** from **`prism-map-loaders.ts`** (fetches `{ apiKey, mapId? }`, loads Maps script with the marker library, resolves when ready; failed loads clear the cached promise so callers can retry). Map init uses **`resolvePrismGoogleMapsOptions()`** with **`PRISM_MAP_GOOGLE_MAP_ID`** (default `DEMO_MAP_ID`; override via env / key endpoint). **`AdvancedMarkerElement`** for pins — style the basemap in Cloud Console; **`PRISM_MAP_GOOGLE_GRAYSCALE_STYLES`** is a reference palette only.
+**Google:** **`loadGoogleMaps`**: `() => Promise<void>` — typically **`createFetchKeyGoogleMapsLoader(apiKeyJsonUrl)`** from **`prism-map-loaders.ts`**. Polygons use `google.maps.Data`; routes use `Polyline` + Advanced Markers.
 
-**Mapbox:** **`mapboxAccessToken`**: string or `() => Promise<string>` — often **`createFetchMapboxTokenLoader(tokenUrl)`** against a same-origin route returning **`{ accessToken }`**. **`mapbox.style`** — default constant **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**. **`mapbox-gl`** is an **optional** `peerDependency`; the implementation **dynamic-imports** Mapbox inside **`PrismMapMapbox`** and imports **`mapbox-gl/dist/mapbox-gl.css`** once.
+**Mapbox:** **`mapboxAccessToken`** + **`mapbox.style`** (default **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**). **`mapbox-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMapbox`**.
 
-**Polyline decoding:** **`decodeEncodedPolyline`** from **`@ui`** (`packages/ui/source/polyline-decode.ts`) — pure implementation, no Google Maps Geometry library.
+**MapLibre:** optional **`maplibre.style`** (default **`PRISM_MAP_MAPLIBRE_STYLE_DEFAULT`** = OpenFreeMap liberty — token-free). **`maplibre-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMaplibre`**. Prefer MapLibre when you want OSM-style basemaps without a Mapbox/Google key.
+
+**Polyline decoding:** **`decodeEncodedPolyline`** from **`@ui`** — pure implementation, no Google Geometry library.
 
 **Import:**
 
@@ -140,13 +142,15 @@ import {
   createFetchKeyGoogleMapsLoader,
   createFetchMapboxTokenLoader,
   PRISM_MAP_MAPBOX_STYLE_DEFAULT,
+  PRISM_MAP_MAPLIBRE_STYLE_DEFAULT,
   decodeEncodedPolyline,
+  type PrismMapPolygon,
   type PrismMapRoute,
   type PrismMapVendor,
-} from "@ui";
+} from "@ui/map";
 ```
 
-Admin demo: **`/admin/prism/components/prism-map`** — **`PrismMapDemo`** in `packages/admin/source/prism-map.tsx`.
+Admin demo: **`/admin/prism/components/prism-map`** — **`PrismMapDemo`** in `packages/admin/source/prism-map.tsx` (Google, Mapbox, and MapLibre sections).
 
 ### PrismSpinner
 

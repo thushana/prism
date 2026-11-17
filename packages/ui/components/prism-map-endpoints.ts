@@ -35,6 +35,52 @@ export type RouteEndpointFeatureCollection = {
   }>;
 };
 
+export type RouteLineFeatureCollection = {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    id: string;
+    properties: {
+      strokeColor: string;
+      strokeOpacity: number;
+      strokeWeight: number;
+      stackOrder: number;
+      routeId: string;
+    };
+    geometry: { type: "LineString"; coordinates: [number, number][] };
+  }>;
+};
+
+/** GeoJSON LineStrings for Mapbox / MapLibre route layers. */
+export function buildRouteLineFeatureCollection(
+  routes: PrismMapRoute[]
+): RouteLineFeatureCollection {
+  const features: RouteLineFeatureCollection["features"] = [];
+  for (const route of routes) {
+    const coordinates = decodeEncodedPolyline(route.encodedPolyline).map(
+      (point) => [point.lng, point.lat] as [number, number]
+    );
+    if (coordinates.length < 2) continue;
+    features.push({
+      type: "Feature",
+      id: route.id,
+      properties: {
+        strokeColor: route.strokeColor,
+        strokeOpacity: route.strokeOpacity ?? 0.2,
+        strokeWeight: route.strokeWeight ?? 3,
+        stackOrder: route.stackOrder ?? 0,
+        routeId: route.id,
+      },
+      geometry: { type: "LineString", coordinates },
+    });
+  }
+  return { type: "FeatureCollection", features };
+}
+
+export function routeGeometrySignatureParts(routes: PrismMapRoute[]): string[] {
+  return routes.map((route) => `${route.id}\n${route.encodedPolyline}`);
+}
+
 /** Keep S/E readable when route lines are drawn faint for chart slot emphasis. */
 export function routeEndpointFillOpacity(strokeOpacity: number): number {
   return Math.max(strokeOpacity, 0.55);

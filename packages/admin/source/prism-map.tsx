@@ -7,6 +7,7 @@ import {
   createFetchKeyGoogleMapsLoader,
   createFetchMapboxTokenLoader,
   PRISM_MAP_MAPBOX_STYLE_DEFAULT,
+  PRISM_MAP_MAPLIBRE_STYLE_DEFAULT,
   type PrismMapRoute,
 } from "@ui/map";
 
@@ -50,15 +51,15 @@ export function PrismMapDemo(): React.JSX.Element {
         <PrismTypography role="body" size="regular" as="span" font="mono">
           PrismMap
         </PrismTypography>{" "}
-        with mock polylines. Requires{" "}
+        with mock polylines. Google/Mapbox need{" "}
         <PrismTypography role="body" size="regular" as="span" font="mono">
           GOOGLE_MAPS_WEB_KEY
         </PrismTypography>{" "}
         /{" "}
         <PrismTypography role="body" size="regular" as="span" font="mono">
           MAPBOX_ACCESS_TOKEN
-        </PrismTypography>{" "}
-        for previews.
+        </PrismTypography>
+        ; MapLibre uses OpenFreeMap (no token).
       </PrismTypography>
 
       <div>
@@ -83,6 +84,20 @@ export function PrismMapDemo(): React.JSX.Element {
           vendor="mapbox"
           mapboxAccessToken={mapboxTokenLoader}
           mapbox={{ style: PRISM_MAP_MAPBOX_STYLE_DEFAULT }}
+          routes={MOCK_ROUTES}
+          shell="card"
+          title="Mock routes"
+          minHeightPx={360}
+        />
+      </div>
+
+      <div>
+        <PrismTypography role="title" size="small" as="h2" className="mb-4">
+          MapLibre (OpenFreeMap)
+        </PrismTypography>
+        <PrismMap
+          vendor="maplibre"
+          maplibre={{ style: PRISM_MAP_MAPLIBRE_STYLE_DEFAULT }}
           routes={MOCK_ROUTES}
           shell="card"
           title="Mock routes"

@@ -24,7 +24,8 @@
     "source/**/*.ts",
     "source/**/*.tsx",
     "source/**/*.json",
-    "../ui/mapbox-gl-css.d.ts"
+    "../ui/mapbox-gl-css.d.ts",
+    "../ui/maplibre-gl-css.d.ts"
   ],
   "exclude": ["node_modules"]
 }

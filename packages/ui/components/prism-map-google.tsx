@@ -25,8 +25,14 @@ import {
 import {
   ROUTE_ENDPOINT_LABEL,
   collectMapEndpointMarkers,
+  routeGeometrySignatureParts,
 } from "./prism-map-endpoints";
-import type { PrismMapRoute } from "./prism-map-types";
+import {
+  buildPolygonFeatureCollection,
+  forEachPolygonPosition,
+  mapOverlayContentSignature,
+} from "./prism-map-polygons";
+import type { PrismMapPolygon, PrismMapRoute } from "./prism-map-types";
 
 function padLatLngBounds(
   bounds: google.maps.LatLngBounds,
@@ -44,12 +50,16 @@ function padLatLngBounds(
   );
 }
 
-function routesGeometrySignature(routes: PrismMapRoute[]): string {
-  return routes.map((r) => `${r.id}\n${r.encodedPolyline}`).join("\u0001");
+function contentSignature(routes: PrismMapRoute[], polygons: PrismMapPolygon[]) {
+  return mapOverlayContentSignature(
+    routeGeometrySignatureParts(routes),
+    polygons
+  );
 }
 
 export type PrismMapGoogleProps = {
   routes: PrismMapRoute[];
+  polygons?: PrismMapPolygon[];
   autoFit?: boolean;
   loadGoogleMaps: () => Promise<void>;
   mapOptions?: google.maps.MapOptions;
@@ -58,6 +68,7 @@ export type PrismMapGoogleProps = {
 
 export function PrismMapGoogle({
   routes,
+  polygons = [],
   autoFit = true,
   loadGoogleMaps,
   mapOptions,
@@ -69,6 +80,7 @@ export function PrismMapGoogle({
     new Map()
   );
   const markerByKeyRef = useRef<Map<string, GoogleAdvancedMarker>>(new Map());
+  const dataLayerRef = useRef<google.maps.Data | null>(null);
   const routesByIdRef = useRef<Map<string, PrismMapRoute>>(new Map());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   const lastGeometrySigRef = useRef<string>("");
@@ -100,11 +112,15 @@ export function PrismMapGoogle({
             mapInitOptions
           );
           applyPrismGoogleMapsBasemapStyle(mapRef.current);
+          dataLayerRef.current = new google.maps.Data({ map: mapRef.current });
           mapRef.current.addListener("click", () => {
             onRouteSelectionRef.current?.(null);
           });
         } else {
           mapRef.current.setOptions(mapInitOptions);
+          if (!dataLayerRef.current) {
+            dataLayerRef.current = new google.maps.Data({ map: mapRef.current });
+          }
         }
 
         setMapReady(true);
@@ -134,6 +150,8 @@ export function PrismMapGoogle({
       const markers = markerByKeyRef.current;
       markers.forEach((marker) => detachGoogleAdvancedMarker(marker));
       markers.clear();
+      dataLayerRef.current?.setMap(null);
+      dataLayerRef.current = null;
       lastGeometrySigRef.current = "";
       const map = mapRef.current;
       mapRef.current = null;
@@ -144,7 +162,7 @@ export function PrismMapGoogle({
     };
   }, [loadGoogleMaps, mapOptions]);
 
-  // Patch polylines in place; fit camera only when encoded paths change.
+  // Patch polylines / polygons in place; fit camera only when geometry changes.
   useEffect(() => {
     if (!mapReady) return;
     const map = mapRef.current;
@@ -158,6 +176,33 @@ export function PrismMapGoogle({
     routesByIdRef.current.clear();
     for (const r of routes) {
       routesByIdRef.current.set(r.id, r);
+    }
+
+    const dataLayer = dataLayerRef.current;
+    if (dataLayer) {
+      dataLayer.forEach((feature) => {
+        dataLayer.remove(feature);
+      });
+      const collection = buildPolygonFeatureCollection(polygons);
+      dataLayer.addGeoJson(collection as unknown as object);
+      dataLayer.setStyle((feature) => {
+        const fillColor = String(feature.getProperty("fillColor") ?? "#2563eb");
+        const fillOpacity = Number(feature.getProperty("fillOpacity") ?? 0.28);
+        const strokeColor = String(
+          feature.getProperty("strokeColor") ?? fillColor
+        );
+        const strokeOpacity = Number(
+          feature.getProperty("strokeOpacity") ?? 0.9
+        );
+        const strokeWeight = Number(feature.getProperty("strokeWeight") ?? 2);
+        return {
+          fillColor,
+          fillOpacity,
+          strokeColor,
+          strokeOpacity,
+          strokeWeight,
+        };
+      });
     }
 
     for (const route of routes) {
@@ -256,12 +301,12 @@ export function PrismMapGoogle({
       }
     }
 
-    if (routes.length === 0) {
+    if (routes.length === 0 && polygons.length === 0) {
       lastGeometrySigRef.current = "";
       return;
     }
 
-    const geometrySig = routesGeometrySignature(routes);
+    const geometrySig = contentSignature(routes, polygons);
     if (
       autoFit &&
       geometrySig.length > 0 &&
@@ -274,6 +319,11 @@ export function PrismMapGoogle({
           bounds.extend(new google.maps.LatLng(pt.lat, pt.lng));
         }
       }
+      for (const polygon of polygons) {
+        forEachPolygonPosition(polygon.geometry, (lng, lat) => {
+          bounds.extend(new google.maps.LatLng(lat, lng));
+        });
+      }
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds);
         const padded = padLatLngBounds(bounds, 0.15);
@@ -282,7 +332,7 @@ export function PrismMapGoogle({
         });
       }
     }
-  }, [routes, autoFit, mapReady]);
+  }, [routes, polygons, autoFit, mapReady]);
 
   return (
     <div className="relative h-full w-full min-h-0 flex-1">

@@ -8,51 +8,19 @@
 import { useEffect, useRef, useState } from "react";
 import { decodeEncodedPolyline } from "../source/polyline-decode";
 import { PRISM_MAP_MAPBOX_STYLE_DEFAULT } from "./prism-map-styles";
-import { buildRouteEndpointFeatureCollection } from "./prism-map-endpoints";
-import type { PrismMapRoute } from "./prism-map-types";
+import {
+  buildRouteEndpointFeatureCollection,
+  buildRouteLineFeatureCollection,
+  routeGeometrySignatureParts,
+} from "./prism-map-endpoints";
+import {
+  buildPolygonFeatureCollection,
+  forEachPolygonPosition,
+  mapOverlayContentSignature,
+} from "./prism-map-polygons";
+import type { PrismMapPolygon, PrismMapRoute } from "./prism-map-types";
 
 type MapboxModule = typeof import("mapbox-gl").default;
-
-type RouteFeatureCollection = {
-  type: "FeatureCollection";
-  features: Array<{
-    type: "Feature";
-    id: string;
-    properties: {
-      strokeColor: string;
-      strokeOpacity: number;
-      strokeWeight: number;
-      stackOrder: number;
-      routeId: string;
-    };
-    geometry: { type: "LineString"; coordinates: [number, number][] };
-  }>;
-};
-
-function buildRouteFeatureCollection(
-  routes: PrismMapRoute[]
-): RouteFeatureCollection {
-  const features: RouteFeatureCollection["features"] = [];
-  for (const r of routes) {
-    const coords = decodeEncodedPolyline(r.encodedPolyline).map(
-      (p) => [p.lng, p.lat] as [number, number]
-    );
-    if (coords.length < 2) continue;
-    features.push({
-      type: "Feature",
-      id: r.id,
-      properties: {
-        strokeColor: r.strokeColor,
-        strokeOpacity: r.strokeOpacity ?? 0.2,
-        strokeWeight: r.strokeWeight ?? 3,
-        stackOrder: r.stackOrder ?? 0,
-        routeId: r.id,
-      },
-      geometry: { type: "LineString", coordinates: coords },
-    });
-  }
-  return { type: "FeatureCollection", features };
-}
 
 function padBoundsNE_SW(
   ne: [number, number],
@@ -73,14 +41,21 @@ function applyFitAndBounds(
   map: import("mapbox-gl").Map,
   mapboxgl: MapboxModule,
   routes: PrismMapRoute[],
+  polygons: PrismMapPolygon[],
   autoFit: boolean
 ) {
-  if (!autoFit || routes.length === 0) return;
+  if (!autoFit) return;
+  if (routes.length === 0 && polygons.length === 0) return;
   const bounds = new mapboxgl.LngLatBounds();
   for (const r of routes) {
     for (const p of decodeEncodedPolyline(r.encodedPolyline)) {
       bounds.extend([p.lng, p.lat]);
     }
+  }
+  for (const polygon of polygons) {
+    forEachPolygonPosition(polygon.geometry, (lng, lat) => {
+      bounds.extend([lng, lat]);
+    });
   }
   if (bounds.isEmpty()) return;
   const ne = bounds.getNorthEast().toArray() as [number, number];
@@ -92,6 +67,7 @@ function applyFitAndBounds(
 
 export type PrismMapMapboxProps = {
   routes: PrismMapRoute[];
+  polygons?: PrismMapPolygon[];
   autoFit?: boolean;
   loadMapboxGl?: () => Promise<void>;
   mapboxAccessToken: string | (() => Promise<string>);
@@ -102,12 +78,16 @@ export type PrismMapMapboxProps = {
   onMapLoadError?: (message: string) => void;
 };
 
-function routesGeometrySignature(routes: PrismMapRoute[]): string {
-  return routes.map((r) => `${r.id}\n${r.encodedPolyline}`).join("\u0001");
+function contentSignature(routes: PrismMapRoute[], polygons: PrismMapPolygon[]) {
+  return mapOverlayContentSignature(
+    routeGeometrySignatureParts(routes),
+    polygons
+  );
 }
 
 export function PrismMapMapbox({
   routes,
+  polygons = [],
   autoFit = true,
   loadMapboxGl,
   mapboxAccessToken,
@@ -119,6 +99,7 @@ export function PrismMapMapbox({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapboxglRef = useRef<MapboxModule | null>(null);
   const routesRef = useRef(routes);
+  const polygonsRef = useRef(polygons);
   const routesByIdRef = useRef(new Map<string, PrismMapRoute>());
   const onRouteSelectionRef = useRef(onRouteSelectionChange);
   const onMapLoadErrorRef = useRef(onMapLoadError);
@@ -128,10 +109,11 @@ export function PrismMapMapbox({
 
   useEffect(() => {
     routesRef.current = routes;
+    polygonsRef.current = polygons;
     autoFitRef.current = autoFit;
     onRouteSelectionRef.current = onRouteSelectionChange;
     onMapLoadErrorRef.current = onMapLoadError;
-  }, [routes, autoFit, onRouteSelectionChange, onMapLoadError]);
+  }, [routes, polygons, autoFit, onRouteSelectionChange, onMapLoadError]);
 
   const [mapInstance, setMapInstance] = useState<
     import("mapbox-gl").Map | null
@@ -187,7 +169,7 @@ export function PrismMapMapbox({
         for (const r of routesRef.current) {
           routesByIdRef.current.set(r.id, r);
         }
-        const data = buildRouteFeatureCollection(routesRef.current);
+        const data = buildRouteLineFeatureCollection(routesRef.current);
         map.addSource("prism-map-routes", {
           type: "geojson",
           data,
@@ -240,6 +222,29 @@ export function PrismMapMapbox({
             "text-color": "#ffffff",
           },
         });
+        map.addSource("prism-map-polygons", {
+          type: "geojson",
+          data: buildPolygonFeatureCollection(polygonsRef.current),
+        });
+        map.addLayer({
+          id: "prism-map-polygons-fill",
+          type: "fill",
+          source: "prism-map-polygons",
+          paint: {
+            "fill-color": ["get", "fillColor"],
+            "fill-opacity": ["get", "fillOpacity"],
+          },
+        });
+        map.addLayer({
+          id: "prism-map-polygons-line",
+          type: "line",
+          source: "prism-map-polygons",
+          paint: {
+            "line-color": ["get", "strokeColor"],
+            "line-opacity": ["get", "strokeOpacity"],
+            "line-width": ["get", "strokeWeight"],
+          },
+        });
         map.on("click", (e) => {
           const feats = map.queryRenderedFeatures(e.point, {
             layers: ["prism-map-routes-line"],
@@ -256,8 +261,17 @@ export function PrismMapMapbox({
           const r = routesByIdRef.current.get(routeId);
           if (r) onRouteSelectionRef.current?.(r);
         });
-        applyFitAndBounds(map, mapboxgl, routesRef.current, autoFitRef.current);
-        lastGeometrySigRef.current = routesGeometrySignature(routesRef.current);
+        applyFitAndBounds(
+          map,
+          mapboxgl,
+          routesRef.current,
+          polygonsRef.current,
+          autoFitRef.current
+        );
+        lastGeometrySigRef.current = contentSignature(
+          routesRef.current,
+          polygonsRef.current
+        );
         setMapInstance(map);
       });
     })();
@@ -287,23 +301,27 @@ export function PrismMapMapbox({
       routesByIdRef.current.set(r.id, r);
     }
 
-    src.setData(buildRouteFeatureCollection(routes));
+    src.setData(buildRouteLineFeatureCollection(routes));
 
     const endpointSrc = mapInstance.getSource("prism-map-endpoints") as
       import("mapbox-gl").GeoJSONSource | undefined;
     endpointSrc?.setData(buildRouteEndpointFeatureCollection(routes));
 
-    if (routes.length === 0) {
+    const polygonSrc = mapInstance.getSource("prism-map-polygons") as
+      import("mapbox-gl").GeoJSONSource | undefined;
+    polygonSrc?.setData(buildPolygonFeatureCollection(polygons));
+
+    if (routes.length === 0 && polygons.length === 0) {
       lastGeometrySigRef.current = "";
       return;
     }
 
-    const geometrySig = routesGeometrySignature(routes);
+    const geometrySig = contentSignature(routes, polygons);
     if (autoFit && geometrySig !== lastGeometrySigRef.current) {
       lastGeometrySigRef.current = geometrySig;
-      applyFitAndBounds(mapInstance, mapboxgl, routes, autoFit);
+      applyFitAndBounds(mapInstance, mapboxgl, routes, polygons, autoFit);
     }
-  }, [mapInstance, routes, autoFit]);
+  }, [mapInstance, routes, polygons, autoFit]);
 
   return <div ref={containerRef} className="h-full w-full min-h-0 flex-1" />;
 }

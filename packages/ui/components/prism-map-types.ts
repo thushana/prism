@@ -1,8 +1,8 @@
 /**
- * Shared map types for Prism dual-vendor maps (see `prism-map.tsx` JSDoc for peer vs vendor props).
+ * Shared map types for Prism multi-vendor maps (see `prism-map.tsx` JSDoc for peer vs vendor props).
  */
 
-export type PrismMapVendor = "google" | "mapbox";
+export type PrismMapVendor = "google" | "mapbox" | "maplibre";
 
 export type PrismMapRoute = {
   id: string;
@@ -23,6 +23,27 @@ export type PrismMapRoute = {
    * When false, skip start/end markers for this route. Default: show S/E dots at polyline ends.
    */
   showEndpoints?: boolean;
+};
+
+/** WGS84 Polygon / MultiPolygon for containment / place bounds overlays. */
+export type PrismMapPolygonGeometry =
+  | {
+      type: "Polygon";
+      coordinates: number[][][];
+    }
+  | {
+      type: "MultiPolygon";
+      coordinates: number[][][][];
+    };
+
+export type PrismMapPolygon = {
+  id: string;
+  geometry: PrismMapPolygonGeometry;
+  fillColor?: string;
+  fillOpacity?: number;
+  strokeColor?: string;
+  strokeOpacity?: number;
+  strokeWeight?: number;
 };
 
 export type PrismMapShell = "none" | "card";

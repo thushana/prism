@@ -3,13 +3,14 @@
 /**
  * ## PrismMap: peer props vs vendor config
  *
- * **Peer props** (top-level fields shared by both vendors): routes, fit behavior, chrome
- * (`shell`, `title`, slots), and layout — anything Google Maps JS and Mapbox GL can honor the same way.
+ * **Peer props** (top-level fields shared by all vendors): `routes` (encoded polylines),
+ * `polygons` (GeoJSON Polygon / MultiPolygon), fit behavior, chrome (`shell`, `title`, slots),
+ * and layout — anything Google Maps JS, Mapbox GL, and MapLibre GL can honor the same way.
  *
- * **Vendor-only config** lives only under `google` or `mapbox`. Do not mirror Google-only options
- * onto the Mapbox branch (or vice versa); when a knob is vendor-specific, nest it under that vendor.
+ * **Vendor-only config** lives only under `google`, `mapbox`, or `maplibre`. Do not mirror
+ * vendor-specific options across branches; nest them under that vendor.
  *
- * @see `PrismMapGoogle` and `PrismMapMapbox` for implementation details.
+ * @see `PrismMapGoogle`, `PrismMapMapbox`, and `PrismMapMaplibre` for implementation details.
  */
 
 /// <reference types="google.maps" />
@@ -25,16 +26,26 @@ import {
 } from "./prism-card";
 import { PrismMapGoogle } from "./prism-map-google";
 import { PrismMapMapbox } from "./prism-map-mapbox";
-import type { PrismMapRoute, PrismMapShell } from "./prism-map-types";
+import { PrismMapMaplibre } from "./prism-map-maplibre";
+import type {
+  PrismMapPolygon,
+  PrismMapRoute,
+  PrismMapShell,
+} from "./prism-map-types";
 
 export type {
+  PrismMapPolygon,
+  PrismMapPolygonGeometry,
   PrismMapRoute,
   PrismMapShell,
   PrismMapVendor,
 } from "./prism-map-types";
 
 type PeerProps = {
-  routes: PrismMapRoute[];
+  /** Encoded overview polylines (optional when `polygons` is set). */
+  routes?: PrismMapRoute[];
+  /** WGS84 Polygon / MultiPolygon overlays (optional when `routes` is set). */
+  polygons?: PrismMapPolygon[];
   autoFit?: boolean;
   shell?: PrismMapShell;
   title?: string;
@@ -49,8 +60,8 @@ type PeerProps = {
    * Fired when the user selects a route polyline, or `null` when the map background is clicked.
    */
   onRouteSelectionChange?: (route: PrismMapRoute | null) => void;
-  /** Mapbox only: style/tile load failure (e.g. invalid token or URL restriction). */
-  onMapboxLoadError?: (message: string) => void;
+  /** Mapbox / MapLibre: style/tile load failure. */
+  onMapLoadError?: (message: string) => void;
 };
 
 export type PrismMapProps =
@@ -71,6 +82,13 @@ export type PrismMapProps =
       mapboxExtra?: {
         projection?: import("mapbox-gl").ProjectionSpecification;
       };
+    })
+  | (PeerProps & {
+      vendor: "maplibre";
+      loadMapLibreGl?: () => Promise<void>;
+      maplibre?: {
+        style?: string | import("maplibre-gl").StyleSpecification;
+      };
     });
 
 function shellPaddingClass(shell: PrismMapShell | undefined): string {
@@ -79,7 +97,8 @@ function shellPaddingClass(shell: PrismMapShell | undefined): string {
 
 export function PrismMap(props: PrismMapProps) {
   const {
-    routes,
+    routes = [],
+    polygons = [],
     autoFit,
     shell = "none",
     title,
@@ -91,7 +110,7 @@ export function PrismMap(props: PrismMapProps) {
     errorSlot,
     emptySlot,
     onRouteSelectionChange,
-    onMapboxLoadError,
+    onMapLoadError,
   } = props;
 
   const showHeader = Boolean(title || headerAction);
@@ -101,29 +120,42 @@ export function PrismMap(props: PrismMapProps) {
       ? `min-h-[${minHeightPx}px] h-[${minHeightPx}px]`
       : "min-h-[320px] h-[320px]";
 
-  const mapBody =
-    routes.length === 0 ? (
-      (emptySlot ?? null)
-    ) : props.vendor === "google" ? (
-      <PrismMapGoogle
-        routes={routes}
-        autoFit={autoFit}
-        loadGoogleMaps={props.loadGoogleMaps}
-        mapOptions={props.google?.mapOptions}
-        onRouteSelectionChange={onRouteSelectionChange}
-      />
-    ) : (
-      <PrismMapMapbox
-        routes={routes}
-        autoFit={autoFit}
-        loadMapboxGl={props.loadMapboxGl}
-        mapboxAccessToken={props.mapboxAccessToken}
-        style={props.mapbox.style}
-        mapboxExtra={props.mapboxExtra}
-        onRouteSelectionChange={onRouteSelectionChange}
-        onMapLoadError={onMapboxLoadError}
-      />
-    );
+  const hasContent = routes.length > 0 || polygons.length > 0;
+
+  const mapBody = !hasContent ? (
+    (emptySlot ?? null)
+  ) : props.vendor === "google" ? (
+    <PrismMapGoogle
+      routes={routes}
+      polygons={polygons}
+      autoFit={autoFit}
+      loadGoogleMaps={props.loadGoogleMaps}
+      mapOptions={props.google?.mapOptions}
+      onRouteSelectionChange={onRouteSelectionChange}
+    />
+  ) : props.vendor === "mapbox" ? (
+    <PrismMapMapbox
+      routes={routes}
+      polygons={polygons}
+      autoFit={autoFit}
+      loadMapboxGl={props.loadMapboxGl}
+      mapboxAccessToken={props.mapboxAccessToken}
+      style={props.mapbox.style}
+      mapboxExtra={props.mapboxExtra}
+      onRouteSelectionChange={onRouteSelectionChange}
+      onMapLoadError={onMapLoadError}
+    />
+  ) : (
+    <PrismMapMaplibre
+      routes={routes}
+      polygons={polygons}
+      autoFit={autoFit}
+      loadMapLibreGl={props.loadMapLibreGl}
+      style={props.maplibre?.style}
+      onRouteSelectionChange={onRouteSelectionChange}
+      onMapLoadError={onMapLoadError}
+    />
+  );
 
   const viewportHeightPx = minHeightPx ?? 320;
 
