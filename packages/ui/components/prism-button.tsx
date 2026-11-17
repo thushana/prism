@@ -96,6 +96,9 @@ export interface PrismButtonProps {
   /**
    * Prism color spec for the button.
    *
+   * Optional when a `preset` supplies it (falls back to default blue-grey).
+   * Explicit `color` always wins over the preset.
+   *
    * Visual no-op constraint: solid fills/borders are derived like the legacy API:
    * - `backgroundLight`: background=100, border/text=800
    * - `backgroundDark`: background=800, border/text=100
@@ -107,7 +110,7 @@ export interface PrismButtonProps {
    *
    * Ignored when `paint="monochrome"`.
    */
-  color: PartialPrismColorSpec;
+  color?: PartialPrismColorSpec;
   /** Button label (hidden when iconOnly; used for aria-label/title) */
   label: string;
   /** Optional node before icon/label (e.g. Noto emoji). */
@@ -175,7 +178,7 @@ export function PrismButton(
         (React.ComponentProps<"button"> | React.ComponentProps<"span">));
 
   const {
-    color,
+    color = { palette: "default", swatchPrimary: "blue-grey" },
     label,
     leadingSlot,
     variant = "icon",
