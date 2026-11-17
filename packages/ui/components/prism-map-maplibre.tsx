@@ -24,7 +24,10 @@ import type { PrismMapPolygon, PrismMapRoute } from "./prism-map-types";
 
 type MapLibreModule = typeof import("maplibre-gl");
 
-function contentSignature(routes: PrismMapRoute[], polygons: PrismMapPolygon[]) {
+function contentSignature(
+  routes: PrismMapRoute[],
+  polygons: PrismMapPolygon[]
+) {
   return mapOverlayContentSignature(
     routeGeometrySignatureParts(routes),
     polygons
@@ -88,11 +91,13 @@ export function PrismMapMaplibre({
     import("maplibre-gl").Map | null
   >(null);
 
-  routesRef.current = routes;
-  polygonsRef.current = polygons;
-  autoFitRef.current = autoFit;
-  onRouteSelectionRef.current = onRouteSelectionChange;
-  onMapLoadErrorRef.current = onMapLoadError;
+  useEffect(() => {
+    routesRef.current = routes;
+    polygonsRef.current = polygons;
+    autoFitRef.current = autoFit;
+    onRouteSelectionRef.current = onRouteSelectionChange;
+    onMapLoadErrorRef.current = onMapLoadError;
+  }, [routes, polygons, autoFit, onRouteSelectionChange, onMapLoadError]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -114,7 +119,10 @@ export function PrismMapMaplibre({
           style: style as string | import("maplibre-gl").StyleSpecification,
           attributionControl: { compact: true },
         });
-        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+        map.addControl(
+          new maplibregl.NavigationControl({ showCompass: false }),
+          "top-right"
+        );
 
         map.on("error", () => {
           if (cancelled || mapLoadErrorReportedRef.current) return;
@@ -248,14 +256,11 @@ export function PrismMapMaplibre({
     if (!maplibregl) return;
 
     const routeSrc = mapInstance.getSource("prism-map-routes") as
-      | import("maplibre-gl").GeoJSONSource
-      | undefined;
+      import("maplibre-gl").GeoJSONSource | undefined;
     const endpointSrc = mapInstance.getSource("prism-map-endpoints") as
-      | import("maplibre-gl").GeoJSONSource
-      | undefined;
+      import("maplibre-gl").GeoJSONSource | undefined;
     const polygonSrc = mapInstance.getSource("prism-map-polygons") as
-      | import("maplibre-gl").GeoJSONSource
-      | undefined;
+      import("maplibre-gl").GeoJSONSource | undefined;
 
     routesByIdRef.current.clear();
     for (const r of routes) {
