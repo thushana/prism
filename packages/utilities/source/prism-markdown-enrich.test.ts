@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isPrismMarkdownSectionHeading,
+  isPrismMarkdownTitleHeading,
+  prismMarkdownDocumentHeadings,
   prismMarkdownEnrich,
 } from "./prism-markdown-enrich";
 
@@ -33,6 +35,35 @@ describe("isPrismMarkdownSectionHeading", () => {
   });
 });
 
+describe("isPrismMarkdownTitleHeading", () => {
+  it("accepts Title Case and sentence-case topic labels", () => {
+    expect(isPrismMarkdownTitleHeading("Conclusion")).toBe(true);
+    expect(isPrismMarkdownTitleHeading("No Viable Alternative Sites")).toBe(
+      true
+    );
+    expect(isPrismMarkdownTitleHeading("Staff Recommendation:")).toBe(true);
+    expect(isPrismMarkdownTitleHeading("Food and beverage")).toBe(true);
+    expect(isPrismMarkdownTitleHeading("Tenant improvements")).toBe(true);
+    expect(isPrismMarkdownTitleHeading("Event center and screening")).toBe(
+      true
+    );
+    expect(isPrismMarkdownTitleHeading("Maintenance and parking lot")).toBe(
+      true
+    );
+  });
+
+  it("rejects ALL-CAPS, prose sentences, and mixed mid-line capitals", () => {
+    expect(isPrismMarkdownTitleHeading("ALTERNATIVES")).toBe(false);
+    expect(
+      isPrismMarkdownTitleHeading(
+        "The Roots have demonstrated that no other suitable site is available."
+      )
+    ).toBe(false);
+    expect(isPrismMarkdownTitleHeading("Close to Alameda Airport")).toBe(false);
+    expect(isPrismMarkdownTitleHeading("Conclusion.")).toBe(false);
+  });
+});
+
 describe("prismMarkdownEnrich", () => {
   it("promotes blank-line-bounded ALL-CAPS lines in document mode", () => {
     const markdown = prismMarkdownEnrich(ALAMEDA_BODY, { mode: "document" });
@@ -51,12 +82,36 @@ describe("prismMarkdownEnrich", () => {
     expect(markdown).toContain("EXECUTIVE SUMMARY");
   });
 
-  it("does not promote ALL-CAPS lines that are not blank-line bounded", () => {
+  it("promotes ALL-CAPS lines even with a single newline before body", () => {
     const markdown = prismMarkdownEnrich(
-      "Intro line\nEXECUTIVE SUMMARY\nMore prose",
+      "Intro line\n\nCLIMATE IMPACT\nThere are no identifiable climate impacts.\n\nRECOMMENDATION\nIntroduce an Ordinance.",
+      { mode: "document" }
+    );
+    expect(markdown).toContain("## CLIMATE IMPACT");
+    expect(markdown).toContain("## RECOMMENDATION");
+    expect(markdown).toContain("There are no identifiable climate impacts.");
+  });
+
+  it("does not promote ALL-CAPS mid-line prose", () => {
+    const markdown = prismMarkdownEnrich(
+      "See the EXECUTIVE SUMMARY section for details.",
       { mode: "document" }
     );
     expect(markdown).not.toContain("## ");
+  });
+
+  it("promotes Title Case and sentence-case labels to ### subsections", () => {
+    const markdown = prismMarkdownEnrich(
+      "ALTERNATIVES\nBody\nNo Viable Alternative Sites\nIncluded in the CEQA checklist.\nConclusion\nThe Roots have demonstrated suitability.\nFood and beverage\nExclusive rights outside Jim's areas.\nTenant improvements\nCourse modifications require approval.",
+      { mode: "document" }
+    );
+    expect(markdown).toContain("## ALTERNATIVES");
+    expect(markdown).toContain("### No Viable Alternative Sites");
+    expect(markdown).toContain("### Conclusion");
+    expect(markdown).toContain("### Food and beverage");
+    expect(markdown).toContain("### Tenant improvements");
+    expect(markdown).toContain("Included in the CEQA checklist.");
+    expect(markdown).not.toMatch(/^### Included/m);
   });
 
   it("escapes structure-changing Markdown without over-escaping prose", () => {
@@ -136,5 +191,20 @@ describe("prismMarkdownEnrich", () => {
 
   it("returns empty string for blank input", () => {
     expect(prismMarkdownEnrich("   ", { mode: "document" })).toBe("");
+  });
+});
+
+describe("prismMarkdownDocumentHeadings", () => {
+  it("lists ## headings only, including single-newline sections", () => {
+    expect(
+      prismMarkdownDocumentHeadings(
+        "Intro\n\nEXECUTIVE SUMMARY\n\nBody\nBACKGROUND\nMore\nCLIMATE IMPACT\nNone.\nRECOMMENDATION\nAdopt.\nConclusion\nDone."
+      )
+    ).toEqual([
+      "EXECUTIVE SUMMARY",
+      "BACKGROUND",
+      "CLIMATE IMPACT",
+      "RECOMMENDATION",
+    ]);
   });
 });

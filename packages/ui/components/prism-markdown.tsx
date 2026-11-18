@@ -2,12 +2,36 @@ import GithubSlugger from "github-slugger";
 import type { ReactElement } from "react";
 import Markdown from "react-markdown";
 import {
+  prismMarkdownDocumentOutline,
   prismMarkdownEnrich,
   type PrismMarkdownKeyword,
   type PrismMarkdownMatcher,
   type PrismMarkdownMode,
 } from "@prism/utilities";
+import type { PartialPrismColorSpec } from "../styles/prism-color";
 import { prismMarkdownStyle } from "./prism-markdown-style";
+
+export type PrismMarkdownHeadingAnchor = {
+  label: string;
+  id: string;
+};
+
+/** Chapter anchors matching the ids PrismMarkdown assigns to `##` headings. */
+export function prismMarkdownHeadingAnchors(
+  text: string,
+  headingIdPrefix = ""
+): PrismMarkdownHeadingAnchor[] {
+  const slugger = new GithubSlugger();
+  // Slug `###` too: the renderer's slugger dedupes across every heading.
+  return prismMarkdownDocumentOutline(text)
+    .map(({ label, level }) => ({
+      label,
+      level,
+      id: `${headingIdPrefix}${slugger.slug(label)}`,
+    }))
+    .filter((entry) => entry.level === 2)
+    .map(({ label, id }) => ({ label, id }));
+}
 
 export type PrismMarkdownProps = {
   text: string;
@@ -16,6 +40,8 @@ export type PrismMarkdownProps = {
   matchers?: PrismMarkdownMatcher[];
   /** Prefix heading ids so multiple documents on one page do not collide. */
   headingIdPrefix?: string;
+  /** Color for `##` headings (e.g. Body accent at shade 700). */
+  headingColor?: PartialPrismColorSpec;
   /** Render anchors as plain text (e.g. inside `<summary>`). */
   disableLinks?: boolean;
   className?: string;
@@ -46,6 +72,7 @@ export function PrismMarkdown({
   keywords,
   matchers,
   headingIdPrefix = "",
+  headingColor,
   disableLinks = false,
   className,
 }: PrismMarkdownProps): ReactElement | null {
@@ -57,6 +84,7 @@ export function PrismMarkdown({
     mode,
     disableLinks,
     headingIdPrefix,
+    headingColor,
     slugger,
   });
 

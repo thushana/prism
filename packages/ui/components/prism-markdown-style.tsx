@@ -1,8 +1,10 @@
 import type { Components } from "react-markdown";
 import type GithubSlugger from "github-slugger";
 import type { ReactNode } from "react";
+import { PrismMarkdownHeading } from "./prism-markdown-heading";
 import { PrismTypography } from "./prism-typography";
 import type { PrismMarkdownMode } from "@prism/utilities";
+import type { PartialPrismColorSpec } from "../styles/prism-color";
 
 function textFromNode(node: ReactNode): string {
   if (node == null || typeof node === "boolean") return "";
@@ -26,30 +28,37 @@ export type PrismMarkdownStyleOptions = {
   disableLinks: boolean;
   headingIdPrefix: string;
   slugger: GithubSlugger;
+  /** When set, `h2` uses this color instead of monochrome. */
+  headingColor?: PartialPrismColorSpec;
 };
 
 /** Markdown element → PrismTypography map (internal to PrismMarkdown). */
 export function prismMarkdownStyle(
   options: PrismMarkdownStyleOptions
 ): Components {
-  const { mode, disableLinks, headingIdPrefix, slugger } = options;
+  const { mode, disableLinks, headingIdPrefix, slugger, headingColor } =
+    options;
 
   return {
     h2: ({ children }) => {
       const id = `${headingIdPrefix}${slugger.slug(textFromNode(children))}`;
       return (
-        <PrismTypography
-          role="body"
-          size="regular"
-          font="sans"
-          fontWeight="heavy"
-          color={{ semanticText: "monochrome" }}
+        <PrismMarkdownHeading
           as="h2"
           id={id}
-          className="mt-3"
+          color={headingColor ?? { semanticText: "monochrome" }}
+          className="mt-3 scroll-mt-24"
         >
           {children}
-        </PrismTypography>
+        </PrismMarkdownHeading>
+      );
+    },
+    h3: ({ children }) => {
+      const id = `${headingIdPrefix}${slugger.slug(textFromNode(children))}`;
+      return (
+        <PrismMarkdownHeading as="h3" id={id} className="mt-2 scroll-mt-24">
+          {children}
+        </PrismMarkdownHeading>
       );
     },
     p: ({ children }) => (
@@ -57,6 +66,8 @@ export function prismMarkdownStyle(
         role="body"
         size="regular"
         font={mode === "document" ? "serif" : "sans"}
+        // Document prose should fill the measure; `balance` shortens lines for even rags.
+        textWrap={mode === "document" ? "wrap" : undefined}
         as="p"
         className={mode === "document" ? "tracking-tight" : undefined}
       >

@@ -1,6 +1,6 @@
 /**
  * Plain civic text → copyable Markdown.
- * Structure (optional ALL-CAPS headings) then link overlays (matchers + Keywords).
+ * Structure (optional ALL-CAPS `##` / Title Case `###` headings) then link overlays.
  */
 
 export type PrismMarkdownMode = "document" | "title";
@@ -60,7 +60,7 @@ function letterCount(value: string): number {
 }
 
 /**
- * ALL-CAPS section title line (document mode). Blank-line bounded by the caller.
+ * ALL-CAPS section title line (document mode → `##`). Caller decides line boundaries.
  * Letters, spaces, and & / , - only; optional trailing colon; 3–60 chars; ≤6 words.
  */
 export function isPrismMarkdownSectionHeading(line: string): boolean {
@@ -74,6 +74,39 @@ export function isPrismMarkdownSectionHeading(line: string): boolean {
   const words = core.split(/\s+/).filter(Boolean);
   if (words.length === 0 || words.length > 6) return false;
   return true;
+}
+
+/** One Title Case word, slash-compound, or short acronym (e.g. CEQA). */
+const TITLE_CASE_WORD_RE =
+  /^(?:[A-Z][a-z]*|[A-Z]{2,5})(?:[/-](?:[A-Z][a-z]*|[A-Z]{2,5}))*$/;
+
+/** Lowercase topic-label word ("beverage", "walk-up", "children's"). */
+const SENTENCE_CASE_WORD_RE = /^[a-z]+(?:'[a-z]+)?(?:[/-][a-z]+)*$/;
+
+/**
+ * Subsection line (document mode → `###`): Title Case ("Conclusion") or
+ * sentence-case topic labels ("Food and beverage", "Tenant improvements").
+ * Rejects prose that mixes capitals mid-line ("Close to Alameda…").
+ */
+export function isPrismMarkdownTitleHeading(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (/[.!?]$/.test(trimmed)) return false;
+  if (isPrismMarkdownSectionHeading(trimmed)) return false;
+  const core = trimmed.endsWith(":") ? trimmed.slice(0, -1).trimEnd() : trimmed;
+  if (core.length < 3 || core.length > 60) return false;
+  // Letters, spaces, apostrophes, and & / , - only — no digits.
+  if (!/^[A-Za-z'\s&/,-]+$/.test(core)) return false;
+  const words = core.split(/\s+/).filter(Boolean);
+  if (words.length === 0 || words.length > 6) return false;
+
+  if (words.every((word) => TITLE_CASE_WORD_RE.test(word))) return true;
+
+  // Sentence-case label: first word Title Case, remaining words lowercase.
+  const [first, ...rest] = words;
+  if (!first || rest.length === 0) return false;
+  if (!TITLE_CASE_WORD_RE.test(first)) return false;
+  return rest.every((word) => SENTENCE_CASE_WORD_RE.test(word));
 }
 
 function stripTrailingUrlJunk(url: string): string {
@@ -218,41 +251,100 @@ function collectParagraphMatches(
   return resolveMatches(text, matchers);
 }
 
+type Segment =
+  | { kind: "heading"; text: string; level: 2 | 3 }
+  | { kind: "paragraph"; text: string };
+
+/**
+ * Split civic plain text into headings + paragraphs.
+ * ALL-CAPS → `##`, Title Case → `###`, even when only a single newline separates
+ * the label from the following body (common in Legistar).
+ */
+function segmentPlainText(text: string, mode: PrismMarkdownMode): Segment[] {
+  const normalized = normalizeCivicPlainText(text);
+  if (!normalized) return [];
+
+  const segments: Segment[] = [];
+  let paragraphLines: string[] = [];
+
+  function flushParagraph() {
+    const paragraph = paragraphLines.join("\n").trim();
+    paragraphLines = [];
+    if (paragraph) segments.push({ kind: "paragraph", text: paragraph });
+  }
+
+  for (const rawLine of normalized.split("\n")) {
+    const line = rawLine.trimEnd();
+    if (line.trim() === "") {
+      flushParagraph();
+      continue;
+    }
+    if (mode === "document") {
+      const trimmed = line.trim();
+      if (isPrismMarkdownSectionHeading(trimmed)) {
+        flushParagraph();
+        segments.push({ kind: "heading", text: trimmed, level: 2 });
+        continue;
+      }
+      if (isPrismMarkdownTitleHeading(trimmed)) {
+        flushParagraph();
+        segments.push({ kind: "heading", text: trimmed, level: 3 });
+        continue;
+      }
+    }
+    paragraphLines.push(line);
+  }
+  flushParagraph();
+  return segments;
+}
+
+export type PrismMarkdownOutlineEntry = { label: string; level: 2 | 3 };
+
+/**
+ * Every heading (`##` ALL-CAPS, `###` subsection) in document order.
+ * Slug all of them together so ids match what PrismMarkdown renders.
+ */
+export function prismMarkdownDocumentOutline(
+  text: string
+): PrismMarkdownOutlineEntry[] {
+  return segmentPlainText(text, "document").flatMap((segment) =>
+    segment.kind === "heading"
+      ? [{ label: segment.text, level: segment.level }]
+      : []
+  );
+}
+
+/**
+ * ALL-CAPS (`##`) section heading labels in document order.
+ * Title Case / sentence-case `###` subheads are omitted from the chapter list.
+ */
+export function prismMarkdownDocumentHeadings(text: string): string[] {
+  return prismMarkdownDocumentOutline(text)
+    .filter((entry) => entry.level === 2)
+    .map((entry) => entry.label);
+}
+
 /**
  * Convert plain text to enriched Markdown.
- * `document` mode promotes blank-line-bounded ALL-CAPS lines to `##` headings.
+ * `document` mode promotes ALL-CAPS lines to `##` and Title Case lines to `###`.
  * `title` mode never promotes headings. Keywords and matchers apply to paragraphs only.
  */
 export function prismMarkdownEnrich(
   text: string,
   options: PrismMarkdownEnrichOptions
 ): string {
-  const normalized = normalizeCivicPlainText(text);
-  if (!normalized) return "";
+  const segments = segmentPlainText(text, options.mode);
+  if (segments.length === 0) return "";
 
-  const blocks = normalized.split(/\n{2,}/);
   const parts: string[] = [];
-
-  for (const block of blocks) {
-    const trimmedBlock = block.replace(/^\n+|\n+$/g, "");
-    if (!trimmedBlock) continue;
-
-    const lines = trimmedBlock.split("\n");
-    const singleLine = lines.length === 1 ? lines[0]!.trim() : null;
-
-    if (
-      options.mode === "document" &&
-      singleLine != null &&
-      isPrismMarkdownSectionHeading(singleLine)
-    ) {
-      // Headings are never keyword/URL enriched.
-      parts.push(`## ${escapeMarkdownInline(singleLine)}`);
+  for (const segment of segments) {
+    if (segment.kind === "heading") {
+      const marks = segment.level === 2 ? "##" : "###";
+      parts.push(`${marks} ${escapeMarkdownInline(segment.text)}`);
       continue;
     }
-
-    const matches = collectParagraphMatches(trimmedBlock, options);
-    parts.push(emitParagraphMarkdown(trimmedBlock, matches));
+    const matches = collectParagraphMatches(segment.text, options);
+    parts.push(emitParagraphMarkdown(segment.text, matches));
   }
-
   return parts.join("\n\n");
 }
