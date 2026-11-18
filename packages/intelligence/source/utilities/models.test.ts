@@ -15,6 +15,16 @@ describe("models utilities", () => {
     expect(resolved?.config.apiIdentifier).toBe("gpt-5-nano");
   });
 
+  it("resolves search capability tiers to Google models", () => {
+    expect(resolveModel("search-light")?.id).toBe(
+      "google/gemini-3.5-flash-lite"
+    );
+    expect(resolveModel("search-medium")?.id).toBe("google/gemini-3-flash");
+    expect(resolveModel("search-high")?.id).toBe(
+      "google/gemini-3.1-pro-preview"
+    );
+  });
+
   it("calculates cost with fully-qualified IDs", () => {
     const cost = calculateCost("openai/gpt-5-nano", {
       promptTokens: 1_000,

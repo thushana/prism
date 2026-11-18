@@ -100,24 +100,24 @@
       "recommended": false
     },
     "google/gemini-3-flash": {
-      "aliases": ["gemini-3-flash"],
+      "aliases": ["gemini-3-flash", "search-medium"],
       "name": "Gemini 3 Flash",
       "provider": "google",
       "apiIdentifier": "gemini-3-flash",
-      "description": "Recommended default - Fast and efficient",
+      "description": "Recommended default - Fast and efficient; search-medium tier",
       "status": "active",
       "pricing": {
         "currency": "USD",
         "inputCostPer1MTokens": 0.5,
         "outputCostPer1MTokens": 3.0,
-        "lastVerified": "2025-12-24"
+        "lastVerified": "2026-04-17"
       },
       "capabilities": {
         "streaming": true,
         "functionCalling": true,
         "vision": true,
         "json": true,
-        "webSearch": false,
+        "webSearch": true,
         "maxContextTokens": 1000000
       },
       "defaultSettings": {
@@ -130,6 +130,70 @@
         "tokensPerMinute": 4000000
       },
       "recommended": true
+    },
+    "google/gemini-3.5-flash-lite": {
+      "aliases": ["gemini-3.5-flash-lite", "search-light"],
+      "name": "Gemini 3.5 Flash Lite",
+      "provider": "google",
+      "apiIdentifier": "gemini-3.5-flash-lite",
+      "description": "Cost-effective Flash Lite with web search; search-light tier",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.3,
+        "outputCostPer1MTokens": 2.5,
+        "lastVerified": "2026-04-17"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": true,
+        "maxContextTokens": 1000000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 1000,
+        "tokensPerMinute": 4000000
+      },
+      "recommended": false
+    },
+    "google/gemini-3.1-pro-preview": {
+      "aliases": ["gemini-3.1-pro-preview", "search-high"],
+      "name": "Gemini 3.1 Pro Preview",
+      "provider": "google",
+      "apiIdentifier": "gemini-3.1-pro-preview",
+      "description": "Pro-tier search and reasoning; search-high tier",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 2.0,
+        "outputCostPer1MTokens": 12.0,
+        "lastVerified": "2026-04-17"
+      },
+      "capabilities": {
+        "streaming": true,
+        "functionCalling": true,
+        "vision": true,
+        "json": true,
+        "webSearch": true,
+        "maxContextTokens": 1000000
+      },
+      "defaultSettings": {
+        "temperature": 0.7,
+        "maxTokens": 500,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 100,
+        "tokensPerMinute": 4000000
+      },
+      "recommended": false
     },
     "google/gemini-2.5-flash-lite": {
       "aliases": ["gemini-2.5-flash-lite"],
@@ -149,7 +213,7 @@
         "functionCalling": true,
         "vision": true,
         "json": true,
-        "webSearch": false,
+        "webSearch": true,
         "maxContextTokens": 1049000
       },
       "defaultSettings": {
