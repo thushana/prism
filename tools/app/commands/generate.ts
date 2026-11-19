@@ -642,14 +642,9 @@ function generateTsConfig(appRoot: string, layout: GenerateLayout): void {
 
   const paths = {
     "@/*": ["./*"],
-    // Prism packages live outside apps/web; on Vercel prism/node_modules is absent.
-    // Resolve React/Next from the app install for typecheck of transpiled packages.
-    react: ["node_modules/@types/react/index.d.ts"],
-    "react-dom": ["node_modules/@types/react-dom/index.d.ts"],
-    "react/jsx-runtime": ["node_modules/@types/react/jsx-runtime.d.ts"],
-    "react/jsx-dev-runtime": ["node_modules/@types/react/jsx-dev-runtime.d.ts"],
-    next: ["node_modules/next/index.d.ts"],
-    "next/*": ["node_modules/next/*"],
+    // Do NOT path-alias react / react/jsx-runtime / next to @types/*.d.ts.
+    // Turbopack honors tsconfig paths for bundling; those aliases made JSX
+    // compile to `(void 0)(...)` and crashed every client page.
     "@database": [`${prismPrefix}/database/source`],
     "@intelligence": [`${prismPrefix}/intelligence/source`],
     "@logger": [`${prismPrefix}/logger/source`],
