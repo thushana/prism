@@ -148,7 +148,7 @@ export function PrismMapMapbox({
         projection: mapboxExtra?.projection as
           import("mapbox-gl").ProjectionSpecification | undefined,
         attributionControl: false,
-      });
+      }) as import("mapbox-gl").Map;
 
       map.on("error", (event) => {
         if (cancelled || mapLoadErrorReportedRef.current) return;

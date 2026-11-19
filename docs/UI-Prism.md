@@ -128,9 +128,9 @@ Multi-vendor map for **encoded overview polylines** and **GeoJSON Polygon / Mult
 
 **Google:** **`loadGoogleMaps`**: `() => Promise<void>` — typically **`createFetchKeyGoogleMapsLoader(apiKeyJsonUrl)`** from **`prism-map-loaders.ts`**. Polygons use `google.maps.Data`; routes use `Polyline` + Advanced Markers.
 
-**Mapbox:** **`mapboxAccessToken`** + **`mapbox.style`** (default **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**). **`mapbox-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMapbox`**.
+**Mapbox:** **`mapboxAccessToken`** + **`mapbox.style`** (default **`PRISM_MAP_MAPBOX_STYLE_DEFAULT`**). **`mapbox-gl`** is an optional peerDependency — install it only in apps that use `vendor="mapbox"`. Lazy-loaded via **`PrismMap`**; the GL package is dynamic-imported inside **`PrismMapMapbox`**.
 
-**MapLibre:** optional **`maplibre.style`** (default **`PRISM_MAP_MAPLIBRE_STYLE_DEFAULT`** = OpenFreeMap liberty — token-free). **`maplibre-gl`** is an optional peerDependency; dynamic-imported inside **`PrismMapMaplibre`**. Prefer MapLibre when you want OSM-style basemaps without a Mapbox/Google key. Next/webpack apps must serve the MapLibre worker (empty worker URL → “Worker failed to load” and no zoomed tiles): sync `maplibre-gl/dist/maplibre-gl-worker.mjs` to **`public/maplibre/`**, or pass **`maplibre.workerUrl`**.
+**MapLibre:** optional **`maplibre.style`** (default **`PRISM_MAP_MAPLIBRE_STYLE_DEFAULT`** = OpenFreeMap liberty — token-free). **`maplibre-gl`** is an optional peerDependency — install it only in apps that use `vendor="maplibre"`. Prefer MapLibre when you want OSM-style basemaps without a Mapbox/Google key. Next/webpack apps must serve the MapLibre worker (empty worker URL → “Worker failed to load” and no zoomed tiles): sync `maplibre-gl/dist/maplibre-gl-worker.mjs` to **`public/maplibre/`**, or pass **`maplibre.workerUrl`**.
 
 **Polyline decoding:** **`decodeEncodedPolyline`** from **`@ui`** — pure implementation, no Google Geometry library.
 
@@ -923,4 +923,4 @@ This keeps one list of option names (camelCase) and avoids drift between labels,
 7. **Never hardcode package paths** - Apps should work identically in monorepo and standalone contexts
 8. **Keep first-load JS small** — `@ui` is a barrel. Webpack still tree-shakes unused modules when `packages/ui/package.json` marks CSS as the only side effects (`"sideEffects": ["**/*.css"]`), but **do not add static imports of GSAP, `lucide-react`’s `icons` map, or `@emoji-mart/data` into layout chrome**. Those load on demand inside PrismIcon / PrismButton / PrismTypography / PrismEmojiPicker. Import **emoji and icon pickers** from **`@ui/pickers`** (not `@ui`) so the Lucide catalog and emoji-mart JSON stay off every page. Generated apps include `experimental.optimizePackageImports: ["ui", "lucide-react", "gsap"]` in `next.config.ts` (`prism generate`); keep that list if you edit the config by hand.
 
-Maps stay on `@ui/map` and load `mapbox-gl` via `import()`. Do not re-export map from the main `@ui` entry.
+Maps stay on `@ui/map`. Install only the optional peers you use (`mapbox-gl` and/or `maplibre-gl`); `PrismMap` lazy-loads the matching vendor module. Do not re-export map from the main `@ui` entry.

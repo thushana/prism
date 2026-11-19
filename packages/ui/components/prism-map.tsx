@@ -10,12 +10,15 @@
  * **Vendor-only config** lives only under `google`, `mapbox`, or `maplibre`. Do not mirror
  * vendor-specific options across branches; nest them under that vendor.
  *
+ * Vendor implementations are lazy-loaded so apps that only install one optional map peer
+ * (e.g. MapLibre) do not pull the others into the initial client graph.
+ *
  * @see `PrismMapGoogle`, `PrismMapMapbox`, and `PrismMapMaplibre` for implementation details.
  */
 
 /// <reference types="google.maps" />
 
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { cn } from "@utilities";
 import {
   PrismCard,
@@ -24,9 +27,6 @@ import {
   PrismCardHeader,
   PrismCardTitle,
 } from "./prism-card";
-import { PrismMapGoogle } from "./prism-map-google";
-import { PrismMapMapbox } from "./prism-map-mapbox";
-import { PrismMapMaplibre } from "./prism-map-maplibre";
 import type {
   PrismMapPolygon,
   PrismMapRoute,
@@ -40,6 +40,9 @@ export type {
   PrismMapShell,
   PrismMapVendor,
 } from "./prism-map-types";
+
+/** Opaque style JSON — avoids requiring `mapbox-gl` / `maplibre-gl` types at the public API. */
+export type PrismMapStyleSpecification = string | Record<string, unknown>;
 
 type PeerProps = {
   /** Encoded overview polylines (optional when `polygons` is set). */
@@ -77,21 +80,37 @@ export type PrismMapProps =
       loadMapboxGl?: () => Promise<void>;
       mapboxAccessToken: string | (() => Promise<string>);
       mapbox: {
-        style: string | import("mapbox-gl").StyleSpecification;
+        style: PrismMapStyleSpecification;
       };
       mapboxExtra?: {
-        projection?: import("mapbox-gl").ProjectionSpecification;
+        projection?: Record<string, unknown>;
       };
     })
   | (PeerProps & {
       vendor: "maplibre";
       loadMapLibreGl?: () => Promise<void>;
       maplibre?: {
-        style?: string | import("maplibre-gl").StyleSpecification;
+        style?: PrismMapStyleSpecification;
         /** MapLibre worker URL; default `/maplibre/maplibre-gl-worker.mjs`. */
         workerUrl?: string;
       };
     });
+
+const PrismMapGoogle = lazy(() =>
+  import("./prism-map-google").then((module) => ({
+    default: module.PrismMapGoogle,
+  }))
+);
+const PrismMapMapbox = lazy(() =>
+  import("./prism-map-mapbox").then((module) => ({
+    default: module.PrismMapMapbox,
+  }))
+);
+const PrismMapMaplibre = lazy(() =>
+  import("./prism-map-maplibre").then((module) => ({
+    default: module.PrismMapMaplibre,
+  }))
+);
 
 function shellPaddingClass(shell: PrismMapShell | undefined): string {
   return shell === "card" ? "px-0 pb-0 pt-0" : "";
@@ -181,7 +200,9 @@ export function PrismMap(props: PrismMapProps) {
           {errorSlot}
         </div>
       ) : null}
-      <div className="relative h-full w-full">{mapBody}</div>
+      <div className="relative h-full w-full">
+        <Suspense fallback={loadingSlot ?? null}>{mapBody}</Suspense>
+      </div>
     </div>
   );
 
