@@ -147,10 +147,83 @@ function readPrismPackageManager(prismRoot: string | null): string | undefined {
   }
 }
 
+type AppsWebVersionPins = {
+  next: string;
+  react: string;
+  reactDom: string;
+  eslintConfigNext: string;
+  mapboxGl: string;
+  maplibreGl: string;
+  betterAuth: string;
+  neonServerless: string;
+  drizzleOrm: string;
+  drizzleKit: string;
+  dotenv: string;
+  zod: string;
+  vitest: string;
+  typescript: string;
+};
+
+/** Prefer pins from `apps/web/package.json` so generated apps track the reference app. */
+function readAppsWebVersionPins(prismRoot: string | null): AppsWebVersionPins {
+  const fallback: AppsWebVersionPins = {
+    next: "16.4.6",
+    react: "19.3.1",
+    reactDom: "19.3.1",
+    eslintConfigNext: "16.4.6",
+    mapboxGl: "^3.35.0",
+    maplibreGl: "^6.19.0",
+    betterAuth: "1.7.25",
+    neonServerless: "^1.1.0",
+    drizzleOrm: "^0.45.3",
+    drizzleKit: "^0.31.11",
+    dotenv: "^18.0.10",
+    zod: "^4.5.4",
+    vitest: "^5.1.0",
+    typescript: "^7.0.0",
+  };
+  if (!prismRoot) return fallback;
+  try {
+    const webPkg = JSON.parse(
+      fs.readFileSync(path.join(prismRoot, "apps/web/package.json"), "utf-8")
+    ) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const dep = webPkg.dependencies ?? {};
+    const dev = webPkg.devDependencies ?? {};
+    return {
+      next: dep.next ?? fallback.next,
+      react: dep.react ?? fallback.react,
+      reactDom: dep["react-dom"] ?? fallback.reactDom,
+      eslintConfigNext: dev["eslint-config-next"] ?? fallback.eslintConfigNext,
+      mapboxGl: dep["mapbox-gl"] ?? fallback.mapboxGl,
+      maplibreGl: dep["maplibre-gl"] ?? fallback.maplibreGl,
+      betterAuth: dep["better-auth"] ?? fallback.betterAuth,
+      neonServerless:
+        dep["@neondatabase/serverless"] ?? fallback.neonServerless,
+      drizzleOrm: dep["drizzle-orm"] ?? fallback.drizzleOrm,
+      drizzleKit: dev["drizzle-kit"] ?? fallback.drizzleKit,
+      dotenv: dep.dotenv ?? fallback.dotenv,
+      zod: dep.zod ?? fallback.zod,
+      vitest: dev.vitest ?? fallback.vitest,
+      typescript: dev.typescript ?? fallback.typescript,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+/** Gate husky/sync-commands off Vercel/CI installs (same pattern as Prism root + TimeTraveler). */
+const GATED_PREPARE_SCRIPT =
+  'node -e "if (!process.env.CI && !process.env.VERCEL) { require(\'child_process\').execSync(\'husky && tsx prism/scripts/sync-commands.ts\', { stdio: \'inherit\' }) }"';
+
 function buildPrismDependencies(
   layout: GenerateLayout,
-  isStatic = false
+  isStatic = false,
+  prismRoot: string | null = null
 ): Record<string, string> {
+  const pins = readAppsWebVersionPins(prismRoot);
   if (layout === "prism-monorepo") {
     const deps: Record<string, string> = {
       "application-settings": "*",
@@ -159,7 +232,7 @@ function buildPrismDependencies(
       ui: "*",
       "@prism/utilities": "*",
       charts: "*",
-      zod: "^4.4.3",
+      zod: pins.zod,
     };
     if (!isStatic) {
       Object.assign(deps, {
@@ -168,10 +241,10 @@ function buildPrismDependencies(
         authentication: "*",
         "feature-flags": "*",
         flags: "^4.0.0",
-        "better-auth": "^1.6.14",
-        "@better-auth/drizzle-adapter": "^1.6.14",
-        "@better-auth/api-key": "^1.6.14",
-        "@better-auth/passkey": "^1.6.14",
+        "better-auth": pins.betterAuth,
+        "@better-auth/drizzle-adapter": pins.betterAuth,
+        "@better-auth/api-key": pins.betterAuth,
+        "@better-auth/passkey": pins.betterAuth,
       });
     }
     return deps;
@@ -181,12 +254,13 @@ function buildPrismDependencies(
 
   const deps: Record<string, string> = {
     "application-settings": `${filePrefix}application-settings`,
+    // Keep intelligence linked for Prism AI apps even when a consumer does not import it yet.
     intelligence: `${filePrefix}intelligence`,
     logger: `${filePrefix}logger`,
     ui: `${filePrefix}ui`,
     "@prism/utilities": `${filePrefix}utilities`,
     charts: `${filePrefix}charts`,
-    zod: "^4.4.3",
+    zod: pins.zod,
   };
   if (!isStatic) {
     Object.assign(deps, {
@@ -195,10 +269,10 @@ function buildPrismDependencies(
       authentication: `${filePrefix}authentication`,
       "feature-flags": `${filePrefix}feature-flags`,
       flags: "^4.0.0",
-      "better-auth": "^1.6.14",
-      "@better-auth/drizzle-adapter": "^1.6.14",
-      "@better-auth/api-key": "^1.6.14",
-      "@better-auth/passkey": "^1.6.14",
+      "better-auth": pins.betterAuth,
+      "@better-auth/drizzle-adapter": pins.betterAuth,
+      "@better-auth/api-key": pins.betterAuth,
+      "@better-auth/passkey": pins.betterAuth,
     });
   }
   return deps;
@@ -211,8 +285,13 @@ function generateWebAppPackageJson(
   prismRoot: string | null,
   isStatic = false
 ): void {
-  const useWebpack = layout === "consumer-workspace";
+  // Next 16 defaults to Turbopack; pass `--webpack` only as an emergency escape hatch.
   const packageManager = readPrismPackageManager(prismRoot);
+  const pins = readAppsWebVersionPins(prismRoot);
+  const runNextDev =
+    layout === "consumer-workspace"
+      ? "tsx ../../prism/scripts/run-next-dev.ts"
+      : "tsx ../../scripts/run-next-dev.ts";
 
   const dbScripts = isStatic
     ? {}
@@ -229,12 +308,14 @@ function generateWebAppPackageJson(
   const serverRuntimeDeps = isStatic
     ? {}
     : {
-        "@neondatabase/serverless": "^1.0.2",
-        dotenv: "^17.4.2",
-        "drizzle-orm": "^0.45.2",
+        "@neondatabase/serverless": pins.neonServerless,
+        dotenv: pins.dotenv,
+        "drizzle-orm": pins.drizzleOrm,
       };
 
-  const serverDevDeps = isStatic ? {} : { "drizzle-kit": "^0.31.10" };
+  const serverDevDeps = isStatic
+    ? {}
+    : { "drizzle-kit": pins.drizzleKit };
 
   const packageJson = {
     name: layout === "consumer-workspace" ? "web" : appName,
@@ -242,19 +323,15 @@ function generateWebAppPackageJson(
     private: true,
     ...(packageManager ? { packageManager } : {}),
     scripts: {
-      dev: useWebpack
-        ? "tsx ../../prism/scripts/run-next-dev.ts --webpack"
-        : "tsx ../../prism/scripts/run-next-dev.ts",
+      dev: runNextDev,
       "assert:required-env": isStatic
         ? 'node -e "process.exit(0)"'
-        : "tsx ../../prism/scripts/assert-required-env.ts",
+        : layout === "consumer-workspace"
+          ? "tsx ../../prism/scripts/assert-required-env.ts"
+          : "tsx ../../scripts/assert-required-env.ts",
       build: isStatic
-        ? useWebpack
-          ? "next build --webpack"
-          : "next build"
-        : useWebpack
-          ? "pnpm run assert:required-env && next build --webpack"
-          : "pnpm run assert:required-env && next build",
+        ? "next build"
+        : "pnpm run assert:required-env && next build",
       start: "next start",
       lint: 'eslint --no-error-on-unmatched-pattern app cli tests "scripts/**/*.{ts,tsx,js,mjs,cjs}"',
       "lint:fix":
@@ -270,33 +347,35 @@ function generateWebAppPackageJson(
       ...dbScripts,
     },
     dependencies: {
-      ...buildPrismDependencies(layout, isStatic),
-      "@radix-ui/react-slot": "^1.2.4",
-      "mapbox-gl": "^3.16.0",
-      next: "16.2.7",
-      react: "19.2.7",
-      "react-dom": "19.2.7",
+      ...buildPrismDependencies(layout, isStatic, prismRoot),
+      "@radix-ui/react-slot": "^1.3.3",
+      // Demo/reference apps include Mapbox; MapLibre-only consumers can drop mapbox-gl.
+      "mapbox-gl": pins.mapboxGl,
+      "maplibre-gl": pins.maplibreGl,
+      next: pins.next,
+      react: pins.react,
+      "react-dom": pins.reactDom,
       ...serverRuntimeDeps,
-      zod: "^4.3.6",
+      zod: pins.zod,
     },
     devDependencies: {
-      "@tailwindcss/postcss": "^4.3.0",
-      "@types/google.maps": "^3.64.0",
-      "@types/node": "^25.9.1",
-      "@types/react": "^19.2.16",
-      "@types/react-dom": "^19.2.3",
-      commander: "^15.0.0",
-      eslint: "^10.4.1",
-      "eslint-config-next": "16.2.7",
-      lightningcss: "^1.32.0",
-      "postcss-import": "^16.1.1",
+      "@tailwindcss/postcss": "^4.3.5",
+      "@types/google.maps": "^3.66.9",
+      "@types/node": "^26.6.4",
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      commander: "^15.1.0",
+      eslint: "^10.15.0",
+      "eslint-config-next": pins.eslintConfigNext,
+      lightningcss: "^1.33.0",
+      "postcss-import": "^17.0.0",
       "postcss-load-config": "^6.0.1",
-      prettier: "^3.8.3",
-      tailwindcss: "^4.3.0",
-      tsx: "^4.22.4",
+      prettier: "^3.10.1",
+      tailwindcss: "^4.3.5",
+      tsx: "^4.23.15",
       "tw-animate-css": "^1.4.0",
-      typescript: "^6.0.3",
-      vitest: "^4.1.8",
+      typescript: pins.typescript,
+      vitest: pins.vitest,
       ...serverDevDeps,
     },
   };
@@ -358,7 +437,7 @@ function generateConsumerRepoPackageJson(
       lint: "pnpm --filter web run lint",
       "lint:fix": "pnpm --filter web run lint:fix",
       precommit: "pnpm exec lint-staged",
-      prepare: "husky && tsx prism/scripts/sync-commands.ts",
+      prepare: GATED_PREPARE_SCRIPT,
       "prism:sync": "tsx prism/scripts/sync.ts",
       "prism:sync:commands": "tsx prism/scripts/sync-commands.ts",
       "prism:sync:hooks": "tsx prism/scripts/install-consumer-git-hooks.ts",
