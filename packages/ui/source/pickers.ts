@@ -4,4 +4,5 @@
  */
 export * from "../components/prism-emoji-picker";
 export * from "../components/prism-icon-picker";
+export * from "../components/prism-emblem";
 export * from "./prism-icon-lucide-resolve";

@@ -6,6 +6,7 @@ import { PrismColorDemo } from "./prism-color";
 import { PrismColorPickerDemo } from "./prism-color-picker";
 import { PrismDividerDemo } from "./prism-divider";
 import { PrismEmojiDemo } from "./prism-emoji";
+import { PrismEmblemDemo } from "./prism-emblem";
 import { PrismIconDemo } from "./prism-icon";
 import { PrismLayoutDemo } from "./prism-layout";
 import { PrismMapDemo } from "./prism-map";
@@ -22,6 +23,7 @@ export type PrismAdminComponentSlug =
   | "prism-color-picker"
   | "prism-divider"
   | "prism-emoji"
+  | "prism-emblem"
   | "prism-icon"
   | "prism-layout"
   | "prism-map"
@@ -78,6 +80,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     description:
       "Emoji: native or Google Noto (color WebP / animated GIF) from CDN; PrismSize and inline inherit.",
     Demo: PrismEmojiDemo,
+  },
+  "prism-emblem": {
+    title: "PrismEmblem",
+    description:
+      "Combined icon/emoji glyph plus color; modes select which controls to show.",
+    Demo: PrismEmblemDemo,
   },
   "prism-icon": {
     title: "PrismIcon",

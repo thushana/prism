@@ -361,6 +361,14 @@ Both are **browse-and-select** panels for **`@emoji-mart/data`** emoji ids (**`P
 
 Admin demos: **`/admin/prism/components/prism-emoji`**, **`/admin/prism/components/prism-icon`**.
 
+### PrismEmblem
+
+**One button → one tool** for a glyph (**icon** and/or **emoji**) plus optional **color**. Import from **`@ui/pickers`**. The trigger is a single preview chip (not a label that repeats the emoji). The popover puts **color first** (always visible), then Icon/Emoji toggle when both modes are on, then the glyph browser — not separate browse buttons. Pass **`modes`**: a subset of `"icon" | "emoji" | "color"`.
+
+**`emojiLibrary`** (setup): `"native"` (default) \| `"googleNotoColor"` \| `"googleNotoAnimated"` — sets the emoji panel’s initial preview library and how the emblem preview renders. Same values as **`PrismEmojiPicker`**’s **`defaultPreview`**.
+
+Admin demo: **`/admin/prism/components/prism-emblem`**.
+
 ### Layout wrappers (`prism-layout.tsx`)
 
 Width bands and breakout sections (see `styles/layout-wrappers.css`): **`PrismLayoutText`**, **`PrismLayoutMain`**, **`PrismGraphicsMain`**, **`PrismGraphicsLarge`**, **`PrismGraphicsFull`**, **`PrismLayoutBreakout`**, **`PrismLayoutWrapperBar`**, **`PrismLayoutWrappersReference`**. Type **`PrismLayoutWrapperBarVariant`** for reference-bar variants.

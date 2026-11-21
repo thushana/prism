@@ -18,6 +18,7 @@ export { PrismColorDemo } from "./prism-color";
 export { PrismColorPickerDemo } from "./prism-color-picker";
 export { PrismDividerDemo } from "./prism-divider";
 export { PrismEmojiDemo } from "./prism-emoji";
+export { PrismEmblemDemo } from "./prism-emblem";
 export { PrismIconDemo } from "./prism-icon";
 export { PrismLayoutDemo } from "./prism-layout";
 export { PrismMapDemo } from "./prism-map";

@@ -35,12 +35,16 @@ export function usePickerPopupState(
 
 /** Inline only so Radix `style` merge cannot drop caps; values mirror intended Tailwind scale. */
 const PICKER_POPOVER_WIDTH_CSS = "min(32rem, calc(100vw - 1.5rem))";
-const PICKER_POPOVER_MAX_HEIGHT_CSS = "min(42rem, calc(100dvh - 2rem))";
+/** Prefer Radix collision box so the panel never exceeds the viewport under the trigger. */
+export const PICKER_POPOVER_MAX_HEIGHT_CSS =
+  "min(42rem, var(--radix-popover-content-available-height, calc(100dvh - 2rem)))";
 
 /**
  * Width/max-height enforced via inline styles so they can't be defeated by
- * tailwind-merge or Radix. No fixed `height`: panel grows with chrome until it
- * hits the cap; inner grids scroll. Optional `contentStyle` overrides maxHeight only.
+ * tailwind-merge or Radix. `height` matches `maxHeight` so nested `flex-1` +
+ * `overflow-y-auto` grids get a definite block size and actually scroll (max-height
+ * alone leaves height:auto and the grid grows with content). Optional `contentStyle`
+ * may override height/maxHeight.
  */
 const POPOVER_BASE_STYLE: CSSProperties = {
   zIndex: 2147483000,
@@ -48,6 +52,7 @@ const POPOVER_BASE_STYLE: CSSProperties = {
   width: PICKER_POPOVER_WIDTH_CSS,
   minWidth: PICKER_POPOVER_WIDTH_CSS,
   maxWidth: PICKER_POPOVER_WIDTH_CSS,
+  height: PICKER_POPOVER_MAX_HEIGHT_CSS,
   maxHeight: PICKER_POPOVER_MAX_HEIGHT_CSS,
   display: "flex",
   flexDirection: "column",
@@ -64,6 +69,7 @@ const POPOVER_FIT_CONTENT_STYLE: CSSProperties = {
   width: "max-content",
   minWidth: "auto",
   maxWidth: PICKER_POPOVER_WIDTH_CSS,
+  height: "auto",
   maxHeight: PICKER_POPOVER_MAX_HEIGHT_CSS,
   display: "flex",
   flexDirection: "column",
@@ -106,7 +112,10 @@ export function PrismPickerPopover({
           className={cn(POPOVER_CONTENT_CLASS, contentClassName)}
           style={mergedStyle}
         >
-          {children}
+          {/* Inherit the content box height so nested flex-1 scroll regions constrain. */}
+          <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
