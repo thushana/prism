@@ -537,7 +537,6 @@ export function PrismButton(
       ? hoverBackgroundValue
       : backgroundValue;
   const useGradientBorderLayers = hasFullBorder && isGradient;
-  const paddingStyle = `${paddingV}px ${paddingH}px`;
   const resolvedGradient =
     shouldChangeColor && effectiveHovered
       ? gradientHoverBackground
@@ -572,7 +571,12 @@ export function PrismButton(
     alignItems: "center",
     justifyContent: "center",
     gap: flexGap,
-    padding: paddingStyle,
+    // Longhand so callers can override one side (e.g. PrismTag paddingRight)
+    // without mixing shorthand + non-shorthand during rerender.
+    paddingTop: paddingV,
+    paddingRight: paddingH,
+    paddingBottom: paddingV,
+    paddingLeft: paddingH,
     borderRadius: borderRadiusValue,
     ...borderStyle,
     ...gradientFillStyle,
