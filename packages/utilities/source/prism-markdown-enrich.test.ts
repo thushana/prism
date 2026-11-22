@@ -33,6 +33,14 @@ describe("isPrismMarkdownSectionHeading", () => {
       isPrismMarkdownSectionHeading("ONE TWO THREE FOUR FIVE SIX SEVEN")
     ).toBe(false);
   });
+
+  it("rejects resolution vote-tally labels", () => {
+    expect(isPrismMarkdownSectionHeading("AYES:")).toBe(false);
+    expect(isPrismMarkdownSectionHeading("NOES:")).toBe(false);
+    expect(isPrismMarkdownSectionHeading("ABSENT:")).toBe(false);
+    expect(isPrismMarkdownSectionHeading("ABSTENTIONS:")).toBe(false);
+    expect(isPrismMarkdownSectionHeading("NAYS")).toBe(false);
+  });
 });
 
 describe("isPrismMarkdownTitleHeading", () => {
@@ -54,6 +62,9 @@ describe("isPrismMarkdownTitleHeading", () => {
 
   it("rejects ALL-CAPS, prose sentences, and mixed mid-line capitals", () => {
     expect(isPrismMarkdownTitleHeading("ALTERNATIVES")).toBe(false);
+    expect(isPrismMarkdownTitleHeading("AYES:")).toBe(false);
+    expect(isPrismMarkdownTitleHeading("NOES:")).toBe(false);
+    expect(isPrismMarkdownTitleHeading("CEQA")).toBe(false);
     expect(
       isPrismMarkdownTitleHeading(
         "The Roots have demonstrated that no other suitable site is available."
@@ -61,6 +72,11 @@ describe("isPrismMarkdownTitleHeading", () => {
     ).toBe(false);
     expect(isPrismMarkdownTitleHeading("Close to Alameda Airport")).toBe(false);
     expect(isPrismMarkdownTitleHeading("Conclusion.")).toBe(false);
+  });
+
+  it("rejects resolution signature labels", () => {
+    expect(isPrismMarkdownTitleHeading("Approved as to form:")).toBe(false);
+    expect(isPrismMarkdownTitleHeading("Approved as to form")).toBe(false);
   });
 });
 
@@ -138,6 +154,24 @@ describe("prismMarkdownEnrich", () => {
     expect(markdown).toContain("WHEREAS, City-owned Building 11 is leased;");
     expect(markdown).not.toMatch(/^\tWHEREAS/m);
     expect(markdown).not.toContain("City\\-owned");
+  });
+
+  it("keeps resolution vote tallies and signature lines as body text", () => {
+    const markdown = prismMarkdownEnrich(
+      "RECREATION AND PARKS COMMISSION\n\nAYES:\n\nNOES:\n\nABSENT:\n\nABSTENTIONS:\n\nApproved as to form:\n\nCITY ATTORNEY",
+      { mode: "document" }
+    );
+    expect(markdown).toContain("## RECREATION AND PARKS COMMISSION");
+    expect(markdown).toContain("AYES:");
+    expect(markdown).toContain("NOES:");
+    expect(markdown).toContain("ABSENT:");
+    expect(markdown).toContain("ABSTENTIONS:");
+    expect(markdown).toContain("Approved as to form:");
+    expect(markdown).not.toMatch(/^## AYES/m);
+    expect(markdown).not.toMatch(/^## NOES/m);
+    expect(markdown).not.toMatch(/^## ABSENT/m);
+    expect(markdown).not.toMatch(/^## ABSTENTIONS/m);
+    expect(markdown).not.toMatch(/^### Approved as to form/m);
   });
 
   it("links Keywords longest-first and case-insensitively in paragraphs only", () => {

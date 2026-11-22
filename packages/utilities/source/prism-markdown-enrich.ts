@@ -60,6 +60,21 @@ function letterCount(value: string): number {
 }
 
 /**
+ * Roll-call / vote-tally lines in resolutions (often blank after the colon).
+ * Must not become `##` chapter headings with copy-link affordances.
+ */
+const SECTION_HEADING_DENYLIST = new Set([
+  "AYES",
+  "NOES",
+  "NAYS",
+  "ABSENT",
+  "ABSENTIONS",
+  "ABSTENTIONS",
+  "ABSTAIN",
+  "ABSTAINS",
+]);
+
+/**
  * ALL-CAPS section title line (document mode → `##`). Caller decides line boundaries.
  * Letters, spaces, and & / , - only; optional trailing colon; 3–60 chars; ≤6 words.
  */
@@ -68,6 +83,7 @@ export function isPrismMarkdownSectionHeading(line: string): boolean {
   if (!trimmed) return false;
   const core = trimmed.endsWith(":") ? trimmed.slice(0, -1).trimEnd() : trimmed;
   if (core.length < 3 || core.length > 60) return false;
+  if (SECTION_HEADING_DENYLIST.has(core)) return false;
   // Letters, spaces, and & / , - only — no digits or lowercase.
   if (!/^[A-Z\s&/,-]+$/.test(core)) return false;
   if (letterCount(core) < 3) return false;
@@ -84,6 +100,11 @@ const TITLE_CASE_WORD_RE =
 const SENTENCE_CASE_WORD_RE = /^[a-z]+(?:'[a-z]+)?(?:[/-][a-z]+)*$/;
 
 /**
+ * Signature / certification labels that look like Title Case subsections.
+ */
+const TITLE_HEADING_DENYLIST = new Set(["approved as to form"]);
+
+/**
  * Subsection line (document mode → `###`): Title Case ("Conclusion") or
  * sentence-case topic labels ("Food and beverage", "Tenant improvements").
  * Rejects prose that mixes capitals mid-line ("Close to Alameda…").
@@ -95,6 +116,9 @@ export function isPrismMarkdownTitleHeading(line: string): boolean {
   if (isPrismMarkdownSectionHeading(trimmed)) return false;
   const core = trimmed.endsWith(":") ? trimmed.slice(0, -1).trimEnd() : trimmed;
   if (core.length < 3 || core.length > 60) return false;
+  if (TITLE_HEADING_DENYLIST.has(core.toLowerCase())) return false;
+  // ALL-CAPS belongs to section-heading rules (or its denylist) — not ###.
+  if (/^[A-Z\s&/,-]+$/.test(core)) return false;
   // Letters, spaces, apostrophes, and & / , - only — no digits.
   if (!/^[A-Za-z'\s&/,-]+$/.test(core)) return false;
   const words = core.split(/\s+/).filter(Boolean);
