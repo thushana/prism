@@ -115,6 +115,8 @@ export interface PrismButtonProps {
   label: string;
   /** Optional node before icon/label (e.g. Noto emoji). */
   leadingSlot?: React.ReactNode;
+  /** Optional node after icon/label (e.g. tag remove control). */
+  trailingSlot?: React.ReactNode;
   variant?: PrismButtonVariant;
   icon?: LucideIcon;
   /**
@@ -181,6 +183,7 @@ export function PrismButton(
     color = { palette: "default", swatchPrimary: "blue-grey" },
     label,
     leadingSlot,
+    trailingSlot,
     variant = "icon",
     icon: IconComponent,
     materialSymbol,
@@ -653,18 +656,21 @@ export function PrismButton(
     <>
       {leadingSlot}
       {iconNode}
+      {trailingSlot}
     </>
   ) : iconPosition === "right" ? (
     <>
       {leadingSlot}
       {labelNode}
       {iconNode}
+      {trailingSlot}
     </>
   ) : (
     <>
       {leadingSlot}
       {iconNode}
       {labelNode}
+      {trailingSlot}
     </>
   );
 

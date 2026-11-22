@@ -25,6 +25,7 @@ export { PrismMapDemo } from "./prism-map";
 export { PrismPathBarDemo } from "./prism-path-bar";
 export { PrismSelectDemo } from "./prism-select";
 export { PrismTableDemo } from "./prism-table";
+export { PrismTagDemo } from "./prism-tag";
 export { PrismTypographyDemo } from "./prism-typography";
 
 export {

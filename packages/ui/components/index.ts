@@ -6,6 +6,7 @@ export * from "./prism-spinner";
 export * from "./prism-picker-popover";
 export * from "./prism-layout";
 export * from "./prism-button";
+export * from "./prism-tag";
 export * from "./prism-select";
 export * from "./prism-code-block";
 export * from "./prism-color-picker";

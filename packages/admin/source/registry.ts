@@ -13,6 +13,7 @@ import { PrismMapDemo } from "./prism-map";
 import { PrismPathBarDemo } from "./prism-path-bar";
 import { PrismSelectDemo } from "./prism-select";
 import { PrismTableDemo } from "./prism-table";
+import { PrismTagDemo } from "./prism-tag";
 import { PrismTypographyDemo } from "./prism-typography";
 
 export type PrismAdminComponentSlug =
@@ -30,6 +31,7 @@ export type PrismAdminComponentSlug =
   | "prism-path-bar"
   | "prism-select"
   | "prism-table"
+  | "prism-tag"
   | "prism-typography";
 
 /** Demos are static; the dynamic route renders them with no props. */
@@ -113,6 +115,12 @@ export const PRISM_ADMIN_COMPONENT_REGISTRY = {
     description:
       "Select: PrismButton trigger + popover options; supports multiple.",
     Demo: PrismSelectDemo,
+  },
+  "prism-tag": {
+    title: "PrismTag",
+    description:
+      "Opinionated chip on PrismButton; editable mode reveals a hover close control.",
+    Demo: PrismTagDemo,
   },
   "prism-table": {
     title: "PrismTable",
