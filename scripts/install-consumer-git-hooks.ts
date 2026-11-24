@@ -43,7 +43,7 @@ function assertHuskyDependency(appRoot: string): void {
   };
   if (!pkg.devDependencies?.husky) {
     console.error(
-      '❌ husky is required in devDependencies (Prism consumer standard). Add husky ^9 and a CI/VERCEL-gated prepare script (see Prism generate / TimeTraveler package.json).'
+      "❌ husky is required in devDependencies (Prism consumer standard). Add husky ^9 and a CI/VERCEL-gated prepare script (see Prism generate / TimeTraveler package.json)."
     );
     process.exit(1);
   }

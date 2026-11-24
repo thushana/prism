@@ -216,7 +216,7 @@ function readAppsWebVersionPins(prismRoot: string | null): AppsWebVersionPins {
 
 /** Gate husky/sync-commands off Vercel/CI installs (same pattern as Prism root + TimeTraveler). */
 const GATED_PREPARE_SCRIPT =
-  'node -e "if (!process.env.CI && !process.env.VERCEL) { require(\'child_process\').execSync(\'husky && tsx prism/scripts/sync-commands.ts\', { stdio: \'inherit\' }) }"';
+  "node -e \"if (!process.env.CI && !process.env.VERCEL) { require('child_process').execSync('husky && tsx prism/scripts/sync-commands.ts', { stdio: 'inherit' }) }\"";
 
 function buildPrismDependencies(
   layout: GenerateLayout,
@@ -313,9 +313,7 @@ function generateWebAppPackageJson(
         "drizzle-orm": pins.drizzleOrm,
       };
 
-  const serverDevDeps = isStatic
-    ? {}
-    : { "drizzle-kit": pins.drizzleKit };
+  const serverDevDeps = isStatic ? {} : { "drizzle-kit": pins.drizzleKit };
 
   const packageJson = {
     name: layout === "consumer-workspace" ? "web" : appName,

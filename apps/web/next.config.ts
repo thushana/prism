@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "path";
 import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
@@ -8,6 +9,19 @@ assertRequiredVercelEnv();
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 const kyselyOriginal = require.resolve("kysely");
+
+const prismRoot = path.join(__dirname, "../..");
+const parentRoot = path.join(prismRoot, "..");
+const parentWorkspaceFile = path.join(parentRoot, "pnpm-workspace.yaml");
+/** Embedder apps (e.g. city-observatory) list `prism/packages/*` in their workspace. */
+const embeddedInApp =
+  fs.existsSync(parentWorkspaceFile) &&
+  /(?:^|\n)\s*-\s*["']?prism\/packages\/\*/.test(
+    fs.readFileSync(parentWorkspaceFile, "utf8")
+  );
+// Turbopack refuses CSS deps resolved via the parent node_modules when root is
+// only `prism/`. Widen to the embedder root so those paths stay in-bounds.
+const monorepoRoot = embeddedInApp ? parentRoot : prismRoot;
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -30,7 +44,7 @@ const nextConfig: NextConfig = {
     "@better-auth/api-key",
     "@better-auth/passkey",
   ],
-  outputFileTracingRoot: path.join(__dirname, "../.."),
+  outputFileTracingRoot: monorepoRoot,
   async redirects() {
     return [
       {
@@ -41,6 +55,7 @@ const nextConfig: NextConfig = {
     ];
   },
   turbopack: {
+    root: monorepoRoot,
     resolveAlias: {
       "kysely-original": kyselyOriginal,
       // Exact package name only — shim re-exports via kysely-original.

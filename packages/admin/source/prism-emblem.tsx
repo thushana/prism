@@ -52,7 +52,7 @@ export function PrismEmblemDemo(): JSX.Element {
       lines.push(`  emojiLibrary="${emojiLibrary}"`);
     }
     lines.push(
-      "  color={{ palette: \"default\", swatchPrimary: \"blue\", shade: 500 }}",
+      '  color={{ palette: "default", swatchPrimary: "blue", shade: 500 }}',
       "  onIconChange={setIcon}",
       "  onEmojiChange={setEmoji}",
       "  onColorChange={setColor}",

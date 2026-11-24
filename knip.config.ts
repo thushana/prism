@@ -38,11 +38,13 @@ const loggerPathsFromPackage = {
  * - Run `pnpm knip:exports` locally when tightening the public export surface.
  */
 const config: KnipConfig = {
+  // Optional map peers are intentionally referenced via dynamic import in packages/ui
+  exclude: ["optionalPeerDependencies"],
   workspaces: {
     ".": {
       entry: ["scripts/*.ts"],
       project: ["scripts/**/*.ts"],
-      ignoreBinaries: ["drizzle-kit", "neon", "pkill"],
+      ignoreBinaries: ["drizzle-kit", "neon"],
       ignoreDependencies: [
         "swr",
         "lightningcss",
@@ -52,12 +54,7 @@ const config: KnipConfig = {
       drizzle: { config: [] },
     },
     "apps/web": {
-      entry: [
-        ...nextAppEntry,
-        "cli/**/*.{ts,js}",
-        "database/drizzle.config.ts",
-        "intelligence/**/*.ts",
-      ],
+      entry: [...nextAppEntry, "cli/**/*.{ts,js}", "intelligence/**/*.ts"],
       project: [
         "app/**/*.{ts,tsx}",
         "cli/**/*.{ts,js}",
@@ -68,6 +65,7 @@ const config: KnipConfig = {
       ],
       paths: webPaths,
       ignoreDependencies: [
+        // Path-alias workspace package (@utilities) — knip does not resolve the name
         "@prism/utilities",
         "@radix-ui/react-slot",
         "admin",
@@ -75,12 +73,16 @@ const config: KnipConfig = {
         "intelligence",
         "lightningcss",
         "logger",
+        // Optional map providers — installed for dynamic imports in packages/ui
+        "mapbox-gl",
+        "maplibre-gl",
         "tailwindcss",
         "tw-animate-css",
         "ui",
         // Webpack alias target used by library/kysely-shim.ts
         "kysely-original",
       ],
+      // Avoid knip's drizzle plugin re-loading env-gated drizzle.config.ts
       drizzle: { config: [] },
     },
     "packages/*": {
@@ -106,7 +108,7 @@ const config: KnipConfig = {
       paths: {
         "@utilities": ["../utilities/source"],
       },
-      ignoreDependencies: ["tailwind-merge", "@prism/utilities"],
+      ignoreDependencies: ["tailwind-merge"],
     },
     "packages/cli": {
       paths: loggerPathsFromPackage,
@@ -118,7 +120,6 @@ const config: KnipConfig = {
       ignoreDependencies: ["ai", "logger"],
     },
     "packages/database": {
-      ignoreDependencies: ["drizzle-kit"],
       drizzle: { config: [] },
     },
     "packages/charts": {
