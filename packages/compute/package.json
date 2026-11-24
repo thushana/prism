@@ -1,0 +1,24 @@
+{
+  "name": "compute",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./source/index.ts",
+  "types": "./source/index.ts",
+  "exports": {
+    ".": "./source/index.ts",
+    "./fleet": "./source/fleet/index.ts",
+    "./worker": "./source/worker/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.0",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint source",
+    "test": "vitest",
+    "test:run": "vitest run"
+  }
+}

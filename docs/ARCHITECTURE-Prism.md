@@ -38,6 +38,7 @@ prism/
 │   ├── authentication/   # Authentication utilities (API and web)
 │   ├── charts/           # Nivo wrappers + theme (see CHARTS-Prism.md)
 │   ├── feature-flags/    # Feature flag helpers
+│   ├── compute/          # Heavy worker loop + fleet scale (see COMPUTE-Prism.md)
 │   └── cli/              # Shared CLI utilities
 ├── tools/                 # CLI entrypoint and generator
 └── package.json          # Root workspace configuration
