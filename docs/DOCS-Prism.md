@@ -43,20 +43,38 @@ Prism’s canonical docs live under **`prism/docs/`**. A host app that vendors P
 Use **`-Prism`** vs **`-{Project}`** so ownership is obvious at a glance and links do not collide when both trees appear in one workspace.
 
 ```
+prism/docs/                                # Submodule-owned (*-Prism.md)
+├── DOCS-Prism.md                          # This file
+├── ARCHITECTURE-Prism.md
+├── CONVENTIONS-Prism.md
+├── ADMIN-Prism.md
+├── APP-CONFIG-Prism.md
+├── AUTHENTICATION-Prism.md
+├── CHARTS-Prism.md
+├── CLI-Prism.md
+├── COMMIT-Prism.md
+├── COMPUTE-Prism.md
+├── DATABASE-Prism.md
+├── DEPLOYMENT-Prism.md
+├── FEATUREFLAGS-Prism.md
+├── GENERATE-Prism.md
+├── GLOSSARY-Prism.md
+├── INTELLIGENCE-Prism.md
+├── LOGGER-Prism.md
+├── PLAYGROUNDS-Prism.md
+├── PROJECT-HEALTH-Prism.md
+├── SYNC-Prism.md
+├── UI-Prism.md
+└── URLS-Prism.md
+
 {project-root}/
 ├── README.md                              # Quick start (~50 lines)
-└── docs/
+└── docs/                                  # Host-owned (*-{Project}.md)
     ├── ARCHITECTURE-{Project}.md          # Mental model (keep lean; link to code)
-    ├── DOCS-Prism.md                      # This file (Prism submodule / template)
-    ├── CONVENTIONS-{Project}.md           # Naming, URLs, quality commands, component hierarchy
-    ├── URLS-Prism.md                      # Path-first app URL conventions (lists, detail slugs)
-    ├── ADMIN-Prism.md                     # Admin section pattern (auth, shell, routes)
-    ├── PLAYGROUNDS-Prism.md               # Prism hub demo page structure (spine, staging); token tables in UI-Prism.md
-    ├── DATABASE-{Project}.md              # Drizzle / DB mental model (Prism)
-    ├── DEPLOYMENT-{Project}.md            # Vercel / env (Prism)
-    ├── FEATUREFLAGS-{Project}.md          # Feature flags package (Prism)
+    ├── CONVENTIONS-{Project}.md           # Project token, commands, layout
+    ├── DATABASE-{Project}.md              # App DB mental model (optional)
     ├── GLOSSARY-{Project}.md              # Domain terms (optional)
-    ├── SYNC-{Project}.md                  # Submodule sync (child apps)
+    ├── … topic runbooks as needed …       # e.g. CLI, worker, MVP, milestones
     └── decisions/
         └── 001-DECISION-{short-description}.md
 ```
