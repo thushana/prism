@@ -42,12 +42,15 @@ function isStopped(machine: FlyMachineSummary): boolean {
  * Fly Machines fleet adapter (dark until the host enables it).
  *
  * `ensureReplicaCount` starts stopped machines, then clones the config of an
- * existing machine to reach N. It never stops running workers (they
- * exit-when-idle). An app with zero machines needs one seeded machine
- * (`fly machine run` / `fly deploy`); that case reports a full shortfall.
+ * existing machine to reach N. Happy-path scale-down is worker exit-when-idle.
+ * When `desired === 0` (empty backlog), it stops any still-started machines as
+ * a zombie backstop (SIGTERM → timeout). It does **not** stop when
+ * `desired > 0` even if more machines are started than desired — that would
+ * kill busy tail workers while jobs are still running.
  *
- * Concurrent wakes re-list before every create and never exceed
- * `maxMachineCount`, so clone races cannot overshoot the org machine limit.
+ * An app with zero machines needs one seeded machine (`fly machine run` /
+ * `fly deploy`); that case reports a full shortfall. Concurrent wakes re-list
+ * before every create and never exceed `maxMachineCount`.
  */
 export function createFlyMachinesProvider(
   options: FlyMachinesProviderOptions
@@ -115,6 +118,24 @@ export function createFlyMachinesProvider(
         await listMachines(),
         maxMachineCount
       );
+
+      // Zombie reap: empty backlog ⇒ stop every started/starting machine.
+      // Do not stop when desired > 0 (busy tail workers must survive).
+      if (desired === 0) {
+        for (const machine of machines.filter(isRunning)) {
+          await request("POST", `${appPath}/${machine.id}/stop`, {
+            signal: "SIGTERM",
+            timeout: "15s",
+          });
+        }
+        machines = await listMachines();
+        const replicaCount = machines.filter(isRunning).length;
+        return {
+          replicaCount,
+          shortfall: 0,
+        };
+      }
+
       let replicaCount = machines.filter(isRunning).length;
 
       for (const machine of machines.filter(isStopped)) {

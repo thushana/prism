@@ -37,6 +37,13 @@ function fakeFly(
       );
       return new Response("{}", { status: 200 });
     }
+    if (method === "POST" && path.includes("/stop")) {
+      const id = path.split("/").at(-2)!;
+      machines = machines.map((machine) =>
+        machine.id === id ? { ...machine, state: "stopped" } : machine
+      );
+      return new Response("{}", { status: 200 });
+    }
     if (method === "DELETE") {
       const id = path.split("/").at(-1)!.split("?")[0]!;
       machines = machines.filter((machine) => machine.id !== id);
@@ -86,8 +93,8 @@ describe("createFlyMachinesProvider", () => {
     });
   });
 
-  it("never stops machines when desired is lower", async () => {
-    const { calls, fetchImpl } = fakeFly([
+  it("stops all started machines when desired is zero", async () => {
+    const { calls, fetchImpl, getMachines } = fakeFly([
       { id: "a", state: "started" },
       { id: "b", state: "started" },
     ]);
@@ -97,8 +104,37 @@ describe("createFlyMachinesProvider", () => {
       fetchImpl,
     });
     const result = await fleet.ensureReplicaCount(0);
-    expect(result.shortfall).toBe(0);
-    expect(calls.filter((call) => call.method !== "GET")).toHaveLength(0);
+    expect(result).toEqual({ replicaCount: 0, shortfall: 0 });
+    expect(getMachines().every((machine) => machine.state === "stopped")).toBe(
+      true
+    );
+    const stops = calls.filter(
+      (call) => call.method === "POST" && call.path.includes("/stop")
+    );
+    expect(stops).toHaveLength(2);
+    expect(stops[0]?.body).toEqual({ signal: "SIGTERM", timeout: "15s" });
+  });
+
+  it("does not stop started machines when desired is positive", async () => {
+    const { calls, fetchImpl } = fakeFly([
+      { id: "a", state: "started" },
+      { id: "b", state: "started" },
+      { id: "c", state: "started" },
+      { id: "d", state: "started" },
+      { id: "e", state: "started" },
+    ]);
+    const fleet = createFlyMachinesProvider({
+      appName: "app",
+      apiToken: "t",
+      fetchImpl,
+    });
+    const result = await fleet.ensureReplicaCount(1);
+    expect(result).toEqual({ replicaCount: 5, shortfall: 0 });
+    expect(
+      calls.filter(
+        (call) => call.method === "POST" && call.path.includes("/stop")
+      )
+    ).toHaveLength(0);
   });
 
   it("never creates past maxMachineCount and prunes excess stopped", async () => {
