@@ -9,18 +9,18 @@
     "./schema": "./source/schema.ts"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
+    "@neondatabase/serverless": "^1.2.1",
     "application-settings": "workspace:*",
     "dotenv": "^18.0.10",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.4"
   },
   "peerDependencies": {
     "drizzle-orm": "*"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.10",
-    "typescript": "^7.0.0",
-    "vitest": "^5.1.0"
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

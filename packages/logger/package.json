@@ -11,14 +11,14 @@
   },
   "dependencies": {
     "server-only": "^0.0.1",
-    "winston": "^3.17.0"
+    "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
-    "@vitejs/plugin-react": "^6.1.1",
-    "@vitest/coverage-v8": "^5.0.0",
-    "typescript": "^7.0.0",
-    "vitest": "^5.1.0"
+    "@types/node": "^26.6.10",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   },
   "scripts": {
     "test": "vitest",

@@ -15,19 +15,19 @@
     "./tasks/registry": "./source/tasks/registry.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.49",
-    "@ai-sdk/gateway": "^4.0.73",
-    "@ai-sdk/google": "^4.0.63",
-    "@ai-sdk/openai": "^4.0.57",
-    "ai": "^7.0.91",
+    "@ai-sdk/anthropic": "^4.0.108",
+    "@ai-sdk/gateway": "^4.0.154",
+    "@ai-sdk/google": "^4.0.126",
+    "@ai-sdk/openai": "^4.0.123",
+    "ai": "^7.0.181",
     "logger": "file:../logger",
     "server-only": "^0.0.1",
-    "zod": "^4.5.4"
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
-    "typescript": "^7.0.0",
-    "vitest": "^5.1.0"
+    "@types/node": "^26.6.10",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   },
   "peerDependencies": {
     "zod": "^4.0.0"

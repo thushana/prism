@@ -12,17 +12,17 @@
   },
   "dependencies": {
     "@prism/cli": "workspace:*",
-    "chalk": "^6.0.1",
-    "commander": "^15.0.0",
+    "chalk": "6.0.1",
+    "commander": "^15.1.0",
     "database": "workspace:*",
     "dotenv": "^18.0.10",
     "logger": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
-    "eslint": "^10.12.0",
-    "tsx": "^4.23.13",
-    "typescript": "^7.0.0",
-    "vitest": "^5.1.0"
+    "@types/node": "^26.6.10",
+    "eslint": "^10.15.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   }
 }

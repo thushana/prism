@@ -8,11 +8,11 @@ strictPeerDependencies: false
 minimumReleaseAge: false
 
 overrides:
-  "@better-auth/core": 1.7.25
-  "@better-auth/api-key": 1.7.25
-  "@better-auth/passkey": 1.7.25
-  "@better-auth/drizzle-adapter": 1.7.25
-  better-auth: 1.7.25
+  "@better-auth/core": 1.7.28
+  "@better-auth/api-key": 1.7.28
+  "@better-auth/passkey": 1.7.28
+  "@better-auth/drizzle-adapter": 1.7.28
+  better-auth: 1.7.28
   # Keep a single peer graph so plugin HookEndpointContext types unify.
   better-call: 1.4.5
   "@better-auth/utils": 0.5.1
