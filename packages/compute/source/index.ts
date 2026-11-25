@@ -1,6 +1,7 @@
 export {
   createFlyMachinesProvider,
   createLocalProvider,
+  type EnsureReplicaCountResult,
   type FleetProvider,
   type FleetStatus,
   type FlyMachinesProviderOptions,
