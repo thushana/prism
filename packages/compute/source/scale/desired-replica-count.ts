@@ -31,7 +31,7 @@ export function desiredReplicaCount(
   return Math.min(maxReplicaCount, Math.max(floor, fromQueue));
 }
 
-/** Observatory-shaped default from PLAN-compute-CityObservatory. */
+/** Starting policy hosts may override. See COMPUTE-Prism.md. */
 export const DEFAULT_HEAVY_REPLICA_POLICY: DesiredReplicaCountPolicy = {
   maxReplicaCount: 8,
   queuedJobsPerReplica: 10,
