@@ -12,13 +12,31 @@ export type EnsureReplicaCountResult = {
   shortfall: number;
 };
 
+export type FleetMachineRef = {
+  id: string;
+  state: string;
+};
+
+export type StopMachineOptions = {
+  signal?: "SIGTERM" | "SIGINT" | "SIGKILL";
+  timeout?: string;
+};
+
 /**
  * Declarative fleet control. Hosts call `ensureReplicaCount`; workers exit
- * themselves when idle (no stop in the happy path).
+ * themselves when idle (happy path). Optional list/stop support stale-machine
+ * reap while desired > 0.
  */
 export type FleetProvider = {
   ensureReplicaCount: (
     desiredReplicaCount: number
   ) => Promise<EnsureReplicaCountResult>;
   status: () => Promise<FleetStatus>;
+  /** List machine id+state (Fly). Optional on noop/local providers. */
+  listMachines?: () => Promise<FleetMachineRef[]>;
+  /** Stop one machine (Fly). Optional on noop/local providers. */
+  stopMachine?: (
+    machineId: string,
+    options?: StopMachineOptions
+  ) => Promise<void>;
 };

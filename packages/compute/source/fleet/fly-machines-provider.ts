@@ -1,7 +1,9 @@
 import type {
   EnsureReplicaCountResult,
+  FleetMachineRef,
   FleetProvider,
   FleetStatus,
+  StopMachineOptions,
 } from "./types";
 
 export type FlyMachinesProviderOptions = {
@@ -85,7 +87,8 @@ export function createFlyMachinesProvider(
     return (await response.json()) as T;
   }
 
-  const listMachines = () => request<FlyMachineSummary[]>("GET", appPath);
+  const fetchMachineList = () =>
+    request<FlyMachineSummary[]>("GET", appPath);
 
   async function pruneExcessStopped(
     machines: FlyMachineSummary[],
@@ -99,7 +102,7 @@ export function createFlyMachinesProvider(
         "DELETE",
         `${appPath}/${encodeURIComponent(victim.id)}?force=true`
       );
-      current = await listMachines();
+      current = await fetchMachineList();
     }
     return current;
   }
@@ -115,7 +118,7 @@ export function createFlyMachinesProvider(
       );
 
       let machines = await pruneExcessStopped(
-        await listMachines(),
+        await fetchMachineList(),
         maxMachineCount
       );
 
@@ -128,7 +131,7 @@ export function createFlyMachinesProvider(
             timeout: "15s",
           });
         }
-        machines = await listMachines();
+        machines = await fetchMachineList();
         const replicaCount = machines.filter(isRunning).length;
         return {
           replicaCount,
@@ -145,7 +148,7 @@ export function createFlyMachinesProvider(
       }
 
       while (replicaCount < desired) {
-        machines = await listMachines();
+        machines = await fetchMachineList();
         replicaCount = machines.filter(isRunning).length;
         if (replicaCount >= desired) break;
 
@@ -166,11 +169,11 @@ export function createFlyMachinesProvider(
           region,
         });
         // Trust the next list, not an optimistic +1 (API lag / concurrent create).
-        machines = await listMachines();
+        machines = await fetchMachineList();
         replicaCount = machines.filter(isRunning).length;
       }
 
-      machines = await listMachines();
+      machines = await fetchMachineList();
       replicaCount = machines.filter(isRunning).length;
       return {
         replicaCount,
@@ -180,7 +183,7 @@ export function createFlyMachinesProvider(
 
     async status(): Promise<FleetStatus> {
       try {
-        const machines = await listMachines();
+        const machines = await fetchMachineList();
         const actualReplicaCount = machines.filter(isRunning).length;
         return {
           desiredReplicaCount: actualReplicaCount,
@@ -196,6 +199,28 @@ export function createFlyMachinesProvider(
           detail: error instanceof Error ? error.message : String(error),
         };
       }
+    },
+
+    async listMachines(): Promise<FleetMachineRef[]> {
+      const machines = await fetchMachineList();
+      return machines.map((machine) => ({
+        id: machine.id,
+        state: machine.state,
+      }));
+    },
+
+    async stopMachine(
+      machineId: string,
+      stopOptions: StopMachineOptions = {}
+    ): Promise<void> {
+      await request(
+        "POST",
+        `${appPath}/${encodeURIComponent(machineId)}/stop`,
+        {
+          signal: stopOptions.signal ?? "SIGTERM",
+          timeout: stopOptions.timeout ?? "15s",
+        }
+      );
     },
   };
 }

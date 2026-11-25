@@ -5,6 +5,8 @@ export {
 export { createLocalProvider } from "./local-provider";
 export type {
   EnsureReplicaCountResult,
+  FleetMachineRef,
   FleetProvider,
   FleetStatus,
+  StopMachineOptions,
 } from "./types";
