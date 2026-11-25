@@ -13,6 +13,12 @@ export type FlyMachinesProviderOptions = {
   apiBaseUrl?: string;
   /** Target region for newly created machines (e.g. `iad`). */
   region?: string;
+  /**
+   * Hard cap on machine records in the app. Creates never push past this;
+   * excess stopped machines are pruned down to it. Defaults to the desired
+   * count for each ensure call (no warm pool above desired).
+   */
+  maxMachineCount?: number;
   /** Injectable for tests. */
   fetchImpl?: typeof fetch;
 };
@@ -39,6 +45,9 @@ function isStopped(machine: FlyMachineSummary): boolean {
  * existing machine to reach N. It never stops running workers (they
  * exit-when-idle). An app with zero machines needs one seeded machine
  * (`fly machine run` / `fly deploy`); that case reports a full shortfall.
+ *
+ * Concurrent wakes re-list before every create and never exceed
+ * `maxMachineCount`, so clone races cannot overshoot the org machine limit.
  */
 export function createFlyMachinesProvider(
   options: FlyMachinesProviderOptions
@@ -75,12 +84,37 @@ export function createFlyMachinesProvider(
 
   const listMachines = () => request<FlyMachineSummary[]>("GET", appPath);
 
+  async function pruneExcessStopped(
+    machines: FlyMachineSummary[],
+    maxMachineCount: number
+  ): Promise<FlyMachineSummary[]> {
+    let current = machines;
+    while (current.length > maxMachineCount) {
+      const victim = current.find(isStopped);
+      if (!victim) break;
+      await request(
+        "DELETE",
+        `${appPath}/${encodeURIComponent(victim.id)}?force=true`
+      );
+      current = await listMachines();
+    }
+    return current;
+  }
+
   return {
     async ensureReplicaCount(
       desiredReplicaCount: number
     ): Promise<EnsureReplicaCountResult> {
       const desired = Math.max(0, Math.floor(desiredReplicaCount));
-      const machines = await listMachines();
+      const maxMachineCount = Math.max(
+        1,
+        Math.floor(options.maxMachineCount ?? Math.max(desired, 1))
+      );
+
+      let machines = await pruneExcessStopped(
+        await listMachines(),
+        maxMachineCount
+      );
       let replicaCount = machines.filter(isRunning).length;
 
       for (const machine of machines.filter(isStopped)) {
@@ -89,12 +123,34 @@ export function createFlyMachinesProvider(
         replicaCount += 1;
       }
 
-      const template = machines.find((machine) => machine.config);
-      while (replicaCount < desired && template?.config) {
-        await request("POST", appPath, { config: template.config, region });
-        replicaCount += 1;
+      while (replicaCount < desired) {
+        machines = await listMachines();
+        replicaCount = machines.filter(isRunning).length;
+        if (replicaCount >= desired) break;
+
+        const stopped = machines.find(isStopped);
+        if (stopped) {
+          await request("POST", `${appPath}/${stopped.id}/start`);
+          replicaCount += 1;
+          continue;
+        }
+
+        if (machines.length >= maxMachineCount) break;
+
+        const template = machines.find((machine) => machine.config);
+        if (!template?.config) break;
+
+        await request("POST", appPath, {
+          config: template.config,
+          region,
+        });
+        // Trust the next list, not an optimistic +1 (API lag / concurrent create).
+        machines = await listMachines();
+        replicaCount = machines.filter(isRunning).length;
       }
 
+      machines = await listMachines();
+      replicaCount = machines.filter(isRunning).length;
       return {
         replicaCount,
         shortfall: Math.max(0, desired - replicaCount),
