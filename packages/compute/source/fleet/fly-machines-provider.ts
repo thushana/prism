@@ -29,11 +29,19 @@ type FlyMachineSummary = {
   id: string;
   state: string;
   region?: string;
+  updated_at?: string;
   config?: Record<string, unknown>;
 };
 
 function isRunning(machine: FlyMachineSummary): boolean {
+  // `stopping` is in-flight SIGTERM — do not count toward desired or stale-start.
   return machine.state === "started" || machine.state === "starting";
+}
+
+function parseUpdatedAt(raw: string | undefined): Date | undefined {
+  if (!raw) return undefined;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
 function isStopped(machine: FlyMachineSummary): boolean {
@@ -206,6 +214,7 @@ export function createFlyMachinesProvider(
       return machines.map((machine) => ({
         id: machine.id,
         state: machine.state,
+        updatedAt: parseUpdatedAt(machine.updated_at),
       }));
     },
 

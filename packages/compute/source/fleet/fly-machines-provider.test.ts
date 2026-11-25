@@ -193,6 +193,29 @@ describe("createFlyMachinesProvider", () => {
     ).toHaveLength(1);
   });
 
+  it("listMachines exposes Fly updated_at for stale-reap generation checks", async () => {
+    const { fetchImpl } = fakeFly([
+      {
+        id: "a",
+        state: "started",
+        updated_at: "2026-11-25T12:00:00.000Z",
+      },
+    ]);
+    const fleet = createFlyMachinesProvider({
+      appName: "app",
+      apiToken: "t",
+      fetchImpl,
+    });
+    const listed = await fleet.listMachines?.();
+    expect(listed).toEqual([
+      {
+        id: "a",
+        state: "started",
+        updatedAt: new Date("2026-11-25T12:00:00.000Z"),
+      },
+    ]);
+  });
+
   it("reports unhealthy status when the API fails", async () => {
     const fleet = createFlyMachinesProvider({
       appName: "app",

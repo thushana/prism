@@ -15,6 +15,8 @@ export type EnsureReplicaCountResult = {
 export type FleetMachineRef = {
   id: string;
   state: string;
+  /** Fly `updated_at` — used to ignore leftover heartbeats after a new start. */
+  updatedAt?: Date;
 };
 
 export type StopMachineOptions = {
