@@ -85,12 +85,36 @@ After that commit, with a clean `prism/` tree:
 
 Do not move a tag that already exists. If several qualifying Prism commits land in one session, bump and tag each one.
 
-When the parent commit only advances the submodule pointer, name the Prism version in that message (`Take Prism v0.2.0`).
+When the parent commit only advances the submodule pointer, name the Prism version in that message (`Take Prism v0.2.0`). That parent commit still follows **Host app version** below (Take Prism = host patch).
 
 `0.1.0` is the baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
+
+## Host app version
+
+Host apps (City Observatory, TimeTraveler, …) have one version: `version` in the **parent repo root** `package.json`. Leave nested `apps/*` / `packages/*` `version` fields alone. Prism’s version and tags live on the Prism remote; the host’s version and tags live on the host remote — two namespaces.
+
+The line is `0.x` until an intentional `1.0.0`. While it is `0.x`:
+
+- **patch** (`0.1.0` → `0.1.1`): bugfix, security fix, compatible dependency bump, refactor, docs, tooling, and **Take Prism** (submodule pointer advance)
+- **minor** (`0.1.0` → `0.2.0`): new user-facing capability, and any breaking change or required migration hosts/users must adapt to
+- **major**: only for an intentional `1.0.0`. Do not choose `1.0.0` as part of a normal change
+
+Bump on **every** parent commit (including Take Prism). If one commit mixes a break and a fix, use the higher bump. Bump inside that same parent commit:
+
+1. Read `version` from the parent root `package.json`.
+2. Write the next version into that file and include it in the commit.
+
+After that commit, with a clean parent tree:
+
+1. Tag that commit: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
+2. Push the branch, then the tag: `git push origin vX.Y.Z`.
+
+Do not move a tag that already exists. If several qualifying parent commits land in one session, bump and tag each one.
+
+`0.1.0` is the host baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
 
 ## Commit
 
 Commit and push. Do not ask for confirmation first.
 
-Follow the commit order, push order, and Prism version rules above. Still stop without committing when the user said not to commit or not to push, the diff contains secrets (`.env`, credentials), or the tag already exists.
+Follow the commit order, push order, Prism version, and Host app version rules above. Still stop without committing when the user said not to commit or not to push, the diff contains secrets (`.env`, credentials), or the tag already exists.
