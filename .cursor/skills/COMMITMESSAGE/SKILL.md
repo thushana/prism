@@ -1,5 +1,5 @@
 ---
-name: commitmessage
+name: COMMITMESSAGE
 description: Write a commit message for the changes on disk
 disable-model-invocation: true
 ---
@@ -8,7 +8,7 @@ Write a commit message for the changes on disk
 
 ## Before committing
 
-**Run [codereview](../codereview/SKILL.md) first** on the unstaged changes and fix Critical / Important findings. Do not write the commit message or commit until that review has run in this turn (or the user explicitly waived it).
+**Run [CODEREVIEW](../CODEREVIEW/SKILL.md) first** on the unstaged changes and fix Critical / Important findings. Do not write the commit message or commit until that review has run in this turn (or the user explicitly waived it).
 
 ## Philosophy
 

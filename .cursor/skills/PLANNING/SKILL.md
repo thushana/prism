@@ -1,9 +1,9 @@
 ---
-name: planning
+name: PLANNING
 description: >-
   Draft implementation plans with Why, Success, How (phased), predefined
   commits, and a naming pass. Use when planning, in Plan mode, or when the
-  user asks for an implementation plan.
+  user asks for an implementation plan or /PLANNING.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ Prefer **DRY** and **YAGNI** — reuse what exists; do not plan speculative abst
 ## Before drafting
 
 1. **Explore the codebase.** Read the relevant code, patterns, call sites, and upstream imports until you can explain how things work today and what this change would touch. Prefer looking over asking. When the change touches Prism shared surface or host conventions, check Prism’s `DOCS-Prism.md`, `CONVENTIONS-Prism.md`, and `ARCHITECTURE-Prism.md` under `docs/` from the Prism package root, or `prism/docs/` from a host app (and the host’s matching docs if present).
-2. **Read** [codereview](../codereview/SKILL.md), [commitmessage](../commitmessage/SKILL.md), and [naming](../naming/SKILL.md). Do not copy their rules here; plans must be reviewable and committable under those skills.
+2. **Read** [CODEREVIEW](../CODEREVIEW/SKILL.md), [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md), and [NAMING](../NAMING/SKILL.md). Do not copy their rules here; plans must be reviewable and committable under those skills.
 3. Surface **major design questions** before locking the plan. For each, state options with brief pros and cons, then recommend one. Do not bury open A-vs-B choices under How. Prefer a concrete proposal they can correct over menus of obvious options. Ask at most 1–2 clarifying questions at a time, and only when the answer would change what gets built. Never ask what the request or codebase already answers.
 4. **Spikes:** keep throwaway and shallow. Keeping spike code is a new request that goes back through planning.
 
@@ -48,7 +48,7 @@ Be detailed and phased and in a logical sequence as possible for an agent to exe
 
 Predefined commit sequence. Each entry is a draft one-liner in **commitmessage** format (`Emoji ALL CAPS SLUG - description`), scoped to what that commit contains. Order must match Prism rules (Prism submodule commit before parent when both change). Mention version bump/tag only when commitmessage requires it. Every How phase maps to one or more commits; no orphan phases; no mega-commit mixing unrelated concerns.
 
-**Execution order (required):** after implementing each commit’s scope, run [codereview](../codereview/SKILL.md) on the unstaged changes, fix what it flags, then run [commitmessage](../commitmessage/SKILL.md). Never commitmessage before codereview.
+**Execution order (required):** after implementing each commit’s scope, run [CODEREVIEW](../CODEREVIEW/SKILL.md) on the unstaged changes, fix what it flags, then run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md). Never COMMITMESSAGE before CODEREVIEW.
 
 ### Names
 
@@ -103,7 +103,7 @@ Files:
 
 ## After the plan is approved
 
-Hand off to [build](../build/SKILL.md) to execute: it shards independent work to subagents when safe, runs phase gates, then codereview → commitmessage per planned commit.
+Hand off to [BUILD](../BUILD/SKILL.md) to execute: it shards independent work to subagents when safe, runs phase gates, then CODEREVIEW → COMMITMESSAGE per planned commit.
 
 ## Out of scope for this skill
 

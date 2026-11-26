@@ -1,5 +1,5 @@
 ---
-name: qualitycheck
+name: QUALITYCHECK
 description: 'Run "npm run quality" which typechecks, lints and formats.'
 disable-model-invocation: true
 ---
@@ -18,4 +18,4 @@ Run "npm run quality" which typechecks, lints and formats.
 4. Repeat until all checks pass
 5. Goal: Commitable, deployable state
 
-**Reference**: See [docs/COMMIT-Prism.md](../docs/COMMIT-Prism.md) for commit message style.
+**Reference**: See [docs/COMMIT-Prism.md](../../../docs/COMMIT-Prism.md) for commit message style.

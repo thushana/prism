@@ -1,5 +1,5 @@
 ---
-name: codereview
+name: CODEREVIEW
 description: Review all unstaged git changes via `git diff`
 disable-model-invocation: true
 ---
@@ -32,7 +32,7 @@ You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows 
 
 **Code style:**
 
-- Names should be clear without needing comments (self-documenting) – read [naming](../naming/SKILL.md) if it would be helpful
+- Names should be clear without needing comments (self-documenting) – read [NAMING](../NAMING/SKILL.md) if it would be helpful
 - Avoid: large components/classes, inline styling, complexity for complexity's sake
 - Prefer: Tailwind CSS classes over inline styles, small focused functions
 - Flag: unused imports, dead code, acronyms without context
@@ -63,5 +63,5 @@ For each issue:
 - Review all unstaged code files
 - Go through the philosophies above and verbally say if it passes these bold line areas of focus
 - Provide specific change proposals if needed
-- If things look good, run [commitmessage](../commitmessage/SKILL.md) next (codereview before commitmessage)
+- If things look good, run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) next (CODEREVIEW before COMMITMESSAGE)
 - When you commit, do not tag a collaborator / co-author

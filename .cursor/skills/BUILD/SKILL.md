@@ -1,23 +1,23 @@
 ---
-name: build
+name: BUILD
 description: >-
   Execute an approved implementation plan: shard independent work to
   subagents when safe, run phases in order, verify gates, then
-  codereview → commitmessage per planned commit. Use when building,
-  implementing a plan, or the user asks to execute /build.
+  CODEREVIEW → COMMITMESSAGE per planned commit. Use when building,
+  implementing a plan, or the user asks to execute /BUILD.
 disable-model-invocation: true
 ---
 
 # Build
 
-Partner to [planning](../planning/SKILL.md). The plan already did the thinking — **execute it**. You are the orchestrator: keep coordination in this session; give workers only what they need.
+Partner to [PLANNING](../PLANNING/SKILL.md). The plan already did the thinking — **execute it**. You are the orchestrator: keep coordination in this session; give workers only what they need.
 
 **Scale:** same as planning — small Next.js / Prism apps. DRY, YAGNI, question every abstraction. Prefer idiomatic patterns already in the tree.
 
 ## Prerequisites
 
 1. An **approved** plan in planning shape (Why / Success / How / Commits / Names). If none exists, run planning first — do not invent a shadow plan mid-build.
-2. Read [planning](../planning/SKILL.md), [codereview](../codereview/SKILL.md), [commitmessage](../commitmessage/SKILL.md), [naming](../naming/SKILL.md), and [qualitycheck](../qualitycheck/SKILL.md).
+2. Read [PLANNING](../PLANNING/SKILL.md), [CODEREVIEW](../CODEREVIEW/SKILL.md), [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md), [NAMING](../NAMING/SKILL.md), and [QUALITYCHECK](../QUALITYCHECK/SKILL.md).
 3. Reuse the plan’s Names verbatim. Do not invent parallel terms.
 
 ## Orchestrator rules
@@ -70,10 +70,10 @@ Before each How phase (or within a phase that has independent steps), classify w
    - If the gate fails: fix or debug; do not mark complete.
    - If the plan is wrong: smallest ruling, continue (or stop if condition 4).
 4. **For each planned commit** (after its phase scope is green):
-   - Run [codereview](../codereview/SKILL.md) on unstaged changes; fix Critical / Important.
-   - Run [commitmessage](../commitmessage/SKILL.md) (commit/push/version rules live there).
-   - Never commitmessage before codereview.
-5. **After all commits:** run [qualitycheck](../qualitycheck/SKILL.md) if the tree has code changes that quality covers; fix until clean.
+   - Run [CODEREVIEW](../CODEREVIEW/SKILL.md) on unstaged changes; fix Critical / Important.
+   - Run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) (commit/push/version rules live there).
+   - Never COMMITMESSAGE before CODEREVIEW.
+5. **After all commits:** run [QUALITYCHECK](../QUALITYCHECK/SKILL.md) if the tree has code changes that quality covers; fix until clean.
 6. **Close out.** Summarize: what shipped, rulings made, any deferred minors. Point at commits. Do not reopen planning unless Success is unmet.
 
 ## Worker brief (when dispatching)
@@ -93,11 +93,11 @@ Implementers do **not** run commitmessage (orchestrator does, after codereview).
 
 | Skill | Role in build |
 |-------|----------------|
-| [planning](../planning/SKILL.md) | Source of truth for scope and sequence |
-| [naming](../naming/SKILL.md) | Locked identifiers |
-| [codereview](../codereview/SKILL.md) | Required before every commit |
-| [commitmessage](../commitmessage/SKILL.md) | Required after codereview |
-| [qualitycheck](../qualitycheck/SKILL.md) | End-of-build (and anytime a gate names it) |
+| [PLANNING](../PLANNING/SKILL.md) | Source of truth for scope and sequence |
+| [NAMING](../NAMING/SKILL.md) | Locked identifiers |
+| [CODEREVIEW](../CODEREVIEW/SKILL.md) | Required before every commit |
+| [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) | Required after codereview |
+| [QUALITYCHECK](../QUALITYCHECK/SKILL.md) | End-of-build (and anytime a gate names it) |
 
 ## Out of scope for this skill
 

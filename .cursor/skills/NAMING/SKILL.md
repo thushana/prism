@@ -1,5 +1,5 @@
 ---
-name: naming
+name: NAMING
 description: Use this when naming variables, props, types, files, or identifiers. Apply consistently across the codebase.
 disable-model-invocation: true
 ---
