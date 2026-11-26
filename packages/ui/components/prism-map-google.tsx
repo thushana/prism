@@ -60,6 +60,33 @@ function contentSignature(
   );
 }
 
+/**
+ * Compare an existing polyline path to a candidate. When Maps JS is blocked
+ * (`ApiTargetBlockedMapError`), `getPath()` can throw internally on `getAt` —
+ * treat that as “not the same” and fall through to `setPath`.
+ */
+function polylinePathMatches(
+  poly: google.maps.Polyline,
+  path: google.maps.LatLng[]
+): boolean {
+  try {
+    const prevPath = poly.getPath();
+    if (!prevPath || typeof prevPath.getLength !== "function") return false;
+    if (prevPath.getLength() !== path.length) return false;
+    for (let i = 0; i < path.length; i += 1) {
+      const a = prevPath.getAt(i);
+      const b = path[i]!;
+      if (!a || a.lat() !== b.lat() || a.lng() !== b.lng()) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const GOOGLE_MAPS_BLOCKED_MESSAGE =
+  "Google Maps is blocked for this API key on this host (ApiTargetBlockedMapError). Set GOOGLE_MAPS_WEB_KEY with Maps JavaScript API enabled, and allow this origin in HTTP referrer restrictions (e.g. http://timetraveler.localhost:3800/*).";
+
 export type PrismMapGoogleProps = {
   routes: PrismMapRoute[];
   polygons?: PrismMapPolygon[];
@@ -100,6 +127,15 @@ export function PrismMapGoogle({
     if (!el) return;
 
     let cancelled = false;
+    const mapsWindow = window as Window & {
+      gm_authFailure?: () => void;
+    };
+    const previousAuthFailure = mapsWindow.gm_authFailure;
+    mapsWindow.gm_authFailure = () => {
+      if (cancelled) return;
+      setBootstrapError(GOOGLE_MAPS_BLOCKED_MESSAGE);
+      setMapReady(false);
+    };
 
     void (async () => {
       try {
@@ -147,6 +183,7 @@ export function PrismMapGoogle({
 
     return () => {
       cancelled = true;
+      mapsWindow.gm_authFailure = previousAuthFailure;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- read latest Maps at unmount (not DOM refs)
       const polys = polylineByRouteIdRef.current;
       polys.forEach((p) => p.setMap(null));
@@ -173,169 +210,172 @@ export function PrismMapGoogle({
     const map = mapRef.current;
     if (!map) return;
 
-    const polys = polylineByRouteIdRef.current;
-    const markers = markerByKeyRef.current;
-    const nextIds = new Set<string>();
-    const nextMarkerKeys = new Set<string>();
+    try {
+      const polys = polylineByRouteIdRef.current;
+      const markers = markerByKeyRef.current;
+      const nextIds = new Set<string>();
+      const nextMarkerKeys = new Set<string>();
 
-    routesByIdRef.current.clear();
-    for (const r of routes) {
-      routesByIdRef.current.set(r.id, r);
-    }
+      routesByIdRef.current.clear();
+      for (const r of routes) {
+        routesByIdRef.current.set(r.id, r);
+      }
 
-    const dataLayer = dataLayerRef.current;
-    if (dataLayer) {
-      dataLayer.forEach((feature) => {
-        dataLayer.remove(feature);
-      });
-      const collection = buildPolygonFeatureCollection(polygons);
-      dataLayer.addGeoJson(collection as unknown as object);
-      dataLayer.setStyle((feature) => {
-        const fillColor = String(feature.getProperty("fillColor") ?? "#2563eb");
-        const fillOpacity = Number(feature.getProperty("fillOpacity") ?? 0.28);
-        const strokeColor = String(
-          feature.getProperty("strokeColor") ?? fillColor
+      const dataLayer = dataLayerRef.current;
+      if (dataLayer) {
+        dataLayer.forEach((feature) => {
+          dataLayer.remove(feature);
+        });
+        const collection = buildPolygonFeatureCollection(polygons);
+        dataLayer.addGeoJson(collection as unknown as object);
+        dataLayer.setStyle((feature) => {
+          const fillColor = String(
+            feature.getProperty("fillColor") ?? "#2563eb"
+          );
+          const fillOpacity = Number(
+            feature.getProperty("fillOpacity") ?? 0.28
+          );
+          const strokeColor = String(
+            feature.getProperty("strokeColor") ?? fillColor
+          );
+          const strokeOpacity = Number(
+            feature.getProperty("strokeOpacity") ?? 0.9
+          );
+          const strokeWeight = Number(
+            feature.getProperty("strokeWeight") ?? 2
+          );
+          return {
+            fillColor,
+            fillOpacity,
+            strokeColor,
+            strokeOpacity,
+            strokeWeight,
+          };
+        });
+      }
+
+      for (const route of routes) {
+        const path = decodeEncodedPolyline(route.encodedPolyline).map(
+          ({ lat, lng }) => new google.maps.LatLng(lat, lng)
         );
-        const strokeOpacity = Number(
-          feature.getProperty("strokeOpacity") ?? 0.9
-        );
-        const strokeWeight = Number(feature.getProperty("strokeWeight") ?? 2);
-        return {
-          fillColor,
-          fillOpacity,
-          strokeColor,
-          strokeOpacity,
-          strokeWeight,
-        };
-      });
-    }
+        if (path.length === 0) continue;
 
-    for (const route of routes) {
-      const path = decodeEncodedPolyline(route.encodedPolyline).map(
-        ({ lat, lng }) => new google.maps.LatLng(lat, lng)
-      );
-      if (path.length === 0) continue;
-
-      nextIds.add(route.id);
-      let poly = polys.get(route.id);
-      const z = route.stackOrder ?? 0;
-      if (!poly) {
-        poly = new google.maps.Polyline({
-          path,
-          strokeColor: route.strokeColor,
-          strokeOpacity: route.strokeOpacity ?? 0.2,
-          strokeWeight: route.strokeWeight ?? 3,
-          geodesic: true,
-          zIndex: z,
-          clickable: true,
-          map,
-        });
-        const routeId = route.id;
-        poly.addListener("click", () => {
-          const picked = routesByIdRef.current.get(routeId);
-          if (picked) onRouteSelectionRef.current?.(picked);
-        });
-        polys.set(route.id, poly);
-      } else {
-        poly.setOptions({
-          strokeColor: route.strokeColor,
-          strokeOpacity: route.strokeOpacity ?? 0.2,
-          strokeWeight: route.strokeWeight ?? 3,
-          geodesic: true,
-          zIndex: z,
-        });
-        const prevPath = poly.getPath();
-        const sameLen = prevPath.getLength() === path.length;
-        let samePoints = sameLen;
-        if (sameLen) {
-          for (let i = 0; i < path.length; i += 1) {
-            const a = prevPath.getAt(i);
-            const b = path[i]!;
-            if (a.lat() !== b.lat() || a.lng() !== b.lng()) {
-              samePoints = false;
-              break;
-            }
+        nextIds.add(route.id);
+        let poly = polys.get(route.id);
+        const z = route.stackOrder ?? 0;
+        if (!poly) {
+          poly = new google.maps.Polyline({
+            path,
+            strokeColor: route.strokeColor,
+            strokeOpacity: route.strokeOpacity ?? 0.2,
+            strokeWeight: route.strokeWeight ?? 3,
+            geodesic: true,
+            zIndex: z,
+            clickable: true,
+            map,
+          });
+          const routeId = route.id;
+          poly.addListener("click", () => {
+            const picked = routesByIdRef.current.get(routeId);
+            if (picked) onRouteSelectionRef.current?.(picked);
+          });
+          polys.set(route.id, poly);
+        } else {
+          poly.setOptions({
+            strokeColor: route.strokeColor,
+            strokeOpacity: route.strokeOpacity ?? 0.2,
+            strokeWeight: route.strokeWeight ?? 3,
+            geodesic: true,
+            zIndex: z,
+          });
+          if (!polylinePathMatches(poly, path)) {
+            poly.setPath(path);
           }
         }
-        if (!samePoints) {
-          poly.setPath(path);
+      }
+
+      for (const endpoint of collectMapEndpointMarkers(routes)) {
+        nextMarkerKeys.add(endpoint.id);
+        let marker = markers.get(endpoint.id);
+        const label = ROUTE_ENDPOINT_LABEL[endpoint.kind];
+        const position = {
+          lat: endpoint.position.lat,
+          lng: endpoint.position.lng,
+        };
+        if (!marker) {
+          marker = createGoogleRouteEndpointMarker({
+            map,
+            position,
+            label,
+            fillColor: endpoint.fillColor,
+            fillOpacity: endpoint.fillOpacity,
+            zIndex: endpoint.stackOrder,
+          });
+          markers.set(endpoint.id, marker);
+        } else {
+          updateGoogleRouteEndpointMarker(marker, {
+            position,
+            label,
+            fillColor: endpoint.fillColor,
+            fillOpacity: endpoint.fillOpacity,
+            zIndex: endpoint.stackOrder,
+          });
         }
       }
-    }
 
-    for (const endpoint of collectMapEndpointMarkers(routes)) {
-      nextMarkerKeys.add(endpoint.id);
-      let marker = markers.get(endpoint.id);
-      const label = ROUTE_ENDPOINT_LABEL[endpoint.kind];
-      const position = {
-        lat: endpoint.position.lat,
-        lng: endpoint.position.lng,
-      };
-      if (!marker) {
-        marker = createGoogleRouteEndpointMarker({
-          map,
-          position,
-          label,
-          fillColor: endpoint.fillColor,
-          fillOpacity: endpoint.fillOpacity,
-          zIndex: endpoint.stackOrder,
-        });
-        markers.set(endpoint.id, marker);
-      } else {
-        updateGoogleRouteEndpointMarker(marker, {
-          position,
-          label,
-          fillColor: endpoint.fillColor,
-          fillOpacity: endpoint.fillOpacity,
-          zIndex: endpoint.stackOrder,
-        });
-      }
-    }
-
-    for (const [key, marker] of [...markers.entries()]) {
-      if (!nextMarkerKeys.has(key)) {
-        detachGoogleAdvancedMarker(marker);
-        markers.delete(key);
-      }
-    }
-
-    for (const [id, poly] of [...polys.entries()]) {
-      if (!nextIds.has(id)) {
-        poly.setMap(null);
-        polys.delete(id);
-      }
-    }
-
-    if (routes.length === 0 && polygons.length === 0) {
-      lastGeometrySigRef.current = "";
-      return;
-    }
-
-    const geometrySig = contentSignature(routes, polygons);
-    if (
-      autoFit &&
-      geometrySig.length > 0 &&
-      geometrySig !== lastGeometrySigRef.current
-    ) {
-      lastGeometrySigRef.current = geometrySig;
-      const bounds = new google.maps.LatLngBounds();
-      for (const route of routes) {
-        for (const pt of decodeEncodedPolyline(route.encodedPolyline)) {
-          bounds.extend(new google.maps.LatLng(pt.lat, pt.lng));
+      for (const [key, marker] of [...markers.entries()]) {
+        if (!nextMarkerKeys.has(key)) {
+          detachGoogleAdvancedMarker(marker);
+          markers.delete(key);
         }
       }
-      for (const polygon of polygons) {
-        forEachPolygonPosition(polygon.geometry, (lng, lat) => {
-          bounds.extend(new google.maps.LatLng(lat, lng));
-        });
+
+      for (const [id, poly] of [...polys.entries()]) {
+        if (!nextIds.has(id)) {
+          poly.setMap(null);
+          polys.delete(id);
+        }
       }
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds);
-        const padded = padLatLngBounds(bounds, 0.15);
-        map.setOptions({
-          restriction: { latLngBounds: padded, strictBounds: false },
-        });
+
+      if (routes.length === 0 && polygons.length === 0) {
+        lastGeometrySigRef.current = "";
+        return;
       }
+
+      const geometrySig = contentSignature(routes, polygons);
+      if (
+        autoFit &&
+        geometrySig.length > 0 &&
+        geometrySig !== lastGeometrySigRef.current
+      ) {
+        lastGeometrySigRef.current = geometrySig;
+        const bounds = new google.maps.LatLngBounds();
+        for (const route of routes) {
+          for (const pt of decodeEncodedPolyline(route.encodedPolyline)) {
+            bounds.extend(new google.maps.LatLng(pt.lat, pt.lng));
+          }
+        }
+        for (const polygon of polygons) {
+          forEachPolygonPosition(polygon.geometry, (lng, lat) => {
+            bounds.extend(new google.maps.LatLng(lat, lng));
+          });
+        }
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds);
+          const padded = padLatLngBounds(bounds, 0.15);
+          map.setOptions({
+            restriction: { latLngBounds: padded, strictBounds: false },
+          });
+        }
+      }
+    } catch (e) {
+      const message =
+        e instanceof Error && /getAt|getPath/i.test(e.message)
+          ? GOOGLE_MAPS_BLOCKED_MESSAGE
+          : e instanceof Error
+            ? e.message
+            : "Google Maps overlay update failed";
+      setBootstrapError(message);
     }
   }, [routes, polygons, autoFit, mapReady]);
 
