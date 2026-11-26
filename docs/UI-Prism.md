@@ -369,6 +369,21 @@ Admin demos: **`/admin/prism/components/prism-emoji`**, **`/admin/prism/componen
 
 Admin demo: **`/admin/prism/components/prism-emblem`**.
 
+### Clipboard copy
+
+Deep-link and “copied” controls share one client hook. Visual chrome stays with the caller. History updates stay with the caller too (`replaceState` on headings, `pushState` where a list must hear the hash).
+
+```tsx
+import { prismLocationHashUrl, usePrismClipboardCopy } from "@ui";
+
+const { copied, copyText } = usePrismClipboardCopy();
+
+history.replaceState(null, "", `#${id}`);
+await copyText(prismLocationHashUrl(id, window.location));
+```
+
+`prismLocationHashUrl` takes `{ origin, pathname, search }` so the URL shape is testable without a browser. `copied` clears after `PRISM_CLIPBOARD_COPIED_RESET_MILLISECONDS` (1600). `PrismMarkdownHeading` uses this hook.
+
 ### Layout wrappers (`prism-layout.tsx`)
 
 Width bands and breakout sections (see `styles/layout-wrappers.css`): **`PrismLayoutText`**, **`PrismLayoutMain`**, **`PrismGraphicsMain`**, **`PrismGraphicsLarge`**, **`PrismGraphicsFull`**, **`PrismLayoutBreakout`**, **`PrismLayoutWrapperBar`**, **`PrismLayoutWrappersReference`**. Type **`PrismLayoutWrapperBarVariant`** for reference-bar variants.

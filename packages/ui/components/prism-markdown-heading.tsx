@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@utilities";
 import type { PartialPrismColorSpec } from "../styles/prism-color";
+import {
+  prismLocationHashUrl,
+  usePrismClipboardCopy,
+} from "./prism-clipboard-copy";
 import { PrismIcon } from "./prism-icon";
 import { PrismTypography } from "./prism-typography";
-
-const COPIED_RESET_MS = 1600;
 
 export type PrismMarkdownHeadingProps = {
   as: "h2" | "h3";
@@ -26,23 +28,11 @@ export function PrismMarkdownHeading({
   className,
   children,
 }: PrismMarkdownHeadingProps) {
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), COPIED_RESET_MS);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
+  const { copied, copyText } = usePrismClipboardCopy();
 
   async function handleCopyLink() {
-    const url = `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`;
     history.replaceState(null, "", `#${id}`);
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-    } catch {
-      // Clipboard can fail off secure contexts; the hash is already updated.
-    }
+    await copyText(prismLocationHashUrl(id, window.location));
   }
 
   return (
