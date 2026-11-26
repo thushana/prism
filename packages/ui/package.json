@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@types/google.maps": "^3.67.0",
-    "@types/react": "19.3.0",
+    "@types/react": "19.3.3",
     "material-ui-colors": "^1.0.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
