@@ -1,3 +1,9 @@
+---
+name: codereview
+description: Review all unstaged git changes via `git diff`
+disable-model-invocation: true
+---
+
 Review all unstaged git changes via `git diff`
 
 ## Philosophy, Persona & Structure

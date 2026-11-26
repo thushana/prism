@@ -1,3 +1,9 @@
+---
+name: readme
+description: Cursor slash commands (Prism)
+disable-model-invocation: true
+---
+
 # Cursor slash commands (Prism)
 
 Edit these files here. Parent apps refresh their copy with:

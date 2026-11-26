@@ -1,3 +1,9 @@
+---
+name: commitmessage
+description: Write a commit message for the changes on disk
+disable-model-invocation: true
+---
+
 Write a commit message for the changes on disk
 
 ## Philosophy

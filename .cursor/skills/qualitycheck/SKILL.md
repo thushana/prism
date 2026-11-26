@@ -1,3 +1,9 @@
+---
+name: qualitycheck
+description: 'Run "npm run quality" which typechecks, lints and formats.'
+disable-model-invocation: true
+---
+
 Run "npm run quality" which typechecks, lints and formats.
 
 ## Philosophy

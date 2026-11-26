@@ -1,3 +1,9 @@
+---
+name: chores
+description: Run the monthly dependency and code-health ritual.
+disable-model-invocation: true
+---
+
 Run the monthly dependency and code-health ritual.
 
 **Deterministic runner:** `pnpm run chores` from the app repo root (add `-- --pull`, `--quarterly`, `--help` as needed). Implemented in `prism/scripts/chores.ts`.

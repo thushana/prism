@@ -1,3 +1,9 @@
+---
+name: naming
+description: Use this when naming variables, props, types, files, or identifiers. Apply consistently across the codebase.
+disable-model-invocation: true
+---
+
 Use this when naming variables, props, types, files, or identifiers. Apply consistently across the codebase.
 
 ## Philosophy

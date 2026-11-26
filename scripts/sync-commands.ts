@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
- * Copy prism/.cursor/commands/*.md into parent .cursor/commands/.
- * Cursor's slash-command indexer often skips symlinked command dirs; use real files.
+ * Copy prism/.cursor/skills into the parent .cursor/skills.
+ * Cursor often skips instructions that live only inside the submodule.
  *
  * Re-runs when prism sources are newer than the parent copy (or after submodule updates).
  */
@@ -21,6 +21,8 @@ const PARENT_DIR = isInPrism
   ? path.join(PRISM_DIR, "..")
   : path.join(scriptDir, "..");
 
+const PRISM_SKILLS_DIR = path.join(PRISM_DIR, ".cursor", "skills");
+const PARENT_SKILLS_DIR = path.join(PARENT_DIR, ".cursor", "skills");
 const PRISM_COMMANDS_DIR = path.join(PRISM_DIR, ".cursor", "commands");
 const PARENT_COMMANDS_DIR = path.join(PARENT_DIR, ".cursor", "commands");
 
@@ -46,40 +48,37 @@ function isConsumerAppRoot(): boolean {
   }
 }
 
-function listCommandMarkdownFiles(dir: string): string[] {
+function listSkillNames(dir: string): string[] {
   if (!fs.existsSync(dir)) {
     return [];
   }
-  return fs.readdirSync(dir).filter((name) => name.endsWith(".md"));
+  return fs.readdirSync(dir).filter((name) => {
+    return fs.existsSync(path.join(dir, name, "SKILL.md"));
+  });
 }
 
-function commandsNeedSync(sourceFiles: string[]): boolean {
-  if (!fs.existsSync(PARENT_COMMANDS_DIR)) {
+function skillsNeedSync(skillNames: string[]): boolean {
+  if (!fs.existsSync(PARENT_SKILLS_DIR)) {
     return true;
   }
 
-  const parentStats = fs.lstatSync(PARENT_COMMANDS_DIR);
-  if (parentStats.isSymbolicLink()) {
-    return true;
-  }
-  if (!parentStats.isDirectory()) {
+  const parentStats = fs.lstatSync(PARENT_SKILLS_DIR);
+  if (parentStats.isSymbolicLink() || !parentStats.isDirectory()) {
     return true;
   }
 
-  const parentFiles = listCommandMarkdownFiles(PARENT_COMMANDS_DIR);
-  if (parentFiles.length !== sourceFiles.length) {
+  const parentNames = listSkillNames(PARENT_SKILLS_DIR);
+  if (parentNames.length !== skillNames.length) {
     return true;
   }
 
-  for (const name of sourceFiles) {
-    const sourcePath = path.join(PRISM_COMMANDS_DIR, name);
-    const destPath = path.join(PARENT_COMMANDS_DIR, name);
+  for (const name of skillNames) {
+    const sourcePath = path.join(PRISM_SKILLS_DIR, name, "SKILL.md");
+    const destPath = path.join(PARENT_SKILLS_DIR, name, "SKILL.md");
     if (!fs.existsSync(destPath)) {
       return true;
     }
-    const sourceMtime = fs.statSync(sourcePath).mtimeMs;
-    const destMtime = fs.statSync(destPath).mtimeMs;
-    if (sourceMtime > destMtime) {
+    if (fs.statSync(sourcePath).mtimeMs > fs.statSync(destPath).mtimeMs) {
       return true;
     }
   }
@@ -87,23 +86,30 @@ function commandsNeedSync(sourceFiles: string[]): boolean {
   return false;
 }
 
-function removeParentCommandsDir(): void {
-  if (!fs.existsSync(PARENT_COMMANDS_DIR)) {
+function removeDir(target: string): void {
+  if (!fs.existsSync(target)) {
     return;
   }
-  const stats = fs.lstatSync(PARENT_COMMANDS_DIR);
+  const stats = fs.lstatSync(target);
   if (stats.isSymbolicLink()) {
-    fs.unlinkSync(PARENT_COMMANDS_DIR);
+    fs.unlinkSync(target);
     return;
   }
   if (stats.isDirectory()) {
-    fs.rmSync(PARENT_COMMANDS_DIR, { recursive: true, force: true });
+    fs.rmSync(target, { recursive: true, force: true });
     return;
   }
-  console.error(
-    `❌ ${PARENT_COMMANDS_DIR} exists and is not a directory or symlink`
-  );
+  console.error(`❌ ${target} exists and is not a directory or symlink`);
   process.exit(1);
+}
+
+function prismStillHasCommands(): boolean {
+  if (!fs.existsSync(PRISM_COMMANDS_DIR)) {
+    return false;
+  }
+  return fs
+    .readdirSync(PRISM_COMMANDS_DIR)
+    .some((name) => name.endsWith(".md"));
 }
 
 export function syncCommands(options: SyncCommandsOptions = {}): void {
@@ -123,52 +129,52 @@ export function syncCommands(options: SyncCommandsOptions = {}): void {
   if (!isConsumerAppRoot()) {
     if (!quiet) {
       console.log(
-        "ℹ️  Skipping Cursor commands sync (not a Prism consumer app root)"
+        "ℹ️  Skipping Cursor skills sync (not a Prism consumer app root)"
       );
     }
     return;
   }
 
-  if (!fs.existsSync(PRISM_COMMANDS_DIR)) {
-    fs.mkdirSync(PRISM_COMMANDS_DIR, { recursive: true });
-    if (!quiet) {
-      console.log(`✅ Created ${PRISM_COMMANDS_DIR}`);
-    }
+  if (!prismStillHasCommands()) {
+    removeDir(PARENT_COMMANDS_DIR);
   }
 
-  const sourceFiles = listCommandMarkdownFiles(PRISM_COMMANDS_DIR);
-  if (sourceFiles.length === 0) {
+  const skillNames = listSkillNames(PRISM_SKILLS_DIR);
+  if (skillNames.length === 0) {
     if (!quiet) {
-      console.warn(`⚠️  No .md files in ${PRISM_COMMANDS_DIR}`);
+      console.warn(`⚠️  No skills in ${PRISM_SKILLS_DIR}`);
     }
     return;
   }
 
-  if (!force && !commandsNeedSync(sourceFiles)) {
+  if (!force && !skillsNeedSync(skillNames)) {
     if (!quiet) {
-      console.log("✅ Cursor commands already up to date");
+      console.log("✅ Cursor skills already up to date");
     }
     return;
   }
 
-  const parentCursorDir = path.dirname(PARENT_COMMANDS_DIR);
+  const parentCursorDir = path.dirname(PARENT_SKILLS_DIR);
   if (!fs.existsSync(parentCursorDir)) {
     fs.mkdirSync(parentCursorDir, { recursive: true });
   }
 
-  removeParentCommandsDir();
-  fs.mkdirSync(PARENT_COMMANDS_DIR, { recursive: true });
+  removeDir(PARENT_SKILLS_DIR);
+  fs.mkdirSync(PARENT_SKILLS_DIR, { recursive: true });
 
-  for (const name of sourceFiles) {
+  for (const name of skillNames) {
+    const sourceDir = path.join(PRISM_SKILLS_DIR, name);
+    const destDir = path.join(PARENT_SKILLS_DIR, name);
+    fs.mkdirSync(destDir, { recursive: true });
     fs.copyFileSync(
-      path.join(PRISM_COMMANDS_DIR, name),
-      path.join(PARENT_COMMANDS_DIR, name)
+      path.join(sourceDir, "SKILL.md"),
+      path.join(destDir, "SKILL.md")
     );
   }
 
   if (!quiet) {
     console.log(
-      `✅ Copied ${sourceFiles.length} command file(s) to ${PARENT_COMMANDS_DIR}`
+      `✅ Copied ${skillNames.length} skill(s) to ${PARENT_SKILLS_DIR}`
     );
   }
 }
