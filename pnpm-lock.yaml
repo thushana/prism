@@ -36,7 +36,7 @@ overrides:
   browserslist: 4.29.6
   source-map-js: 1.2.2
   nanoid: 3.3.18
-  postcss: 8.5.26
+  postcss: 8.5.33
   typescript-eslint: ^8.59.3
   '@typescript-eslint/eslint-plugin': ^8.59.3
   '@typescript-eslint/parser': ^8.59.3
@@ -201,10 +201,10 @@ importers:
         version: 1.33.0
       postcss-import:
         specifier: ^17.0.1
-        version: 17.0.1(postcss@8.5.26)
+        version: 17.0.1(postcss@8.5.33)
       postcss-load-config:
         specifier: ^6.0.1
-        version: 6.0.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.15)(yaml@2.9.1)
+        version: 6.0.1(jiti@2.7.0)(postcss@8.5.33)(tsx@4.23.15)(yaml@2.9.1)
       prettier:
         specifier: ^3.10.1
         version: 3.10.1
@@ -4499,14 +4499,14 @@ packages:
     resolution: {integrity: sha512-lthLZRa+sMc/xo+lG7TMUvOviwP9ngR0VULnvfXTyOE3JIc0mFrbjcubI6Jx52X+B3IKt9yfp6wwVWE768JezA==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      postcss: 8.5.26
+      postcss: 8.5.33
 
   postcss-load-config@6.0.1:
     resolution: {integrity: sha512-oPtTM4oerL+UXmx+93ytZVN82RrlY/wPUV8IeDxFrzIjXOLF1pN+EmKPLbubvKHT2HC20xXsCAH2Z+CKV6Oz/g==}
     engines: {node: '>= 18'}
     peerDependencies:
       jiti: '>=1.21.0'
-      postcss: 8.5.26
+      postcss: 8.5.33
       tsx: ^4.8.1
       yaml: ^2.4.2
     peerDependenciesMeta:
@@ -4522,8 +4522,8 @@ packages:
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
 
-  postcss@8.5.26:
-    resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
+  postcss@8.5.33:
+    resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   potpack@2.1.0:
@@ -6839,7 +6839,7 @@ snapshots:
       '@alloc/quick-lru': 5.3.0
       '@tailwindcss/node': 4.3.5
       '@tailwindcss/oxide': 4.3.5
-      postcss: 8.5.26
+      postcss: 8.5.33
       tailwindcss: 4.3.5
 
   '@tybys/wasm-util@0.10.5':
@@ -8910,7 +8910,7 @@ snapshots:
       '@swc/helpers': 0.5.23
       baseline-browser-mapping: 2.11.39
       caniuse-lite: 1.0.30001828
-      postcss: 8.5.26
+      postcss: 8.5.33
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
       styled-jsx: 5.1.6(@babel/core@7.29.13)(react@19.3.1)
@@ -9088,25 +9088,25 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcss-import@17.0.1(postcss@8.5.26):
+  postcss-import@17.0.1(postcss@8.5.33):
     dependencies:
-      postcss: 8.5.26
+      postcss: 8.5.33
       postcss-value-parser: 4.2.0
       read-cache: 1.0.2
       resolve: 1.22.14
 
-  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.15)(yaml@2.9.1):
+  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.33)(tsx@4.23.15)(yaml@2.9.1):
     dependencies:
       lilconfig: 3.1.5
     optionalDependencies:
       jiti: 2.7.0
-      postcss: 8.5.26
+      postcss: 8.5.33
       tsx: 4.23.15
       yaml: 2.9.1
 
   postcss-value-parser@4.2.0: {}
 
-  postcss@8.5.26:
+  postcss@8.5.33:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
@@ -9823,7 +9823,7 @@ snapshots:
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.26
+      postcss: 8.5.33
       rolldown: 1.2.19
       tinyglobby: 0.2.17
     optionalDependencies:
