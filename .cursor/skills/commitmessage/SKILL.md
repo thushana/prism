@@ -6,6 +6,10 @@ disable-model-invocation: true
 
 Write a commit message for the changes on disk
 
+## Before committing
+
+**Run [codereview](../codereview/SKILL.md) first** on the unstaged changes and fix Critical / Important findings. Do not write the commit message or commit until that review has run in this turn (or the user explicitly waived it).
+
 ## Philosophy
 
 **One authoritative representation.** The commit message should capture _what_ changed and _why_ (if non-obvious), not _how_ (the code shows that). Be concise but descriptive enough that someone reading git log understands the change.

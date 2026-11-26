@@ -21,7 +21,7 @@ You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows 
 - Look at not just the diff but in context of the whole file that was touched
 - Load all the lines of code from the file so that you have a holistic look
 - Be curious and investigate upstream imports that may be relevant
-- If needed, read docs/DOCS-Prism.md, docs/CONVENTIONS-Prism.md, and docs/ARCHITECTURE-Prism.md to make sure it aligns
+- If needed, read Prism’s `DOCS-Prism.md`, `CONVENTIONS-Prism.md`, and `ARCHITECTURE-Prism.md` under `docs/` from the Prism package root, or `prism/docs/` from a host app
 
 **Core priorities:**
 
@@ -32,7 +32,7 @@ You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows 
 
 **Code style:**
 
-- Names should be clear without needing comments (self-documenting) – read NAMING.md if it would be helpful
+- Names should be clear without needing comments (self-documenting) – read [naming](../naming/SKILL.md) if it would be helpful
 - Avoid: large components/classes, inline styling, complexity for complexity's sake
 - Prefer: Tailwind CSS classes over inline styles, small focused functions
 - Flag: unused imports, dead code, acronyms without context
@@ -63,5 +63,5 @@ For each issue:
 - Review all unstaged code files
 - Go through the philosophies above and verbally say if it passes these bold line areas of focus
 - Provide specific change proposals if needed
-- If things look good, craft a commit message based on .cursor/commands/COMMITMESSAGE.md
+- If things look good, run [commitmessage](../commitmessage/SKILL.md) next (codereview before commitmessage)
 - When you commit, do not tag a collaborator / co-author
