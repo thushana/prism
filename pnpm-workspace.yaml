@@ -14,7 +14,7 @@ overrides:
   "@better-auth/drizzle-adapter": 1.7.28
   better-auth: 1.7.28
   # Keep a single peer graph so plugin HookEndpointContext types unify.
-  better-call: 1.4.5
+  better-call: 1.4.6
   "@better-auth/utils": 0.5.1
   "@better-fetch/fetch": 1.3.3
   "@opentelemetry/api": 1.9.1
