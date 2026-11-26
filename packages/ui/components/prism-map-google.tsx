@@ -241,9 +241,7 @@ export function PrismMapGoogle({
           const strokeOpacity = Number(
             feature.getProperty("strokeOpacity") ?? 0.9
           );
-          const strokeWeight = Number(
-            feature.getProperty("strokeWeight") ?? 2
-          );
+          const strokeWeight = Number(feature.getProperty("strokeWeight") ?? 2);
           return {
             fillColor,
             fillOpacity,
@@ -375,7 +373,7 @@ export function PrismMapGoogle({
           : e instanceof Error
             ? e.message
             : "Google Maps overlay update failed";
-      setBootstrapError(message);
+      queueMicrotask(() => setBootstrapError(message));
     }
   }, [routes, polygons, autoFit, mapReady]);
 
