@@ -22,9 +22,17 @@ import { PrismTypography } from "./prism-typography";
 /**
  * Line tones match {@link PrismDivider}: **`default`** = active **`prismColor`** swatch + shade;
  * **`muted`** = that family’s **100** tint; **`rich`** = theme primary; **`white`** / **`black`** fixed.
- * **`swatch`** is a legacy alias of **`default`** (same paint).
+ * **`swatch`** is a legacy alias of **`default`** (same paint). Callers may still pass it.
  */
 export type PrismTableLineTone = PrismDividerTone | "swatch";
+
+/** `swatch` paints as `default`. The variant map only knows divider tones. */
+function normalizePrismTableLineTone(
+  tone: PrismTableLineTone | undefined
+): PrismDividerTone | undefined {
+  if (tone === "swatch") return "default";
+  return tone;
+}
 
 /** Column rules: `none` removes vertical borders between cells. */
 export type PrismTableColumnLineWeight = PrismDividerLineWeight | "none";
@@ -62,7 +70,6 @@ const prismTableRowBorderVariants = cva("", {
       default: "[border-bottom-color:var(--prism-table-line)]",
       rich: "border-primary",
       black: "[border-bottom-color:rgb(0_0_0/0.82)]",
-      swatch: "[border-bottom-color:var(--prism-table-line)]",
     },
   },
   defaultVariants: {
@@ -288,8 +295,7 @@ function resolveTableLineToneCss(
   tone: PrismTableLineTone | undefined,
   prismColor: PartialPrismColorSpec
 ): string {
-  switch (tone ?? "default") {
-    case "swatch":
+  switch (normalizePrismTableLineTone(tone) ?? "default") {
     case "default":
       return (
         resolvePrismSwatchLineCss(prismColor) ?? "hsl(var(--foreground) / 0.18)"
@@ -713,7 +719,7 @@ function PrismTable({
       ? ""
       : prismTableRowBorderVariants({
           lineWeight: rowLineWeight,
-          lineTone: rowLineTone,
+          lineTone: normalizePrismTableLineTone(rowLineTone),
         });
 
   const outerFrameBorderActive =
