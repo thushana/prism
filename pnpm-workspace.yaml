@@ -24,7 +24,7 @@ overrides:
   vite: 8.3.8
   next: 16.4.6
   eslint-config-next: 16.4.6
-  lucide-react: 1.74.0
+  lucide-react: 1.81.0
   chalk: 6.0.1
   maplibre-gl: 6.19.0
   react: 19.3.1
