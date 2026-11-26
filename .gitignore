@@ -27,6 +27,9 @@ node_modules.bak/
 # production
 /build
 **/build
+# Keep the Prism agent skill named "build" (not a production build output)
+!.cursor/skills/build/
+!.cursor/skills/build/**
 
 # misc
 .DS_Store

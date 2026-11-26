@@ -101,9 +101,13 @@ Files:
 - `kebab-file-name.ts` — ...
 ```
 
+## After the plan is approved
+
+Hand off to [build](../build/SKILL.md) to execute: it shards independent work to subagents when safe, runs phase gates, then codereview → commitmessage per planned commit.
+
 ## Out of scope for this skill
 
-- Full copies of codereview / commitmessage / naming rules
+- Full copies of build / codereview / commitmessage / naming rules
+- Executing the plan (that is build)
 - Mandatory red-green-refactor per step
-- Parallel-wave / subagent executor machinery
 - Speculative features, premature abstractions, or parallel names for the same concept
