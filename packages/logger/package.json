@@ -14,7 +14,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.10",
+    "@types/node": "^26.6.11",
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/coverage-v8": "^5.1.2",
     "typescript": "^7.0.2",

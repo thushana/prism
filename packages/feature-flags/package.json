@@ -12,8 +12,8 @@
     "next": "*"
   },
   "devDependencies": {
-    "@types/node": "^26.6.10",
-    "flags": "^4.5.1",
+    "@types/node": "^26.6.11",
+    "flags": "^4.5.3",
     "typescript": "^7.0.2",
     "vitest": "^5.1.2"
   },
