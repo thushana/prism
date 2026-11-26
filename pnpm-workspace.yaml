@@ -35,7 +35,7 @@ overrides:
   kysely: 0.29.9
   undici: ">=8.12.2"
   tar: ">=7.5.19"
-  "brace-expansion@>=4.0.0": 5.0.13
+  "brace-expansion@>=4.0.0": 5.1.0
   "brace-expansion@<2.0.0": 1.1.22
   browserslist: 4.29.6
   source-map-js: 1.2.4
