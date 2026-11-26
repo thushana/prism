@@ -2,7 +2,7 @@
 
 Human-friendly, path-first URLs for Prism apps.
 
-**See also**: [NAMING.md](../.cursor/commands/NAMING.md) (identifier naming), [CONVENTIONS-Prism.md](./CONVENTIONS-Prism.md) (code style).
+**See also**: [NAMING](../.cursor/skills/NAMING/SKILL.md) (identifier naming), [CONVENTIONS-Prism.md](./CONVENTIONS-Prism.md) (code style).
 
 ## Philosophy
 
@@ -49,7 +49,7 @@ List search uses the **`q`** query param only — page and sort stay in the path
 
 ### Sort segments
 
-- **Column** — Matches the table column id (`name`, `address`, `members`, `kind`). Same vocabulary as props and types ([NAMING.md](../.cursor/commands/NAMING.md)).
+- **Column** — Matches the table column id (`name`, `address`, `members`, `kind`). Same vocabulary as props and types ([NAMING](../.cursor/skills/NAMING/SKILL.md)).
 - **Direction** — Full words: `ascending` or `descending` (not `asc` / `desc`).
 
 ### Legacy query URLs

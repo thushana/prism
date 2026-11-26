@@ -220,7 +220,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Naming Conventions
 
-- **No Acronyms**: Use full words for package and folder names (e.g., "database" not "db", "utilities" not "utils"). For identifiers (props, types, constants), follow [NAMING.md](../.cursor/commands/NAMING.md), including its small allowlist (`api`, `ui`, …) where appropriate.
+- **No Acronyms**: Use full words for package and folder names (e.g., "database" not "db", "utilities" not "utils"). For identifiers (props, types, constants), follow [NAMING](../.cursor/skills/NAMING/SKILL.md), including its small allowlist (`api`, `ui`, …) where appropriate.
 - **Kebab-case**: For file and directory names
 - **PascalCase**: For React components and TypeScript types
 - **camelCase**: For functions and variables
@@ -236,7 +236,7 @@ Shared CLI utilities used by generator/ops commands:
 
 ### Git Workflow
 
-- **Commits**: Use descriptive commit messages (see [COMMIT-Prism.md](./COMMIT-Prism.md) and `.cursor/commands/COMMITMESSAGE.md` in consuming repos)
+- **Commits**: Use descriptive commit messages (see [COMMIT-Prism.md](./COMMIT-Prism.md) and `.cursor/skills/COMMIT/SKILL.md`)
 - **File Moves**: Use `git mv` to preserve file history
 - **Hooks**: Pre-commit hooks run format, lint, and typecheck
 - **CI**: GitHub Actions runs quality checks on every push

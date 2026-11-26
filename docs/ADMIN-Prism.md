@@ -2,7 +2,7 @@
 
 Every Prism app ships with a password-protected `/admin` section. This doc covers the mental model and what each piece is for. Exact props and signatures live in `packages/authentication/source/`.
 
-Naming for admin shell props and the shared title map follows [NAMING.md](../.cursor/commands/NAMING.md) (camelCase props, PascalCase types, `SCREAMING_SNAKE_CASE` for app-level constants such as `ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX`).
+Naming for admin shell props and the shared title map follows [NAMING](../.cursor/skills/NAMING/SKILL.md) (camelCase props, PascalCase types, `SCREAMING_SNAKE_CASE` for app-level constants such as `ADMIN_PATH_BAR_TITLE_BY_PATH_PREFIX`).
 
 ## Application config
 

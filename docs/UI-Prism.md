@@ -58,7 +58,7 @@ import { satoshi, sentient, zodiak, gambarino } from "@ui";
 
 ### PrismPathBar
 
-Path row for admin-style navigation: **explicit** `mode="explicit"` with **`segments`**, or **auto** mode from `pathname` + authoritative **`titleByPathPrefix`** and **`pageTitle`** (see `buildPrismPathBarAutoSegmentList` in `prism-path-segments.ts`). Prop names follow [NAMING.md](../.cursor/commands/NAMING.md). Crumbs use **Next `Link`** and **`PrismTypography`** (not `PrismButton`). The UI package lists **Next** as a `peerDependency`; `PrismPathBar` imports `next/link` accordingly.
+Path row for admin-style navigation: **explicit** `mode="explicit"` with **`segments`**, or **auto** mode from `pathname` + authoritative **`titleByPathPrefix`** and **`pageTitle`** (see `buildPrismPathBarAutoSegmentList` in `prism-path-segments.ts`). Prop names follow [NAMING](../.cursor/skills/NAMING/SKILL.md). Crumbs use **Next `Link`** and **`PrismTypography`** (not `PrismButton`). The UI package lists **Next** as a `peerDependency`; `PrismPathBar` imports `next/link` accordingly.
 
 Types: **`PrismPathBarSegment`**, **`PrismPathBarTitleEntry`**, **`PrismPathBarIcon`**.
 
@@ -898,7 +898,7 @@ Prism UI follows the industry pattern often called **variant axes** (discriminat
 - Reuse **`PrismSize`** if the component has a stepped scale aligned with buttons/icons/type.
 - Motion opt-outs: **`disable*`** only.
 - Export **`*Props`** types from the component module when consumers need them.
-- Update **this file** and, if applicable, **`prism/.cursor/commands/NAMING.md`** in the same change.
+- Update **this file** and, if applicable, **`prism/.cursor/skills/NAMING/SKILL.md`** in the same change.
 
 ---
 

@@ -1,13 +1,13 @@
 ---
-name: QUALITYCHECK
+name: CHECK
 description: >-
   Run `pnpm run quality` (format, lint, typecheck, knip, tests for the app and
   Prism) and fix failures until it passes. Use before committing or when the
-  user asks for /QUALITYCHECK.
+  user asks for /CHECK.
 disable-model-invocation: true
 ---
 
-# Quality check
+# Check
 
 **Code quality is not optional.** Fix errors iteratively until every check passes. Goal: a commitable, deployable tree.
 

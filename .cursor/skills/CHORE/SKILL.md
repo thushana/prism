@@ -1,12 +1,12 @@
 ---
-name: CHORES
+name: CHORE
 description: >-
   Run the monthly dependency and code-health ritual (report-only by default).
-  Use when the user asks for /CHORES, monthly chores, or a health pass.
+  Use when the user asks for /CHORE, monthly chores, or a health pass.
 disable-model-invocation: true
 ---
 
-# Chores
+# Chore
 
 **Source of truth:** `PROJECT-HEALTH-Prism.md` §6 “For agents” — at `prism/docs/` from a host app, or `docs/` from the Prism root. Read it before acting; it defines modes, guardrails, the deliverable, and apply/commit steps. This skill only picks the mode.
 
@@ -18,11 +18,11 @@ disable-model-invocation: true
 
 | User said | Mode |
 |-----------|------|
-| (nothing / `/CHORES` / chores / health pass) | `report-only` |
+| (nothing / `/CHORE` / chores / health pass) | `report-only` |
 | `apply-updates`, “apply the updates”, named packages to bump | `apply-updates` (only what they approved) |
 | `quarterly` | `quarterly` (+ `report-only` unless they also said apply) |
 | “commit”, “push” | allow §6 step 7 **only** when combined with an explicit apply or they confirm changes |
 
 **Deliverable (report-only):** the short sections listed in §6 (toolchain, git/submodule, outdated, dependency sync dry-run, audit, knip, quality, build, recommended next actions) and an explicit “no changes made”.
 
-**Commits:** follow [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) when the user asked to commit.
+**Commits:** follow [COMMIT](../COMMIT/SKILL.md) when the user asked to commit.

@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 # Prism Cursor skills
 
-Edit skills under `prism/.cursor/skills/<NAME>/SKILL.md`. Folder and frontmatter `name` are **ALLCAPS** so Prism skills are easy to spot next to other agents’ skills.
+Edit skills under `prism/.cursor/skills/<NAME>/SKILL.md`. Folder and frontmatter `name` are **ALLCAPS** so Prism skills are easy to spot next to other agents’ skills. Slash names are short imperatives in one grammar space (`/PLAN`, `/BUILD`, `/COMMIT`, …).
 
 Parent apps refresh their copy with:
 
@@ -28,6 +28,6 @@ That **copies** `prism/.cursor/skills/*/SKILL.md` → `.cursor/skills/` (real fi
 
 Edit skills **only under `prism/.cursor/skills/`** — the parent copy is generated.
 
-Cursor’s skill / slash menu should list `BUILD`, `CHORES`, `CODEREVIEW`, `COMMITMESSAGE`, `NAMING`, `PLANNING`, `QUALITYCHECK`, `README` after sync. If skills are missing, run sync again and fully quit Cursor (`Cmd+Q`), then reopen.
+Cursor’s skill / slash menu should list `BUILD`, `CHECK`, `CHORE`, `COMMIT`, `NAMING`, `PLAN`, `README`, `REVIEW` after sync. If skills are missing, run sync again and fully quit Cursor (`Cmd+Q`), then reopen.
 
 **Do not** symlink `.cursor/skills` to prism — Cursor often does not index symlinked skill directories.

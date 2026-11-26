@@ -3,21 +3,21 @@ name: BUILD
 description: >-
   Execute an approved implementation plan: shard independent work to
   subagents when safe, run phases in order, verify gates, then
-  CODEREVIEW → COMMITMESSAGE per planned commit. Use when building,
+  REVIEW → COMMIT per planned commit. Use when building,
   implementing a plan, or the user asks to execute /BUILD.
 disable-model-invocation: true
 ---
 
 # Build
 
-Partner to [PLANNING](../PLANNING/SKILL.md). The plan already did the thinking — **execute it**. You are the orchestrator: keep coordination in this session; give workers only what they need.
+Partner to [PLAN](../PLAN/SKILL.md). The plan already did the thinking — **execute it**. You are the orchestrator: keep coordination in this session; give workers only what they need.
 
 **Scale:** same as planning — small Next.js / Prism apps. DRY, YAGNI, question every abstraction. Prefer idiomatic patterns already in the tree.
 
 ## Prerequisites
 
-1. An **approved** plan in planning shape (Why / Success / How / Commits / Names). If none exists, run planning first — do not invent a shadow plan mid-build.
-2. Read [PLANNING](../PLANNING/SKILL.md), [CODEREVIEW](../CODEREVIEW/SKILL.md), [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md), [NAMING](../NAMING/SKILL.md), and [QUALITYCHECK](../QUALITYCHECK/SKILL.md).
+1. An **approved** plan in planning shape (Why / Success / How / Commits / Names). If none exists, run [PLAN](../PLAN/SKILL.md) first — do not invent a shadow plan mid-build.
+2. Read [PLAN](../PLAN/SKILL.md), [REVIEW](../REVIEW/SKILL.md), [COMMIT](../COMMIT/SKILL.md), [NAMING](../NAMING/SKILL.md), and [CHECK](../CHECK/SKILL.md).
 3. Reuse the plan’s Names verbatim. Do not invent parallel terms.
 
 ## Orchestrator rules
@@ -32,8 +32,8 @@ Partner to [PLANNING](../PLANNING/SKILL.md). The plan already did the thinking �
 
 1. Irreversible or destructive operations  
 2. Security-sensitive actions  
-3. Side effects outside this worktree that norms say to confirm (merge, push to shared branch, publish) — unless the user already ordered commit/push via commitmessage  
-4. Plan so broken that every path forward is a guess → return to planning  
+3. Side effects outside this worktree that norms say to confirm (merge, push to shared branch, publish) — unless the user already ordered commit/push via COMMIT, or this is the plan’s **final** commit (which pushes once)  
+4. Plan so broken that every path forward is a guess → return to [PLAN](../PLAN/SKILL.md)  
 
 ## Shard decision
 
@@ -44,7 +44,7 @@ Before each How phase (or within a phase that has independent steps), classify w
 | One small phase, same files, or tight sequential deps | **Inline** in this session |
 | Independent steps, **disjoint files**, no shared mutable state | **Parallel subagents** (`Task` / `generalPurpose`) |
 | Broad “how does X work?” before coding | **Explore** subagent(s); synthesize, then build |
-| Fresh eyes on a finished commit scope | **codereview** (this session or a read-focused subagent); never skip before commitmessage |
+| Fresh eyes on a finished commit scope | **review** (this session or a read-focused subagent); never skip before COMMIT |
 | Same file touched by two workers | **Never parallel** — one owner |
 
 **Parallel rules (pragmatic):**
@@ -71,10 +71,10 @@ Before each How phase (or within a phase that has independent steps), classify w
    - If the plan is wrong: smallest ruling, continue (or stop if condition 4).
 4. **For each planned commit** (after its phase scope is green):
    - Run `pnpm run quality:quick` so formatting, lint, and type fixes land in this commit, not a straggler.
-   - Run [CODEREVIEW](../CODEREVIEW/SKILL.md) on uncommitted changes; fix Critical / Important.
-   - Run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) (commit/push/version rules live there).
-   - Never COMMITMESSAGE before CODEREVIEW.
-5. **After all commits:** run the full [QUALITYCHECK](../QUALITYCHECK/SKILL.md) (adds knip, tests, and the partner repo). If it changes anything, fix, CODEREVIEW, and commit as a follow-up.
+   - Run [REVIEW](../REVIEW/SKILL.md) on uncommitted changes; fix Critical / Important.
+   - Run [COMMIT](../COMMIT/SKILL.md) (commit / push / version rules live there). Honor the plan’s **interim vs final** markers: local commit only on interim; bump + tag + push only on final.
+   - Never COMMIT before REVIEW.
+5. **After all commits:** run the full [CHECK](../CHECK/SKILL.md) (adds knip, tests, and the partner repo). If it changes anything, fix, REVIEW, and COMMIT as a follow-up that **may push** (so CI sees the green tree once — fold into the plan’s final commit when possible).
 6. **Close out.** Summarize: what shipped, rulings made, any deferred minors. Point at commits. Do not reopen planning unless Success is unmet.
 
 ## Worker brief (when dispatching)
@@ -88,21 +88,21 @@ Give each implementer subagent:
 5. Constraints: DRY, YAGNI, no new abstractions unless the plan named them; follow existing patterns  
 6. Report format: `DONE | DONE_WITH_CONCERNS | BLOCKED` + files + verify evidence + concerns  
 
-Implementers do **not** run commitmessage (orchestrator does, after codereview). Implementers do **not** spawn their own reviewers.
+Implementers do **not** run COMMIT (orchestrator does, after REVIEW). Implementers do **not** spawn their own reviewers.
 
 ## Partner skills
 
 | Skill | Role in build |
 |-------|----------------|
-| [PLANNING](../PLANNING/SKILL.md) | Source of truth for scope and sequence |
+| [PLAN](../PLAN/SKILL.md) | Source of truth for scope and sequence |
 | [NAMING](../NAMING/SKILL.md) | Locked identifiers |
-| [CODEREVIEW](../CODEREVIEW/SKILL.md) | Required before every commit |
-| [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) | Required after codereview |
-| [QUALITYCHECK](../QUALITYCHECK/SKILL.md) | End-of-build (and anytime a gate names it) |
+| [REVIEW](../REVIEW/SKILL.md) | Required before every commit |
+| [COMMIT](../COMMIT/SKILL.md) | Required after review |
+| [CHECK](../CHECK/SKILL.md) | End-of-build (and anytime a gate names it) |
 
 ## Out of scope for this skill
 
-- Writing or rewriting the plan (that is planning)
+- Writing or rewriting the plan (that is PLAN)
 - Mandatory TDD / red-green on every step (use gates the plan named)
 - Superpowers-style ledger scripts, worktree mandates, or per-task reviewer ceremony
 - Parallel edits to the same files

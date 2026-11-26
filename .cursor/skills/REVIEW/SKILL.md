@@ -1,13 +1,13 @@
 ---
-name: CODEREVIEW
+name: REVIEW
 description: >-
   Review all uncommitted changes (including new files and the prism submodule)
   for bugs, maintainability, and Prism conventions. Use before every commit or
-  when the user asks for /CODEREVIEW.
+  when the user asks for /REVIEW.
 disable-model-invocation: true
 ---
 
-# Code review
+# Review
 
 ## What to review
 
@@ -78,4 +78,4 @@ Then go through the bold areas above (Core priorities, Code style, Philosophy ch
 
 - Look at relevant documentation in `docs/` (host) or Prism docs if you need context
 - Fix 🔴 Critical and 🟠 Important findings (or get the user to waive them) before moving on; list 🟡 items without blocking
-- If things look good, run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) next (CODEREVIEW before COMMITMESSAGE)
+- If things look good, run [COMMIT](../COMMIT/SKILL.md) next (REVIEW before COMMIT)

@@ -71,7 +71,7 @@ Same as [TimeTraveler](https://github.com/thushana/timetraveler): **`husky`** in
 
 ### Deferred upgrades (not routine chores)
 
-These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
+These need a **dedicated pass**, not batch 1–2 of `/CHORE`:
 
 | Upgrade             | Status                                        | What to plan for                                                                                                                                                                            |
 | ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,7 +87,7 @@ These need a **dedicated pass**, not batch 1–2 of `/CHORES`:
 4. **Verify** — `pnpm run typecheck` (app + `cd prism && pnpm run typecheck`), `pnpm run lint`, `pnpm run test:run`, `pnpm run build` in both trees.
 5. **Known good news** — a trial bump to TS 7.0.2 on this repo passed **typecheck** with no source changes; breakage is expected in **config + tooling**, not app logic.
 
-Recent security/tooling floor (Oct 2026): **next ≥16.3.8**, **better-auth 1.7.18**, **vitest 5.0.3**, tooling bumps via `/CHORES` batches 1–2. Exact pins: `package.json` / lockfiles.
+Recent security/tooling floor (Oct 2026): **next ≥16.3.8**, **better-auth 1.7.18**, **vitest 5.0.3**, tooling bumps via `/CHORE` batches 1–2. Exact pins: `package.json` / lockfiles.
 
 ## 6. Monthly dependency & code health ritual
 
@@ -95,7 +95,7 @@ Recent security/tooling floor (Oct 2026): **next ≥16.3.8**, **better-auth 1.7.
 
 Use this after merging Dependabot PRs or whenever things feel “stale.” All commands assume the **app repo root** (parent of `prism/` for embedder apps) unless noted.
 
-**Cursor:** run **`/CHORES`** — thin wrapper; this section is the source of truth.
+**Cursor:** run **`/CHORE`** — thin wrapper; this section is the source of truth.
 
 **CLI:** `pnpm run chores` from the app repo root runs the **(report)** steps deterministically (`prism/scripts/chores.ts`). Flags: `--pull`, `--quarterly`, `--skip-quality`, `--strict`, `--help`.
 
@@ -105,7 +105,7 @@ Use this after merging Dependabot PRs or whenever things feel “stale.” All c
 
 | Mode                | When                                                                       | What to do                                                                                                                                                                                        |
 | ------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`report-only`**   | Default; user said `/CHORES`, “monthly chores”, “health pass”, etc.        | Run steps below marked **(report)**. Summarize findings. **Do not** change deps, lockfiles, submodule SHA, or git state beyond `git pull` / `submodule update --init`. **Do not** commit or push. |
+| **`report-only`**   | Default; user said `/CHORE`, “monthly chores”, “health pass”, etc.        | Run steps below marked **(report)**. Summarize findings. **Do not** change deps, lockfiles, submodule SHA, or git state beyond `git pull` / `submodule update --init`. **Do not** commit or push. |
 | **`apply-updates`** | User approved specific bumps from a prior report (or said “apply updates”) | Run **(apply)** steps only for what they approved, then **(verify)** again. Commit/push **only** if they asked.                                                                                   |
 | **`quarterly`**     | User said “quarterly”                                                      | Same as `report-only`, plus **(quarterly)** steps. Still no **(apply)** unless they also said `apply-updates`.                                                                                    |
 
