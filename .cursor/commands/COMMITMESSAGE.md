@@ -54,6 +54,37 @@ If only `prism/` was committed, push step 1 only. If only the parent was committ
 
 Never push the parent first when the commit updates the `prism` submodule reference — clones and CI will point at a missing SHA.
 
----
+## Prism version
 
-Ask the user if they'd like you to commit. If yes, follow the commit and push order above.
+Prism has one version: `version` in `prism/package.json`. Host apps consume a submodule SHA, not published packages. Leave the `version` fields in `packages/*`, `apps/*`, and `tools/` alone.
+
+The line is `0.x` until an intentional `1.0.0`. While it is `0.x`:
+
+- **patch** (`0.1.0` → `0.1.1`): bugfix, security fix, compatible dependency bump, refactor or performance change with the same exports, docs
+- **minor** (`0.1.0` → `0.2.0`): new public API, and any breaking change (renamed or removed export, required config or migration, behavior a host must adapt to)
+- **major**: only for an intentional `1.0.0`. Do not choose `1.0.0` as part of a normal change
+
+Skip the bump when the commit only touches `.cursor/`.
+
+If one commit mixes a break and a fix, use the higher bump. Bump inside that same Prism commit:
+
+1. Read `version` from `prism/package.json`.
+2. Write the next version into that file and include it in the commit.
+
+After that commit, with a clean `prism/` tree:
+
+1. From inside `prism/`, tag that commit: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
+2. Push the branch, then the tag: `git push origin vX.Y.Z`.
+3. Then commit and push the parent, in the push order above.
+
+Do not move a tag that already exists. If several qualifying Prism commits land in one session, bump and tag each one.
+
+When the parent commit only advances the submodule pointer, name the Prism version in that message (`Take Prism v0.2.0`).
+
+`0.1.0` is the baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
+
+## Commit
+
+Commit and push. Do not ask for confirmation first.
+
+Follow the commit order, push order, and Prism version rules above. Still stop without committing when the user said not to commit or not to push, the diff contains secrets (`.env`, credentials), or the tag already exists.
