@@ -1,10 +1,13 @@
 ---
 name: COMMITMESSAGE
-description: Write a commit message for the changes on disk
+description: >-
+  Write a one-line commit message for the changes on disk, bump and tag
+  versions, then commit and push (prism first). Use after CODEREVIEW or when
+  the user asks for /COMMITMESSAGE.
 disable-model-invocation: true
 ---
 
-Write a commit message for the changes on disk
+# Commit message
 
 ## Before committing
 
@@ -17,7 +20,7 @@ Write a commit message for the changes on disk
 ## Rules
 
 - One line only
-- Cover all unstaged changes in the commit holistically
+- Cover all uncommitted changes in that repo holistically (stage with `git add -A`, including new files); when running a planned commit from BUILD, cover only that commit's scope
 - Format: **Emoji** + **ALL CAPS** slug + dash + brief description
 - Do not add Co-authored-by or tag collaborators on commits
 
@@ -44,7 +47,7 @@ Return it as a copyable Markdown block
 
 ## Commit and push (repos with a `prism/` submodule)
 
-**TimeTraveler** (and similar apps): run `pnpm prism:sync:commands` so `.cursor/commands/` is a copy of this folder.
+Applies to host apps (City Observatory, TimeTraveler, …). A Prism change and its host change get **separate** messages — one per repo.
 
 ### Commit order
 
@@ -91,9 +94,7 @@ After that commit, with a clean `prism/` tree:
 
 Do not move a tag that already exists. If several qualifying Prism commits land in one session, bump and tag each one.
 
-When the parent commit only advances the submodule pointer, name the Prism version in that message (`Take Prism v0.2.0`). That parent commit still follows **Host app version** below (Take Prism = host patch).
-
-`0.1.0` is the baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
+When the parent commit only advances the submodule pointer, name the Prism version in that message (`🔧 PRISM - Take Prism v0.2.0`). That parent commit still follows **Host app version** below (Take Prism = host patch).
 
 ## Host app version
 
@@ -118,8 +119,6 @@ After that commit, with a clean parent tree:
 2. Push the branch, then the tag: `git push origin vX.Y.Z`.
 
 Do not move a tag that already exists. If several qualifying parent commits land in one session, bump and tag each one.
-
-`0.1.0` is the host baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
 
 ## Commit
 

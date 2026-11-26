@@ -1,14 +1,16 @@
 ---
 name: CHORES
-description: Run the monthly dependency and code-health ritual.
+description: >-
+  Run the monthly dependency and code-health ritual (report-only by default).
+  Use when the user asks for /CHORES, monthly chores, or a health pass.
 disable-model-invocation: true
 ---
 
-Run the monthly dependency and code-health ritual.
+# Chores
 
-**Deterministic runner:** `pnpm run chores` from the app repo root (add `-- --pull`, `--quarterly`, `--help` as needed). Implemented in `prism/scripts/chores.ts`.
+**Source of truth:** `PROJECT-HEALTH-Prism.md` §6 “For agents” — at `prism/docs/` from a host app, or `docs/` from the Prism root. Read it before acting; it defines modes, guardrails, the deliverable, and apply/commit steps. This skill only picks the mode.
 
-**Source of truth:** [PROJECT-HEALTH-Prism.md §6 — For agents](../../../docs/PROJECT-HEALTH-Prism.md#for-agents-cursor--automation) (modes, guardrails, apply/commit steps). The script runs **report** steps only; apply-updates and commit remain manual or agent-driven.
+**Deterministic runner:** `pnpm run chores` from the app repo root (`prism/scripts/chores.ts`). It runs the **report** steps only. Flags: `-- --pull`, `--quarterly`, `--skip-quality`, `--strict`, `--help`. Apply-updates and commit remain agent-driven.
 
 **Working directory:** app repo root (directory that contains `prism/` for embedder apps).
 
@@ -19,6 +21,8 @@ Run the monthly dependency and code-health ritual.
 | (nothing / `/CHORES` / chores / health pass) | `report-only` |
 | `apply-updates`, “apply the updates”, named packages to bump | `apply-updates` (only what they approved) |
 | `quarterly` | `quarterly` (+ `report-only` unless they also said apply) |
-| “commit”, “push” | allow step 7 **only** when combined with an explicit apply or they confirm changes |
+| “commit”, “push” | allow §6 step 7 **only** when combined with an explicit apply or they confirm changes |
 
-**Commits:** follow [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) when the user asked to commit; submodule push order is in §6 step 7.
+**Deliverable (report-only):** the short sections listed in §6 (toolchain, git/submodule, outdated, dependency sync dry-run, audit, knip, quality, build, recommended next actions) and an explicit “no changes made”.
+
+**Commits:** follow [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) when the user asked to commit.

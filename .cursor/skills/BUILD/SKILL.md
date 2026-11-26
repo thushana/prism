@@ -70,10 +70,11 @@ Before each How phase (or within a phase that has independent steps), classify w
    - If the gate fails: fix or debug; do not mark complete.
    - If the plan is wrong: smallest ruling, continue (or stop if condition 4).
 4. **For each planned commit** (after its phase scope is green):
-   - Run [CODEREVIEW](../CODEREVIEW/SKILL.md) on unstaged changes; fix Critical / Important.
+   - Run `pnpm run quality:quick` so formatting, lint, and type fixes land in this commit, not a straggler.
+   - Run [CODEREVIEW](../CODEREVIEW/SKILL.md) on uncommitted changes; fix Critical / Important.
    - Run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) (commit/push/version rules live there).
    - Never COMMITMESSAGE before CODEREVIEW.
-5. **After all commits:** run [QUALITYCHECK](../QUALITYCHECK/SKILL.md) if the tree has code changes that quality covers; fix until clean.
+5. **After all commits:** run the full [QUALITYCHECK](../QUALITYCHECK/SKILL.md) (adds knip, tests, and the partner repo). If it changes anything, fix, CODEREVIEW, and commit as a follow-up.
 6. **Close out.** Summarize: what shipped, rulings made, any deferred minors. Point at commits. Do not reopen planning unless Success is unmet.
 
 ## Worker brief (when dispatching)

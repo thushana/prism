@@ -1,21 +1,33 @@
 ---
 name: QUALITYCHECK
-description: 'Run "npm run quality" which typechecks, lints and formats.'
+description: >-
+  Run `pnpm run quality` (format, lint, typecheck, knip, tests for the app and
+  Prism) and fix failures until it passes. Use before committing or when the
+  user asks for /QUALITYCHECK.
 disable-model-invocation: true
 ---
 
-Run "npm run quality" which typechecks, lints and formats.
+# Quality check
 
-## Philosophy
+**Code quality is not optional.** Fix errors iteratively until every check passes. Goal: a commitable, deployable tree.
 
-**Code quality is not optional.** Fix errors iteratively until all checks pass. Typecheck and lint may require manual fixes; format auto-fixes formatting.
+**Working directory:** app repo root (or `prism/` root for Prism-only work).
+
+## What `pnpm run quality` runs
+
+Implemented in `prism/scripts/quality.ts`, for the current project and then its partner (app → Prism, or Prism → parent app):
+
+1. `format` — Prettier **writes** files (expect formatting diffs)
+2. `lint`
+3. `typecheck`
+4. `knip` — only if the project defines it
+5. `test:run`
+
+For a faster inner loop while fixing, use `pnpm run quality:quick` (format + lint + typecheck, current project only). Finish with the full `pnpm run quality`.
 
 ## Process
 
-1. Run `npm run quality`
-2. Review errors (typecheck and lint may need manual fixes)
-3. Fix errors and re-run
-4. Repeat until all checks pass
-5. Goal: Commitable, deployable state
-
-**Reference**: See [docs/COMMIT-Prism.md](../../../docs/COMMIT-Prism.md) for commit message style.
+1. Run `pnpm run quality` and read the output.
+2. Fix the first failing step. Lint, typecheck, knip, and tests need real fixes — do not silence them with `eslint-disable`, `@ts-ignore`, `any`, skipped tests, or new knip ignores unless the cause is truly a tool false positive (say so).
+3. Re-run (`quality:quick` while iterating, full `quality` to confirm).
+4. Repeat until all checks pass, then report what you fixed.

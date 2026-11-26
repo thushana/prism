@@ -1,10 +1,13 @@
 ---
 name: NAMING
-description: Use this when naming variables, props, types, files, or identifiers. Apply consistently across the codebase.
+description: >-
+  Naming rules for variables, props, types, files, constants, and UI labels
+  (no abbreviations, PrismSize words, one name per concept). Use when naming
+  or renaming identifiers, reviewing names, or the user asks for /NAMING.
 disable-model-invocation: true
 ---
 
-Use this when naming variables, props, types, files, or identifiers. Apply consistently across the codebase.
+# Naming
 
 ## Philosophy
 
@@ -38,7 +41,7 @@ Use this when naming variables, props, types, files, or identifiers. Apply consi
 - `cfg` / `conf` → `configuration` (or `config` only where it’s the standard, e.g. Next `config`)
 - `btn` → `button`
 - `opt` → `option`
-- Mismatched names for the same thing (e.g. prop `toggled` vs. data attribute `data-toggled`).
+- Mismatched names for the same thing (e.g. prop `toggled` but data attribute `data-active` or UI label "Selected" — use `data-toggled` and "Toggled").
 - Shortened size literals in your own types or props: `sm` / `md` / `lg` / `xl` → use `PrismSize` words (`small` / `regular` / `large` / `huge` / `gigantic`) for Prism UI components.
 
 Apply these rules when creating or renaming identifiers and when reviewing renames.

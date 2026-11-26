@@ -1,10 +1,23 @@
 ---
 name: CODEREVIEW
-description: Review all unstaged git changes via `git diff`
+description: >-
+  Review all uncommitted changes (including new files and the prism submodule)
+  for bugs, maintainability, and Prism conventions. Use before every commit or
+  when the user asks for /CODEREVIEW.
 disable-model-invocation: true
 ---
 
-Review all unstaged git changes via `git diff`
+# Code review
+
+## What to review
+
+Everything uncommitted, not just `git diff`:
+
+1. `git status --short` — list modified **and untracked** files; `git diff` alone misses new files.
+2. `git diff` and `git diff --staged` for tracked changes.
+3. **Host app with `prism/`:** the parent diff only shows the submodule pointer. Also run `git -C prism status --short` and `git -C prism diff` and review those files.
+
+Skip generated or vendored output (lockfiles beyond a sanity check, `.next/`, synced `.cursor/skills/` copies in host apps).
 
 ## Philosophy, Persona & Structure
 
@@ -39,7 +52,7 @@ You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows 
 - TypeScript: Use Zod schemas for runtime validation and type inference
   - Prefer `z.infer<typeof Schema>` over manual type definitions
   - Use Zod for config files, API request/response validation, and any external data parsing
-  - See `app/config/index.ts` for example pattern
+  - See `packages/application-settings/source/application-config-schema.ts` (under `prism/` from a host app) for the pattern
 
 **Philosophy check:**
 
@@ -50,6 +63,8 @@ You're a pragmatic YC founder who's read "The Pragmatic Programmer" and follows 
 
 ## Output Format
 
+Start with a one-line verdict: **Ready to commit** or **Needs changes** (with counts per priority).
+
 For each issue:
 
 - **File:line** - specific location
@@ -57,11 +72,10 @@ For each issue:
 - **Fix** - concrete recommendation with code if helpful
 - **Priority** - 🔴 Critical | 🟠 Important | 🟡 Nice-to-have
 
+Then go through the bold areas above (Core priorities, Code style, Philosophy check) and say briefly whether each passes.
+
 ## Instructions
 
-- Look at relevant documentation in /docs/ if you need context
-- Review all unstaged code files
-- Go through the philosophies above and verbally say if it passes these bold line areas of focus
-- Provide specific change proposals if needed
+- Look at relevant documentation in `docs/` (host) or Prism docs if you need context
+- Fix 🔴 Critical and 🟠 Important findings (or get the user to waive them) before moving on; list 🟡 items without blocking
 - If things look good, run [COMMITMESSAGE](../COMMITMESSAGE/SKILL.md) next (CODEREVIEW before COMMITMESSAGE)
-- When you commit, do not tag a collaborator / co-author
