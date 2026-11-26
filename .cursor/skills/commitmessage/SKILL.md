@@ -62,6 +62,8 @@ Never push the parent first when the commit updates the `prism` submodule refere
 
 ## Prism version
 
+Versions follow [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
+
 Prism has one version: `version` in `prism/package.json`. Host apps consume a submodule SHA, not published packages. Leave the `version` fields in `packages/*`, `apps/*`, and `tools/` alone.
 
 The line is `0.x` until an intentional `1.0.0`. While it is `0.x`:
@@ -90,6 +92,8 @@ When the parent commit only advances the submodule pointer, name the Prism versi
 `0.1.0` is the baseline. Tag `v0.1.0` once on current `main` before the next bump. Do not rewrite older commits.
 
 ## Host app version
+
+Versions follow [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
 
 Host apps (City Observatory, TimeTraveler, …) have one version: `version` in the **parent repo root** `package.json`. Leave nested `apps/*` / `packages/*` `version` fields alone. Prism’s version and tags live on the Prism remote; the host’s version and tags live on the host remote — two namespaces.
 
