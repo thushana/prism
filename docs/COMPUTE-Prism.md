@@ -12,14 +12,14 @@ Sources of truth for behavior:
 
 ## What
 
-| Piece | Role |
-| --- | --- |
-| `runWorkerLoop` | Idle backoff, once/limit, exit-when-idle around an app-supplied `tick` |
-| `FleetProvider` | `ensureReplicaCount(n)` + `status()` — declarative scale |
-| `desiredReplicaCount` | Pure backlog → N |
-| `createLocalProvider` | In-process / test fleet |
-| `createFlyMachinesProvider` | Fly Machines adapter (start / create / stop-at-zero) |
-| Optional `listMachines` / `stopMachine` | Hosts that reap a stale machine while work is still running |
+| Piece                                   | Role                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `runWorkerLoop`                         | Idle backoff, once/limit, exit-when-idle around an app-supplied `tick` |
+| `FleetProvider`                         | `ensureReplicaCount(n)` + `status()` — declarative scale               |
+| `desiredReplicaCount`                   | Pure backlog → N                                                       |
+| `createLocalProvider`                   | In-process / test fleet                                                |
+| `createFlyMachinesProvider`             | Fly Machines adapter (start / create / stop-at-zero)                   |
+| Optional `listMachines` / `stopMachine` | Hosts that reap a stale machine while work is still running            |
 
 ## What this package does not own
 

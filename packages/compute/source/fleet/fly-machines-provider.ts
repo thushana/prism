@@ -65,9 +65,10 @@ function isStopped(machine: FlyMachineSummary): boolean {
 export function createFlyMachinesProvider(
   options: FlyMachinesProviderOptions
 ): FleetProvider {
-  const apiBaseUrl = (
-    options.apiBaseUrl ?? "https://api.machines.dev"
-  ).replace(/\/$/, "");
+  const apiBaseUrl = (options.apiBaseUrl ?? "https://api.machines.dev").replace(
+    /\/$/,
+    ""
+  );
   const region = options.region ?? "iad";
   const doFetch = options.fetchImpl ?? fetch;
   const appPath = `/v1/apps/${encodeURIComponent(options.appName)}/machines`;
@@ -95,8 +96,7 @@ export function createFlyMachinesProvider(
     return (await response.json()) as T;
   }
 
-  const fetchMachineList = () =>
-    request<FlyMachineSummary[]>("GET", appPath);
+  const fetchMachineList = () => request<FlyMachineSummary[]>("GET", appPath);
 
   async function pruneExcessStopped(
     machines: FlyMachineSummary[],

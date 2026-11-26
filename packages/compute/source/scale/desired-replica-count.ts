@@ -15,9 +15,7 @@ export type DesiredReplicaCountInput = {
  * Pure scale helper: backlog → desired replica count.
  * When nothing is queued or running, returns 0 (workers should exit-when-idle).
  */
-export function desiredReplicaCount(
-  input: DesiredReplicaCountInput
-): number {
+export function desiredReplicaCount(input: DesiredReplicaCountInput): number {
   const { queuedCount, runningCount, policy } = input;
   const queued = Math.max(0, queuedCount);
   const running = Math.max(0, runningCount);

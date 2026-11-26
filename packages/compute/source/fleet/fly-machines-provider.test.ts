@@ -75,7 +75,9 @@ describe("createFlyMachinesProvider", () => {
       "GET /v1/apps/app/machines",
       "GET /v1/apps/app/machines",
     ]);
-    expect(calls.find((call) => call.method === "POST" && call.body)?.body).toMatchObject({
+    expect(
+      calls.find((call) => call.method === "POST" && call.body)?.body
+    ).toMatchObject({
       config: { image: "x" },
     });
   });
