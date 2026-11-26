@@ -491,6 +491,33 @@ function generatePackageJson(
 }
 
 /**
+ * Logger, UI, and utilities webpack aliases shared by static and full consumer
+ * apps. Static export omits database, auth, intelligence, and admin on purpose.
+ * The in-repo template does not use these aliases.
+ */
+function sharedConsumerWebpackAliasLines(prismPrefix: string): string {
+  return `      "@logger": path.resolve(__dirname, "${prismPrefix}/logger/source"),
+      "@logger/client": path.resolve(
+        __dirname,
+        "${prismPrefix}/logger/source/client"
+      ),
+      "@logger/server": path.resolve(
+        __dirname,
+        "${prismPrefix}/logger/source/server"
+      ),
+      "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
+      "@ui/map": path.resolve(__dirname, "${prismPrefix}/ui/source/map.ts"),
+      "@ui/pickers": path.resolve(
+        __dirname,
+        "${prismPrefix}/ui/source/pickers.ts"
+      ),
+      "@utilities": path.resolve(
+        __dirname,
+        "${prismPrefix}/utilities/source"
+      ),`;
+}
+
+/**
  * Generate next.config.ts
  */
 function generateNextConfig(
@@ -527,25 +554,7 @@ const nextConfig: NextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@logger": path.resolve(__dirname, "${prismPrefix}/logger/source"),
-      "@logger/client": path.resolve(
-        __dirname,
-        "${prismPrefix}/logger/source/client"
-      ),
-      "@logger/server": path.resolve(
-        __dirname,
-        "${prismPrefix}/logger/source/server"
-      ),
-      "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
-      "@ui/map": path.resolve(__dirname, "${prismPrefix}/ui/source/map.ts"),
-      "@ui/pickers": path.resolve(
-        __dirname,
-        "${prismPrefix}/ui/source/pickers.ts"
-      ),
-      "@utilities": path.resolve(
-        __dirname,
-        "${prismPrefix}/utilities/source"
-      ),
+${sharedConsumerWebpackAliasLines(prismPrefix)}
     };
     config.resolve.symlinks = true;
     return config;
@@ -606,16 +615,7 @@ const nextConfig: NextConfig = {
       "@intelligence": path.resolve(__dirname, "${prismPrefix}/intelligence/source"),
       "@intelligence/tasks": path.resolve(__dirname, "${prismPrefix}/intelligence/source/tasks"),
       "@intelligence/client": path.resolve(__dirname, "${prismPrefix}/intelligence/source/client"),
-      "@logger": path.resolve(__dirname, "${prismPrefix}/logger/source"),
-      "@logger/client": path.resolve(__dirname, "${prismPrefix}/logger/source/client"),
-      "@logger/server": path.resolve(__dirname, "${prismPrefix}/logger/source/server"),
-      "@ui": path.resolve(__dirname, "${prismPrefix}/ui/source"),
-      "@ui/map": path.resolve(__dirname, "${prismPrefix}/ui/source/map.ts"),
-      "@ui/pickers": path.resolve(
-        __dirname,
-        "${prismPrefix}/ui/source/pickers.ts"
-      ),
-      "@utilities": path.resolve(__dirname, "${prismPrefix}/utilities/source"),
+${sharedConsumerWebpackAliasLines(prismPrefix)}
       "@admin": path.resolve(__dirname, "${prismPrefix}/admin/source"),
       "feature-flags": path.resolve(__dirname, "${prismPrefix}/feature-flags/source"),
       "@authentication$": path.join(authenticationSource, "index.ts"),
