@@ -531,6 +531,7 @@ function generateNextConfig(
     layout === "consumer-workspace" && isStatic
       ? `import type { NextConfig } from "next";
 import path from "path";
+import { resolveTurbopackRoot } from "application-settings/turbopack-root";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -550,7 +551,9 @@ const nextConfig: NextConfig = {
     "logger",
     "ui",
   ],
-  turbopack: {},
+  turbopack: {
+    root: resolveTurbopackRoot(__dirname),
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -568,12 +571,14 @@ export default nextConfig;
 import { createRequire } from "node:module";
 import path from "path";
 import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+import { resolveTurbopackRoot } from "application-settings/turbopack-root";
 
 assertRequiredVercelEnv();
 
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 const kyselyOriginal = require.resolve("kysely");
+const turbopackRoot = resolveTurbopackRoot(__dirname);
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -595,7 +600,9 @@ const nextConfig: NextConfig = {
     "charts",
     "feature-flags",
   ],
+  outputFileTracingRoot: turbopackRoot,
   turbopack: {
+    root: turbopackRoot,
     resolveAlias: {
       "kysely-original": kyselyOriginal,
       kysely: kyselyShim,
@@ -660,12 +667,14 @@ export default nextConfig;
 import { createRequire } from "node:module";
 import path from "path";
 import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+import { resolveTurbopackRoot } from "application-settings/turbopack-root";
 
 assertRequiredVercelEnv();
 
 const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 const kyselyOriginal = require.resolve("kysely");
+const turbopackRoot = resolveTurbopackRoot(__dirname);
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -680,8 +689,9 @@ const nextConfig: NextConfig = {
     "@better-auth/passkey",
     "kysely",
   ],
-  outputFileTracingRoot: path.join(__dirname, "../.."),
+  outputFileTracingRoot: turbopackRoot,
   turbopack: {
+    root: turbopackRoot,
     resolveAlias: {
       "kysely-original": kyselyOriginal,
       kysely: kyselyShim,

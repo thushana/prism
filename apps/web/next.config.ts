@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
-import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "path";
 import { assertRequiredVercelEnv } from "application-settings/assert-required-vercel-env";
+import { resolveTurbopackRoot } from "application-settings/turbopack-root";
 
 assertRequiredVercelEnv();
 
@@ -10,18 +10,10 @@ const require = createRequire(__filename);
 const kyselyShim = path.resolve(__dirname, "library/kysely-shim.ts");
 const kyselyOriginal = require.resolve("kysely");
 
-const prismRoot = path.join(__dirname, "../..");
-const parentRoot = path.join(prismRoot, "..");
-const parentWorkspaceFile = path.join(parentRoot, "pnpm-workspace.yaml");
-/** Embedder apps (e.g. city-observatory) list `prism/packages/*` in their workspace. */
-const embeddedInApp =
-  fs.existsSync(parentWorkspaceFile) &&
-  /(?:^|\n)\s*-\s*["']?prism\/packages\/\*/.test(
-    fs.readFileSync(parentWorkspaceFile, "utf8")
-  );
-// Turbopack refuses CSS deps resolved via the parent node_modules when root is
-// only `prism/`. Widen to the embedder root so those paths stay in-bounds.
-const monorepoRoot = embeddedInApp ? parentRoot : prismRoot;
+// Static and server apps share this root. Embedded Prism widens to the host
+// so CSS from the parent node_modules stays in bounds; consumers stay on
+// their own repo even when a parent checkout also has pnpm-workspace.yaml.
+const monorepoRoot = resolveTurbopackRoot(__dirname);
 
 const nextConfig: NextConfig = {
   experimental: {

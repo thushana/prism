@@ -11,7 +11,8 @@
     "./load-prism-config-sync": "./source/load-prism-config-sync.ts",
     "./reserved-subdomain-labels": "./source/reserved-subdomain-labels.ts",
     "./build-env-fallback": "./source/build-env-fallback.ts",
-    "./assert-required-vercel-env": "./source/assert-required-vercel-env.ts"
+    "./assert-required-vercel-env": "./source/assert-required-vercel-env.ts",
+    "./turbopack-root": "./source/turbopack-root.ts"
   },
   "dependencies": {
     "server-only": "^0.0.1",
