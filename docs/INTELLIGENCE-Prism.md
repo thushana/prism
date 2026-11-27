@@ -31,9 +31,9 @@ The AI system is split between generic infrastructure (reusable) and app-specifi
 
 ```
 packages/intelligence/
-├── models.config.json           # Model metadata, pricing, capabilities
+├── models.config.json           # Model metadata, pricing, capabilities (chat + embeddings)
 ├── source/
-│   ├── client.ts                # AI client setup (shared)
+│   ├── client.ts                # AI client: language models, embedText, rerankDocuments
 │   ├── utilities/               # Shared utilities
 │   │   ├── cost.ts              # Automatic cost tracking
 │   │   ├── retry.ts             # Retry logic with exponential backoff
@@ -43,6 +43,8 @@ packages/intelligence/
 │       ├── types.ts             # Shared task types
 │       └── registry.ts          # Task registry for discoverability
 ```
+
+Shared pgvector column helpers live in `packages/database/source/vector.ts` (`halfvec` / `vector`) — not a generic chunk product table.
 
 **App-Specific Tasks** (`apps/{app}/intelligence/tasks/`):
 
@@ -1499,6 +1501,60 @@ AI_DEFAULT_TEMPERATURE=0.7
 
 # Disable gateway (for local testing)
 AI_GATEWAY_ENABLED=false
+
+# Text embeddings (Gateway). Defaults lock Qwen3 Embedding @ 1024-d Matryoshka.
+# Flip model/dims → Child Apps must re-vectorize stored rows; do not edit vectors by hand.
+AI_EMBEDDING_MODEL=alibaba/qwen3-embedding-8b
+AI_EMBEDDING_DIMENSIONS=1024
+# Optional query-time override (defaults to AI_EMBEDDING_MODEL)
+# AI_EMBEDDING_QUERY_MODEL=alibaba/qwen3-embedding-8b
+
+# Optional cross-encoder rerank (empty = off)
+# AI_RERANK_MODEL=cohere/rerank-v3.5
+```
+
+### Text embeddings and rerank
+
+Prism owns the **Gateway embed / rerank client** so Child Apps do not fork `@ai-sdk/gateway` wrappers. Civic chunk schema, hybrid SQL, and re-vectorize jobs stay in the app (e.g. City Observatory ADR 010 / retrieval-embeddings plan).
+
+| Helper | Role |
+| ------ | ---- |
+| `embedText` | `embed` / `embedMany` with env model + dimensions; retry + cost hooks |
+| `rerankDocuments` | Gateway `rerank` when `AI_RERANK_MODEL` (or an explicit model) is set |
+| `getEmbeddingModelId` / `getEmbeddingDimensions` / `getRerankModelId` | Read active config from env |
+| `halfvec` (from `database/vector`) | Shared Drizzle column helper; apps enable `vector` in their migrations |
+
+**Defaults (configurable, not a product bake-off):** `alibaba/qwen3-embedding-8b` at **1024** dimensions via AI Gateway. Same id for document and query unless `AI_EMBEDDING_QUERY_MODEL` overrides. Record `embeddingModel` + dimensions on every written vector in the Child App.
+
+**Text only in v1.** Do not expose `embedImage` / page embeddings until Gateway + the installed AI SDK have a proven typed multimodal path. Image modality is deferred — never fake it through the text interface.
+
+**Child App contract**
+
+- Import column helpers from **`database/vector`**, not the `database` package root (the root also constructs a Neon client).
+- Add `database` (and `intelligence`) to Next `transpilePackages` when bundling these file: workspace packages under Turbopack.
+- Embed **offline** via jobs; never on the document request path. Changing `AI_EMBEDDING_MODEL` / dims requires the app’s named **re-vectorize** path (City Observatory: `enqueueSearchRevectorize` / `search revectorize`).
+- Query-time may call `embedText({ purpose: "query" })` with lexical fallback if Gateway fails.
+
+```ts
+import {
+  embedText,
+  rerankDocuments,
+  getRerankModelId,
+} from "@intelligence/client";
+import { halfvec } from "database/vector";
+
+const { embeddings, model, dimensions } = await embedText({
+  values: ["staff report section…", "agenda item title…"],
+  purpose: "document",
+});
+
+if (getRerankModelId()) {
+  const { ranking } = await rerankDocuments({
+    query: "bike lane funding",
+    documents: candidates,
+    topN: 10,
+  });
+}
 ```
 
 **Getting Your AI Gateway API Key:**

@@ -14,6 +14,23 @@ export {
   getDefaultModel,
   isGatewayEnabled,
   isConfigured,
+  DEFAULT_EMBEDDING_MODEL,
+  DEFAULT_EMBEDDING_DIMENSIONS,
+  getEmbeddingModelId,
+  getEmbeddingDimensions,
+  getRerankModelId,
+  getEmbeddingModel,
+  getRerankingModel,
+  embedText,
+  rerankDocuments,
+} from "./client";
+
+export type {
+  EmbedTextPurpose,
+  EmbedTextOptions,
+  EmbedTextResult,
+  RerankDocumentsOptions,
+  RerankDocumentsResult,
 } from "./client";
 
 // Re-export utilities

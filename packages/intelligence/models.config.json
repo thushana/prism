@@ -290,6 +290,42 @@
         "tokensPerMinute": 200000
       },
       "recommended": false
+    },
+    "alibaba/qwen3-embedding-8b": {
+      "aliases": ["qwen3-embedding-8b"],
+      "name": "Qwen3 Embedding 8B",
+      "provider": "alibaba",
+      "apiIdentifier": "qwen3-embedding-8b",
+      "description": "Default text embedding model via AI Gateway (Matryoshka; store 1024-d)",
+      "status": "active",
+      "pricing": {
+        "currency": "USD",
+        "inputCostPer1MTokens": 0.05,
+        "outputCostPer1MTokens": 0,
+        "lastVerified": "2026-11-27"
+      },
+      "capabilities": {
+        "streaming": false,
+        "functionCalling": false,
+        "vision": false,
+        "json": false,
+        "webSearch": false,
+        "maxContextTokens": 32000,
+        "textEmbedding": true,
+        "embeddingDimensions": 1024,
+        "embeddingMaxDimensions": 4096,
+        "modality": "text"
+      },
+      "defaultSettings": {
+        "temperature": 0,
+        "maxTokens": 0,
+        "topP": 1.0
+      },
+      "limits": {
+        "requestsPerMinute": 500,
+        "tokensPerMinute": 2000000
+      },
+      "recommended": false
     }
   },
   "providers": {
@@ -320,6 +356,13 @@
       "sdkPackage": "@ai-sdk/xai",
       "docsUrl": "https://docs.x.ai",
       "pricingUrl": "https://x.ai/pricing"
+    },
+    "alibaba": {
+      "name": "Alibaba",
+      "apiKeyEnvVar": "AI_GATEWAY_API_KEY",
+      "sdkPackage": "@ai-sdk/gateway",
+      "docsUrl": "https://vercel.com/docs/ai-gateway",
+      "pricingUrl": "https://vercel.com/docs/ai-gateway"
     }
   },
   "fallbackChains": {

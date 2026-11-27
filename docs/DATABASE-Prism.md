@@ -18,6 +18,7 @@ Prism uses **Drizzle ORM** with **Neon** (PostgreSQL). This doc is the **mental 
 **Imports**
 
 - **Shared package**: `import { db, database } from "database"` — `db` and `database` are the same instance ([`packages/database/source/index.ts`](../packages/database/source/index.ts)). Schema: `import { … } from "database/schema"` as needed.
+- **pgvector helpers**: `import { halfvec, vector, DEFAULT_HALFVEC_DIMENSIONS } from "database/vector"` — thin re-exports of Drizzle’s native types with Prism’s 1024-d embedding default documented alongside. **Apps own** `CREATE EXTENSION vector` in their migrations; Prism does not ship a generic chunk table.
 - **App-local**: `import { db } from "@/database/db"` or a path alias your app defines; the sample web app exports **`db` only** from [`apps/web/database/db.ts`](../apps/web/database/db.ts) (no `database` alias there).
 
 Use the **workspace `database` package** for shared tooling and cross-app code. Use **app `database/`** for that app’s own schema, seeds, and Drizzle CLI config.
