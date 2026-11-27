@@ -26,6 +26,14 @@ export interface ModelConfig {
     json: boolean;
     webSearch: boolean;
     maxContextTokens: number;
+    /** True for text embedding models (not chat/completion). */
+    textEmbedding?: boolean;
+    /** Default stored/request width when Matryoshka or configurable. */
+    embeddingDimensions?: number;
+    /** Native max width when the model supports truncation. */
+    embeddingMaxDimensions?: number;
+    /** Embedding modality for this entry. Image/page wait on a proven Gateway API. */
+    modality?: "text" | "image" | "multimodal";
   };
   defaultSettings: {
     temperature: number;

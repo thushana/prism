@@ -6,7 +6,8 @@
   "types": "./source/index.ts",
   "exports": {
     ".": "./source/index.ts",
-    "./schema": "./source/schema.ts"
+    "./schema": "./source/schema.ts",
+    "./vector": "./source/vector.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.1",

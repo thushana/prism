@@ -29,3 +29,10 @@ export const db = database;
 
 // Export schema for convenience
 export * from "./schema";
+
+// Shared pgvector helpers (apps enable the extension in their own migrations)
+export {
+  DEFAULT_HALFVEC_DIMENSIONS,
+  halfvec,
+  vector,
+} from "./vector";
