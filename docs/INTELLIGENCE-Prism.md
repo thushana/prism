@@ -1515,7 +1515,7 @@ AI_EMBEDDING_DIMENSIONS=1024
 
 ### Text embeddings and rerank
 
-Prism owns the **Gateway embed / rerank client** so Child Apps do not fork `@ai-sdk/gateway` wrappers. Civic chunk schema, hybrid SQL, and re-vectorize jobs stay in the app (e.g. City Observatory ADR 010).
+Prism owns the **Gateway embed / rerank client** so Child Apps do not fork `@ai-sdk/gateway` wrappers. Civic chunk schema, hybrid SQL, and re-vectorize jobs stay in the app (e.g. City Observatory ADR 010 / retrieval-embeddings plan).
 
 | Helper | Role |
 | ------ | ---- |
@@ -1528,12 +1528,20 @@ Prism owns the **Gateway embed / rerank client** so Child Apps do not fork `@ai-
 
 **Text only in v1.** Do not expose `embedImage` / page embeddings until Gateway + the installed AI SDK have a proven typed multimodal path. Image modality is deferred — never fake it through the text interface.
 
+**Child App contract**
+
+- Import column helpers from **`database/vector`**, not the `database` package root (the root also constructs a Neon client).
+- Add `database` (and `intelligence`) to Next `transpilePackages` when bundling these file: workspace packages under Turbopack.
+- Embed **offline** via jobs; never on the document request path. Changing `AI_EMBEDDING_MODEL` / dims requires the app’s named **re-vectorize** path (City Observatory: `enqueueSearchRevectorize` / `search revectorize`).
+- Query-time may call `embedText({ purpose: "query" })` with lexical fallback if Gateway fails.
+
 ```ts
 import {
   embedText,
   rerankDocuments,
   getRerankModelId,
 } from "@intelligence/client";
+import { halfvec } from "database/vector";
 
 const { embeddings, model, dimensions } = await embedText({
   values: ["staff report section…", "agenda item title…"],
