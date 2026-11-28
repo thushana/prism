@@ -50,20 +50,25 @@ export {
   buildDevAppOrigins,
   buildDevAppUrl,
   buildDevLocalhostHost,
+  coerceDevSlug,
+  hashWorktreeDevPort,
   resolvePrismBetterAuthUrl,
   resolveTrustedAuthOrigins,
   normalizeDevSlug,
   resolveDevDeployment,
   resolveDevHost,
   resolveDevPort,
+  resolveDevPortOverride,
   resolveNameIdentifier,
   resolveDevSlug,
+  resolveWorktreeLabel,
   type DevDeployment,
   type DevDeploymentContext,
 } from "./dev-deployment";
 export {
   loadDevDeploymentFromDirectory,
   loadPrismConfigFromDirectory,
+  resolveCheckoutRoot,
   resolveMonorepoPackageName,
 } from "./load-prism-config-sync";
 export {

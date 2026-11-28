@@ -53,6 +53,30 @@ function readPackageName(directory: string): string | undefined {
   }
 }
 
+/**
+ * Absolute checkout root: nearest ancestor with `workspaces` in package.json,
+ * else the resolved app root.
+ */
+export function resolveCheckoutRoot(appRoot: string): string {
+  let directory = path.resolve(appRoot);
+
+  while (directory !== path.dirname(directory)) {
+    const packageJsonPath = path.join(directory, "package.json");
+    try {
+      const raw = readFileSync(packageJsonPath, "utf8");
+      const parsed = JSON.parse(raw) as { workspaces?: unknown };
+      if (parsed.workspaces) {
+        return directory;
+      }
+    } catch {
+      // continue
+    }
+    directory = path.dirname(directory);
+  }
+
+  return path.resolve(appRoot);
+}
+
 /** Walk up from the app root to find the monorepo root `package.json` name. */
 export function resolveMonorepoPackageName(
   appRoot: string
@@ -84,10 +108,13 @@ export function loadDevDeploymentFromDirectory(
   appRoot: string,
   portFallback = 3000
 ): DevDeployment {
-  const config = loadPrismConfigFromDirectory(appRoot);
+  const resolvedAppRoot = path.resolve(appRoot);
+  const config = loadPrismConfigFromDirectory(resolvedAppRoot);
   const context: DevDeploymentContext = {
-    appPackageName: readPackageName(appRoot),
-    monorepoPackageName: resolveMonorepoPackageName(appRoot),
+    appPackageName: readPackageName(resolvedAppRoot),
+    monorepoPackageName: resolveMonorepoPackageName(resolvedAppRoot),
+    checkoutRoot: resolveCheckoutRoot(resolvedAppRoot),
+    appRoot: resolvedAppRoot,
   };
   return resolveDevDeployment(config, context, portFallback);
 }

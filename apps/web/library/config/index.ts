@@ -1,6 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import appConfigJson from "../../config.app.json";
 import prismConfigJson from "../../config.prism.json";
-import { resolveDevDeployment } from "application-settings/dev-deployment";
+import { loadDevDeploymentFromDirectory } from "application-settings/load-prism-config-sync";
 import {
   prismConfigBaseSchema,
   resolveAuthenticationGateMode,
@@ -15,9 +17,12 @@ export const prismConfig = prismConfigBaseSchema.parse(prismConfigJson);
 /** Prism-standard app chrome (from config.prism.json → app). */
 export const prismApp = prismConfig.app;
 
-export const devDeployment = resolveDevDeployment(prismConfig, {
-  monorepoPackageName: "web",
-});
+const appRoot = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../.."
+);
+
+export const devDeployment = loadDevDeploymentFromDirectory(appRoot);
 
 export const DEV_PORT = devDeployment.port;
 export const DEV_HOST = devDeployment.host;

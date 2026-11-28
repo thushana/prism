@@ -68,7 +68,7 @@ Passkeys use the [`@better-auth/passkey`](https://www.better-auth.com/docs/plugi
 
 **Production:** `BETTER_AUTH_URL` must be the canonical site URL (e.g. `https://your-app.vercel.app`). The WebAuthn RP ID is derived from that URL in `resolvePasskeyRelyingParty()` — do not use `localhost` in production env.
 
-**Local Prism dev:** Visiting `http://{nameIdentifier}.localhost:{port}` requires RP ID `{nameIdentifier}.localhost`, not `localhost`. `resolvePrismBetterAuthUrl()` upgrades legacy `BETTER_AUTH_URL=http://localhost:{port}` to the Prism dev URL in development; passkey RP ID uses the full `*.localhost` hostname.
+**Local Prism dev:** Visiting `http://{nameIdentifier}.localhost:{port}` requires RP ID `{nameIdentifier}.localhost`, not `localhost`. `resolvePrismBetterAuthUrl()` upgrades loopback / `*.localhost` `BETTER_AUTH_URL` values to the **computed** deployment URL in development (including worktree hosts/ports) so a shared `.env` still works. Passkey RP ID uses the full origin hostname — linked worktrees (`{label}.{nameIdentifier}.localhost`) are **distinct** origins (sessions/passkeys are not shared across worktrees; password sign-in per tree is fine).
 
 Disable passkeys for an app: omit `rpName` in `createPrismAuth`, or pass `<SignInPage passkeys={false} />`.
 

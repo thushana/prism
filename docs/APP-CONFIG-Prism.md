@@ -40,9 +40,10 @@ Same structure for all Prism apps:
 - `authentication.gateMode` — `admin` (only `/admin/*` gated) or `app` (proxy redirects to `/sign-in`). Default `admin`.
 - `authentication.signInPathDropOff` — redirect after sign-in (default `/`). Wire via `createAuthGates(auth, { signInPathDropOff: SIGN_IN_PATH_DROP_OFF })`. See [AUTHENTICATION-Prism.md](./AUTHENTICATION-Prism.md).
 - `build.output` — `server` (default) or `static`. Static consumers skip auth/DB scaffold requirements during sync and quality checks. See [SYNC-Prism.md](./SYNC-Prism.md).
-- `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to `{nameIdentifier}.localhost` and prints the Prism dev URL on startup.
+- `package.json` `dev` script should call `tsx ../../prism/scripts/run-next-dev.ts` so Next.js binds to the Prism dev host/port and prints that URL on startup.
 - Keep `deployments.dev.port` in sync with any hardcoded kill scripts (e.g. root `dev:kill`).
-- **Local dev URL:** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.
+- **Local dev URL (main checkout):** `http://{nameIdentifier}.localhost:{port}` (e.g. `http://alameda-elections.localhost:1776`). Optional `deployments.dev.host` overrides the hostname.
+- **Linked worktrees:** hostname becomes `{worktreeLabel}.{nameIdentifier}.localhost`. `worktreeLabel` is the checkout directory basename (`city-observatory-pdf` → `pdf`). Port is a **stable hash** of the absolute checkout root in `[configPort+1, configPort+999]` so parallel trees do not collide. Overrides: `PORT` env, then `{appRoot}/.cursor/dev-port`, then config/hash. Resolved by `resolveDevDeployment()` / `loadDevDeploymentFromDirectory()` in `application-settings`.
 - Legacy `app.displayName` is still accepted and mapped to `nameDisplay`.
 - `readApplicationSettings()` reads the `app` section for admin chrome and metadata.
 
