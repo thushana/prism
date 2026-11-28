@@ -53,23 +53,35 @@ function readPackageName(directory: string): string | undefined {
   }
 }
 
+function isMonorepoRootDirectory(directory: string): boolean {
+  try {
+    const raw = readFileSync(path.join(directory, "package.json"), "utf8");
+    const parsed = JSON.parse(raw) as { workspaces?: unknown };
+    if (parsed.workspaces) {
+      return true;
+    }
+  } catch {
+    // missing package.json — still allow pnpm-workspace.yaml below
+  }
+
+  try {
+    readFileSync(path.join(directory, "pnpm-workspace.yaml"), "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Absolute checkout root: nearest ancestor with `workspaces` in package.json,
- * else the resolved app root.
+ * Absolute checkout root: nearest ancestor that is a monorepo root
+ * (`package.json` `workspaces` or `pnpm-workspace.yaml`), else the resolved app root.
  */
 export function resolveCheckoutRoot(appRoot: string): string {
   let directory = path.resolve(appRoot);
 
   while (directory !== path.dirname(directory)) {
-    const packageJsonPath = path.join(directory, "package.json");
-    try {
-      const raw = readFileSync(packageJsonPath, "utf8");
-      const parsed = JSON.parse(raw) as { workspaces?: unknown };
-      if (parsed.workspaces) {
-        return directory;
-      }
-    } catch {
-      // continue
+    if (isMonorepoRootDirectory(directory)) {
+      return directory;
     }
     directory = path.dirname(directory);
   }
@@ -81,22 +93,12 @@ export function resolveCheckoutRoot(appRoot: string): string {
 export function resolveMonorepoPackageName(
   appRoot: string
 ): string | undefined {
-  let directory = appRoot;
   const appPackageName = readPackageName(appRoot);
+  let directory = path.resolve(appRoot);
 
   while (directory !== path.dirname(directory)) {
-    const packageJsonPath = path.join(directory, "package.json");
-    try {
-      const raw = readFileSync(packageJsonPath, "utf8");
-      const parsed = JSON.parse(raw) as {
-        name?: string;
-        workspaces?: unknown;
-      };
-      if (parsed.workspaces) {
-        return typeof parsed.name === "string" ? parsed.name : undefined;
-      }
-    } catch {
-      // continue
+    if (isMonorepoRootDirectory(directory)) {
+      return readPackageName(directory) ?? appPackageName;
     }
     directory = path.dirname(directory);
   }
